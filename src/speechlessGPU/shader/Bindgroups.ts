@@ -1,0 +1,284 @@
+import { Bindgroup } from "./Bindgroup";
+import { CubeMapTexture } from "./resources/CubeMapTexture";
+import { imageTexture } from "./resources/ImageTexture";
+import { IShaderResource } from "./resources/IShaderResource";
+import { TextureSampler } from "./resources/TextureSampler";
+import { UniformBuffer } from "./resources/UniformBuffer";
+import { VertexBuffer } from "./resources/VertexBuffer";
+import { VideoTexture } from "./resources/VideoTexture";
+
+export class Bindgroups {
+
+
+    public groups: BindGroup[] = [];
+    private _name: string;
+
+
+
+    constructor(name: string) {
+        this._name = name;
+    }
+    public get name(): string { return this._name; }
+
+
+    public build(autoLayout: boolean = false) {
+
+        const description: any = {};
+        const layouts: GPUBindGroupLayout[] = [];
+        const bindgroups: GPUBindGroup[] = [];
+
+
+        for (let i = 0; i < this.groups.length; i++) {
+
+            if (!autoLayout) layouts[i] = this.groups[i].layout;
+            bindgroups[i] = this.groups[i].group;
+        }
+
+        if (autoLayout) description.layout = "auto";
+        else description.layout = GPU.createPipelineLayout({ bindGroupLayouts: layouts });
+
+
+        const { vertexLayouts, buffers, nbVertex } = this.createVertexBufferLayout();
+
+        description.vertex = {
+            buffers: vertexLayouts
+        }
+
+        return {
+            description,
+            bindgroups,
+            buffers,
+            nbVertex
+        }
+
+    }
+
+
+    public apply(renderPassEncoder: GPURenderPassEncoder): void {
+        for (let i = 0; i < this.groups.length; i++) {
+            //console.log("setBindgroup ", i, this.groups[i])
+            renderPassEncoder.setBindGroup(i, this.groups[i].group);
+        }
+    }
+
+
+    /*
+
+    DOIT ETRE MIS EN PLACE DANS LA PIPELINE
+    => Pipeline doit stocker  GPURenderPipeline et les GPUBindgroups
+    =====> lors du draw, verifier que bindgroups.id ===== oldFrameBindgroupId
+           => si non, rebuild de la pipeline avec le nouveau groupe
+              => garder en mémoire les GPUPipeline/Bindgroups associé à l'objet Pipeline
+
+    public apply(pass: GPURenderPassEncoder|GPUComputePassEncoder):void{
+        let group: BindGroup;
+        let resources:PipelineResource[];
+        for(let i=0;i<this.groups.length;i++){
+            group = this.groups[i];
+            resources = group.resources;
+            for(let j=0;j<resources.length;j++){
+                resources[j].update();
+            }
+            pass.setBindGroup(i,group.)
+
+        }
+    }
+    */
+
+
+
+
+
+
+
+
+
+    public getVertexShaderDeclaration(): string {
+        let result: string = "";
+        let group: BindGroup;
+        let resources: { name: string, resource: PipelineResource }[];
+        let resource: PipelineResource;
+        let name: string;
+        let k: number = 0;
+        for (let i = 0; i < this.groups.length; i++) {
+            group = this.groups[i];
+            resources = group.elements;
+            k = 0;
+            for (let j = 0; j < resources.length; j++) {
+                resource = resources[j].resource;
+                if (resource instanceof VertexBufferResource) continue;
+                name = resources[j].name;
+
+                console.log("=====> ", resource, resource instanceof VertexBufferResource)
+                if (resource instanceof UniformBufferResource) result += resource.createStruct(name).struct + "\n";
+
+                result += resource.createDeclaration(name, k++, i) + "\n";
+
+
+
+
+            }
+        }
+        return result;
+    }
+
+    public getFragmentShaderDeclaration(): string {
+        let result: string = "";
+        let group: BindGroup;
+        let resources: { name: string, resource: PipelineResource }[];
+        let resource: PipelineResource;
+        let name: string;
+        let k: number = 0;
+        for (let i = 0; i < this.groups.length; i++) {
+            group = this.groups[i];
+            resources = group.elements;
+            k = 0;
+            for (let j = 0; j < resources.length; j++) {
+                resource = resources[j].resource;
+                if (resource instanceof VertexBufferResource) continue;
+                name = resources[j].name;
+                if (resource instanceof UniformBufferResource) result += resource.createStruct(name).struct + "\n";
+                result += resource.createDeclaration(name, k++, i) + "\n";
+            }
+        }
+        return result;
+    }
+
+
+
+    protected createVertexBufferLayout(): { vertexLayouts: Iterable<GPUVertexBufferLayout>, buffers: VertexBufferResource[], nbVertex: number } {
+        const vertexLayouts: Iterable<GPUVertexBufferLayout> = [];
+        const buffers: VertexBufferResource[] = [];
+
+        let group: BindGroup;
+        let resources: { name: string, resource: PipelineResource }[];
+        let resource: PipelineResource;
+        let vb: VertexBufferResource;
+        let k: number = 0;
+        let builtin: number = 0;
+        let nbVertex: number = 0;
+        for (let j = 0; j < this.groups.length; j++) {
+            group = this.groups[j];
+            resources = group.elements;
+
+
+            for (let i = 0; i < resources.length; i++) {
+
+                resource = resources[i].resource;
+                if (resource instanceof VertexBufferResource) {
+                    nbVertex = Math.max(nbVertex, resource.nbVertex)
+                    buffers[k] = resource;
+                    vertexLayouts[k++] = resource.createVertexBufferLayout(builtin);
+                    builtin += vb.vertexArrays.length;
+                }
+            }
+        }
+
+
+        return {
+            vertexLayouts,
+            buffers,
+            nbVertex
+        }
+    }
+
+    protected _resources: any = {};
+    public get resources(): any { return this._resources }
+
+    public add(bindgroup: Bindgroup | Bindgroups): (Bindgroup | Bindgroups) {
+
+
+        let resource = this._resources
+        if (!this._resources.all) this._resources.all = [];
+        if (!this._resources.types) this._resources.types = {};
+
+        const types = this._resources.types;
+
+        const addResources = (res: any, elements: { name: string, resource: IShaderResource }[]) => {
+
+            let element: { name: string, resource: IShaderResource };
+            let r: IShaderResource;
+            for (let i = 0; i < elements.length; i++) {
+                element = elements[i];
+
+                if (res[element.name]) continue;
+                //console.log("addResources ", i, element)
+                r = element.resource;
+                if (this._resources.all.indexOf(r) === -1) this._resources.all.push(r);
+                res[element.name] = element.resource;
+
+                if (r instanceof UniformBuffer) {
+                    if (!types.uniforms) types.uniforms = [];
+                    if (types.uniforms.indexOf(element) === -1) types.uniforms.push(element);
+                } else if (r instanceof VertexBuffer) {
+                    if (!types.vertexBuffers) types.vertexBuffers = [];
+                    if (types.vertexBuffers.indexOf(element) === -1) types.vertexBuffers.push(element);
+                } else if (r instanceof imageTexture) {
+                    if (!types.imageTextures) types.imageTextures = [];
+                    if (types.imageTextures.indexOf(element) === -1) types.imageTextures.push(element);
+                } else if (r instanceof VideoTexture) {
+                    if (!types.videoTexture) types.videoTexture = [];
+                    if (types.videoTexture.indexOf(element) === -1) types.videoTexture.push(element);
+                } else if (r instanceof CubeMapTexture) {
+                    if (!types.cubeMapTexture) types.cubeMapTexture = [];
+                    if (types.cubeMapTexture.indexOf(element) === -1) types.cubeMapTexture.push(element);
+                } else if (r instanceof TextureSampler) {
+                    if (!types.sampler) types.sampler = [];
+                    if (types.sampler.indexOf(element) === -1) types.sampler.push(element);
+                } else if (r instanceof IndexBufferResource) {
+                    if (!types.indexBuffer) types.indexBuffer = element.resource;
+                }
+
+            }
+
+            //console.log("this.resources = ", this.resources)
+        }
+
+        const addGroup = (o: Bindgroup) => {
+            //console.log("addGroup ", o.name)
+            const res: any = resource[o.name] = {};
+            if (!res.types) res.types = {};
+
+            addResources(res, o.elements)
+
+            this.groups.push(o);
+        }
+
+
+        if (bindgroup instanceof Bindgroup) {
+            if (this.groups.indexOf(bindgroup) === -1) addGroup(bindgroup);
+            else {
+                //console.log("=> ", bindgroup.name)
+                addResources(resource[bindgroup.name], bindgroup.elements)
+            }
+        } else {
+            resource = resource[bindgroup.name] = {};
+            let o;
+            for (let i = 0; i < bindgroup.groups.length; i++) {
+                o = bindgroup.groups[i];
+                if (this.groups.indexOf(o) === -1) addGroup(o);
+            }
+        }
+
+        return bindgroup;
+    }
+
+    public copy(options?: { oldGroups: Bindgroup[], replacedGroup: Bindgroup[] }): Bindgroups {
+        const obj = new Bindgroups(this._name);
+        const groups = this.groups.concat();
+        if (options) {
+            for (let i = 0; i < options.oldGroups.length; i++) {
+                groups.splice(groups.indexOf(options.oldGroups[i]), 1, options.replacedGroup[i]);
+            }
+        }
+
+        obj.groups = groups;
+        return obj;
+    }
+
+
+    public get current(): Bindgroup {
+        return this.groups[this.groups.length - 1]
+    }
+
+}
