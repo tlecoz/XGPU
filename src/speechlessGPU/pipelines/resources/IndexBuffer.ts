@@ -2,36 +2,46 @@ import { GPU } from "../../GPU";
 
 export type IndexBufferDescriptor = {
     nbPoint: number,
-    dataType: "uint16" | "uint32"
+    dataType?: "uint16" | "uint32",
+    datas?: Uint16Array | Uint32Array
+
 }
 
 export class IndexBuffer {
 
-    protected _buffer: GPUBuffer;
-    protected descriptor: IndexBufferDescriptor;
+    public gpuResource: GPUBuffer;
+    public descriptor: IndexBufferDescriptor;
 
     constructor(descriptor: IndexBufferDescriptor) {
 
+        if (undefined === descriptor.dataType) {
+            if (descriptor.datas) {
+                if (descriptor.datas instanceof Uint16Array) descriptor.dataType = "uint16";
+                else descriptor.dataType = "uint32";
+            } else {
+                descriptor.dataType = "uint32";
+            }
+        }
         this.descriptor = descriptor;
     }
 
     public init(descriptor: IndexBufferDescriptor) {
         this.descriptor = descriptor;
-        this.createBuffer();
+        this.createGpuResource();
     }
-    public destroy(): void {
-        if (this._buffer) this._buffer.destroy();
-        this._buffer = null;
+    public destroyGpuResource(): void {
+        if (this.gpuResource) this.gpuResource.destroy();
+        this.gpuResource = null;
     }
-    public createBuffer(): void {
-        if (this._buffer) this._buffer.destroy();
-        this._buffer = GPU.device.createBuffer({
+    public createGpuResource(): void {
+        if (this.gpuResource) this.gpuResource.destroy();
+        this.gpuResource = GPU.device.createBuffer({
             size: this.getBufferSize(),
             usage: GPUBufferUsage.INDEX,
             mappedAtCreation: true
         });
-        (this._buffer as any).dataType = this.dataType;
-        (this._buffer as any).nbPoint = this.nbPoint;
+        (this.gpuResource as any).dataType = this.dataType;
+        (this.gpuResource as any).nbPoint = this.nbPoint;
     }
 
     private getBufferSize(): number {
@@ -44,13 +54,13 @@ export class IndexBuffer {
         }
         return size;
     }
-    public get buffer(): GPUBuffer { return this._buffer; }
+
     public get nbPoint(): number { return this.descriptor.nbPoint; }
     public get dataType(): string { return this.descriptor.dataType; }
 
     public setValues(points: number[]): void {
-        new Uint16Array(this._buffer.getMappedRange()).set(points);
-        this._buffer.unmap();
+        new Uint16Array(this.gpuResource.getMappedRange()).set(points);
+        this.gpuResource.unmap();
     }
 
 }

@@ -1,6 +1,7 @@
+import { GPU } from "../GPU";
 import { Bindgroup } from "./Bindgroup";
 import { CubeMapTexture } from "./resources/CubeMapTexture";
-import { imageTexture } from "./resources/ImageTexture";
+import { ImageTexture } from "./resources/ImageTexture";
 import { IShaderResource } from "./resources/IShaderResource";
 import { TextureSampler } from "./resources/TextureSampler";
 import { UniformBuffer } from "./resources/UniformBuffer";
@@ -10,7 +11,7 @@ import { VideoTexture } from "./resources/VideoTexture";
 export class Bindgroups {
 
 
-    public groups: BindGroup[] = [];
+    public groups: Bindgroup[] = [];
     private _name: string;
 
 
@@ -62,42 +63,11 @@ export class Bindgroups {
     }
 
 
-    /*
-
-    DOIT ETRE MIS EN PLACE DANS LA PIPELINE
-    => Pipeline doit stocker  GPURenderPipeline et les GPUBindgroups
-    =====> lors du draw, verifier que bindgroups.id ===== oldFrameBindgroupId
-           => si non, rebuild de la pipeline avec le nouveau groupe
-              => garder en mémoire les GPUPipeline/Bindgroups associé à l'objet Pipeline
-
-    public apply(pass: GPURenderPassEncoder|GPUComputePassEncoder):void{
-        let group: BindGroup;
-        let resources:PipelineResource[];
-        for(let i=0;i<this.groups.length;i++){
-            group = this.groups[i];
-            resources = group.resources;
-            for(let j=0;j<resources.length;j++){
-                resources[j].update();
-            }
-            pass.setBindGroup(i,group.)
-
-        }
-    }
-    */
-
-
-
-
-
-
-
-
-
     public getVertexShaderDeclaration(): string {
         let result: string = "";
-        let group: BindGroup;
-        let resources: { name: string, resource: PipelineResource }[];
-        let resource: PipelineResource;
+        let group: Bindgroup;
+        let resources: { name: string, resource: IShaderResource }[];
+        let resource: IShaderResource;
         let name: string;
         let k: number = 0;
         for (let i = 0; i < this.groups.length; i++) {
@@ -106,11 +76,11 @@ export class Bindgroups {
             k = 0;
             for (let j = 0; j < resources.length; j++) {
                 resource = resources[j].resource;
-                if (resource instanceof VertexBufferResource) continue;
+                if (resource instanceof VertexBuffer) continue;
                 name = resources[j].name;
 
-                console.log("=====> ", resource, resource instanceof VertexBufferResource)
-                if (resource instanceof UniformBufferResource) result += resource.createStruct(name).struct + "\n";
+                console.log("=====> ", resource, resource instanceof VertexBuffer)
+                if (resource instanceof UniformBuffer) result += resource.createStruct(name).struct + "\n";
 
                 result += resource.createDeclaration(name, k++, i) + "\n";
 
@@ -124,9 +94,9 @@ export class Bindgroups {
 
     public getFragmentShaderDeclaration(): string {
         let result: string = "";
-        let group: BindGroup;
-        let resources: { name: string, resource: PipelineResource }[];
-        let resource: PipelineResource;
+        let group: Bindgroup;
+        let resources: { name: string, resource: IShaderResource }[];
+        let resource: IShaderResource;
         let name: string;
         let k: number = 0;
         for (let i = 0; i < this.groups.length; i++) {
@@ -135,9 +105,9 @@ export class Bindgroups {
             k = 0;
             for (let j = 0; j < resources.length; j++) {
                 resource = resources[j].resource;
-                if (resource instanceof VertexBufferResource) continue;
+                if (resource instanceof VertexBuffer) continue;
                 name = resources[j].name;
-                if (resource instanceof UniformBufferResource) result += resource.createStruct(name).struct + "\n";
+                if (resource instanceof UniformBuffer) result += resource.createStruct(name).struct + "\n";
                 result += resource.createDeclaration(name, k++, i) + "\n";
             }
         }
@@ -146,14 +116,14 @@ export class Bindgroups {
 
 
 
-    protected createVertexBufferLayout(): { vertexLayouts: Iterable<GPUVertexBufferLayout>, buffers: VertexBufferResource[], nbVertex: number } {
+    protected createVertexBufferLayout(): { vertexLayouts: Iterable<GPUVertexBufferLayout>, buffers: VertexBuffer[], nbVertex: number } {
         const vertexLayouts: Iterable<GPUVertexBufferLayout> = [];
-        const buffers: VertexBufferResource[] = [];
+        const buffers: VertexBuffer[] = [];
 
-        let group: BindGroup;
-        let resources: { name: string, resource: PipelineResource }[];
-        let resource: PipelineResource;
-        let vb: VertexBufferResource;
+        let group: Bindgroup;
+        let resources: { name: string, resource: IShaderResource }[];
+        let resource: IShaderResource;
+        let vb: VertexBuffer;
         let k: number = 0;
         let builtin: number = 0;
         let nbVertex: number = 0;
@@ -165,7 +135,7 @@ export class Bindgroups {
             for (let i = 0; i < resources.length; i++) {
 
                 resource = resources[i].resource;
-                if (resource instanceof VertexBufferResource) {
+                if (resource instanceof VertexBuffer) {
                     nbVertex = Math.max(nbVertex, resource.nbVertex)
                     buffers[k] = resource;
                     vertexLayouts[k++] = resource.createVertexBufferLayout(builtin);
@@ -213,7 +183,7 @@ export class Bindgroups {
                 } else if (r instanceof VertexBuffer) {
                     if (!types.vertexBuffers) types.vertexBuffers = [];
                     if (types.vertexBuffers.indexOf(element) === -1) types.vertexBuffers.push(element);
-                } else if (r instanceof imageTexture) {
+                } else if (r instanceof ImageTexture) {
                     if (!types.imageTextures) types.imageTextures = [];
                     if (types.imageTextures.indexOf(element) === -1) types.imageTextures.push(element);
                 } else if (r instanceof VideoTexture) {
@@ -225,8 +195,6 @@ export class Bindgroups {
                 } else if (r instanceof TextureSampler) {
                     if (!types.sampler) types.sampler = [];
                     if (types.sampler.indexOf(element) === -1) types.sampler.push(element);
-                } else if (r instanceof IndexBufferResource) {
-                    if (!types.indexBuffer) types.indexBuffer = element.resource;
                 }
 
             }
