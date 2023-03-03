@@ -10,7 +10,7 @@ import { VideoTexture } from "./resources/VideoTexture";
 
 export class Bindgroups {
 
-
+    public parent: Bindgroups;
     public groups: Bindgroup[] = [];
     private _name: string;
 
@@ -162,7 +162,7 @@ export class Bindgroups {
 
     public add(bindgroup: Bindgroup | Bindgroups): (Bindgroup | Bindgroups) {
 
-
+        bindgroup.parent = this;
         let resource = this._resources
         if (!this._resources.all) this._resources.all = [];
         if (!this._resources.types) this._resources.types = {};

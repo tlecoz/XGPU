@@ -51,14 +51,16 @@ export class ImageTexture implements IShaderResource {
 
 
 
-    public setSize(w: number, h: number): ImageTexture {
+    public resize(w: number, h: number): ImageTexture {
         this.descriptor.size = [w, h];
         this.createGpuResource()
         return this;
     }
 
-    public get image(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas { return this.descriptor.source }
-    public set image(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas) {
+    public get view(): GPUTextureView { return this._view; }
+
+    public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas { return this.descriptor.source }
+    public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas) {
         this.descriptor.source = bmp;
         this.mustBeTransfered = true;
     }

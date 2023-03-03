@@ -1,3 +1,4 @@
+import { ImageTexture } from "../../../shader/resources/ImageTexture";
 import { Texture, TextureDescriptor } from "./Texture";
 
 export type RenderPassTextureDescriptor = {
@@ -10,7 +11,7 @@ export type RenderPassTextureDescriptor = {
     viewFormats?: GPUTextureFormat[];
 }
 
-export class RenderPassTexture extends Texture {
+export class RenderPassTexture extends ImageTexture {
 
     constructor(descriptor: {
         size: GPUExtent3D,
@@ -29,10 +30,16 @@ export class RenderPassTexture extends Texture {
         if (!descriptor.dimension) descriptor.dimension = "2d";
         if (!descriptor.viewFormats) descriptor.viewFormats = [];
 
-        super(descriptor as TextureDescriptor)
+        super(descriptor)
     }
 
     public get width(): number { return this.descriptor.size[0] }
     public get height(): number { return this.descriptor.size[1] }
 
+    public update(): void {
+        //nothing here
+    }
+
+    public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas { return null }
+    public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas) { if (bmp) return }
 }

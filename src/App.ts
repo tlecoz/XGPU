@@ -27,10 +27,8 @@ export class App {
 
     }
 
-    private async start(renderer: GPURenderer) {
-
+    private async loadMedias() {
         const loadImage = (url: string) => {
-
             return new Promise((resolve: (bmp: ImageBitmap) => void, error: (e: any) => void) => {
                 const img = document.createElement("img");
                 img.onload = () => {
@@ -46,9 +44,6 @@ export class App {
         }
 
         const loadVideo = (url: string) => {
-
-
-
             return new Promise(async (resolve: (video: HTMLVideoElement) => void, error: (e: any) => void) => {
                 const video = document.createElement("video");
                 video.src = url;
@@ -57,16 +52,23 @@ export class App {
                 video.onerror = error;
                 await video.play();
                 resolve(video)
-
-
-
             });
         }
 
-        const bmp = await loadImage("../../assets/leaf.png")
-        const bmp2 = await loadImage("../../assets/leaf2.png")
-        const video = await loadVideo("../../assets/video.webm")
-        console.log(video);
+        return new Promise(async (resolve: (o: any) => void, error: (e: any) => void) => {
+
+            const bmp = await loadImage("../../assets/leaf.png")
+            const bmp2 = await loadImage("../../assets/leaf2.png")
+            const video = await loadVideo("../../assets/video.webm")
+
+            resolve({ bmp, bmp2, video });
+        })
+
+    }
+
+    private async start(renderer: GPURenderer) {
+
+        const { bmp, bmp2, video } = await this.loadMedias();
 
         //-------------------------------------------------------------------------------------
 
@@ -74,9 +76,7 @@ export class App {
 
         const pipeline = new RenderPipeline("TestPipeline", renderer);
         const group: Bindgroup = new Bindgroup("common");
-
-
-
+        pipeline.bindGroups.add(group);
 
 
         group.add("geom", new VertexBuffer({
@@ -110,20 +110,14 @@ export class App {
                     new Matrix4x4()
                 ])
             }
-
         }))
-        pipeline.bindGroups.add(group);
-
 
         const group2 = new Bindgroup("media");
-
         group2.add("mySampler", new TextureSampler({ minFilter: "linear", magFilter: "linear" }));
         group2.add("myTexture", new ImageTexture({ source: bmp }));
         group2.add("myTexture2", new ImageTexture({ source: bmp2 }));
         group2.add("myVideo", new VideoTexture({ source: video }));
-
         pipeline.bindGroups.add(group2);
-
 
         pipeline.vertexShader.outputs = [
             { name: "position", type: "vec4<f32>", ...BuiltIns.vertexOutputs.position },
@@ -140,29 +134,21 @@ export class App {
             output.fragPosition = 0.5+ (vec4<f32>(vertexPos, 1.0));
         `;
 
-
-
         pipeline.fragmentShader.outputs = [
             { name: "color", type: "vec4<f32>", ...BuiltIns.fragmentOutputs.color }
         ]
         pipeline.fragmentShader.main.text = `
-            //output.color = fragPosition;
             output.color = textureSample(myTexture, mySampler, fragUV);
             
             let video = textureSampleBaseClampToEdge(myVideo, mySampler, fragUV);
             output.color /= video;
-
 
             let mask = textureSample(myTexture2, mySampler, fragUV);
             if(mask.a == 0.0){
                 output.color = vec4(0.0);
             }
 
-            output.color *= fragPosition;
-
-            
-
-            
+            output.color *= fragPosition;            
         `;
 
 

@@ -1,0 +1,19 @@
+- faire en sorte que toute la pipeline puisse etre contenu dans un json 
+
+- faire le lien entre les Float,Vec2,... des uniform avec le uniformVuffer associé 
+  => verifier que ça marche en updatant des uniforms 
+
+
+- instanciation de plusieurs elements dans un canvas en utilisant la meme pipeline
+  => on clone les ressource en se basant sur le descriptor 
+     => ajout d'une propriété 'clonable' sur les IShaderResource (pour que plusieurs pipeline puisse exploiter le meme VertexBuffer par exemple)
+  => différencier le build des layout et l'exploitation des bindgroup 
+
+- sortir GPU du renderer pour avoir plusieurs renderer 
+  => appeler Renderer GPUCanvas 
+
+- creer un deuxieme canvas et une deuxieme pipeline 
+  => utiliser le renderTexture du premier canvas en input du deuxieme 
+
+- Créer une classe MultiPassPipeline 
+

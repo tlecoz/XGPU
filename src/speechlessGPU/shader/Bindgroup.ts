@@ -1,11 +1,12 @@
 import { GPU } from "../GPU";
+import { Bindgroups } from "./Bindgroups";
 import { IShaderResource } from "./resources/IShaderResource";
 import { VertexBuffer } from "./resources/VertexBuffer";
 import { VideoTexture } from "./resources/VideoTexture";
 
 export class Bindgroup {
 
-
+    public parent: Bindgroups;
     public entries: any[] = [];
     public elements: { name: string, resource: IShaderResource }[] = [];
 
@@ -23,6 +24,7 @@ export class Bindgroup {
     public add(name: string, resource: IShaderResource): IShaderResource {
         if (resource instanceof VideoTexture) this.mustRefreshBindgroup = true;
         this.elements.push({ name, resource });
+        if (this.parent) this.parent.add(this);
         return resource;
     }
 
