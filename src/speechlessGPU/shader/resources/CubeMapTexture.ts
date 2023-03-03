@@ -24,7 +24,19 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
 
     protected _sides: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[] = [];
 
-    constructor(descriptor: CubeMapTextureDescriptor) {
+    constructor(descriptor: {
+        source?: {
+            front: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
+            back: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
+            left: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
+            right: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
+            top: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
+            bottom: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
+        },
+        size: GPUExtent3D,
+        usage?: GPUTextureUsageFlags,
+        defaultViewDescriptor?: GPUTextureViewDescriptor
+    }) {
 
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
 

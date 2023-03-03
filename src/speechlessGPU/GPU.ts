@@ -39,6 +39,7 @@ export class GPU {
         return this.device.createBindGroup(o);
     }
     public static createBindgroupLayout(o: any): GPUBindGroupLayout {
+        console.warn("createBindgroupLayout ", o)
         return this.device.createBindGroupLayout(o);
     }
 

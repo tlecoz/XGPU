@@ -22,7 +22,18 @@ export class TextureSampler implements IShaderResource {
     public descriptor: TextureSamplerDescriptor;
 
 
-    constructor(descriptor: TextureSamplerDescriptor) {
+    constructor(descriptor: {
+        minFilter: "nearest" | "linear",
+        magFilter: "nearest" | "linear",
+        addressModeU?: "clamp-to-edge" | "repeat" | "mirror-repeat",
+        addressModeV?: "clamp-to-edge" | "repeat" | "mirror-repeat",
+        addressModeW?: "clamp-to-edge" | "repeat" | "mirror-repeat",
+        mipmapFilter?: "nearest" | "linear",
+        lodMinClamp?: number,
+        lodMaxClamp?: number,
+        maxAnisotropy?: number
+        compare?: "never" | "less" | "equal" | "less-equal" | "greater" | "not-equal" | "greater-equal" | "always"
+    }) {
 
         if (undefined === descriptor.addressModeU) descriptor.addressModeU = "clamp-to-edge";
         if (undefined === descriptor.addressModeV) descriptor.addressModeV = "clamp-to-edge";

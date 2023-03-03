@@ -2,7 +2,7 @@ import { Texture } from "./Texture";
 
 export type DepthStencilTextureDescriptor = {
     size: GPUExtent3D,
-    format: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
+    format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
 }
 
 export class DepthStencilTexture extends Texture {
@@ -13,9 +13,13 @@ export class DepthStencilTexture extends Texture {
     private _attachment: any;
     public get attachment(): any { return this._attachment };
 
-    constructor(descriptor: DepthStencilTextureDescriptor, depthStencilDescription: { depthWriteEnabled: boolean, depthCompare: string, format: string } = null, depthStencilAttachmentOptions: any = null) {
+    constructor(descriptor: {
+        size: GPUExtent3D,
+        format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
+    }, depthStencilDescription: { depthWriteEnabled: boolean, depthCompare: string, format: string } = null, depthStencilAttachmentOptions: any = null) {
 
-        super(descriptor)
+        if (undefined === descriptor.format) descriptor.format = "depth24plus"
+        super(descriptor as any)
 
         this.descriptor.sampleCount = 0;
 

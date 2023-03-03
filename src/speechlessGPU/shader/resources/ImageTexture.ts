@@ -22,7 +22,13 @@ export class ImageTexture implements IShaderResource {
     protected viewDescriptor: GPUTextureViewDescriptor = undefined;
 
 
-    constructor(descriptor: ImageTextureDescriptor) {
+    constructor(descriptor: {
+        source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas
+        size?: GPUExtent3D,
+        usage?: GPUTextureUsageFlags,
+        format?: GPUTextureFormat,
+        defaultViewDescriptor?: GPUTextureViewDescriptor
+    }) {
 
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";

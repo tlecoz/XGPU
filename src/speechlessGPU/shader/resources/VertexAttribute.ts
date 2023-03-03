@@ -1,7 +1,9 @@
 import { GPUType } from "../../GPUType";
 
 
-export class VertexArray {
+
+
+export class VertexAttribute {
 
     public static get types(): any {
         return {
@@ -56,8 +58,8 @@ export class VertexArray {
         this._dataType = dataType;
         this._dataOffset = offset;
 
-        if (VertexArray.types[dataType]) {
-            this.vertexType = VertexArray.types[dataType];
+        if (VertexAttribute.types[dataType]) {
+            this.vertexType = VertexAttribute.types[dataType];
             this.nbValues = this.vertexType.nbComponent;
         } else {
 

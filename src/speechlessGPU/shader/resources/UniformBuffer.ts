@@ -24,7 +24,12 @@ export class UniformBuffer implements IShaderResource {
 
     protected uniformAlignmentReady: boolean = false;
 
-    constructor(descriptor: UniformBufferDescriptor) {
+    constructor(descriptor: {
+        items: any;
+        visibility?: GPUShaderStageFlags;
+    }) {
+
+        if (undefined === descriptor.visibility) descriptor.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT;
         this.descriptor = descriptor;
 
         let items = descriptor.items;

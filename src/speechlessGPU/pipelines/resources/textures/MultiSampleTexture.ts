@@ -2,7 +2,6 @@ import { GPU } from "../../../GPU";
 import { Texture, TextureDescriptor } from "./Texture";
 
 export type MultiSampleTextureDescriptor = {
-
     size: GPUExtent3D,
     format?: GPUTextureFormat,
     usage?: GPUTextureUsageFlags,
@@ -17,7 +16,15 @@ export class MultiSampleTexture extends Texture {
     private _description: { count: number, mask: number, alphaToCoverageEnabled: boolean };
     public get description(): { count: number, mask: number, alphaToCoverageEnabled: boolean } { return this._description }
 
-    constructor(descriptor: MultiSampleTextureDescriptor) {
+    constructor(descriptor: {
+        size: GPUExtent3D,
+        format?: GPUTextureFormat,
+        usage?: GPUTextureUsageFlags,
+        sampleCount?: GPUSize32,
+        alphaToCoverageEnabled?: boolean,
+        mask?: number,
+        resolveTarget?: GPUTextureView
+    }) {
 
         if (undefined === descriptor.format) descriptor.format = GPU.getPreferredCanvasFormat();
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;

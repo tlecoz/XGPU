@@ -18,11 +18,21 @@ export type VideoTextureDescriptor = {
 
 export class VideoTexture implements IShaderResource {
 
-    public mustBeTransfered: boolean = false;
+    public mustBeTransfered: boolean = true;
     public descriptor: VideoTextureDescriptor;
     public gpuResource: HTMLVideoElement
 
-    constructor(descriptor: VideoTextureDescriptor) {
+    constructor(descriptor: {
+        source?: HTMLVideoElement,
+        format?: GPUTextureFormat,
+        usage?: GPUTextureUsageFlags,
+        size?: GPUExtent3D,
+        mipLevelCount?: GPUIntegerCoordinate,
+        sampleCount?: GPUSize32,
+        dimension?: GPUTextureDimension,
+        viewFormats?: GPUTextureFormat[],
+        defaultViewDescriptor?: any
+    }) {
 
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
@@ -32,14 +42,16 @@ export class VideoTexture implements IShaderResource {
         if (undefined === descriptor.viewFormats) descriptor.viewFormats = [];
 
         if (descriptor.source) {
+            this.gpuResource = descriptor.source;
             descriptor.size = [descriptor.source.width, descriptor.source.height];
         }
 
         this.descriptor = descriptor;
 
     }
-    public init(video: HTMLVideoElement) {
+    public set source(video: HTMLVideoElement) {
         this.gpuResource = video;
+        this.descriptor.source = video;
     }
 
 

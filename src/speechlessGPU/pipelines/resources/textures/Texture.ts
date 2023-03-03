@@ -14,7 +14,12 @@ export class Texture {
     public gpuResource: GPUTexture = null;
     protected _view: GPUTextureView = null;
 
-    constructor(descriptor: TextureDescriptor) {
+    constructor(descriptor: {
+        size: GPUExtent3D,
+        format: GPUTextureFormat,
+        usage?: GPUTextureUsageFlags,
+        sampleCount?: GPUSize32,
+    }) {
         if (!descriptor.usage) descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
         if (!descriptor.sampleCount) descriptor.sampleCount = 1;
         this.descriptor = descriptor;

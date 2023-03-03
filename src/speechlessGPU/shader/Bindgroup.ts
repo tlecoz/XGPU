@@ -1,6 +1,7 @@
 import { GPU } from "../GPU";
 import { IShaderResource } from "./resources/IShaderResource";
 import { VertexBuffer } from "./resources/VertexBuffer";
+import { VideoTexture } from "./resources/VideoTexture";
 
 export class Bindgroup {
 
@@ -20,6 +21,7 @@ export class Bindgroup {
     public get name(): string { return this._name; }
 
     public add(name: string, resource: IShaderResource): IShaderResource {
+        if (resource instanceof VideoTexture) this.mustRefreshBindgroup = true;
         this.elements.push({ name, resource });
         return resource;
     }
@@ -70,7 +72,6 @@ export class Bindgroup {
     public update(): void {
         for (let i = 0; i < this.elements.length; i++) {
             this.elements[i].resource.update();
-
         }
     }
 

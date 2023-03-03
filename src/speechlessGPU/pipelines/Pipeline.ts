@@ -1,10 +1,13 @@
-
 import { GPU } from "../GPU";
 import { Bindgroup } from "../shader/Bindgroup";
 import { Bindgroups } from "../shader/Bindgroups";
 import { FragmentShader } from "../shader/FragmentShader";
+import { IShaderResource } from "../shader/resources/IShaderResource";
+import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
+import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
+
 
 
 export class Pipeline {
@@ -24,8 +27,8 @@ export class Pipeline {
     protected gpuPipelineLayout: GPUPipelineLayout;
 
     constructor(name: string) {
-        this.bindGroups = new Bindgroups();
-        this.bindGroups.parent = this;
+        this.bindGroups = new Bindgroups(name);
+
     }
 
     public addBindgroup(group: Bindgroup) {
@@ -36,10 +39,9 @@ export class Pipeline {
         this.vertexBufferLayouts = [];
         this.vertexBuffers = [];
 
-        const groups: BindGroup[] = this.bindGroups.groups;
-        let elements: { name: string, resource: PipelineResource }[];
-        let resource: PipelineResource;
-        let vBuffer: VertexBuffer;
+        const groups: Bindgroup[] = this.bindGroups.groups;
+        let elements: { name: string, resource: IShaderResource }[];
+        let resource: IShaderResource;
         let builtin: number = 0;
         let k = 0;
         for (let i = 0; i < groups.length; i++) {
@@ -62,7 +64,7 @@ export class Pipeline {
         const vertexInput: ShaderStruct = new ShaderStruct("Input", shader.inputs);;
 
         if (buffers) {
-            let arrays: VertexArray[];
+            let arrays: VertexAttribute[];
             let builtin: number = 0;
             for (let i = 0; i < buffers.length; i++) {
                 arrays = buffers[i].vertexArrays;
@@ -82,7 +84,7 @@ export class Pipeline {
         this.fragmentShader = new FragmentShader();
 
         const groups = this.bindGroups.groups;
-        let group: BindGroup;
+        let group: Bindgroup;
         let vertex: string = "";
         let fragment: string = "";
         let vertexInputs = [];
@@ -120,9 +122,9 @@ export class Pipeline {
         this.gpuPipelineLayout = null;
 
 
-        const groups: BindGroup[] = this.bindGroups.groups;
-        let elements: { name: string, resource: PipelineResource }[];
-        let resource: PipelineResource;
+        const groups: Bindgroup[] = this.bindGroups.groups;
+        let elements: { name: string, resource: IShaderResource }[];
+        let resource: IShaderResource;
         let layout, group;
         let layouts = [];
         let k, n = 0;

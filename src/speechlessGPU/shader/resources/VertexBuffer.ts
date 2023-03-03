@@ -2,7 +2,7 @@ import { GPU } from "../../GPU";
 import { GPUType } from "../../GPUType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
-import { VertexArray } from "./VertexArray";
+import { VertexAttribute } from "./VertexAttribute";
 
 export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
@@ -17,7 +17,7 @@ export class VertexBuffer implements IShaderResource {
 
     public io: boolean = false;
     public mustBeTransfered: boolean = true;
-    public vertexArrays: VertexArray[] = [];
+    public vertexArrays: VertexAttribute[] = [];
     public attributes: any = {};
     public gpuResource: any;
     public descriptor: VertexBufferDescriptor;
@@ -32,7 +32,13 @@ export class VertexBuffer implements IShaderResource {
 
 
 
-    constructor(descriptor: VertexBufferDescriptor) {
+    constructor(descriptor: {
+        stepMode?: "vertex" | "instance",
+        accessMode?: "read" | "read_write",
+        usage?: GPUBufferUsageFlags,
+        attributes: any,
+        datas?: Float32Array
+    }) {
 
         this.descriptor = descriptor;
 
@@ -130,8 +136,8 @@ export class VertexBuffer implements IShaderResource {
     }
 
     private _byteCount: number = 0;
-    public createArray(name: string, dataType: string, offset?: number): VertexArray {
-        const v = this.attributes[name] = new VertexArray(name, dataType, offset);
+    public createArray(name: string, dataType: string, offset?: number): VertexAttribute {
+        const v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
         const nbCompo = v.nbComponent;
         this._nbComponent += nbCompo;
         this._byteCount += v.nbComponent * new GPUType(v.varType).byteValue;
@@ -166,7 +172,7 @@ export class VertexBuffer implements IShaderResource {
 
         let result = "";
         result += "struct " + structName + "{\n";
-        let a: VertexArray;
+        let a: VertexAttribute;
         for (let i = 0; i < this.vertexArrays.length; i++) {
             a = this.vertexArrays[i];
             result += "   " + a.name + ":" + a.varType + ",\n";
@@ -217,7 +223,7 @@ export class VertexBuffer implements IShaderResource {
 
         const structName = name.substring(0, 1).toUpperCase() + name.slice(1);
         const properties: { name: string, type: string, builtin?: string }[] = [];
-        let a: VertexArray;
+        let a: VertexAttribute;
         for (let i = 0; i < this.vertexArrays.length; i++) {
             a = this.vertexArrays[i];
             properties[i] = { name: a.name, type: a.varType, builtin: "" };
@@ -289,7 +295,7 @@ export class VertexBuffer implements IShaderResource {
         this._buffer.unmap();
     }
 
-    public getVertexArrayById(id: number): VertexArray { return this.vertexArrays[id]; }
+    public getVertexArrayById(id: number): VertexAttribute { return this.vertexArrays[id]; }
 
     public update(): boolean {
         if (this.vertexArrays.length === 0) return false;

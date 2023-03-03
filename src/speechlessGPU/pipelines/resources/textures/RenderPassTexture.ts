@@ -12,7 +12,15 @@ export type RenderPassTextureDescriptor = {
 
 export class RenderPassTexture extends Texture {
 
-    constructor(descriptor: RenderPassTextureDescriptor) {
+    constructor(descriptor: {
+        size: GPUExtent3D,
+        format?: GPUTextureFormat,
+        usage?: GPUTextureUsageFlags,
+        mipLevelCount?: GPUIntegerCoordinate,
+        sampleCount?: GPUSize32,
+        dimension?: GPUTextureDimension,
+        viewFormats?: GPUTextureFormat[];
+    }) {
 
         if (!descriptor.format) descriptor.format = "bgra8unorm" //WGSL.textureFormat.bit32.bgra8unorm;
         if (!descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST;

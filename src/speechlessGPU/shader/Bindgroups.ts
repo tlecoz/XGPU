@@ -62,6 +62,11 @@ export class Bindgroups {
         }
     }
 
+    public update(): void {
+        for (let i = 0; i < this.groups.length; i++) {
+            this.groups[i].update();
+        }
+    }
 
     public getVertexShaderDeclaration(): string {
         let result: string = "";
@@ -164,15 +169,17 @@ export class Bindgroups {
 
         const types = this._resources.types;
 
-        const addResources = (res: any, elements: { name: string, resource: IShaderResource }[]) => {
+        console.warn("should I delete this part ?")
 
+        const addResources = (res: any, elements: { name: string, resource: IShaderResource }[]) => {
+            console.log("call addResource ", elements)
             let element: { name: string, resource: IShaderResource };
             let r: IShaderResource;
             for (let i = 0; i < elements.length; i++) {
                 element = elements[i];
 
                 if (res[element.name]) continue;
-                //console.log("addResources ", i, element)
+                console.log("addResources ", i, element)
                 r = element.resource;
                 if (this._resources.all.indexOf(r) === -1) this._resources.all.push(r);
                 res[element.name] = element.resource;
@@ -199,11 +206,11 @@ export class Bindgroups {
 
             }
 
-            //console.log("this.resources = ", this.resources)
+            console.log("this.resources = ", this.resources.all.length)
         }
 
         const addGroup = (o: Bindgroup) => {
-            //console.log("addGroup ", o.name)
+            console.log("addGroup ", o.name, o.elements)
             const res: any = resource[o.name] = {};
             if (!res.types) res.types = {};
 
