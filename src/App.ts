@@ -54,7 +54,7 @@ export class App {
                 video.src = url;
                 video.loop = true;
                 video.muted = true;
-
+                video.onerror = error;
                 await video.play();
                 resolve(video)
 

@@ -29,6 +29,10 @@ export class ShaderStage {
     protected _shaderInfos: { code: string, output: ShaderStruct };
     public build(shaderPipeline: any, input: ShaderStruct): { code: string, output: ShaderStruct } {
         //must be overrided;
+        if (!shaderPipeline || !input) {
+
+        };
+
         if (this._shaderInfos) return this._shaderInfos;
         this._shaderInfos = { code: "", output: null }
         return this._shaderInfos;

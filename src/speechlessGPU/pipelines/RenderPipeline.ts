@@ -71,67 +71,40 @@ export class RenderPipeline extends Pipeline {
     }
     //------------------------------------------------
 
-    public setupMultiSampleView(count: number = 1, mask: number = 0xFFFFFFFF, alphaToCoverageEnabled: boolean = false, resolveTarget: GPUTextureView = null) {
-        /*this.description.multisample = {
-            count,
-            mask,
-            alphaToCoverageEnabled
-        }
+    public setupMultiSampleView(descriptor: {
+        size: GPUExtent3D,
+        format?: GPUTextureFormat,
+        usage?: GPUTextureUsageFlags,
+        sampleCount?: GPUSize32,
+        alphaToCoverageEnabled?: boolean,
+        mask?: number,
+        resolveTarget?: GPUTextureView
+    }) {
 
-        const updateTexture = () => {
-            if (this.multisampleView) (this.multisampleView as any).texture.destroy();
-
-
-            const desc = new TextureDescriptor(this.canvas.width, this.canvas.height, navigator.gpu.getPreferredCanvasFormat(), null, count)
-            const tex = GPU.addTexture(desc);
-            this.multisampleView = tex.texture.createView();
-            (this.multisampleView as any).texture = tex;
-            (this.multisampleView as any).updateTexture = updateTexture;
-            if (resolveTarget) (this.multisampleView as any).resolveTarget = resolveTarget;
-        }
-
-        updateTexture();
-        */
         if (this.multisampleTexture) this.multisampleTexture.destroy();
-        this.multisampleTexture = new MultiSampleTexture({ size: [this.canvas.width, this.canvas.height] })
+
+        descriptor.size = [this.canvas.width, this.canvas.height];
+        this.multisampleTexture = new MultiSampleTexture(descriptor);
     }
 
     //---------------------------
 
-    public setupDepthStencilView(depthStencilDescription?: { depthWriteEnabled: boolean, depthCompare: string, format: string }, depthStencilAttachmentOptions?: any) {
-        /*
-        const updateTexture = () => {
+    public setupDepthStencilView(
+        descriptor: {
+            size: GPUExtent3D,
+            format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
+        },
+        depthStencilDescription?: {
+            depthWriteEnabled: boolean,
+            depthCompare: string,
+            format: string
+        },
+        depthStencilAttachmentOptions?: any
 
-            if (this.depthStencilView) (this.depthStencilView as any).texture.destroy();
+    ) {
 
-            const desc = new DepthTextureDescriptor(this.canvas.width, this.canvas.height, wglsTextureFormat);
-            const tex = GPU.addTexture(desc);
-
-            this.depthStencilView = tex.texture.createView();
-            (this.depthStencilView as any).updateTexture = updateTexture;
-            (this.depthStencilView as any).texture = tex;
-            const o = {
-                view: this.depthStencilView,
-                depthClearValue: 1,
-                depthLoadOp: 'clear',
-                depthStoreOp: 'store',
-            };
-            for (var z in depthStencilOptions) o[z] = depthStencilOptions[z];
-
-            this.renderPassDescriptor.depthStencilAttachment = o
-
-            const obj = this.description.depthStencil = {
-                depthWriteEnabled: true,
-                depthCompare: "less",
-                format: tex.texture.format
-            }
-            for (var z in pipelineDepthStencilOptions) obj[z] = pipelineDepthStencilOptions[z];
-
-        }
-        updateTexture();
-        */
         if (this.depthStencilTexture) this.depthStencilTexture.destroy();
-        this.depthStencilTexture = new DepthStencilTexture({ size: [this.canvas.width, this.canvas.height] }, depthStencilDescription, depthStencilAttachmentOptions)
+        this.depthStencilTexture = new DepthStencilTexture(descriptor, depthStencilDescription, depthStencilAttachmentOptions)
 
     }
     //----------------------------------------

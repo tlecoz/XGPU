@@ -85,7 +85,7 @@ export class GPURenderer {
 
             */
             //-------------------------
-            pipeline.update(pipeline.bindGroups.resources);
+            pipeline.update();
 
             pipeline.draw(renderPass);
             pipeline.end(commandEncoder, renderPass);
