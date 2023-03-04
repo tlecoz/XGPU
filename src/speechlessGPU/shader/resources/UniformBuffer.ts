@@ -3,7 +3,7 @@ import { GPUType } from "../../GPUType";
 import { PrimitiveType } from "../PrimitiveType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
-import { Uniform } from "./Uniform";
+
 
 export type UniformBufferDescriptor = {
     items: any;
@@ -16,7 +16,7 @@ export class UniformBuffer implements IShaderResource {
     public gpuResource: GPUBuffer;
     public descriptor: UniformBufferDescriptor;
 
-    protected uniforms: Uniform[] = [];
+    protected uniforms: PrimitiveType[] = [];
     protected byteSize: number = 0;
     protected _nbComponent: number = 0;
     protected _data: Float32Array;
@@ -45,22 +45,27 @@ export class UniformBuffer implements IShaderResource {
 
     public add(name: string, type: string, data: PrimitiveType) {
 
-        console.log(name + " = ", data instanceof Float32Array)
+        //console.log(name + " = ", data instanceof Float32Array)
 
-        const gpuType = new GPUType(type);
-        const uniform: Uniform = new Uniform(this, name, gpuType, data)
-        this._items[name] = uniform;
+        //const gpuType = new GPUType(type);
+
+        data.uniformBuffer = this;
+        data.name = name;
+        //data.type = gpuType;
+
+        //const uniform: Uniform = new Uniform(this, name, gpuType, data)
+        this._items[name] = data;
         this._itemNames.push(name);
-        uniform.startId = this.byteSize;
-        this._nbComponent += uniform.type.nbValues;
+        data.startId = this.byteSize;
+        this._nbComponent += data.length;//uniform.type.nbValues;
 
-        this.uniforms.push(uniform)
-        return uniform;
+        this.uniforms.push(data)
+        return data;
     }
 
 
     private setupUniformAlignment() {
-        this.uniforms = this.uniforms.sort((a: Uniform, b: Uniform) => {
+        this.uniforms = this.uniforms.sort((a: PrimitiveType, b: PrimitiveType) => {
             if (a.type.byteAlign > b.type.byteAlign) return 1;
             if (a.type.byteAlign < b.type.byteAlign) return -1
             return 0;
@@ -69,7 +74,7 @@ export class UniformBuffer implements IShaderResource {
 
         let offset = 0;
         let type: GPUType;
-        let uniform: Uniform;
+        let uniform: PrimitiveType;
         for (let i = 0; i < this.uniforms.length; i++) {
             uniform = this.uniforms[i];
             type = uniform.type;
@@ -93,7 +98,7 @@ export class UniformBuffer implements IShaderResource {
         if (!this._data) this._data = new Float32Array(new ArrayBuffer(this.byteSize))
         if (!this.gpuResource) this.createGpuResource();
 
-        let uniform: Uniform;
+        let uniform: PrimitiveType;
         for (let i = 0; i < this.uniforms.length; i++) {
             uniform = this.uniforms[i];
 
@@ -103,9 +108,9 @@ export class UniformBuffer implements IShaderResource {
                 GPU.device.queue.writeBuffer(
                     this.gpuResource,
                     uniform.startId,
-                    uniform.data.buffer,
+                    uniform.buffer,
                     0,
-                    uniform.data.byteLength
+                    uniform.byteLength
                 )
 
             }
@@ -117,7 +122,7 @@ export class UniformBuffer implements IShaderResource {
         const structName = uniformName.substring(0, 1).toUpperCase() + uniformName.slice(1);
         const struct = new ShaderStruct(structName);
 
-        let o: Uniform;
+        let o: PrimitiveType;
         for (let i = 0; i < this.uniforms.length; i++) {
             o = this.uniforms[i];
             struct.addProperty({ name: o.name, type: o.type.dataType, builtin: ""/* "@location(" + o.builtin + ")"*/ })

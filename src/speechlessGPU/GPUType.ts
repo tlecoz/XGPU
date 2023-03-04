@@ -218,8 +218,8 @@ export class GPUType {
                     } else if (dataType.substring(6, 7) === "f") {//array of f32
                         temp = 9;
                     }
-                    console.log(start, temp, dataType.substring(start, temp))
-                    console.log("dataType.substring(start + temp, start + temp + 1) = ", dataType.substring(start + temp, start + temp + 1))
+                    //console.log(start, temp, dataType.substring(start, temp))
+                    //console.log("dataType.substring(start + temp, start + temp + 1) = ", dataType.substring(start + temp, start + temp + 1))
                     if (dataType.substring(start + temp, start + temp + 1) === ",") {
                         let num;
                         temp++;

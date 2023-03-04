@@ -78,7 +78,7 @@ export class ImageTexture implements IShaderResource {
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
             GPU.device.queue.copyExternalImageToTexture(
-                { source: this.descriptor.source },
+                { source: this.descriptor.source, flipY: true },
                 { texture: this.gpuResource },
                 this.descriptor.size
             );

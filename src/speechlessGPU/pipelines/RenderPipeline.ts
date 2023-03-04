@@ -40,7 +40,8 @@ export class RenderPipeline extends Pipeline {
         this.fragmentShader = new FragmentShader();
         this.description.primitive = {
             topology: "triangle-list",
-            cullMode: "none"
+            cullMode: "none",
+            frontFace: "ccw"
         }
         this.outputColor = this.createColorAttachment(bgColor);
     }
@@ -171,6 +172,10 @@ export class RenderPipeline extends Pipeline {
 
         if (this.depthStencilTexture) this.depthStencilTexture.destroy();
         this.depthStencilTexture = new DepthStencilTexture(descriptor, depthStencilDescription, depthStencilAttachmentOptions)
+
+        console.log("depthStencilAttachment ", this.depthStencilTexture.attachment)
+        this.renderPassDescriptor.depthStencilAttachment = this.depthStencilTexture.attachment;
+        this.description.depthStencil = this.depthStencilTexture.description;
 
     }
     //----------------------------------------

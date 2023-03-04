@@ -21,7 +21,7 @@ export class DepthStencilTexture extends Texture {
         if (undefined === descriptor.format) descriptor.format = "depth24plus"
         super(descriptor as any)
 
-        this.descriptor.sampleCount = 0;
+        this.create();
 
         //--------
         if (!depthStencilDescription) {
@@ -35,7 +35,7 @@ export class DepthStencilTexture extends Texture {
 
         //--------
         this._attachment = {
-            view: null,
+            view: this._view,
             depthClearValue: 1,
             depthLoadOp: 'clear',
             depthStoreOp: 'store',
@@ -44,15 +44,8 @@ export class DepthStencilTexture extends Texture {
             this._attachment[z] = depthStencilAttachmentOptions[z];
         }
 
+
     }
 
-    public create(): void {
-        super.create();
-        this._attachment.view = this._view;
-    }
 
-    public resize(width: number, height: number): void {
-        this.descriptor.size = [width, height];
-        this.create();
-    }
 }

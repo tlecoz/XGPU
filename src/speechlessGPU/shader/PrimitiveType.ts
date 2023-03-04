@@ -1,18 +1,57 @@
 import { mat2, mat2d, mat3, mat4, vec3 } from "gl-matrix";
-import { Uniform } from "./resources/Uniform";
+import { GPUType } from "../GPUType";
+import { UniformBuffer } from "./resources/UniformBuffer";
 
 export type PrimitiveType = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform;
 
 export class PrimitiveFloatUniform extends Float32Array {
 
-    public uniform: Uniform;
+    //public uniform: Uniform;
+    public name: string;
+    public type: GPUType;
+    public startId: number = 0;
+    public mustBeTransfered: boolean = false;
+    public uniformBuffer: UniformBuffer;
 
-    protected _type: string;
+
+
     constructor(type: string, val: number[] | Float32Array) {
         super(val);
-        this._type = type;
+        this.type = new GPUType(type);
     }
-    public get type(): string { return this._type; }
+    public get byteSize(): number { return this.byteLength; }
+}
+
+
+export class PrimitiveIntUniform extends Int32Array {
+
+
+    public name: string;
+    public type: GPUType;
+    public startId: number = 0;
+    public mustBeTransfered: boolean = false;
+    public uniformBuffer: UniformBuffer;
+
+    constructor(type: string, val: number[] | Int32Array) {
+        super(val);
+        this.type = new GPUType(type);
+    }
+
+}
+
+
+export class PrimitiveUintUniform extends Uint32Array {
+
+    public name: string;
+    public type: GPUType;
+    public startId: number = 0;
+    public mustBeTransfered: boolean = false;
+    public uniformBuffer: UniformBuffer;
+    constructor(type: string, val: number[] | Uint32Array) {
+        super(val);
+        this.type = new GPUType(type);
+    }
+
 }
 
 //--------------
@@ -25,7 +64,7 @@ export class Float extends PrimitiveFloatUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
     public get x(): number {
         return this[0];
@@ -42,12 +81,12 @@ export class Vec2 extends PrimitiveFloatUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -64,17 +103,17 @@ export class Vec3 extends PrimitiveFloatUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set z(n: number) {
         this[2] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -92,24 +131,24 @@ export class Vec4 extends PrimitiveFloatUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set z(n: number) {
         this[2] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set w(n: number) {
         this[3] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
@@ -122,16 +161,7 @@ export class Vec4 extends PrimitiveFloatUniform {
 
 //================================================================================
 
-export class PrimitiveIntUniform extends Int32Array {
 
-    public uniform: Uniform;
-    protected _type: string;
-    constructor(type: string, val: number[] | Int32Array) {
-        super(val);
-        this._type = type;
-    }
-    public get type(): string { return this._type; }
-}
 
 //--------------
 
@@ -143,7 +173,7 @@ export class Int extends PrimitiveIntUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -160,12 +190,12 @@ export class IVec2 extends PrimitiveIntUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -182,18 +212,18 @@ export class IVec3 extends PrimitiveIntUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set z(n: number) {
         this[2] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -212,24 +242,24 @@ export class IVec4 extends PrimitiveIntUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set z(n: number) {
         this[2] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set w(n: number) {
         this[3] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
@@ -241,16 +271,7 @@ export class IVec4 extends PrimitiveIntUniform {
 
 //================================================================================
 
-export class PrimitiveUintUniform extends Uint32Array {
 
-    public uniform: Uniform;
-    protected _type: string;
-    constructor(type: string, val: number[] | Uint32Array) {
-        super(val);
-        this._type = type;
-    }
-    public get type(): string { return this._type; }
-}
 
 //--------------
 
@@ -262,7 +283,7 @@ export class Uint extends PrimitiveUintUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -279,12 +300,12 @@ export class UVec2 extends PrimitiveUintUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -301,18 +322,18 @@ export class UVec3 extends PrimitiveUintUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set z(n: number) {
         this[2] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public get x(): number { return this[0]; }
@@ -330,24 +351,24 @@ export class UVec4 extends PrimitiveUintUniform {
 
     public set x(n: number) {
         this[0] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
     public set y(n: number) {
         this[1] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set z(n: number) {
         this[2] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
     public set w(n: number) {
         this[3] = n;
-        this.uniform.mustBeTransfered = true;
+        this.mustBeTransfered = true;
     }
 
 
@@ -448,70 +469,65 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 
     public set x(n: number) {
         if (n === this._x) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._x = n;
     }
 
     public set y(n: number) {
         if (n === this._y) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._y = n;
     }
 
     public set z(n: number) {
         if (n === this._z) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._z = n;
+
     }
 
     public set rotationX(n: number) {
         if (n === this._rx) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._rx = n;
     }
 
     public set rotationY(n: number) {
         if (n === this._ry) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._ry = n;
     }
 
     public set rotationZ(n: number) {
         if (n === this._rz) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._rz = n;
     }
 
     public set scaleX(n: number) {
         if (n === this._sx) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._sx = n;
     }
 
     public set scaleY(n: number) {
         if (n === this._sy) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._sy = n;
     }
 
     public set scaleZ(n: number) {
         if (n === this._sz) return;
-        this.mustUpdate = true;
+        this.mustBeTransfered = true;
         this._sz = n;
     }
 
-    public update() {
-
-        if (!this.mustUpdate) return;
-        this.mustUpdate = false;
-
-        mat4.identity(this);
-        mat4.rotate(this, this, 1, vec3.fromValues(this._rx, this._ry, this._rz));
-        mat4.scale(this, this, vec3.fromValues(this._sx, this._sy, this._sz));
-        mat4.translate(this, this, vec3.fromValues(this._x, this._y, this._z));
-
-        this.uniform.mustBeTransfered = true;
+    public setMatrix(mat: Float32Array) {
+        this.set(mat);
+        this.mustBeTransfered = true;
     }
+
+
 }
 
 //--------------------

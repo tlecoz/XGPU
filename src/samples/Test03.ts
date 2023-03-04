@@ -1,3 +1,4 @@
+import { mat4, vec3 } from "gl-matrix";
 import { BuiltIns } from "../speechlessGPU/Builtins";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
@@ -39,9 +40,10 @@ export class Test02 extends Sample {
                     transform: new UniformBuffer({
                         items: {
                             rotation: new Float(0.10),
-                            dimension: new Vec3(1.0, 1.0, 0),
+                            dimension: new Vec3(1.0, 1.0, 1.0),
                             position: new Vec3(0.30, 0.0, 0),
                             matrix: new Matrix4x4(),
+                            projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, -1, 1) as Float32Array),
                             test: new Vec4Array([
                                 new Vec4(1, 0, 0, 0),
                                 new Vec4(2, 0, 0.5, 0)
@@ -70,11 +72,14 @@ export class Test02 extends Sample {
                 },
 
                 main: `
-                let p:vec3<f32> = vec3(vertexPos * transform.dimension);
+                let p:vec3<f32> = vec3(vertexPos);
                 let a:f32 = atan2(p.y,p.x) + transform.rotation + transform.test[0].x;
                 let d:f32 = sqrt(p.x*p.x + p.y*p.y);
 
-                output.position = transform.matrix * vec4(vec3(cos(a)*d,sin(a)*d,0.0) + transform.position,1.0);
+                var pos:vec4<f32> = transform.matrix * vec4(p ,1.0) ;
+                
+                output.position = vec4(pos.xyz , 1.0);
+                
                 output.fragUV = 0.5 + vertexPos.xy;
                 output.fragPosition = 0.5+ (vec4<f32>(vertexPos, 1.0));
                 `
@@ -89,7 +94,7 @@ export class Test02 extends Sample {
                 output.color = textureSample(myTexture, mySampler, fragUV);
             
                 let video = textureSampleBaseClampToEdge(myVideo, mySampler, fragUV);
-                output.color /= video;
+                output.color += video;
     
                 let mask = textureSample(myTexture2, mySampler, fragUV);
                 output.color = vec4(output.color.rgb,mask.a);
@@ -101,19 +106,46 @@ export class Test02 extends Sample {
         });
 
         obj.bindgroups.myVertexResources.geom.datas = new Float32Array([
-            -0.5, -0.5, 0.0,
-            +0.5, -0.5, 0.0,
-            -0.5, +0.5, 0.0,
+            -1, -1, 0.0,
+            +1, -1, 0.0,
+            -1, +1, 0.0,
 
-            +0.5, -0.5, 0.0,
-            +0.5, +0.5, 0.0,
-            -0.5, +0.5, 0.0
+            +1, -1, 0.0,
+            +1, +1, 0.0,
+            -1, +1, 0.0,
+
+
         ])
 
+
+        const uniforms = obj.bindgroups.myVertexResources.transform.items;
+        const matrix: Matrix4x4 = uniforms.matrix;
+        //console.log("matrix = ", matrix)
         setInterval(() => {
-            obj.bindgroups.myVertexResources.transform.items.dimension.data.x = Math.sin(Date.now() / 1000);
+            const model = mat4.create();
+            mat4.translate(model, model, vec3.fromValues(0, 0, -0.5))
+            const rota = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+            //matrix.rotationX = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+            //matrix.rotationY = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+            //matrix.rotationZ = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+
+            mat4.rotate(model, model, rota, vec3.fromValues(1, 0, 0));
+            mat4.rotate(model, model, rota, vec3.fromValues(0, 1, 0));
+            mat4.rotate(model, model, rota, vec3.fromValues(0, 0, 1));
+
+            const m = mat4.create();
+            mat4.translate(m, m, vec3.fromValues(0, 0, 0.1))
+            mat4.multiply(m, mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, 0.1, 10000), model);
+
+            matrix.setMatrix(m as Float32Array);
+            //matrix.z = Math.sin((Date.now() / 1000)) * 500;
+            //matrix.scaleX = matrix.scaleY = ((500 + matrix.z) / 1000) * 2
+
+
+            //uniforms.dimension.data.x = Math.sin(Date.now() / 1000);
         }, 10)
 
+        //pipeline.setupDepthStencilView({ size: [renderer.canvas.width, renderer.canvas.height], format: "depth24plus" })
         pipeline.buildGpuPipeline();
         renderer.addPipeline(pipeline);
     }

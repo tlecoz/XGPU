@@ -148,14 +148,14 @@ export class Pipeline {
                 this.gpuBindgroups[n] = GPU.createBindgroup(group)
                 n++;
 
-                console.log("-----")
-                console.log(layout);
-                console.log(group)
+                //console.log("-----")
+                //console.log(layout);
+                //console.log(group)
             }
 
 
         }
-        console.log("this.gpuBindGroupLayouts", this.gpuBindGroupLayouts)
+        //console.log("this.gpuBindGroupLayouts", this.gpuBindGroupLayouts)
 
         this.gpuPipelineLayout = GPU.createPipelineLayout({ bindGroupLayouts: this.gpuBindGroupLayouts })
     }
