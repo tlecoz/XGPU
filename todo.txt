@@ -1,8 +1,11 @@
 - faire en sorte que toute la pipeline puisse etre contenu dans un json 
+  => export vers JSON / import depuis JSON
+
 
 - faire le lien entre les Float,Vec2,... des uniform avec le uniformVuffer associé 
   => verifier que ça marche en updatant des uniforms 
-
+  => faire en sorte de pouvoir créér une classe extends Vec3 (par exemple) , 
+     utiliser des propriétés autres que x/y/z et créer la struct associé dans le shader  
 
 - instanciation de plusieurs elements dans un canvas en utilisant la meme pipeline
   => on clone les ressource en se basant sur le descriptor 
@@ -16,4 +19,6 @@
   => utiliser le renderTexture du premier canvas en input du deuxieme 
 
 - Créer une classe MultiPassPipeline 
+
+- computePipeline
 

@@ -15,8 +15,24 @@ export type VertexBufferDescriptor = {
 
 export class VertexBuffer implements IShaderResource {
 
+    public static Float(offset?: number) { return { type: "float32", offset } }
+    public static Vec2(offset?: number) { return { type: "float32x2", offset } }
+    public static Vec3(offset?: number) { return { type: "float32x3", offset } }
+    public static Vec4(offset?: number) { return { type: "float32x4", offset } }
+
+    public static Int(offset?: number) { return { type: "sint32", offset } }
+    public static IVec2(offset?: number) { return { type: "sint32x2", offset } }
+    public static IVec3(offset?: number) { return { type: "sint32x3", offset } }
+    public static IVec4(offset?: number) { return { type: "sint32x4", offset } }
+
+    public static Uint(offset?: number) { return { type: "uint32", offset } }
+    public static UVec2(offset?: number) { return { type: "uint32x2", offset } }
+    public static UVec3(offset?: number) { return { type: "uint32x3", offset } }
+    public static UVec4(offset?: number) { return { type: "uint32x4", offset } }
+
+
     public io: boolean = false;
-    public mustBeTransfered: boolean = true;
+    public mustBeTransfered: boolean = false;
     public vertexArrays: VertexAttribute[] = [];
     public attributes: any = {};
     public gpuResource: any;
@@ -45,7 +61,7 @@ export class VertexBuffer implements IShaderResource {
 
         if (undefined === descriptor.stepMode) descriptor.stepMode = "vertex";
         if (undefined === descriptor.accessMode) descriptor.accessMode = "read";
-        if (undefined === descriptor.usage) descriptor.usage = GPUBufferUsage.VERTEX;
+        if (undefined === descriptor.usage) descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 
         const items: any = descriptor.attributes;
         let buffer;
@@ -270,7 +286,7 @@ export class VertexBuffer implements IShaderResource {
         this._buffer = GPU.device.createBuffer({
             size: this.datas.byteLength,
             usage: this.descriptor.usage,
-            mappedAtCreation: true,
+            mappedAtCreation: false,
         })
     }
 
@@ -289,10 +305,18 @@ export class VertexBuffer implements IShaderResource {
 
         }
 
-        //console.warn("DATA ", this.datas)
-        new Float32Array(this._buffer.getMappedRange()).set(this.datas);
 
-        this._buffer.unmap();
+        GPU.device.queue.writeBuffer(this._buffer, 0, this.datas.buffer)
+
+        /*
+        console.warn("DATA ", this._buffer.mapState)
+        if (this._buffer.mapState === "mapped") {
+            new Float32Array(this._buffer.getMappedRange()).set(this.datas);
+            this._buffer.unmap();
+        }*/
+
+
+
     }
 
     public getVertexArrayById(id: number): VertexAttribute { return this.vertexArrays[id]; }
@@ -301,6 +325,7 @@ export class VertexBuffer implements IShaderResource {
         if (this.vertexArrays.length === 0) return false;
 
         if (this.mustBeTransfered) {
+            console.log("mustBeTransfered ")
             this.mustBeTransfered = false;
             this.updateBuffer();
         }

@@ -1,10 +1,11 @@
 import { mat2, mat2d, mat3, mat4, vec3 } from "gl-matrix";
+import { Uniform } from "./resources/Uniform";
+
+export type PrimitiveType = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform;
 
 export class PrimitiveFloatUniform extends Float32Array {
 
-    public mixedUniformData: Float32Array;
-    public mixedUniformDataId: number;
-    public mixed: boolean = false;
+    public uniform: Uniform;
 
     protected _type: string;
     constructor(type: string, val: number[] | Float32Array) {
@@ -23,12 +24,11 @@ export class Float extends PrimitiveFloatUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
     public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        return this[0];
     }
 }
 
@@ -41,22 +41,17 @@ export class Vec2 extends PrimitiveFloatUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
-    }
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
 }
 
 //--------------
@@ -68,31 +63,23 @@ export class Vec3 extends PrimitiveFloatUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
-    }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set z(n: number) {
-        if (!this.mixed) this[2] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 2] = n;
+        this[2] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get z(): number {
-        if (!this.mixed) return this[2];
-        else return this.mixedUniformData[this.mixedUniformDataId + 2];
-    }
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
+    public get z(): number { return this[2]; }
 }
 
 //--------------
@@ -104,40 +91,32 @@ export class Vec4 extends PrimitiveFloatUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
-    }
+
 
     public set z(n: number) {
-        if (!this.mixed) this[2] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 2] = n;
-    }
-    public get z(): number {
-        if (!this.mixed) return this[2];
-        else return this.mixedUniformData[this.mixedUniformDataId + 2];
+        this[2] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
+
     public set w(n: number) {
-        if (!this.mixed) this[3] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 3] = n;
+        this[3] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get w(): number {
-        if (!this.mixed) return this[3];
-        else return this.mixedUniformData[this.mixedUniformDataId + 3];
-    }
+
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
+    public get z(): number { return this[2]; }
+    public get w(): number { return this[3]; }
 }
 
 
@@ -145,10 +124,7 @@ export class Vec4 extends PrimitiveFloatUniform {
 
 export class PrimitiveIntUniform extends Int32Array {
 
-    public mixedUniformData: Int32Array;
-    public mixedUniformDataId: number;
-    public mixed: boolean = false;
-
+    public uniform: Uniform;
     protected _type: string;
     constructor(type: string, val: number[] | Int32Array) {
         super(val);
@@ -166,13 +142,12 @@ export class Int extends PrimitiveIntUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
-    }
+
+    public get x(): number { return this[0]; }
+
 }
 
 //--------------
@@ -184,22 +159,17 @@ export class IVec2 extends PrimitiveIntUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
-    }
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
 }
 
 //--------------
@@ -211,31 +181,25 @@ export class IVec3 extends PrimitiveIntUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
-    }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
+
     public set z(n: number) {
-        if (!this.mixed) this[2] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 2] = n;
+        this[2] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get z(): number {
-        if (!this.mixed) return this[2];
-        else return this.mixedUniformData[this.mixedUniformDataId + 2];
-    }
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
+    public get z(): number { return this[2]; }
+
 }
 
 //--------------
@@ -247,50 +211,39 @@ export class IVec4 extends PrimitiveIntUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
-    }
+
 
     public set z(n: number) {
-        if (!this.mixed) this[2] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 2] = n;
-    }
-    public get z(): number {
-        if (!this.mixed) return this[2];
-        else return this.mixedUniformData[this.mixedUniformDataId + 2];
+        this[2] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
+
     public set w(n: number) {
-        if (!this.mixed) this[3] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 3] = n;
+        this[3] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get w(): number {
-        if (!this.mixed) return this[3];
-        else return this.mixedUniformData[this.mixedUniformDataId + 3];
-    }
+
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
+    public get z(): number { return this[2]; }
+    public get w(): number { return this[3]; }
 }
 
 //================================================================================
 
 export class PrimitiveUintUniform extends Uint32Array {
 
-    public mixedUniformData: Uint32Array;
-    public mixedUniformDataId: number;
-    public mixed: boolean = false;
-
+    public uniform: Uniform;
     protected _type: string;
     constructor(type: string, val: number[] | Uint32Array) {
         super(val);
@@ -308,13 +261,12 @@ export class Uint extends PrimitiveUintUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
-    }
+
+    public get x(): number { return this[0]; }
+
 }
 
 //--------------
@@ -326,22 +278,17 @@ export class UVec2 extends PrimitiveUintUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
-    }
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
 }
 
 //--------------
@@ -353,31 +300,24 @@ export class UVec3 extends PrimitiveUintUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
-    }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
+
     public set z(n: number) {
-        if (!this.mixed) this[2] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 2] = n;
+        this[2] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get z(): number {
-        if (!this.mixed) return this[2];
-        else return this.mixedUniformData[this.mixedUniformDataId + 2];
-    }
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
+    public get z(): number { return this[2]; }
 }
 
 //--------------
@@ -389,40 +329,32 @@ export class UVec4 extends PrimitiveUintUniform {
     }
 
     public set x(n: number) {
-        if (!this.mixed) this[0] = n;
-        else this.mixedUniformData[this.mixedUniformDataId] = n;
-    }
-    public get x(): number {
-        if (!this.mixed) return this[0];
-        else return this.mixedUniformData[this.mixedUniformDataId];
+        this[0] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
     public set y(n: number) {
-        if (!this.mixed) this[1] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 1] = n;
+        this[1] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get y(): number {
-        if (!this.mixed) return this[1];
-        else return this.mixedUniformData[this.mixedUniformDataId + 1];
-    }
+
 
     public set z(n: number) {
-        if (!this.mixed) this[2] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 2] = n;
-    }
-    public get z(): number {
-        if (!this.mixed) return this[2];
-        else return this.mixedUniformData[this.mixedUniformDataId + 2];
+        this[2] = n;
+        this.uniform.mustBeTransfered = true;
     }
 
+
     public set w(n: number) {
-        if (!this.mixed) this[3] = n;
-        else this.mixedUniformData[this.mixedUniformDataId + 3] = n;
+        this[3] = n;
+        this.uniform.mustBeTransfered = true;
     }
-    public get w(): number {
-        if (!this.mixed) return this[3];
-        else return this.mixedUniformData[this.mixedUniformDataId + 3];
-    }
+
+
+    public get x(): number { return this[0]; }
+    public get y(): number { return this[1]; }
+    public get z(): number { return this[2]; }
+    public get w(): number { return this[3]; }
 }
 
 //==========================================================================
@@ -435,13 +367,7 @@ export class Vec4Array extends PrimitiveFloatUniform {
         super("array<vec4<f32>," + vec4Array.length + ">", buf)
     }
 
-    public getElementById(id: number): Vec4 {
-        const v = new Vec4();
-        v.mixedUniformData = this;
-        v.mixedUniformDataId = id * 4;
-        v.mixed = true;
-        return v;
-    }
+
 }
 
 export class IVec4Array extends PrimitiveIntUniform {
@@ -452,13 +378,7 @@ export class IVec4Array extends PrimitiveIntUniform {
         super("array<vec4<i32>," + vec4Array.length + ">", buf)
     }
 
-    public getElementById(id: number): IVec4 {
-        const v = new IVec4();
-        v.mixedUniformData = this;
-        v.mixedUniformDataId = id * 4;
-        v.mixed = true;
-        return v;
-    }
+
 }
 
 export class UVec4Array extends PrimitiveUintUniform {
@@ -469,13 +389,6 @@ export class UVec4Array extends PrimitiveUintUniform {
         super("array<vec4<i32>," + vec4Array.length + ">", buf)
     }
 
-    public getElementById(id: number): UVec4 {
-        const v = new UVec4();
-        v.mixedUniformData = this;
-        v.mixedUniformDataId = id * 4;
-        v.mixed = true;
-        return v;
-    }
 }
 
 
@@ -597,9 +510,7 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
         mat4.scale(this, this, vec3.fromValues(this._sx, this._sy, this._sz));
         mat4.translate(this, this, vec3.fromValues(this._x, this._y, this._z));
 
-        if (this.mixed) {
-            this.mixedUniformData.set(this, this.mixedUniformDataId)
-        }
+        this.uniform.mustBeTransfered = true;
     }
 }
 
@@ -612,87 +523,6 @@ export class Matrix4x4Array extends PrimitiveFloatUniform {
         super("array<mat4x4<f32>," + mat4x4Array.length + ">", buf)
     }
 
-    public getElementById(id: number): Matrix4x4 {
-        const v = new Matrix4x4(this.slice(this.mixedUniformDataId, this.mixedUniformDataId + 1));
-        v.mixedUniformData = this;
-        v.mixedUniformDataId = id * 4;
-        v.mixed = true;
-        return v;
-    }
+
 }
 
-//========================
-
-export class VertexAttributeBufferDefinition {
-    protected _offset: number;
-    protected _type: string;
-    constructor(type: string, offset?: number) {
-        this._offset = offset;
-        this._type = type;
-    }
-    public get type(): string { return this._type; }
-    public get offset(): number { return this._offset; }
-}
-
-export class FloatBuffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("float32", offset)
-    }
-}
-export class Vec2Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("float32x2", offset)
-    }
-}
-export class Vec3Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("float32x3", offset)
-    }
-}
-export class Vec4Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("float32x4", offset)
-    }
-}
-
-export class IntBuffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("sint32", offset)
-    }
-}
-export class IVec2Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("sint32x2", offset)
-    }
-}
-export class IVec3Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("sint32x3", offset)
-    }
-}
-export class IVec4Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("sint32x4", offset)
-    }
-}
-
-export class UintBuffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("uint32", offset)
-    }
-}
-export class UVec2Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("uint32x2", offset)
-    }
-}
-export class UVec3Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("uint32x3", offset)
-    }
-}
-export class UVec4Buffer extends VertexAttributeBufferDefinition {
-    constructor(offset?: number) {
-        super("uint32x4", offset)
-    }
-}

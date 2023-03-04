@@ -28,7 +28,20 @@ export class Bindgroup {
         return resource;
     }
 
+    public get(name: string): IShaderResource {
+        for (let i = 0; i < this.elements.length; i++) {
+            if (this.elements[i].name === name) return this.elements[i].resource;
+        }
+        return null;
+    }
 
+    public initFromObject(object: any): void {
+        for (let z in object) {
+            if (object[z].createGpuResource) { //if it's a shader resource 
+                this.add(z, object[z]);
+            }
+        }
+    }
     //---------------------------------------------------------------------------
 
     protected buildLayout(): void {

@@ -14,7 +14,7 @@ export class GPURenderer {
     constructor() {
 
     }
-    public initCanvas(w: number, h: number, useAlphaChannel: boolean = false): Promise<HTMLCanvasElement> {
+    public initCanvas(w: number, h: number, useAlphaChannel: boolean = true): Promise<HTMLCanvasElement> {
 
         return new Promise((onResolve: (val: any) => void, onError: (val?: any) => void) => {
 

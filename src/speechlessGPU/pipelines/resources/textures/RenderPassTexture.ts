@@ -1,5 +1,4 @@
 import { ImageTexture } from "../../../shader/resources/ImageTexture";
-import { Texture, TextureDescriptor } from "./Texture";
 
 export type RenderPassTextureDescriptor = {
     size: GPUExtent3D,
@@ -23,7 +22,7 @@ export class RenderPassTexture extends ImageTexture {
         viewFormats?: GPUTextureFormat[];
     }) {
 
-        if (!descriptor.format) descriptor.format = "bgra8unorm" //WGSL.textureFormat.bit32.bgra8unorm;
+        if (!descriptor.format) descriptor.format = "bgra8unorm"
         if (!descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST;
         if (!descriptor.mipLevelCount) descriptor.mipLevelCount = 1;
         if (!descriptor.sampleCount) descriptor.sampleCount = 1;

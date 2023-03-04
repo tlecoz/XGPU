@@ -6,6 +6,7 @@ import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
 import { Pipeline } from "./Pipeline";
+import { BlendMode } from "./resources/blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
@@ -142,6 +143,16 @@ export class RenderPipeline extends Pipeline {
         return _inputs;
     }
 
+
+    public blendMode: BlendMode;
+    private getFragmentShaderColorOptions() {
+        const o: any = {
+            format: GPU.getPreferredCanvasFormat()
+        }
+        if (this.blendMode) o.blend = this.blendMode;
+        return o;
+    }
+
     public buildGpuPipeline(): GPURenderPipeline {
         if (this.gpuPipeline) return this.gpuPipeline
 
@@ -185,9 +196,25 @@ export class RenderPipeline extends Pipeline {
             }),
             entryPoint: "main",
             targets: [
+                this.getFragmentShaderColorOptions()
+                /*
                 {
-                    format: GPU.getPreferredCanvasFormat()
-                }
+                    format: GPU.getPreferredCanvasFormat(),
+                    blend: {
+                        color: {
+                            operation: "add",
+                            srcFactor: "src-alpha",
+                            dstFactor: "one-minus-src-alpha"
+                        },
+                        alpha: {
+                            operation: "add",
+                            srcFactor: "src-alpha",
+                            dstFactor: "one-minus-src-alpha"
+                        }
+                    }
+                },*/
+
+
             ]
         }
 

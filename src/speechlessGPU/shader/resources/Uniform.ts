@@ -1,4 +1,5 @@
 import { GPUType } from "../../GPUType";
+import { PrimitiveType } from "../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 
 
@@ -6,20 +7,21 @@ export class Uniform {
 
     public _name: string;
     private _type: GPUType;
-    private _data: Float32Array;
+    private _data: PrimitiveType;
     private _byteSize: number = 0;
     private _buffer: UniformBuffer;
     public startId: number = 0;
     //public builtin: number = 0;
     public mustBeTransfered: boolean = false;
 
-    constructor(buffer: UniformBuffer, name: string, type: GPUType, data?: Float32Array) {
+    constructor(buffer: UniformBuffer, name: string, type: GPUType, data: PrimitiveType) {
         this._name = name;
         this._type = type;
         this._buffer = buffer;
         //console.log("uniform ", name, type)
         //console.log("nbVal = ", type.nbValues)
-        if (!data) data = new Float32Array(type.nbValues);
+        //if (!data) data = new Float32Array(type.nbValues);
+        data.uniform = this;
         this.data = data;
 
 
@@ -43,7 +45,7 @@ export class Uniform {
 
 
     private oldValues: string = "";
-    public get data(): Float32Array { return this._data; }
+    public get data(): PrimitiveType { return this._data; }
     public set data(data: any) {
         if (!data) return
         const str = data.toString();

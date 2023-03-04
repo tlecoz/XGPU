@@ -1,79 +1,24 @@
-import { BuiltIns } from "./speechlessGPU/Builtins";
-import { GPURenderer } from "./speechlessGPU/GPURenderer";
-import { RenderPipeline } from "./speechlessGPU/pipelines/RenderPipeline";
-import { Bindgroup } from "./speechlessGPU/shader/Bindgroup";
-import { Float, Matrix4x4, Matrix4x4Array, Vec3, Vec3Buffer, Vec4, Vec4Array } from "./speechlessGPU/shader/PrimitiveType";
-import { ImageTexture } from "./speechlessGPU/shader/resources/ImageTexture";
-import { TextureSampler } from "./speechlessGPU/shader/resources/TextureSampler";
-import { UniformBuffer } from "./speechlessGPU/shader/resources/UniformBuffer";
-import { VertexBuffer } from "./speechlessGPU/shader/resources/VertexBuffer";
-import { VideoTexture } from "./speechlessGPU/shader/resources/VideoTexture";
+import { BuiltIns } from "../speechlessGPU/Builtins";
+import { GPURenderer } from "../speechlessGPU/GPURenderer";
+import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
+import { Bindgroup } from "../speechlessGPU/shader/Bindgroup";
+import { Float, Matrix4x4, Matrix4x4Array, Vec3, Vec4, Vec4Array } from "../speechlessGPU/shader/PrimitiveType";
+import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
+import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
+import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
+import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
+import { VideoTexture } from "../speechlessGPU/shader/resources/VideoTexture";
+import { Sample } from "./Sample";
 
-export class App {
+export class Test01 extends Sample {
 
     constructor() {
-        const renderer = new GPURenderer()
-        renderer.initCanvas(512, 512, false).then((canvas) => {
-            document.body.appendChild(canvas);
-            this.start(renderer);
-        })
-
-        const animate = () => {
-            renderer.update();
-            requestAnimationFrame(animate);
-        }
-
-        animate();
-
+        super();
     }
 
-    private async loadMedias() {
-        const loadImage = (url: string) => {
-            return new Promise((resolve: (bmp: ImageBitmap) => void, error: (e: any) => void) => {
-                const img = document.createElement("img");
-                img.onload = () => {
-                    createImageBitmap(img).then((bmp) => {
-                        resolve(bmp);
-                    })
-                }
-                img.onerror = (e) => {
-                    error(e)
-                }
-                img.src = url;
-            });
-        }
+    protected async start(renderer: GPURenderer) {
 
-        const loadVideo = (url: string) => {
-            return new Promise(async (resolve: (video: HTMLVideoElement) => void, error: (e: any) => void) => {
-                const video = document.createElement("video");
-                video.src = url;
-                video.loop = true;
-                video.muted = true;
-                video.onerror = error;
-                await video.play();
-                resolve(video)
-            });
-        }
-
-        return new Promise(async (resolve: (o: any) => void, error: (e: any) => void) => {
-
-            const bmp = await loadImage("../../assets/leaf.png")
-            const bmp2 = await loadImage("../../assets/leaf2.png")
-            const video = await loadVideo("../../assets/video.webm")
-
-            resolve({ bmp, bmp2, video });
-        })
-
-    }
-
-    private async start(renderer: GPURenderer) {
-
-        const { bmp, bmp2, video } = await this.loadMedias();
-
-        //-------------------------------------------------------------------------------------
-
-
-
+        const { bmp, bmp2, video } = this.medias;
         const pipeline = new RenderPipeline("TestPipeline", renderer);
         const group: Bindgroup = new Bindgroup("common");
         pipeline.bindGroups.add(group);
@@ -81,7 +26,7 @@ export class App {
 
         group.add("geom", new VertexBuffer({
             attributes: {
-                vertexPos: new Vec3Buffer()
+                vertexPos: VertexBuffer.Vec3()
             },
             datas: new Float32Array([
                 -0.5, -0.5, 0.0,

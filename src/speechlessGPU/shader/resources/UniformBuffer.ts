@@ -1,5 +1,6 @@
 import { GPU } from "../../GPU";
 import { GPUType } from "../../GPUType";
+import { PrimitiveType } from "../PrimitiveType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
 import { Uniform } from "./Uniform";
@@ -42,14 +43,12 @@ export class UniformBuffer implements IShaderResource {
         }
     }
 
-    public add(name: string, type: string, data?: number | (Float32Array | number[])) {
+    public add(name: string, type: string, data: PrimitiveType) {
 
-
-        if (typeof data === "number") data = [data];
-        if (data && !(data instanceof Float32Array)) data = new Float32Array(data);
+        console.log(name + " = ", data instanceof Float32Array)
 
         const gpuType = new GPUType(type);
-        const uniform: Uniform = new Uniform(this, name, gpuType, data as Float32Array)
+        const uniform: Uniform = new Uniform(this, name, gpuType, data)
         this._items[name] = uniform;
         this._itemNames.push(name);
         uniform.startId = this.byteSize;
