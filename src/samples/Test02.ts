@@ -66,26 +66,24 @@ export class Test02 extends Sample {
             -0.5, +0.5, 0.0
         ]);
         buffer.datas = datas;
+        /*
+       setInterval(() => {
+           const scale = Math.random();
+           const t = [];
+           for (let i = 0; i < datas.length; i++) t[i] = datas[i] * scale;
 
+           buffer.datas = new Float32Array(t);
+       }, 100)
+       */
 
         const transform = group.get("transform") as UniformBuffer;
-        console.log("ROTATION = ", transform.items.rotation.data)
-
         setInterval(() => {
             transform.items.rotation.data.x += 0.01;
         }, 1)
 
         //
 
-        /*
-        setInterval(() => {
-            const scale = Math.random();
-            const t = [];
-            for (let i = 0; i < datas.length; i++) t[i] = datas[i] * scale;
 
-            buffer.datas = new Float32Array(t);
-        }, 100)
-        */
 
 
         const group2 = new Bindgroup("media");
@@ -97,10 +95,7 @@ export class Test02 extends Sample {
             myVideo: new VideoTexture({ source: video })
         })
 
-        /*group2.add("mySampler", new TextureSampler({ minFilter: "linear", magFilter: "linear" }));
-        group2.add("myTexture", new ImageTexture({ source: bmp }));
-        group2.add("myTexture2", new ImageTexture({ source: bmp2 }));
-        group2.add("myVideo", new VideoTexture({ source: video }));*/
+
         pipeline.bindGroups.add(group2);
 
         pipeline.vertexShader.outputs = [

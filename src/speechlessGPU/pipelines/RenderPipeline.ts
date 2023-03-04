@@ -1,5 +1,7 @@
 import { GPU } from "../GPU";
 import { GPURenderer } from "../GPURenderer";
+import { Bindgroup } from "../shader/Bindgroup";
+import { Bindgroups } from "../shader/Bindgroups";
 import { FragmentShader } from "../shader/FragmentShader";
 import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
@@ -38,10 +40,73 @@ export class RenderPipeline extends Pipeline {
         this.fragmentShader = new FragmentShader();
         this.description.primitive = {
             topology: "triangle-list",
-            cullMode: "back"
+            cullMode: "none"
         }
         this.outputColor = this.createColorAttachment(bgColor);
     }
+
+
+    public initFromObject(descriptor: {
+        clearColor?: { r: number, g: number, b: number, a: number },
+        blendMode?: BlendMode,
+        bindgroups?: any,
+        vertexShader: {
+            outputs: any,
+            main: string
+            inputs?: any,
+            code?: string,
+        },
+        fragmentShader: {
+            outputs: any,
+            main: string,
+            inputs?: any,
+            code?: string
+        }
+    }) {
+
+        if (descriptor.clearColor) this.outputColor.clearValue = descriptor.clearColor;
+        else descriptor.clearColor = this.outputColor.clearValue;
+
+        if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
+
+        if (descriptor.bindgroups) {
+            let group: Bindgroup;
+            for (let z in descriptor.bindgroups) {
+                group = new Bindgroup(z);
+                group.initFromObject(descriptor.bindgroups[z]);
+                this.bindGroups.add(group);
+            }
+        }
+
+        const vertexOutput = descriptor.vertexShader.outputs;
+        const fragmentOutput = descriptor.fragmentShader.outputs;
+        const vOutput = [];
+        const fOutput = [];
+
+        let o: any;
+        for (let z in vertexOutput) {
+            o = vertexOutput[z];
+            vOutput.push({ name: z, ...o })
+        }
+
+        for (let z in fragmentOutput) {
+            o = fragmentOutput[z];
+            fOutput.push({ name: z, ...o })
+        }
+
+        this.vertexShader.outputs = vOutput;
+        this.fragmentShader.outputs = fOutput;
+
+        if (descriptor.vertexShader.code) this.vertexShader.code.text = descriptor.vertexShader.code;
+        this.vertexShader.main.text = descriptor.vertexShader.main;
+
+        if (descriptor.fragmentShader.code) this.fragmentShader.code.text = descriptor.fragmentShader.code;
+        this.fragmentShader.main.text = descriptor.fragmentShader.main;
+
+        return descriptor;
+
+    }
+
 
     public createColorAttachment(rgba: { r: number, g: number, b: number, a: number }, view: GPUTextureView = undefined): any {
 
