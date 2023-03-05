@@ -68,13 +68,17 @@ export class Bindgroups {
         }
     }
 
-    public getVertexShaderDeclaration(): string {
+    public getVertexShaderDeclaration(): { result: string, variables: string } {
+        console.log("getVertexShaderDeclaration")
         let result: string = "";
         let group: Bindgroup;
         let resources: { name: string, resource: IShaderResource }[];
         let resource: IShaderResource;
         let name: string;
         let k: number = 0;
+
+        const obj = { result: "", variables: "" };
+
         for (let i = 0; i < this.groups.length; i++) {
             group = this.groups[i];
             resources = group.elements;
@@ -85,7 +89,27 @@ export class Bindgroups {
                 name = resources[j].name;
 
                 //console.log("=====> ", resource, resource instanceof VertexBuffer)
-                if (resource instanceof UniformBuffer) result += resource.createStruct(name).struct + "\n";
+                if (resource instanceof UniformBuffer) {
+
+                    let item;
+                    console.log("uniforms = ", resource.items)
+
+
+                    for (let z in resource.items) {
+                        item = resource.items[z];
+
+                        let _name = name.substring(0, 1).toLowerCase() + name.slice(1);
+
+                        if (item.propertyNames) {
+                            result += item.createStruct() + "\n";
+                            obj.variables += item.createVariable(_name) + "\n"
+                        }
+                    }
+
+
+
+                    result += resource.createStruct(name).struct + "\n";
+                }
 
                 result += resource.createDeclaration(name, k++, i) + "\n";
 
@@ -93,8 +117,10 @@ export class Bindgroups {
 
 
             }
+
         }
-        return result;
+        obj.result = result;
+        return obj;
     }
 
     public getFragmentShaderDeclaration(): string {
@@ -112,7 +138,15 @@ export class Bindgroups {
                 resource = resources[j].resource;
                 if (resource instanceof VertexBuffer) continue;
                 name = resources[j].name;
-                if (resource instanceof UniformBuffer) result += resource.createStruct(name).struct + "\n";
+                if (resource instanceof UniformBuffer) {
+                    let item;
+                    for (let z in resource.items) {
+                        item = resource.items[z];
+                        if (item.propertyNames) result += item.createStruct() + "\n";
+                    }
+                    result += resource.createStruct(name).struct + "\n";
+
+                }
                 result += resource.createDeclaration(name, k++, i) + "\n";
             }
         }

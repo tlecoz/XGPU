@@ -13,12 +13,43 @@ export class PrimitiveFloatUniform extends Float32Array {
     public mustBeTransfered: boolean = true;
     public uniformBuffer: UniformBuffer;
 
+    public propertyNames: string[];
+    public createVariableInsideMain: boolean = false;;
 
     constructor(type: string, val: number[] | Float32Array) {
         super(val);
         this.type = new GPUType(type);
     }
 
+
+    public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {
+        if (this.type.isArray || this.type.isMatrix) throw new Error("initStruct doesn't accept array or matrix");
+        this.propertyNames = propertyNames;
+        this.createVariableInsideMain = createVariableInsideMain;
+    }
+
+    public createStruct(): string {
+        console.warn("createStruct")
+        let result = "struct " + this.constructor.name + " {\n";
+        for (let i = 0; i < this.propertyNames.length; i++) {
+            result += "   " + this.propertyNames[i] + ":f32,\n";
+        }
+        result += "}\n"
+        return result;
+    }
+
+    public createVariable(uniformBufferName: string): string {
+        if (!this.createVariableInsideMain) return "";
+
+        const items = this.uniformBuffer.items;
+        let name: string;
+        for (let z in items) {
+            if (items[z] === this) {
+                name = z;
+            }
+        }
+        return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
+    }
 }
 
 
@@ -31,9 +62,41 @@ export class PrimitiveIntUniform extends Int32Array {
     public mustBeTransfered: boolean = true;
     public uniformBuffer: UniformBuffer;
 
+    public propertyNames: string[];
+    public createVariableInsideMain: boolean = false;;
+
     constructor(type: string, val: number[] | Int32Array) {
         super(val);
         this.type = new GPUType(type);
+    }
+
+    public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {
+        if (this.type.isArray || this.type.isMatrix) throw new Error("initStruct doesn't accept array or matrix");
+        this.propertyNames = propertyNames;
+        this.createVariableInsideMain = createVariableInsideMain;
+    }
+
+    public createStruct(): string {
+        console.warn("createStruct")
+        let result = "struct " + this.constructor.name + " {\n";
+        for (let i = 0; i < this.propertyNames.length; i++) {
+            result += "   " + this.propertyNames[i] + ":i32,\n";
+        }
+        result += "}\n"
+        return result;
+    }
+
+    public createVariable(uniformBufferName: string): string {
+        if (!this.createVariableInsideMain) return "";
+
+        const items = this.uniformBuffer.items;
+        let name: string;
+        for (let z in items) {
+            if (items[z] === this) {
+                name = z;
+            }
+        }
+        return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
     }
 
 }
@@ -46,11 +109,43 @@ export class PrimitiveUintUniform extends Uint32Array {
     public startId: number = 0;
     public mustBeTransfered: boolean = true;
     public uniformBuffer: UniformBuffer;
+
+    public propertyNames: string[];
+    public createVariableInsideMain: boolean = false;;
+
     constructor(type: string, val: number[] | Uint32Array) {
         super(val);
         this.type = new GPUType(type);
     }
 
+    public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {
+        if (this.type.isArray || this.type.isMatrix) throw new Error("initStruct doesn't accept array or matrix");
+        this.propertyNames = propertyNames;
+        this.createVariableInsideMain = createVariableInsideMain;
+    }
+
+    public createStruct(): string {
+        console.warn("createStruct")
+        let result = "struct " + this.constructor.name + " {\n";
+        for (let i = 0; i < this.propertyNames.length; i++) {
+            result += "   " + this.propertyNames[i] + ":u32,\n";
+        }
+        result += "}\n"
+        return result;
+    }
+
+    public createVariable(uniformBufferName: string): string {
+        if (!this.createVariableInsideMain) return "";
+
+        const items = this.uniformBuffer.items;
+        let name: string;
+        for (let z in items) {
+            if (items[z] === this) {
+                name = z;
+            }
+        }
+        return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
+    }
 }
 
 //--------------

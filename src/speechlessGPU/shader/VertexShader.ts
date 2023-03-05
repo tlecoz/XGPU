@@ -12,7 +12,8 @@ export class VertexShader extends ShaderStage {
     public build(pipeline: any, input: ShaderStruct): { code: string, output: ShaderStruct } {
         //console.log("VS inputs = ", input)
         let result = this.code.value + "\n\n";
-        result += pipeline.bindGroups.getVertexShaderDeclaration();
+        const obj = pipeline.bindGroups.getVertexShaderDeclaration();
+        result += obj.result;
 
         //-----
         //if the renderPipeline is "fed" by a computePipeline, the shaderStruct "input"
@@ -27,6 +28,7 @@ export class VertexShader extends ShaderStage {
 
         result += "@vertex\n";
         result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
+        result += obj.variables + "\n";
         result += "   var output:Output;\n";
         result += this.main.value;
         result += "   return output;\n"

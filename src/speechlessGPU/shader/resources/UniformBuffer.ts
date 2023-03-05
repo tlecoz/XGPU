@@ -79,6 +79,8 @@ export class UniformBuffer implements IShaderResource {
             type = uniform.type;
             uniform.startId = offset;
 
+            console.log(uniform.name, offset);
+
             if (type.isArray) {
                 if (type.isArrayOfVectors) offset += 16 * type.arrayLength;
                 else offset += 4 * type.nbValues;
@@ -124,7 +126,16 @@ export class UniformBuffer implements IShaderResource {
         let o: PrimitiveType;
         for (let i = 0; i < this.uniforms.length; i++) {
             o = this.uniforms[i];
-            struct.addProperty({ name: o.name, type: o.type.dataType, builtin: ""/* "@location(" + o.builtin + ")"*/ })
+
+            if ((o as any).propertyNames) {
+                struct.addProperty({ name: o.name, type: o.constructor.name, builtin: "", size: o.byteLength, obj: o })
+            } else {
+                struct.addProperty({ name: o.name, type: o.type.dataType, builtin: "" })
+            }
+
+
+            //struct.addProperty({ name: o.name, type: o.type.dataType, builtin: "" })
+
         }
 
 

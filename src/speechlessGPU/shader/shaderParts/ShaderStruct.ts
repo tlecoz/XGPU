@@ -29,12 +29,12 @@ export class ShaderStruct {
         return new ShaderStruct(n, [...this.properties])
     }
 
-    public addProperty(o: { name: string, type: string, builtin?: string }): ShaderStruct {
+    public addProperty(o: { name: string, type: string, builtin?: string, offset?: number, size?: number, obj?: any }): ShaderStruct {
 
         //console.warn("addProperty ", o)
 
         if (!o.builtin) o.builtin = "";
-        this.properties.push(o as { name: string, type: string, builtin: string })
+        this.properties.push(o as { name: string, type: string, builtin: string, offset })
         return this;
     }
 
@@ -103,14 +103,25 @@ export class ShaderStruct {
         let o;
         for (let i = 0; i < this.properties.length; i++) {
             o = this.properties[i];
+
             if (this.isShaderIO) {
                 if (i > 0) o.builtin = "@location(" + (i - 1) + ")";
                 //console.log(o.name + " , i = ", i, " location = ", o.builtin, " -- ", o.builtin.length)
                 result += "   " + o.builtin + " " + o.name + ":" + o.type + ",\n";
-            } else result += "   " + " " + o.name + ":" + o.type + ",\n";
+            } else {
+                if (undefined !== o.size) result += "    " + "@size(" + o.size + ") @align(16) " + o.name + ":" + o.type + ",\n";
+                else result += "   " + " " + o.name + ":" + o.type + ",\n";
+            }
         }
         result += "}\n\n";
 
+        /*
+        const varName = this.name.substring(0, 1).toLowerCase() + this.name.slice(1);
+        for (let i = 0; i < this.properties.length; i++) {
+            o = this.properties[i];
+            if (o.obj) result += o.obj.createVariable(varName) + "\n";
+        }
+        */
         return result;
     }
 }
