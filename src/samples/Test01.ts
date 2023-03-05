@@ -1,6 +1,7 @@
 import { BuiltIns } from "../speechlessGPU/Builtins";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
+import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
 import { Bindgroup } from "../speechlessGPU/shader/Bindgroup";
 import { Float, Matrix4x4, Matrix4x4Array, Vec3, Vec4, Vec4Array } from "../speechlessGPU/shader/PrimitiveType";
 import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
@@ -20,6 +21,7 @@ export class Test01 extends Sample {
 
         const { bmp, bmp2, video } = this.medias;
         const pipeline = new RenderPipeline("TestPipeline", renderer);
+        pipeline.blendMode = new AlphaBlendMode();
         const group: Bindgroup = new Bindgroup("common");
         pipeline.bindGroups.add(group);
 

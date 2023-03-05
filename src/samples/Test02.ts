@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import { BuiltIns } from "../speechlessGPU/Builtins";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
@@ -40,6 +41,7 @@ export class Test02 extends Sample {
                     dimension: new Vec3(1.0, 1.0, 0),
                     position: new Vec3(0.30, 0.0, 0),
                     matrix: new Matrix4x4(),
+                    projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, -1, 1) as Float32Array),
                     test: new Vec4Array([
                         new Vec4(1, 0, 0, 0),
                         new Vec4(2, 0, 0.5, 0)
@@ -78,7 +80,8 @@ export class Test02 extends Sample {
 
         const transform = group.get("transform") as UniformBuffer;
         setInterval(() => {
-            transform.items.rotation.data.x += 0.01;
+            transform.items.rotation.x += 0.01;
+            //console.log(transform.items.rotation)
         }, 1)
 
         //
@@ -104,11 +107,14 @@ export class Test02 extends Sample {
             { name: "fragPosition", type: "vec4<f32>" },
         ]
         pipeline.vertexShader.main.text = `
-            let p:vec3<f32> = vec3(vertexPos * transform.dimension);
+            let p:vec3<f32> = vec3(vertexPos);
             let a:f32 = atan2(p.y,p.x) + transform.rotation + transform.test[0].x;
             let d:f32 = sqrt(p.x*p.x + p.y*p.y);
 
-            output.position = transform.matrix * vec4(vec3(cos(a)*d,sin(a)*d,0.0) + transform.position,1.0);
+            var pos:vec4<f32> = transform.matrix * vec4(p ,1.0) ;
+            
+            output.position = vec4(pos.xyz , 1.0);
+            
             output.fragUV = 0.5 + vertexPos.xy;
             output.fragPosition = 0.5+ (vec4<f32>(vertexPos, 1.0));
         `;

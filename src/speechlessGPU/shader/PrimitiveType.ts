@@ -10,16 +10,15 @@ export class PrimitiveFloatUniform extends Float32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
-    public mustBeTransfered: boolean = false;
+    public mustBeTransfered: boolean = true;
     public uniformBuffer: UniformBuffer;
-
 
 
     constructor(type: string, val: number[] | Float32Array) {
         super(val);
         this.type = new GPUType(type);
     }
-    public get byteSize(): number { return this.byteLength; }
+
 }
 
 
@@ -29,7 +28,7 @@ export class PrimitiveIntUniform extends Int32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
-    public mustBeTransfered: boolean = false;
+    public mustBeTransfered: boolean = true;
     public uniformBuffer: UniformBuffer;
 
     constructor(type: string, val: number[] | Int32Array) {
@@ -45,7 +44,7 @@ export class PrimitiveUintUniform extends Uint32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
-    public mustBeTransfered: boolean = false;
+    public mustBeTransfered: boolean = true;
     public uniformBuffer: UniformBuffer;
     constructor(type: string, val: number[] | Uint32Array) {
         super(val);

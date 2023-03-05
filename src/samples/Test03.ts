@@ -13,7 +13,7 @@ import { VideoTexture } from "../speechlessGPU/shader/resources/VideoTexture";
 import { ShaderType } from "../speechlessGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 
-export class Test02 extends Sample {
+export class Test03 extends Sample {
 
     constructor() {
         super();
