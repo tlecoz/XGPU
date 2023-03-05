@@ -99,11 +99,8 @@ export class Bindgroups {
                         item = resource.items[z];
 
                         let _name = name.substring(0, 1).toLowerCase() + name.slice(1);
-
-                        if (item.propertyNames) {
-                            result += item.createStruct() + "\n";
-                            obj.variables += item.createVariable(_name) + "\n"
-                        }
+                        if (item.propertyNames) result += item.createStruct() + "\n";
+                        if (item.createVariableInsideMain) obj.variables += item.createVariable(_name) + "\n"
                     }
 
 
@@ -123,13 +120,16 @@ export class Bindgroups {
         return obj;
     }
 
-    public getFragmentShaderDeclaration(): string {
+    public getFragmentShaderDeclaration(): { result: string, variables: string } {
         let result: string = "";
         let group: Bindgroup;
         let resources: { name: string, resource: IShaderResource }[];
         let resource: IShaderResource;
         let name: string;
         let k: number = 0;
+
+        const obj = { result: "", variables: "" };
+
         for (let i = 0; i < this.groups.length; i++) {
             group = this.groups[i];
             resources = group.elements;
@@ -142,7 +142,9 @@ export class Bindgroups {
                     let item;
                     for (let z in resource.items) {
                         item = resource.items[z];
+                        let _name = name.substring(0, 1).toLowerCase() + name.slice(1);
                         if (item.propertyNames) result += item.createStruct() + "\n";
+                        if (item.createVariableInsideMain) obj.variables += item.createVariable(_name) + "\n"
                     }
                     result += resource.createStruct(name).struct + "\n";
 
@@ -150,7 +152,8 @@ export class Bindgroups {
                 result += resource.createDeclaration(name, k++, i) + "\n";
             }
         }
-        return result;
+        obj.result = result;
+        return obj;
     }
 
 

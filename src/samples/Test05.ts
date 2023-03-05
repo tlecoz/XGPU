@@ -35,6 +35,10 @@ export class Test05 extends Sample {
         const { bmp, bmp2, video } = this.medias;
         const pipeline = new RenderPipeline("TestPipeline", renderer);
 
+
+        const pos = new Vec3(0.30, 0.0, 0);
+        pos.createVariableInsideMain = true;
+
         const obj = pipeline.initFromObject({
 
             clearColor: { r: 0, g: 0, b: 0, a: 1 },
@@ -43,16 +47,12 @@ export class Test05 extends Sample {
             bindgroups: {
                 myVertexResources: {
                     geom: new VertexBuffer({
-
                         vertexPos: VertexBuffer.Vec3()
-
                     }),
 
                     transform: new UniformBuffer({
-
                         rotation: new Float(0.10),
-
-                        position: new Vec3(0.30, 0.0, 0),
+                        position: pos,
                         matrix: new Matrix4x4(),
                         dimension: new Dimension(0.5, 1, 1),//new Vec3(1.0, 1.0, 1.0),
                         projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, -1, 1) as Float32Array),
@@ -64,7 +64,6 @@ export class Test05 extends Sample {
                             new Matrix4x4(),
                             new Matrix4x4()
                         ])
-
                     })
                 },
 
@@ -91,7 +90,7 @@ export class Test05 extends Sample {
 
                 let w:f32 = transform.dimension.width;
 
-                var pos:vec4<f32> = transform.matrix * vec4(p * dimension.width,1.0) ;
+                var pos:vec4<f32> = transform.matrix * vec4(p * transform.dimension.width,1.0) ;
                 
                 output.position = vec4(pos.xyz , 1.0);
                 
@@ -128,8 +127,6 @@ export class Test05 extends Sample {
             +1, -1, 0.0,
             +1, +1, 0.0,
             -1, +1, 0.0,
-
-
         ])
 
 

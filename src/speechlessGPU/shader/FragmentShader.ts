@@ -17,7 +17,8 @@ export class FragmentShader extends ShaderStage {
 
 
         let result = this.code.value + "\n\n";
-        result += shaderPipeline.bindGroups.getFragmentShaderDeclaration();
+        const obj = shaderPipeline.bindGroups.getVertexShaderDeclaration();
+        result += obj.result;
 
         console.log("-------- FRAGMENT -----------");
         //console.log(result)
@@ -36,6 +37,7 @@ export class FragmentShader extends ShaderStage {
 
         result += "@fragment\n";
         result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
+        result += obj.variables + "\n";
         result += "   var output:Output;\n";
         result += this.main.value;
         result += "   return output;\n"

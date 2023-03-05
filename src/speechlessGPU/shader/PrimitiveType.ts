@@ -41,6 +41,12 @@ export class PrimitiveFloatUniform extends Float32Array {
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
+        let type = this.constructor.name;
+        if (type === "Float") type = "f32";
+        if (type === "Vec2") type = "vec2<f32>";
+        if (type === "Vec3") type = "vec3<f32>";
+        if (type === "Vec4") type = "vec4<f32>";
+
         const items = this.uniformBuffer.items;
         let name: string;
         for (let z in items) {
@@ -48,7 +54,7 @@ export class PrimitiveFloatUniform extends Float32Array {
                 name = z;
             }
         }
-        return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
+        return "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";"
     }
 }
 
