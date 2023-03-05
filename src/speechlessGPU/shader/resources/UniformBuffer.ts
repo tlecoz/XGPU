@@ -6,7 +6,7 @@ import { IShaderResource } from "./IShaderResource";
 
 
 export type UniformBufferDescriptor = {
-    items: any;
+
     visibility?: GPUShaderStageFlags;
 }
 
@@ -25,15 +25,14 @@ export class UniformBuffer implements IShaderResource {
 
     protected uniformAlignmentReady: boolean = false;
 
-    constructor(descriptor: {
-        items: any;
+    constructor(items: any, descriptor?: {
         visibility?: GPUShaderStageFlags;
     }) {
 
+        if (!descriptor) descriptor = {}
         if (undefined === descriptor.visibility) descriptor.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT;
         this.descriptor = descriptor;
 
-        let items = descriptor.items;
         let o: any, type: string;
         for (let name in items) {
 

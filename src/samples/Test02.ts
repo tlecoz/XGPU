@@ -30,27 +30,27 @@ export class Test02 extends Sample {
 
         const obj = {
             geom: new VertexBuffer({
-                attributes: {
-                    vertexPos: VertexBuffer.Vec3()
-                }
+
+                vertexPos: VertexBuffer.Vec3()
+
             }),
 
             transform: new UniformBuffer({
-                items: {
-                    rotation: new Float(0.10),
-                    dimension: new Vec3(1.0, 1.0, 0),
-                    position: new Vec3(0.30, 0.0, 0),
-                    matrix: new Matrix4x4(),
-                    projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, -1, 1) as Float32Array),
-                    test: new Vec4Array([
-                        new Vec4(1, 0, 0, 0),
-                        new Vec4(2, 0, 0.5, 0)
-                    ]),
-                    matrixs: new Matrix4x4Array([
-                        new Matrix4x4(),
-                        new Matrix4x4()
-                    ])
-                }
+
+                rotation: new Float(0.10),
+                dimension: new Vec3(1.0, 1.0, 0),
+                position: new Vec3(0.30, 0.0, 0),
+                matrix: new Matrix4x4(),
+                projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, -1, 1) as Float32Array),
+                test: new Vec4Array([
+                    new Vec4(1, 0, 0, 0),
+                    new Vec4(2, 0, 0.5, 0)
+                ]),
+                matrixs: new Matrix4x4Array([
+                    new Matrix4x4(),
+                    new Matrix4x4()
+                ])
+
             })
         }
 

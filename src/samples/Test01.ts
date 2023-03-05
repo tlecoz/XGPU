@@ -27,36 +27,37 @@ export class Test01 extends Sample {
 
 
         group.add("geom", new VertexBuffer({
-            attributes: {
-                vertexPos: VertexBuffer.Vec3()
-            },
-            datas: new Float32Array([
-                -0.5, -0.5, 0.0,
-                +0.5, -0.5, 0.0,
-                -0.5, +0.5, 0.0,
+            vertexPos: VertexBuffer.Vec3()
+        },
+            {
+                datas: new Float32Array([
+                    -0.5, -0.5, 0.0,
+                    +0.5, -0.5, 0.0,
+                    -0.5, +0.5, 0.0,
 
-                +0.5, -0.5, 0.0,
-                +0.5, +0.5, 0.0,
-                -0.5, +0.5, 0.0
-            ])
-        }))
+                    +0.5, -0.5, 0.0,
+                    +0.5, +0.5, 0.0,
+                    -0.5, +0.5, 0.0
+                ])
+            }
+        ))
 
 
         group.add("transform", new UniformBuffer({
-            items: {
-                rotation: new Float(0.10),
-                dimension: new Vec3(1.0, 1.0, 0),
-                position: new Vec3(0.30, 0.0, 0),
-                matrix: new Matrix4x4(),
-                test: new Vec4Array([
-                    new Vec4(1, 0, 0, 0),
-                    new Vec4(2, 0, 0.5, 0)
-                ]),
-                matrixs: new Matrix4x4Array([
-                    new Matrix4x4(),
-                    new Matrix4x4()
-                ])
-            }
+
+            rotation: new Float(0.10),
+            dimension: new Vec3(1.0, 1.0, 0),
+            position: new Vec3(0.30, 0.0, 0),
+            matrix: new Matrix4x4(),
+            test: new Vec4Array([
+                new Vec4(1, 0, 0, 0),
+                new Vec4(2, 0, 0.5, 0)
+            ]),
+            matrixs: new Matrix4x4Array([
+                new Matrix4x4(),
+                new Matrix4x4()
+            ])
+
         }))
 
         const group2 = new Bindgroup("media");

@@ -8,7 +8,6 @@ export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
     accessMode?: "read" | "read_write",
     usage?: GPUBufferUsageFlags,
-    attributes: any,
     datas?: Float32Array
 }
 
@@ -48,22 +47,20 @@ export class VertexBuffer implements IShaderResource {
 
 
 
-    constructor(descriptor: {
+    constructor(attributes: any, descriptor?: {
         stepMode?: "vertex" | "instance",
         accessMode?: "read" | "read_write",
         usage?: GPUBufferUsageFlags,
-        attributes: any,
         datas?: Float32Array
     }) {
 
-        this.descriptor = descriptor;
-
-
+        if (!descriptor) descriptor = {};
         if (undefined === descriptor.stepMode) descriptor.stepMode = "vertex";
         if (undefined === descriptor.accessMode) descriptor.accessMode = "read";
         if (undefined === descriptor.usage) descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
+        this.descriptor = descriptor;
 
-        const items: any = descriptor.attributes;
+        const items: any = attributes;
         let buffer;
         for (let name in items) {
             buffer = items[name];
