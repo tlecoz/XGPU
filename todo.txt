@@ -1,12 +1,13 @@
 - faire en sorte que toute la pipeline puisse etre contenu dans un json 
   => export vers JSON / import depuis JSON
 
-  => faire en sorte que les primitiveType soient directement les uniform (sans objet intermédiaire)
-  => virer les structures de données inutiles (attributes / items)
-  => pouvoir définir un objet pipeline sans bindgroups 
 
-  => faire en sorte de pouvoir créér une classe extends Vec3 (par exemple) , 
-     utiliser des propriétés autres que x/y/z et créer la struct associé dans le shader  
+
+- computePipeline
+
+
+
+
 
 - instanciation de plusieurs elements dans un canvas en utilisant la meme pipeline
   => on clone les ressource en se basant sur le descriptor 
@@ -21,5 +22,5 @@
 
 - Créer une classe MultiPassPipeline 
 
-- computePipeline
+
 

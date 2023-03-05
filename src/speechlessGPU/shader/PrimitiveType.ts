@@ -16,9 +16,10 @@ export class PrimitiveFloatUniform extends Float32Array {
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
 
-    constructor(type: string, val: number[] | Float32Array) {
+    constructor(type: string, val: number[] | Float32Array, createLocalVariable: boolean = false) {
         super(val);
         this.type = new GPUType(type);
+        this.createVariableInsideMain = createLocalVariable;
     }
 
 
@@ -71,9 +72,10 @@ export class PrimitiveIntUniform extends Int32Array {
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
 
-    constructor(type: string, val: number[] | Int32Array) {
+    constructor(type: string, val: number[] | Int32Array, createLocalVariable: boolean = false) {
         super(val);
         this.type = new GPUType(type);
+        this.createVariableInsideMain = createLocalVariable;
     }
 
     public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {
@@ -119,9 +121,10 @@ export class PrimitiveUintUniform extends Uint32Array {
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
 
-    constructor(type: string, val: number[] | Uint32Array) {
+    constructor(type: string, val: number[] | Uint32Array, createLocalVariable: boolean = false) {
         super(val);
         this.type = new GPUType(type);
+        this.createVariableInsideMain = createLocalVariable;
     }
 
     public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {
@@ -158,8 +161,8 @@ export class PrimitiveUintUniform extends Uint32Array {
 
 export class Float extends PrimitiveFloatUniform {
 
-    constructor(x: number = 0) {
-        super("f32", [x]);
+    constructor(x: number = 0, createLocalVariable: boolean = false) {
+        super("f32", [x], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -175,8 +178,8 @@ export class Float extends PrimitiveFloatUniform {
 
 export class Vec2 extends PrimitiveFloatUniform {
 
-    constructor(x: number = 0, y: number = 0) {
-        super("vec2<f32>", [x, y]);
+    constructor(x: number = 0, y: number = 0, createLocalVariable: boolean = false) {
+        super("vec2<f32>", [x, y], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -197,8 +200,8 @@ export class Vec2 extends PrimitiveFloatUniform {
 
 export class Vec3 extends PrimitiveFloatUniform {
 
-    constructor(x: number = 0, y: number = 0, z: number = 0) {
-        super("vec3<f32>", [x, y, z]);
+    constructor(x: number = 0, y: number = 0, z: number = 0, createLocalVariable: boolean = false) {
+        super("vec3<f32>", [x, y, z], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -225,8 +228,8 @@ export class Vec3 extends PrimitiveFloatUniform {
 
 export class Vec4 extends PrimitiveFloatUniform {
 
-    constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
-        super("vec4<f32>", [x, y, z, w]);
+    constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 0, createLocalVariable: boolean = false) {
+        super("vec4<f32>", [x, y, z, w], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -267,8 +270,8 @@ export class Vec4 extends PrimitiveFloatUniform {
 
 export class Int extends PrimitiveIntUniform {
 
-    constructor(x: number = 0) {
-        super("i32", [x]);
+    constructor(x: number = 0, createLocalVariable: boolean = false) {
+        super("i32", [x], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -284,8 +287,8 @@ export class Int extends PrimitiveIntUniform {
 
 export class IVec2 extends PrimitiveIntUniform {
 
-    constructor(x: number = 0, y: number = 0) {
-        super("vec2<i32>", [x, y]);
+    constructor(x: number = 0, y: number = 0, createLocalVariable: boolean = false) {
+        super("vec2<i32>", [x, y], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -306,8 +309,8 @@ export class IVec2 extends PrimitiveIntUniform {
 
 export class IVec3 extends PrimitiveIntUniform {
 
-    constructor(x: number = 0, y: number = 0, z: number = 0) {
-        super("vec3<i32>", [x, y, z]);
+    constructor(x: number = 0, y: number = 0, z: number = 0, createLocalVariable: boolean = false) {
+        super("vec3<i32>", [x, y, z], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -336,8 +339,8 @@ export class IVec3 extends PrimitiveIntUniform {
 
 export class IVec4 extends PrimitiveIntUniform {
 
-    constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
-        super("vec4<i32>", [x, y, z, w]);
+    constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 0, createLocalVariable: boolean = false) {
+        super("vec4<i32>", [x, y, z, w], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -377,8 +380,8 @@ export class IVec4 extends PrimitiveIntUniform {
 
 export class Uint extends PrimitiveUintUniform {
 
-    constructor(x: number = 0) {
-        super("u32", [x]);
+    constructor(x: number = 0, createLocalVariable: boolean = false) {
+        super("u32", [x], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -394,8 +397,8 @@ export class Uint extends PrimitiveUintUniform {
 
 export class UVec2 extends PrimitiveUintUniform {
 
-    constructor(x: number = 0, y: number = 0) {
-        super("vec2<u32>", [x, y]);
+    constructor(x: number = 0, y: number = 0, createLocalVariable: boolean = false) {
+        super("vec2<u32>", [x, y], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -416,8 +419,8 @@ export class UVec2 extends PrimitiveUintUniform {
 
 export class UVec3 extends PrimitiveUintUniform {
 
-    constructor(x: number = 0, y: number = 0, z: number = 0) {
-        super("vec3<u32>", [x, y, z]);
+    constructor(x: number = 0, y: number = 0, z: number = 0, createLocalVariable: boolean = false) {
+        super("vec3<u32>", [x, y, z], createLocalVariable);
     }
 
     public set x(n: number) {
@@ -445,8 +448,8 @@ export class UVec3 extends PrimitiveUintUniform {
 
 export class UVec4 extends PrimitiveUintUniform {
 
-    constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
-        super("vec4<u32>", [x, y, z, w]);
+    constructor(x: number = 0, y: number = 0, z: number = 0, w: number = 0, createLocalVariable: boolean = false) {
+        super("vec4<u32>", [x, y, z, w], createLocalVariable);
     }
 
     public set x(n: number) {

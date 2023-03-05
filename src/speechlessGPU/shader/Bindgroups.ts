@@ -156,6 +156,10 @@ export class Bindgroups {
         return obj;
     }
 
+    public getComputeShaderDeclaration(): { result: string, variables: string } {
+        const obj = { result: "", variables: "" }
+        return obj;
+    }
 
 
     protected createVertexBufferLayout(): { vertexLayouts: Iterable<GPUVertexBufferLayout>, buffers: VertexBuffer[], nbVertex: number } {
