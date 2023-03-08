@@ -57,6 +57,8 @@ export class PrimitiveFloatUniform extends Float32Array {
         }
         return "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";"
     }
+
+    public update() { }
 }
 
 
@@ -107,6 +109,8 @@ export class PrimitiveIntUniform extends Int32Array {
         return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
     }
 
+    public update() { }
+
 }
 
 
@@ -155,6 +159,8 @@ export class PrimitiveUintUniform extends Uint32Array {
         }
         return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
     }
+
+    public update() { }
 }
 
 //--------------
@@ -630,7 +636,17 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
         this.mustBeTransfered = true;
     }
 
+    public update() {
 
+
+        mat4.identity(this);
+
+        mat4.rotate(this, this, this._rx, vec3.fromValues(1, 0, 0));
+        mat4.rotate(this, this, this._ry, vec3.fromValues(0, 1, 0));
+        mat4.rotate(this, this, this._rz, vec3.fromValues(0, 0, 1));
+
+        mat4.translate(this, this, vec3.fromValues(this._x, this._y, this._z));
+    }
 }
 
 //--------------------

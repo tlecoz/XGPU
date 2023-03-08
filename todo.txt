@@ -5,7 +5,7 @@
 
 - computePipeline
 
-
+  => regler les pbm d'usage et de visibilité en fonction de si on utile une RenderPipeline, une ComplexPipeline ou une ComputePipeline
 
 
 

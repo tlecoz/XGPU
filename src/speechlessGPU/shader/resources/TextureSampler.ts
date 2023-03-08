@@ -35,6 +35,8 @@ export class TextureSampler implements IShaderResource {
         compare?: "never" | "less" | "equal" | "less-equal" | "greater" | "not-equal" | "greater-equal" | "always"
     }) {
 
+        descriptor = { ...descriptor };
+
         if (undefined === descriptor.addressModeU) descriptor.addressModeU = "clamp-to-edge";
         if (undefined === descriptor.addressModeV) descriptor.addressModeV = "clamp-to-edge";
         if (undefined === descriptor.addressModeW) descriptor.addressModeW = "clamp-to-edge";

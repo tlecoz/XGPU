@@ -10,6 +10,7 @@ import { VertexShader } from "../shader/VertexShader";
 
 
 
+
 export class Pipeline {
 
     public description: any = {};
@@ -26,9 +27,8 @@ export class Pipeline {
     protected gpuBindGroupLayouts: GPUBindGroupLayout[] = [];
     protected gpuPipelineLayout: GPUPipelineLayout;
 
-    constructor(name: string) {
-        this.bindGroups = new Bindgroups(name);
-
+    constructor() {
+        this.bindGroups = new Bindgroups("pipeline");
     }
 
     public addBindgroup(group: Bindgroup) {
@@ -116,6 +116,7 @@ export class Pipeline {
         */
     }
 
+    public isComputePipeline: boolean = false;
     protected createLayouts(): void {
         this.gpuBindGroupLayouts = [];
         this.gpuBindgroups = [];
@@ -136,7 +137,7 @@ export class Pipeline {
 
             for (let j = 0; j < elements.length; j++) {
                 resource = elements[j].resource;
-                if (!(resource instanceof VertexBuffer)) {
+                if (!(resource instanceof VertexBuffer) || this.isComputePipeline) {
                     layout.entries[k] = resource.createBindGroupLayoutEntry(k);
                     group.entries[k] = resource.createBindGroupEntry(k)
                     k++;

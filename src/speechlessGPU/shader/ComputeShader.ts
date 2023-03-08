@@ -16,6 +16,7 @@ export class ComputeShader extends ShaderStage {
     }
 
     public build(shaderPipeline: ComputePipeline, inputs: ShaderStruct): { code: string, output: ShaderStruct } {
+
         if (this._shaderInfos) return this._shaderInfos;
 
 
@@ -24,16 +25,16 @@ export class ComputeShader extends ShaderStage {
         const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
         result += obj.result;
 
-        console.log("-------- COMPUTE -----------");
+        console.warn("-------- COMPUTE ----------- ", inputs);
         //console.log(result)
 
-        for (let i = 0; i < this.inputs.length; i++) {
-            inputs.addProperty(this.inputs[i]);
-        }
+        //for (let i = 0; i < this.inputs.length; i++) {
+        //    inputs.addProperty(this.inputs[i]);
+        //}
 
 
-        const output: ShaderStruct = new ShaderStruct("Output", this.outputs);
-        result += output.struct + "\n"
+        //const output: ShaderStruct = new ShaderStruct("Output", this.outputs);
+        //result += output.struct + "\n"
 
 
 
@@ -42,20 +43,24 @@ export class ComputeShader extends ShaderStage {
         const w = shaderPipeline.workgroups;
 
         result += "@compute @workgroup_size(" + w[0] + "," + w[1] + "," + w[2] + ")\n";
-        result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
+        result += "fn main(" + inputs.getFunctionParams() + ") {\n";
         result += obj.variables + "\n";
-        result += "   var output:Output;\n";
         result += this.main.value;
-        result += "   return output;\n"
         result += "}\n";
 
         console.log(result)
-        this._shaderInfos = { code: result, output: output };
+        this._shaderInfos = { code: result, output: null };
         return this._shaderInfos;
+
+
+
 
         /*
         let result = "";
         result += this.code.value + "\n\n";
+
+        const resources = shaderPipeline.bindGroups.resources.types;
+        const uniformBuffers
 
         let bindingId = 0;
         let uniform: UniformBuffer;
@@ -92,9 +97,7 @@ export class ComputeShader extends ShaderStage {
         result += "fn main(" + input.getComputeFunctionParams() + "){\n";
         result += this.main.value;
         result += "}\n";
-        */
-        this._shaderInfos = { code: result, output: null };
-        return this._shaderInfos;
+       */
     }
 
 }

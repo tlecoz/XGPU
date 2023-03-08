@@ -1,4 +1,5 @@
 import { GPU } from "../GPU";
+import { Pipeline } from "../pipelines/Pipeline";
 import { Bindgroup } from "./Bindgroup";
 import { CubeMapTexture } from "./resources/CubeMapTexture";
 import { ImageTexture } from "./resources/ImageTexture";
@@ -6,9 +7,12 @@ import { IShaderResource } from "./resources/IShaderResource";
 import { TextureSampler } from "./resources/TextureSampler";
 import { UniformBuffer } from "./resources/UniformBuffer";
 import { VertexBuffer } from "./resources/VertexBuffer";
+import { VertexBufferIO } from "./resources/VertexBufferIO";
 import { VideoTexture } from "./resources/VideoTexture";
 
 export class Bindgroups {
+
+
 
     public parent: Bindgroups;
     public groups: Bindgroup[] = [];
@@ -19,6 +23,8 @@ export class Bindgroups {
     constructor(name: string) {
         this._name = name;
     }
+
+
     public get name(): string { return this._name; }
 
 
@@ -54,11 +60,23 @@ export class Bindgroups {
 
     }
 
+    public getBindgroupByResource(resource: IShaderResource): Bindgroup {
+        let group: Bindgroup, element: IShaderResource;
+        for (let i = 0; i < this.groups.length; i++) {
+            group = this.groups[i];
+            for (let j = 0; j < group.elements.length; j++) {
+                element = group.elements[j].resource;
+                if (element === resource) return group;
+            }
+        }
+        return null;
+    }
 
-    public apply(renderPassEncoder: GPURenderPassEncoder): void {
+
+    public apply(passEncoder: GPURenderPassEncoder | GPUComputePassEncoder): void {
         for (let i = 0; i < this.groups.length; i++) {
             //console.log("setBindgroup ", i, this.groups[i])
-            renderPassEncoder.setBindGroup(i, this.groups[i].group);
+            passEncoder.setBindGroup(i, this.groups[i].group);
         }
     }
 
@@ -69,7 +87,7 @@ export class Bindgroups {
     }
 
     public getVertexShaderDeclaration(): { result: string, variables: string } {
-        console.log("getVertexShaderDeclaration")
+        //console.log("getVertexShaderDeclaration")
         let result: string = "";
         let group: Bindgroup;
         let resources: { name: string, resource: IShaderResource }[];
@@ -157,7 +175,43 @@ export class Bindgroups {
     }
 
     public getComputeShaderDeclaration(): { result: string, variables: string } {
-        const obj = { result: "", variables: "" }
+        let result: string = "";
+        let group: Bindgroup;
+        let resources: { name: string, resource: IShaderResource }[];
+        let resource: IShaderResource;
+        let name: string;
+        let k: number = 0;
+
+        const obj = { result: "", variables: "" };
+
+        for (let i = 0; i < this.groups.length; i++) {
+            group = this.groups[i];
+            resources = group.elements;
+            k = 0;
+            for (let j = 0; j < resources.length; j++) {
+                resource = resources[j].resource;
+                name = resources[j].name;
+
+                if (resource instanceof VertexBuffer) {
+
+
+
+
+                } else if (resource instanceof UniformBuffer) {
+
+                    let item;
+                    for (let z in resource.items) {
+                        item = resource.items[z];
+                        let _name = name.substring(0, 1).toLowerCase() + name.slice(1);
+                        if (item.propertyNames) result += item.createStruct() + "\n";
+                        if (item.createVariableInsideMain) obj.variables += item.createVariable(_name) + "\n"
+                    }
+                    result += resource.createStruct(name).struct + "\n";
+                }
+                result += resource.createDeclaration(name, k++, i) + "\n";
+            }
+        }
+        obj.result = result;
         return obj;
     }
 
@@ -210,7 +264,7 @@ export class Bindgroups {
 
         const types = this._resources.types;
 
-        //console.warn("should I delete this part ?")
+
 
         const addResources = (res: any, elements: { name: string, resource: IShaderResource }[]) => {
             //console.log("call addResource ", elements)
@@ -218,14 +272,17 @@ export class Bindgroups {
             let r: IShaderResource;
             for (let i = 0; i < elements.length; i++) {
                 element = elements[i];
-
+                //console.log(element.name)
                 if (res[element.name]) continue;
                 //console.log("addResources ", i, element)
                 r = element.resource;
                 if (this._resources.all.indexOf(r) === -1) this._resources.all.push(r);
                 res[element.name] = element.resource;
-
-                if (r instanceof UniformBuffer) {
+                if (r instanceof VertexBufferIO) {
+                    //console.log("addVertexBufferIO")
+                    if (!types.vertexBuuferIOs) types.vertexBuuferIOs = [];
+                    if (types.vertexBuuferIOs.indexOf(element) === -1) types.vertexBuuferIOs.push(element);
+                } else if (r instanceof UniformBuffer) {
                     if (!types.uniforms) types.uniforms = [];
                     if (types.uniforms.indexOf(element) === -1) types.uniforms.push(element);
                 } else if (r instanceof VertexBuffer) {
@@ -249,6 +306,7 @@ export class Bindgroups {
 
             //console.log("this.resources = ", this.resources.all.length)
         }
+
 
         const addGroup = (o: Bindgroup) => {
             //console.log("addGroup ", o.name, o.elements)

@@ -28,8 +28,8 @@ export class RenderPipeline extends Pipeline {
 
     private gpuPipeline: GPURenderPipeline;
 
-    constructor(name: string, renderer: GPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
-        super(name);
+    constructor(renderer: GPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
+        super();
 
         if (!renderer.canvas) {
             throw new Error("A RenderPipeline need a GPUProcess with a canvas in order to draw things inside. You must pass a reference to a canvas when you instanciate the GPUProcess.")
@@ -163,7 +163,7 @@ export class RenderPipeline extends Pipeline {
         },
         depthStencilDescription?: {
             depthWriteEnabled: boolean,
-            depthCompare: string,
+            depthCompare: "never" | "less" | "equal" | "less-equal" | "greater" | "not-equal" | "greater-equal" | "always",
             format: string
         },
         depthStencilAttachmentOptions?: any

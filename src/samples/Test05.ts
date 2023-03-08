@@ -33,10 +33,10 @@ export class Test05 extends Sample {
     protected async start(renderer: GPURenderer) {
 
         const { bmp, bmp2, video } = this.medias;
-        const pipeline = new RenderPipeline("TestPipeline", renderer);
+        const pipeline = new RenderPipeline(renderer);
 
 
-        const pos = new Vec3(0.30, 0.0, 0);
+        const pos = new Vec3(0, 0, 0.025);
         pos.createVariableInsideMain = true;
 
         const obj = pipeline.initFromObject({
@@ -54,8 +54,8 @@ export class Test05 extends Sample {
                         rotation: new Float(0.10),
                         position: pos,
                         matrix: new Matrix4x4(),
-                        dimension: new Dimension(0.5, 1, 1),//new Vec3(1.0, 1.0, 1.0),
-                        projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, -1, 1) as Float32Array),
+                        dimension: new Dimension(1, 1, 1),//new Vec3(1.0, 1.0, 1.0),
+                        projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 4, 1, 0.0000001, 1000) as Float32Array),
                         test: new Vec4Array([
                             new Vec4(1, 0, 0, 0),
                             new Vec4(2, 0, 0.5, 0)
@@ -83,16 +83,12 @@ export class Test05 extends Sample {
                 },
 
                 main: `
-                let p:vec3<f32> = vec3(vertexPos);
+                let p = vertexPos ; 
                 
-                let a:f32 = atan2(p.y,p.x) + transform.rotation + transform.test[0].x;
-                let d:f32 = sqrt(p.x*p.x + p.y*p.y);
-
-                let w:f32 = transform.dimension.width;
-
-                var pos:vec4<f32> = transform.matrix * vec4(p * transform.dimension.width,1.0) ;
                 
-                output.position = vec4(pos.xyz , 1.0);
+                var pos = transform.matrix * vec4(p ,1.0) ;
+                
+                output.position = vec4(pos.xyz + vec3(0.0,0.0,0.5) , 1.0);
                 
                 output.fragUV = 0.5 + vertexPos.xy;
                 output.fragPosition = 0.5+ (vec4<f32>(vertexPos, 1.0));
@@ -135,21 +131,27 @@ export class Test05 extends Sample {
         //console.log("matrix = ", matrix)
         setInterval(() => {
             const model = mat4.create();
-            mat4.translate(model, model, vec3.fromValues(0, 0, -0.5))
-            const rota = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+            const temp = mat4.create();
+            //mat4.translate(model, model, vec3.fromValues(0, 0, -0.3))
+            const rotaX = Math.sin((Date.now() / 1000)) * Math.PI * 10;
+            const rotaY = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+            const rotaZ = Math.sin((Date.now() / 1000)) * Math.PI * 3;
             //matrix.rotationX = Math.sin((Date.now() / 1000)) * Math.PI * 2;
             //matrix.rotationY = Math.sin((Date.now() / 1000)) * Math.PI * 2;
-            //matrix.rotationZ = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+            matrix.rotationZ = Math.sin((Date.now() / 1000)) * Math.PI * 2;
+            matrix.z = Math.sin((Date.now() / 1000)) * 0.5;
+            //mat4.rotate(model, temp, rotaX, vec3.fromValues(1, 0, 0));
+            //mat4.rotate(model, temp, rotaY, vec3.fromValues(0, 1, 0));
+            //mat4.rotate(model, temp, rotaZ, vec3.fromValues(0, 0, 1));
 
-            mat4.rotate(model, model, rota, vec3.fromValues(1, 0, 0));
-            mat4.rotate(model, model, rota, vec3.fromValues(0, 1, 0));
-            mat4.rotate(model, model, rota, vec3.fromValues(0, 0, 1));
+            //mat4.rotate(model, model, rotaZ, vec3.fromValues(rotaX, rotaY, rotaZ));
 
-            const m = mat4.create();
-            mat4.translate(m, m, vec3.fromValues(0, 0, 0.1))
-            mat4.multiply(m, mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, 0.1, 10000), model);
+            //const m = mat4.create();
+            //mat4.translate(m, m, vec3.fromValues(0, 0, -0))
+            //mat4.multiply(m, model, m);
+            //mat4.multiply(m, mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, 0.1, 10000), m);
 
-            matrix.setMatrix(m as Float32Array);
+            //matrix.setMatrix(m as Float32Array);
             //matrix.z = Math.sin((Date.now() / 1000)) * 500;
             //matrix.scaleX = matrix.scaleY = ((500 + matrix.z) / 1000) * 2
 
@@ -157,7 +159,7 @@ export class Test05 extends Sample {
             //uniforms.dimension.data.x = Math.sin(Date.now() / 1000);
         }, 10)
 
-        //pipeline.setupDepthStencilView({ size: [renderer.canvas.width, renderer.canvas.height], format: "depth24plus" })
+        pipeline.setupDepthStencilView({ size: [renderer.canvas.width, renderer.canvas.height], format: "depth24plus" })
         pipeline.buildGpuPipeline();
         renderer.addPipeline(pipeline);
     }

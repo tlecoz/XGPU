@@ -30,7 +30,7 @@ export class VertexBuffer implements IShaderResource {
     public static UVec4(offset?: number) { return { type: "uint32x4", offset } }
 
 
-    public io: boolean = false;
+    public io: number = 0;
     public mustBeTransfered: boolean = false;
     public vertexArrays: VertexAttribute[] = [];
     public attributes: any = {};
@@ -55,6 +55,8 @@ export class VertexBuffer implements IShaderResource {
     }) {
 
         if (!descriptor) descriptor = {};
+        else descriptor = { ...descriptor };
+
         if (undefined === descriptor.stepMode) descriptor.stepMode = "vertex";
         if (undefined === descriptor.accessMode) descriptor.accessMode = "read";
         if (undefined === descriptor.usage) descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
@@ -72,6 +74,8 @@ export class VertexBuffer implements IShaderResource {
         }
 
     }
+
+
 
     public get buffer(): GPUBuffer { return this._buffer; }
 
@@ -171,30 +175,35 @@ export class VertexBuffer implements IShaderResource {
     //----------------------------- USED WITH COMPUTE PIPELINE ----------------------------------------
 
     public createDeclaration(vertexBufferName: string, bindingId: number, groupId: number = 0, isInput: boolean = true): string {
-        console.warn("VB.createDeclaration ", vertexBufferName)
-        /*let temp = this.name ? this.name : this._name;
+        console.warn("VB.createDeclaration ", vertexBufferName, isInput)
 
-        const t = temp.split(".");
-        if (t.length > 1) t.shift();
-        let name = t.join(".");
-        if (name.indexOf("#") !== -1) name = name.slice(0, name.indexOf("#"));
-        */
 
-        const structName = vertexBufferName.substring(0, 1).toUpperCase() + vertexBufferName.slice(1);
+        let structName = vertexBufferName.substring(0, 1).toUpperCase() + vertexBufferName.slice(1);
         const varName = vertexBufferName.substring(0, 1).toLowerCase() + vertexBufferName.slice(1);
 
+
         let result = "";
-        result += "struct " + structName + "{\n";
-        let a: VertexAttribute;
-        for (let i = 0; i < this.vertexArrays.length; i++) {
-            a = this.vertexArrays[i];
-            result += "   " + a.name + ":" + a.varType + ",\n";
-        }
-        result += "}\n\n";
-
-
         let type = "storage, read";
-        if (!isInput) type = "storage, read_write"
+        if (this.io === 1) {
+
+            result += "struct " + structName + "{\n";
+            let a: VertexAttribute;
+            for (let i = 0; i < this.vertexArrays.length; i++) {
+                a = this.vertexArrays[i];
+                result += "   " + a.name + ":" + a.varType + ",\n";
+            }
+            result += "}\n\n";
+
+        } else {
+            type = "storage, read_write"
+            structName = structName.slice(0, structName.length - 4);
+        }
+
+
+
+
+
+
         result += "@binding(" + bindingId + ") @group(" + groupId + ") var<" + type + "> " + varName + ":array<" + structName + ">;\n";//+ "_Array;\n\n";
 
         return result;

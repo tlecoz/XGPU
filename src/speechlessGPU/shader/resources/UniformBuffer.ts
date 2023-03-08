@@ -1,5 +1,6 @@
 import { GPU } from "../../GPU";
 import { GPUType } from "../../GPUType";
+import { Pipeline } from "../../pipelines/Pipeline";
 import { PrimitiveType } from "../PrimitiveType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
@@ -29,8 +30,11 @@ export class UniformBuffer implements IShaderResource {
         visibility?: GPUShaderStageFlags;
     }) {
 
+
         if (!descriptor) descriptor = {}
-        if (undefined === descriptor.visibility) descriptor.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT;
+        else descriptor = { ...descriptor };
+
+        if (undefined === descriptor.visibility) descriptor.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
         this.descriptor = descriptor;
 
         let o: any, type: string;
@@ -41,6 +45,18 @@ export class UniformBuffer implements IShaderResource {
             this.add(name, type, o)
         }
     }
+
+    /*
+    public initFromPipeline(pipeline: Pipeline) {
+
+        if (pipeline instanceof ComputePipeline) {
+            this.descriptor.visibility = GPUShaderStage.COMPUTE;
+        } else {
+            this.descriptor.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT;
+        }
+
+
+    }*/
 
     public add(name: string, type: string, data: PrimitiveType) {
 
@@ -104,7 +120,7 @@ export class UniformBuffer implements IShaderResource {
             uniform = this.uniforms[i];
 
             if (uniform.mustBeTransfered) {
-
+                uniform.update();
                 uniform.mustBeTransfered = false;
                 GPU.device.queue.writeBuffer(
                     this.gpuResource,

@@ -5,6 +5,20 @@ export class GPU {
 
     protected static gpuDevice: GPUDevice;
 
+    public static debugUsage(usage: number) {
+
+        if (usage === 128) return "GPUBufferUsage.STORAGE";
+        else if (usage === 8) return "GPUBufferUsage.COPY_DST";
+        else if (usage === 32) return "GPUBufferUsage.VERTEX";
+        else if (usage == 136) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST";
+        else if (usage === 168) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX";
+        else if (usage === 4) return "GPUBufferUsage.COPY_SRC";
+        else if (usage === 132) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC";
+        else if (usage === 40) return "GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST";
+        else if (usage === 140) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST";
+        else if (usage === 172) return ""
+    }
+
     constructor() {
         throw new Error("GPU is static and can't be instanciated")
     }
@@ -49,5 +63,15 @@ export class GPU {
     public static createRenderPipeline(o: any): GPURenderPipeline {
         return this.device.createRenderPipeline(o);
     }
+    public static createComputePipeline(o: any): GPUComputePipeline {
+        return this.device.createComputePipeline(o);
+    }
 
+    public static createStagingBuffer(size: number): GPUBuffer {
+        return this.device.createBuffer({
+            size,
+            usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: false
+        })
+    }
 }

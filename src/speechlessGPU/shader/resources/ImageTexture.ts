@@ -30,6 +30,8 @@ export class ImageTexture implements IShaderResource {
         defaultViewDescriptor?: GPUTextureViewDescriptor
     }) {
 
+        descriptor = { ...descriptor };
+
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
         if (undefined === descriptor.size) {

@@ -38,6 +38,8 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
         defaultViewDescriptor?: GPUTextureViewDescriptor
     }) {
 
+        descriptor = { ...descriptor };
+
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
 
         super(descriptor as any);

@@ -21,7 +21,7 @@ export class Test04 extends Sample {
     protected async start(renderer: GPURenderer) {
 
         const { bmp, bmp2, video } = this.medias;
-        const pipeline = new RenderPipeline("TestPipeline", renderer);
+        const pipeline = new RenderPipeline(renderer);
 
         const obj = pipeline.initFromObject({
 

@@ -21,7 +21,7 @@ export class Test02 extends Sample {
     protected async start(renderer: GPURenderer) {
 
         const { bmp, bmp2, video } = this.medias;
-        const pipeline = new RenderPipeline("TestPipeline", renderer);
+        const pipeline = new RenderPipeline(renderer);
         pipeline.blendMode = new AlphaBlendMode();
 
         const group: Bindgroup = new Bindgroup("common");

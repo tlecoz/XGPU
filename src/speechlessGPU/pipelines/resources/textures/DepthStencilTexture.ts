@@ -16,7 +16,11 @@ export class DepthStencilTexture extends Texture {
     constructor(descriptor: {
         size: GPUExtent3D,
         format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
-    }, depthStencilDescription: { depthWriteEnabled: boolean, depthCompare: string, format: string } = null, depthStencilAttachmentOptions: any = null) {
+    }, depthStencilDescription: {
+        depthWriteEnabled: boolean,
+        depthCompare: "never" | "less" | "equal" | "less-equal" | "greater" | "not-equal" | "greater-equal" | "always",
+        format: string
+    } = null, depthStencilAttachmentOptions: any = null) {
 
         if (undefined === descriptor.format) descriptor.format = "depth24plus"
         super(descriptor as any)
