@@ -75,7 +75,7 @@ export class Bindgroups {
 
     public apply(passEncoder: GPURenderPassEncoder | GPUComputePassEncoder): void {
         for (let i = 0; i < this.groups.length; i++) {
-            //console.log("setBindgroup ", i, this.groups[i])
+            //console.log("setBindgroup ", i, this.groups[i].group)
             passEncoder.setBindGroup(i, this.groups[i].group);
         }
     }
@@ -252,6 +252,20 @@ export class Bindgroups {
         }
     }
 
+    public handleRenderPipelineResourceIOs() {
+        for (let i = 0; i < this.groups.length; i++) {
+            this.groups[i].handleRenderPipelineResourceIOs();
+        }
+    }
+
+    public handleComputePipelineResourceIOs() {
+        for (let i = 0; i < this.groups.length; i++) {
+            console.log(i, this.groups[i])
+            this.groups[i].handleComputePipelineResourceIOs();
+        }
+    }
+
+
     protected _resources: any = {};
     public get resources(): any { return this._resources }
 
@@ -278,11 +292,7 @@ export class Bindgroups {
                 r = element.resource;
                 if (this._resources.all.indexOf(r) === -1) this._resources.all.push(r);
                 res[element.name] = element.resource;
-                if (r instanceof VertexBufferIO) {
-                    //console.log("addVertexBufferIO")
-                    if (!types.vertexBuuferIOs) types.vertexBuuferIOs = [];
-                    if (types.vertexBuuferIOs.indexOf(element) === -1) types.vertexBuuferIOs.push(element);
-                } else if (r instanceof UniformBuffer) {
+                if (r instanceof UniformBuffer) {
                     if (!types.uniforms) types.uniforms = [];
                     if (types.uniforms.indexOf(element) === -1) types.uniforms.push(element);
                 } else if (r instanceof VertexBuffer) {

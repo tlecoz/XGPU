@@ -6,20 +6,33 @@ import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { Pipeline } from "./Pipeline";
+import { RenderPipeline } from "./RenderPipeline";
 
 export class ComputePipeline extends Pipeline {
 
     public computeShader: ComputeShader;
-    protected renderPipeline: any;
+    public onReceiveData: (datas: Float32Array) => void;
+
 
     protected gpuComputePipeline: GPUComputePipeline;
-    public onProcessCompleted: () => void;
+    protected workgroups: number[];
+    protected dispatchWorkgroup: number[];
+    protected bufferSize: number;
+    protected stagingBuffer: GPUBuffer;
+    protected canCallMapAsync: boolean = true;
+    protected queueSubmitting: boolean = false;
+    protected bufferIOs: VertexBuffer[];
 
-    constructor(renderPipeline?: any) {
+
+    constructor() {
         super()
-        this.renderPipeline = renderPipeline;
         this.computeShader = new ComputeShader();
-        this.isComputePipeline = true;
+        this.type = "compute";
+    }
+
+    public set useRenderPipeline(b: boolean) {
+        if (b) this.type = "mixed";
+        else this.type = "compute";
     }
 
     public initFromObject(descriptor: {
@@ -39,7 +52,7 @@ export class ComputePipeline extends Pipeline {
             for (let z in descriptor.bindgroups) {
                 group = new Bindgroup(z);
                 group.initFromObject(descriptor.bindgroups[z]);
-                console.log(group)
+                //console.log(group)
                 this.bindGroups.add(group);
             }
         }
@@ -59,7 +72,7 @@ export class ComputePipeline extends Pipeline {
 
         const t = [];
         for (let z in descriptor.computeShader.inputs) t.push({ name: z, ...descriptor.computeShader.inputs[z] });
-        console.log("TTTTTT ", t)
+        //console.log("TTTTTT ", t)
         this.computeShader.inputs = t//descriptor.computeShader.inputs;
 
         if (descriptor.computeShader.code) this.computeShader.code.text = descriptor.computeShader.code;
@@ -70,17 +83,17 @@ export class ComputePipeline extends Pipeline {
     }
 
 
-    public workgroups: number[];
+
     public setWorkgroups(x: number, y: number = 1, z: number = 1) {
         this.workgroups = [x, y, z];
     }
 
-    protected dispatchWorkgroup: number[];
+
     public setDispatchWorkgroup(x: number = 1, y: number = 1, z: number = 1) {
         this.dispatchWorkgroup = [x, y, z];
     }
 
-    protected bufferSize: number;
+
     protected cleanInputsAndInitBufferIO() {
         const _inputs = [];
         const t = this.computeShader.inputs;
@@ -113,7 +126,13 @@ export class ComputePipeline extends Pipeline {
 
         if (this.gpuComputePipeline) return this.gpuComputePipeline;
 
+        let pipeline: Pipeline = this;
+
+        this.initPipelineResources(this);
+
+
         this.createLayouts();
+        this.bindGroups.handleComputePipelineResourceIOs();
 
         this.cleanInputsAndInitBufferIO();
 
@@ -121,12 +140,12 @@ export class ComputePipeline extends Pipeline {
 
         const nb = this.workgroups[0];
         if (!this.dispatchWorkgroup) {
-            console.log("=> ", this.bindGroups.resources.types)
+            //console.log("=> ", this.bindGroups.resources.types)
 
 
 
             const nbVertex = this.bindGroups.resources.types.vertexBuffers[0].resource.nbVertex;
-            console.log("=> ", nbVertex)
+            //console.log("=> ", nbVertex)
 
             this.setDispatchWorkgroup(Math.ceil(nbVertex / nb))
         }
@@ -153,12 +172,10 @@ export class ComputePipeline extends Pipeline {
         }
         this.description.layout = this.gpuPipelineLayout;
 
-        console.log("description = ", this.description)
+        //console.log("description = ", this.description)
 
         this.gpuComputePipeline = GPU.createComputePipeline(this.description);
-        if (this.renderPipeline) {
-            this.renderPipeline.gpuComputePipeline = this.gpuComputePipeline;
-        }
+
 
         return this.gpuComputePipeline;
     }
@@ -167,16 +184,10 @@ export class ComputePipeline extends Pipeline {
 
 
 
-    public stagingBuffer: GPUBuffer;
-
-    public onReceiveData: (datas: Float32Array) => void;
 
 
 
 
-    private canCallMapAsync: boolean = true;
-    private nbMapAsyncCall: number = 0;
-    private queueSubmitting: boolean = false;
     public async nextFrame() {
 
         if (!this.canCallMapAsync || this.queueSubmitting) return
@@ -195,54 +206,49 @@ export class ComputePipeline extends Pipeline {
 
         const vertexBuffers = this.bindGroups.resources.types.vertexBuffers;
 
+        if (!this.bufferIOs) {
+            let inputBuffer;
+            let outputBuffer;
+            if (vertexBuffers) {
+                for (let i = 0; i < vertexBuffers.length; i++) {
+                    if (vertexBuffers[i].resource.io) {
+                        inputBuffer = vertexBuffers[i].resource;
+                        outputBuffer = vertexBuffers[i + 1].resource;
+                        break;
+                    }
+                }
+            }
 
-        let inputBuffer = vertexBuffers[0].resource;
-        let outputBuffer = vertexBuffers[1].resource;
-        let bufferSize = inputBuffer.buffer.size;
-
-
-
-
-        if (!this.stagingBuffer) this.stagingBuffer = GPU.createStagingBuffer(bufferSize);
+            this.bufferIOs = [inputBuffer, outputBuffer];
+            this.bufferSize = inputBuffer.bufferSize;
+        }
 
         //------
 
+        const buffer = this.bufferIOs[0].buffer
+
+        if (this.onReceiveData) {
+
+            if (!this.stagingBuffer) this.stagingBuffer = GPU.createStagingBuffer(this.bufferSize);
+            const copyEncoder = GPU.device.createCommandEncoder();
+            const stage = this.stagingBuffer;
 
 
-        const copyEncoder = GPU.device.createCommandEncoder();
+            copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
 
+            GPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
 
-        const stage = this.stagingBuffer;
+            this.canCallMapAsync = false;
+            await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
+            this.canCallMapAsync = true;
 
+            const copyArray = stage.getMappedRange(0, stage.size);
+            const data = copyArray.slice(0);
+            stage.unmap();
+            this.queueSubmitting = false;
+            this.onReceiveData(new Float32Array(data));
 
-        copyEncoder.copyBufferToBuffer(outputBuffer.buffer,
-            0,
-            stage,
-            0,
-            stage.size);
-
-        GPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
-
-        this.nbMapAsyncCall++;
-        this.canCallMapAsync = false;
-
-        await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
-        this.canCallMapAsync = true;
-
-        const copyArray = stage.getMappedRange(0, stage.size);
-        const data = copyArray.slice(0);
-        stage.unmap();
-
-
-        GPU.device.queue.writeBuffer(inputBuffer.buffer, 0, data)
-        this.queueSubmitting = false;
-
-        this.onReceiveData(new Float32Array(data));
-
-
-
-
-
+        }
 
     }
 

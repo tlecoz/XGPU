@@ -34,7 +34,6 @@ export class UniformBuffer implements IShaderResource {
         if (!descriptor) descriptor = {}
         else descriptor = { ...descriptor };
 
-        if (undefined === descriptor.visibility) descriptor.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
         this.descriptor = descriptor;
 
         let o: any, type: string;
@@ -42,37 +41,21 @@ export class UniformBuffer implements IShaderResource {
 
             o = items[name];
             type = o.type;
-            this.add(name, type, o)
+            this.add(name, o)
         }
     }
 
-    /*
-    public initFromPipeline(pipeline: Pipeline) {
-
-        if (pipeline instanceof ComputePipeline) {
-            this.descriptor.visibility = GPUShaderStage.COMPUTE;
-        } else {
-            this.descriptor.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT;
-        }
 
 
-    }*/
-
-    public add(name: string, type: string, data: PrimitiveType) {
-
-        //console.log(name + " = ", data instanceof Float32Array)
-
-        //const gpuType = new GPUType(type);
+    public add(name: string, data: PrimitiveType) {
 
         data.uniformBuffer = this;
         data.name = name;
-        //data.type = gpuType;
 
-        //const uniform: Uniform = new Uniform(this, name, gpuType, data)
         this._items[name] = data;
         this._itemNames.push(name);
         data.startId = this.byteSize;
-        this._nbComponent += data.length;//uniform.type.nbValues;
+        this._nbComponent += data.length;
 
         this.uniforms.push(data)
         return data;
@@ -95,7 +78,7 @@ export class UniformBuffer implements IShaderResource {
             type = uniform.type;
             uniform.startId = offset;
 
-            console.log(uniform.name, offset);
+            //console.log(uniform.name, offset);
 
             if (type.isArray) {
                 if (type.isArrayOfVectors) offset += 16 * type.arrayLength;
@@ -115,12 +98,13 @@ export class UniformBuffer implements IShaderResource {
         if (!this._data) this._data = new Float32Array(new ArrayBuffer(this.byteSize))
         if (!this.gpuResource) this.createGpuResource();
 
+
         let uniform: PrimitiveType;
         for (let i = 0; i < this.uniforms.length; i++) {
             uniform = this.uniforms[i];
-
+            uniform.update();
             if (uniform.mustBeTransfered) {
-                uniform.update();
+
                 uniform.mustBeTransfered = false;
                 GPU.device.queue.writeBuffer(
                     this.gpuResource,
@@ -201,6 +185,7 @@ export class UniformBuffer implements IShaderResource {
 
 
     public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, buffer: { type: string } } {
+
         return {
             binding: bindingId,
             visibility: this.descriptor.visibility,
@@ -227,4 +212,11 @@ export class UniformBuffer implements IShaderResource {
     public get nbUniforms(): number { return this.uniforms.length; }
 
     //public get bufferType(): string { return "uniform"; }
+
+    public setPipelineType(pipelineType: "compute" | "render" | "mixed") {
+
+        //use to handle particular cases in descriptor relative to the nature of pipeline
+        if (pipelineType === "compute") this.descriptor.visibility = GPUShaderStage.COMPUTE;
+        else this.descriptor.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
+    }
 }

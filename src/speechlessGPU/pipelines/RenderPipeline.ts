@@ -3,10 +3,12 @@ import { GPURenderer } from "../GPURenderer";
 import { Bindgroup } from "../shader/Bindgroup";
 import { Bindgroups } from "../shader/Bindgroups";
 import { FragmentShader } from "../shader/FragmentShader";
+import { IShaderResource } from "../shader/resources/IShaderResource";
 import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
+import { ComputePipeline } from "./ComputePipeline";
 import { Pipeline } from "./Pipeline";
 import { BlendMode } from "./resources/blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
@@ -26,7 +28,10 @@ export class RenderPipeline extends Pipeline {
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
 
-    private gpuPipeline: GPURenderPipeline;
+    protected gpuPipeline: GPURenderPipeline;
+
+    protected _computePipeline: ComputePipeline
+    public onDrawEnd: () => void;
 
     constructor(renderer: GPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
         super();
@@ -34,6 +39,7 @@ export class RenderPipeline extends Pipeline {
         if (!renderer.canvas) {
             throw new Error("A RenderPipeline need a GPUProcess with a canvas in order to draw things inside. You must pass a reference to a canvas when you instanciate the GPUProcess.")
         }
+        this.type = "render";
         this.renderer = renderer;
         this.canvas = renderer.canvas;
         this.vertexShader = new VertexShader();
@@ -46,8 +52,17 @@ export class RenderPipeline extends Pipeline {
         this.outputColor = this.createColorAttachment(bgColor);
     }
 
+    public get computePipeline(): ComputePipeline { return this._computePipeline }
+    public set computePipeline(computePipeline: ComputePipeline) {
+        this._computePipeline = computePipeline;
+        computePipeline.useRenderPipeline = true;
+        if (computePipeline) this.type = "mixed";
+        else this.type = "render";
+    }
+
 
     public initFromObject(descriptor: {
+        stepMode?: "vertex" | "instance",
         clearColor?: { r: number, g: number, b: number, a: number },
         blendMode?: BlendMode,
         bindgroups?: any,
@@ -64,6 +79,8 @@ export class RenderPipeline extends Pipeline {
             code?: string
         }
     }) {
+
+
 
         if (descriptor.clearColor) this.outputColor.clearValue = descriptor.clearColor;
         else descriptor.clearColor = this.outputColor.clearValue;
@@ -107,7 +124,17 @@ export class RenderPipeline extends Pipeline {
         return descriptor;
 
     }
-
+    /*
+    private handleVertexBufferIO(){
+        const groups = this.bindGroups.groups;
+        let group:Bindgroup;
+        let element:{name:string,resource:IShaderResource};
+        for(let i=0;i<groups.length;i++){
+            group = groups[i];
+            for(group.elements
+        }
+    }
+    */
 
     public createColorAttachment(rgba: { r: number, g: number, b: number, a: number }, view: GPUTextureView = undefined): any {
 
@@ -226,7 +253,9 @@ export class RenderPipeline extends Pipeline {
     public buildGpuPipeline(): GPURenderPipeline {
         if (this.gpuPipeline) return this.gpuPipeline
 
+        this.bindGroups.handleRenderPipelineResourceIOs();
 
+        this.initPipelineResources(this);
         this.build();
 
         //setup vertexShader inputs ------
@@ -349,6 +378,7 @@ export class RenderPipeline extends Pipeline {
         this.bindGroups.update();
     }
 
+
     public draw(renderPass: GPURenderPassEncoder) {
 
 
@@ -399,7 +429,7 @@ export class RenderPipeline extends Pipeline {
         if (this.renderPassTexture) {
             commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
         }
-
+        if (this.onDrawEnd) this.onDrawEnd();
     }
 
     public get pipeline(): GPURenderPipeline { return this.gpuPipeline }

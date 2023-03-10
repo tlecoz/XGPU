@@ -55,7 +55,7 @@ export class Test05 extends Sample {
                         position: pos,
                         matrix: new Matrix4x4(),
                         dimension: new Dimension(1, 1, 1),//new Vec3(1.0, 1.0, 1.0),
-                        projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 4, 1, 0.0000001, 1000) as Float32Array),
+                        projection: new Matrix4x4(mat4.perspective(mat4.create(), (Math.PI * 2) / 4, 1, 0.01, 1000) as Float32Array),
                         test: new Vec4Array([
                             new Vec4(1, 0, 0, 0),
                             new Vec4(2, 0, 0.5, 0)

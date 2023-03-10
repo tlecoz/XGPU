@@ -3,6 +3,8 @@ import { BuiltIns } from "../speechlessGPU/Builtins";
 import { GPU } from "../speechlessGPU/GPU";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
+import { Float } from "../speechlessGPU/shader/PrimitiveType";
+import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../speechlessGPU/shader/resources/VertexBufferIO";
 import { Sample } from "./Sample";
@@ -19,23 +21,25 @@ export class Test06 {
 
 
 
-            const size = 500;
+            const size = 512;
             const ctx = this.setupCanvas2D(size, size);
             const nbParticle = 5000;
-            const particleDatas = this.createParticleDatas(nbParticle, ctx.canvas.width, ctx.canvas.height);
-
+            const particleDatas = this.createParticleDatas(nbParticle, size, size);
 
             const pipeline = new ComputePipeline();
-            pipeline.initFromObject({
+            const obj = pipeline.initFromObject({
                 bindgroups: {
                     myComputeResources: {
                         particles: new VertexBufferIO({
                             radius: VertexBuffer.Float(),
                             position: VertexBuffer.Vec2(),
                             velocity: VertexBuffer.Vec2()
-                        }, {
-                            datas: particleDatas
+                        }, { datas: particleDatas }),
+
+                        uniforms: new UniformBuffer({
+                            time: new Float(0, true)
                         })
+
                     }
                 }, computeShader: {
                     inputs: {
@@ -50,28 +54,38 @@ export class Test06 {
                         
                         var p:Particles = particles[index];
                         var center = vec2(256.0,256.0);
-            
+                        
                         var cx = 256.0;
                         var cy = 256.0;
-                        var dx = p.position.x - cx+ p.velocity.x;
-                        var dy = p.position.y - cy+ p.velocity.y;
-                        var d = f32(index)*0.05;//distance(p.position,center);
-                        var a = atan2(dy ,dx) + p.position.x * 0.001; //+ d*0.0001 * cos(p.velocity.x * sin(d*0.1)  ) * 0.618;
+                        var dx = p.position.x - cx + p.velocity.x;
+                        var dy = p.position.y - cy + p.velocity.y;
+                        var d = distance(p.position,center);
+                        var a = atan2(dy ,dx) ;
                         
-            
-                        p.position = vec2(cx + cos(a)*d,cy + sin(a)*d);  //( vec2(cx + cos(a) * d, cy + sin(a) * d))  ;
+                        
+                        //var id = f32(index) ;
+                        p.position.x = (cx + cos( a + time % sin(dx + time) ) * d) ;  
+                        p.position.y = (cy + sin( a + time % cos(dy + time) ) * d)  ;
                         
                         var out:Particles = particles_out[index];
+                        particles_out[index].radius = 4.0;
                         particles_out[index].position =  p.position;
-                        particles_out[index].velocity += cos(a)*2.15;
+                        particles_out[index].velocity = vec2(cos(a + sin(a+d*time)) *5.15);
                     `
                 }
             })
+            console.log(obj.bindgroups.myComputeResources)
+            const timeObj = obj.bindgroups.myComputeResources.uniforms.items.time;
 
 
-
+            let oldTime = new Date().getTime();
             pipeline.onReceiveData = (datas: Float32Array) => {
-                ctx.canvas.width = ctx.canvas.width;
+
+
+                let time = (new Date().getTime() - oldTime) / 1000000;
+                timeObj.x = time;
+                //console.log(timeObj.x, time)
+                ctx.clearRect(0, 0, 512, 512)
                 ctx.beginPath();
                 ctx.fillStyle = "#ff0000";
                 let radius, x, y;

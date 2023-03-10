@@ -1,4 +1,5 @@
 import { GPU } from "../../GPU";
+import { Pipeline } from "../../pipelines/Pipeline";
 import { IShaderResource } from "./IShaderResource";
 
 export type TextureSamplerDescriptor = {
@@ -143,5 +144,10 @@ export class TextureSampler implements IShaderResource {
             binding: bindingId,
             resource: this.gpuResource
         }
+    }
+
+    public setPipelineType(pipelineType: "compute" | "render" | "mixed") {
+        if (pipelineType) { }
+        //use to handle particular cases in descriptor relative to the nature of pipeline
     }
 }

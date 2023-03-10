@@ -26,10 +26,14 @@ export class Pipeline {
     protected gpuBindgroups: GPUBindGroup[] = [];
     protected gpuBindGroupLayouts: GPUBindGroupLayout[] = [];
     protected gpuPipelineLayout: GPUPipelineLayout;
+    protected type: "compute" | "mixed" | "render" = null;
 
     constructor() {
         this.bindGroups = new Bindgroups("pipeline");
     }
+    public get isComputePipeline(): boolean { return this.type === "compute"; }
+    public get isRenderPipeline(): boolean { return this.type === "render"; }
+    public get isMixedPipeline(): boolean { return this.type === "mixed"; }
 
     public addBindgroup(group: Bindgroup) {
         this.bindGroups.add(group);
@@ -116,7 +120,8 @@ export class Pipeline {
         */
     }
 
-    public isComputePipeline: boolean = false;
+
+
     protected createLayouts(): void {
         this.gpuBindGroupLayouts = [];
         this.gpuBindgroups = [];
@@ -161,14 +166,21 @@ export class Pipeline {
         this.gpuPipelineLayout = GPU.createPipelineLayout({ bindGroupLayouts: this.gpuBindGroupLayouts })
     }
 
-
+    protected initPipelineResources(pipeline: Pipeline) {
+        const resources: IShaderResource[] = this.bindGroups.resources.all;
+        for (let i = 0; i < resources.length; i++) resources[i].setPipelineType(pipeline.type);
+    }
 
 
     protected build() {
 
+
+
+
+
+
         this.createVertexBufferLayout();
         this.createLayouts();
-        //this.mergeBindgroupShaders();
 
     }
 

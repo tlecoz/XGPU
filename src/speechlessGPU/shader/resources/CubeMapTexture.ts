@@ -140,4 +140,10 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
             resource: this.gpuResource.createView({ dimension: 'cube' }),
         }
     }
+
+    public setPipelineType(pipelineType: "compute" | "render" | "mixed") {
+        if (pipelineType) { }
+
+        //use to handle particular cases in descriptor relative to the nature of pipeline
+    }
 }

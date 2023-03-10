@@ -16,19 +16,10 @@ export class VertexBufferIO {
         else descriptor = { ...descriptor };
 
         this.descriptor = descriptor;
-
         if (!descriptor.stepMode) descriptor.stepMode = "instance";
 
-        let desc = { ...descriptor };
-        desc.accessMode = "read";
-        desc.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST;
-
-        this.buffers[0] = new VertexBuffer(attributes, desc);
-
-        desc = { ...descriptor };
-        desc.accessMode = "read_write";
-        desc.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST // | GPUBufferUsage.VERTEX;
-        this.buffers[1] = new VertexBuffer(attributes, desc);
+        this.buffers[0] = new VertexBuffer(attributes, descriptor);
+        this.buffers[1] = new VertexBuffer(attributes, descriptor);
 
         this.buffers[0].io = 1;
         this.buffers[1].io = 2;

@@ -19,6 +19,13 @@ export class GPU {
         else if (usage === 172) return ""
     }
 
+    public static debugShaderStage(n: number) {
+        if (n === GPUShaderStage.COMPUTE) return "GPUShaderStage.COMPUTE"
+        else if (n === GPUShaderStage.VERTEX) return "GPUShaderStage.VERTEX"
+        else if (n === GPUShaderStage.FRAGMENT) return "GPUShaderStage.FRAGMENT"
+    }
+
+
     constructor() {
         throw new Error("GPU is static and can't be instanciated")
     }
