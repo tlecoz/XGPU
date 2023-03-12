@@ -8,10 +8,10 @@ export class Sample {
         video: HTMLVideoElement
     }
 
-    constructor() {
+    constructor(w: number = 512, h: number = 512) {
 
         const renderer = new GPURenderer()
-        renderer.initCanvas(512, 512, true).then(async (canvas) => {
+        renderer.initCanvas(w, h, true).then(async (canvas) => {
             document.body.appendChild(canvas);
             this.medias = await this.loadMedias();
             this.start(renderer);

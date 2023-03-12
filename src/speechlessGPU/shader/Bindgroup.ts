@@ -183,8 +183,8 @@ export class Bindgroup {
             let vertexBuffers = parentResources.types.vertexBuffers;
             let buffers: { name: string, resource: VertexBuffer }[] = [];
             for (let i = 0; i < vertexBuffers.length; i++) {
-                console.log(i, vertexBuffers[i].io)
-                if (!vertexBuffers[i].io) {
+                // console.log(i, vertexBuffers[i].resource.io)
+                if (!vertexBuffers[i].resource.io) {
                     buffers.push(vertexBuffers[i]);
                 }
             }

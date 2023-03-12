@@ -338,7 +338,7 @@ export class VertexBuffer implements IShaderResource {
 
         let nb = this._nbComponent;
         if (this.nbComponentData) nb = this.nbComponentData;
-        console.log("vertex layout ", this.descriptor, this.attributeDescriptor)
+
         const obj = {
             stepMode: this.descriptor.stepMode,
             arrayStride: Float32Array.BYTES_PER_ELEMENT * nb,
@@ -355,6 +355,7 @@ export class VertexBuffer implements IShaderResource {
                 offset: offset * Float32Array.BYTES_PER_ELEMENT,
                 format: this.vertexArrays[i].format
             }
+            console.log(i, obj.attributes[i])
             componentId += this.vertexArrays[i].nbComponent;
         }
 

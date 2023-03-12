@@ -12,7 +12,7 @@ export class Test07 extends Sample {
 
 
     constructor() {
-        super();
+        super(1024, 1024);
     }
 
 
@@ -21,7 +21,7 @@ export class Test07 extends Sample {
 
         console.log("START")
 
-        const nbParticle = 4190000;
+        const nbParticle = 480000;
         const particleDatas = this.createParticleDatas(nbParticle, renderer.canvas.width, renderer.canvas.height);
 
         let computePipeline = new ComputePipeline();
@@ -29,9 +29,10 @@ export class Test07 extends Sample {
             bindgroups: {
                 io: {
                     particles: new VertexBufferIO({
-                        //radius: VertexBuffer.Float(),
+                        radius: VertexBuffer.Float(),
                         position: VertexBuffer.Vec2(),
-                        velocity: VertexBuffer.Vec2()
+                        velocity: VertexBuffer.Vec2(),
+
                     },
                         { datas: particleDatas }
                     ),
@@ -52,30 +53,33 @@ export class Test07 extends Sample {
                     return;
                 }
                 
+                let size = 512.0;
+
                 var p:Particles = particles[index];
-                var center = vec2(256.0,256.0);
+                var center = vec2(size,size);
                 
-                var cx = 256.0;
-                var cy = 256.0;
-                var dx = p.position.x - cx+ p.velocity.x;
-                var dy = p.position.y - cy+ p.velocity.y;
+
+
+                var cx = size;
+                var cy = size;
+                var dx = p.position.x - cx + p.velocity.x + p.position.x*0.0001005;
+                var dy = p.position.y - cy + p.velocity.y /atan2(p.position.x,p.position.y);
                 var d = distance(p.position,center);
                 var a = atan2(dy ,dx) ;
                 
-                var end = vec2(cx + cos(a)*d,cy + sin(a)*d);
-                p.position +=   sin( end*cos(a) ) ;  //( vec2(cx + cos(a) * d, cy + sin(a) * d)) ) ;
+                //var end = vec2(cx + cos(a)*d,cy + sin(a)*d);
+                //p.position +=   sin( end*cos(a) ) ;  //( vec2(cx + cos(a) * d, cy + sin(a) * d)) ) ;
                 
-                var id = f32(index) ;
-                var py = floor(id / 50.0); 
-                p.position = vec2( id % 50.0 *10.0   , py * 10.0 );
                 
-                p.position.x = cx + cos( a + uniforms.time) * d ;  //sin( p.velocity.x * uniforms.time) * (100.0 + cos(uniforms.time)*100.0);
+                
+                p.position.x = cx + cos( a+ uniforms.time) * d ;  //sin( p.velocity.x * uniforms.time) * (100.0 + cos(uniforms.time)*100.0);
                 p.position.y = cy + sin(a + uniforms.time) * d ;
                 
                 var out:Particles = particles_out[index];
-                //particles_out[index].radius = 4.0;
+                particles_out[index].radius = p.radius;//+ abs(sin(f32(index)/100.0))*0.5;
                 particles_out[index].position =  p.position;
                 particles_out[index].velocity = vec2(cos(a + sin(d)) *2.15);
+               
                 `
             }
         })
@@ -87,7 +91,7 @@ export class Test07 extends Sample {
             vertexCount: 6
         })
 
-        let quadSize = 0.0005;
+        let quadSize = 0.001;
         renderPipeline.initFromObject({
 
             bindgroups: {
@@ -118,8 +122,8 @@ export class Test07 extends Sample {
                 },
                 main: `
                 
-                let a = -1.0 + position / 256.0;
-                output.position = vec4( vertexPos.xy + a, 0.0 , 1.0);
+                let a = -1.0 + position / 512.0;
+                output.position = vec4( vertexPos.xy  + a, 0.0 , 1.0);
                 
                 //output.position = vec4( vertexPos.xy + position , 0.0 , 1.0);
                 `
@@ -145,13 +149,13 @@ export class Test07 extends Sample {
 
         renderPipeline.buildGpuPipeline();
         //computePipeline.nextFrame();
-        /*computePipeline.onReceiveData = (data: Float32Array) => {
-            //console.log(data.slice(600, 606))
-        }*/
+        //computePipeline.onReceiveData = (data: Float32Array) => {
+        //console.log(data.slice(0, 6))
+        //}
 
 
         const time = computeResources.bindgroups.datas.uniforms.items.time;
-        console.log("time = ", time)
+        //console.log("time = ", time)
 
         let oldTime = new Date().getTime();
         renderPipeline.onDrawEnd = () => {
@@ -173,14 +177,15 @@ export class Test07 extends Sample {
         let radius: number, x: number, y: number, a: number, speedX: number, speedY: number;
         const datas: number[] = [];
         for (let i = 0; i < nb; i++) {
-            radius = 1 + Math.random() * 2;
+            radius = 0.5//1 + Math.random() * 2;
             x = Math.random() * w;
             y = Math.random() * h;
             a = Math.random() * pi2;
             speedX = Math.cos(a);
             speedY = Math.sin(a);
-            //datas.push(radius, x, y, speedX, speedY);
-            datas.push(x, y, speedX, speedY);
+            //datas.push(radius, x, y, speedX, speedY, x, y);
+            datas.push(radius, x, y, speedX, speedY);
+            //datas.push(x, y, speedX, speedY);
         }
         return new Float32Array(datas);
     }

@@ -20,7 +20,6 @@ export class ComputePipeline extends Pipeline {
     protected bufferSize: number;
     protected stagingBuffer: GPUBuffer;
     protected canCallMapAsync: boolean = true;
-    protected queueSubmitting: boolean = false;
     protected bufferIOs: VertexBuffer[];
 
 
@@ -190,7 +189,7 @@ export class ComputePipeline extends Pipeline {
 
     public async nextFrame() {
 
-        if (!this.canCallMapAsync || this.queueSubmitting) return
+
         const commandEncoder = GPU.device.createCommandEncoder();
 
         this.update();
@@ -228,6 +227,8 @@ export class ComputePipeline extends Pipeline {
         const buffer = this.bufferIOs[0].buffer
 
         if (this.onReceiveData) {
+            const buffer = this.bufferIOs[0].buffer
+            if (!this.canCallMapAsync) return
 
             if (!this.stagingBuffer) this.stagingBuffer = GPU.createStagingBuffer(this.bufferSize);
             const copyEncoder = GPU.device.createCommandEncoder();
@@ -245,7 +246,7 @@ export class ComputePipeline extends Pipeline {
             const copyArray = stage.getMappedRange(0, stage.size);
             const data = copyArray.slice(0);
             stage.unmap();
-            this.queueSubmitting = false;
+
             this.onReceiveData(new Float32Array(data));
 
         } else {

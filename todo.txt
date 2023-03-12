@@ -1,3 +1,28 @@
+corriger le probleme de reorganisation de donnée des buffer 
+
+gerer plusieurs vertexBufferIO 
+
+textureIO 
+
+
+AudioShader ? 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - faire en sorte que toute la pipeline puisse etre contenu dans un json 
   => export vers JSON / import depuis JSON
 
