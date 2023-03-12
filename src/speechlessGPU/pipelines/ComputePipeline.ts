@@ -248,6 +248,8 @@ export class ComputePipeline extends Pipeline {
             this.queueSubmitting = false;
             this.onReceiveData(new Float32Array(data));
 
+        } else {
+            GPU.device.queue.submit([commandEncoder.finish()]);
         }
 
     }

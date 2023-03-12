@@ -43,7 +43,7 @@ export class FragmentShader extends ShaderStage {
         result += "   return output;\n"
         result += "}\n";
 
-        console.log(result)
+        //console.log(result)
         this._shaderInfos = { code: result, output: output };
         return this._shaderInfos;
     }

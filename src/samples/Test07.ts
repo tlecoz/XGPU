@@ -19,7 +19,9 @@ export class Test07 extends Sample {
 
     protected async start(renderer: GPURenderer) {
 
-        const nbParticle = 5000;
+        console.log("START")
+
+        const nbParticle = 4190000;
         const particleDatas = this.createParticleDatas(nbParticle, renderer.canvas.width, renderer.canvas.height);
 
         let computePipeline = new ComputePipeline();
@@ -27,16 +29,19 @@ export class Test07 extends Sample {
             bindgroups: {
                 io: {
                     particles: new VertexBufferIO({
-                        radius: VertexBuffer.Float(),
+                        //radius: VertexBuffer.Float(),
                         position: VertexBuffer.Vec2(),
                         velocity: VertexBuffer.Vec2()
-                    }, { datas: particleDatas }),
+                    },
+                        { datas: particleDatas }
+                    ),
                 },
-                uniforms: new UniformBuffer({
-                    time: new Float(0)
-                })
-            },
-            computeShader: {
+                datas: {
+                    uniforms: new UniformBuffer({
+                        time: new Float(0, true)
+                    })
+                }
+            }, computeShader: {
                 inputs: {
                     global_id: BuiltIns.computeInputs.globalInvocationId
                 },
@@ -68,39 +73,56 @@ export class Test07 extends Sample {
                 p.position.y = cy + sin(a + uniforms.time) * d ;
                 
                 var out:Particles = particles_out[index];
-                particles_out[index].radius = 4.0;
+                //particles_out[index].radius = 4.0;
                 particles_out[index].position =  p.position;
                 particles_out[index].velocity = vec2(cos(a + sin(d)) *2.15);
                 `
             }
         })
 
+
         let renderPipeline = new RenderPipeline(renderer);
+        renderPipeline.setupDraw({
+            instanceCount: nbParticle,
+            vertexCount: 6
+        })
+
+        let quadSize = 0.0005;
         renderPipeline.initFromObject({
 
             bindgroups: {
-                geom: new VertexBuffer({
-                    vertexPos: VertexBuffer.Vec3(0)
-                },
-                    {
+                vertexResources: {
+                    geom: new VertexBuffer({
+                        vertexPos: VertexBuffer.Vec3(0)
+                    }, {
                         datas: new Float32Array([
-                            -0.01, -0.01, 0.0,
-                            +0.01, -0.01, 0.0,
-                            -0.01, +0.01, 0.0,
+                            -quadSize, -quadSize, 0.0,
+                            +quadSize, -quadSize, 0.0,
+                            -quadSize, +quadSize, 0.0,
 
-                            +0.01, -0.01, 0.0,
-                            +0.01, +0.01, 0.0,
-                            -0.01, +0.01, 0.0,
+                            +quadSize, -quadSize, 0.0,
+                            +quadSize, +quadSize, 0.0,
+                            -quadSize, +quadSize, 0.0,
                         ])
-                    }),
+                    })
+                },
                 io: computeResources.bindgroups.io
             },
 
             vertexShader: {
+                inputs: {
+                    instanceId: BuiltIns.vertexInputs.instanceIndex
+                },
                 outputs: {
                     position: BuiltIns.vertexOutputs.position
                 },
-                main: `output.position = vec4( vertexPos.xy + position , 0.0 , 1.0);`
+                main: `
+                
+                let a = -1.0 + position / 256.0;
+                output.position = vec4( vertexPos.xy + a, 0.0 , 1.0);
+                
+                //output.position = vec4( vertexPos.xy + position , 0.0 , 1.0);
+                `
             },
 
             fragmentShader: {
@@ -118,9 +140,23 @@ export class Test07 extends Sample {
 
 
         computePipeline.buildGpuPipeline();
-        renderPipeline.buildGpuPipeline();
 
+
+
+        renderPipeline.buildGpuPipeline();
+        //computePipeline.nextFrame();
+        /*computePipeline.onReceiveData = (data: Float32Array) => {
+            //console.log(data.slice(600, 606))
+        }*/
+
+
+        const time = computeResources.bindgroups.datas.uniforms.items.time;
+        console.log("time = ", time)
+
+        let oldTime = new Date().getTime();
         renderPipeline.onDrawEnd = () => {
+            time.x = (new Date().getTime() - oldTime) / 1000000;
+            //console.log("nextFrame")
             computePipeline.nextFrame();
         }
 
@@ -143,7 +179,8 @@ export class Test07 extends Sample {
             a = Math.random() * pi2;
             speedX = Math.cos(a);
             speedY = Math.sin(a);
-            datas.push(radius, x, y, speedX, speedY);
+            //datas.push(radius, x, y, speedX, speedY);
+            datas.push(x, y, speedX, speedY);
         }
         return new Float32Array(datas);
     }

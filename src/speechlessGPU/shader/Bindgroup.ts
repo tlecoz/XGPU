@@ -56,10 +56,12 @@ export class Bindgroup {
 
     public add(name: string, resource: IShaderResource): IShaderResource {
         if (resource instanceof VideoTexture) this.mustRefreshBindgroup = true;
-        //console.log("group add ", name)
+
         if (resource instanceof VertexBufferIO) {
             this.mustRefreshBindgroup = true;
             this.vertexBufferIO = resource;
+
+            //console.log("group vertexBufferIO ", this.vertexBufferIO)
             this.elements.push({ name: name, resource: resource.buffers[0] });
             this.elements.push({ name: name + "_out", resource: resource.buffers[1] });
 
@@ -86,6 +88,7 @@ export class Bindgroup {
         let o;
         for (let z in object) {
             o = object[z];
+            //console.log(z + " : " + object[z])
             if (o.createGpuResource || o instanceof VertexBufferIO) { //if it's a shader resource 
                 this.add(z, o);
             }
@@ -97,7 +100,7 @@ export class Bindgroup {
 
         const layout = { entries: [] }
         let bindingId = 0;
-        console.warn(this.elements)
+        //console.warn(this.elements)
         let resource: IShaderResource;
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
@@ -106,7 +109,7 @@ export class Bindgroup {
             layout.entries.push(resource.createBindGroupLayoutEntry(bindingId++));
         }
 
-        console.log("BINDGROUP LAYOUT ENTRIES ", layout)
+        //console.log("BINDGROUP LAYOUT ENTRIES ", layout)
         this._layout = GPU.device.createBindGroupLayout(layout);
     }
 
@@ -129,14 +132,20 @@ export class Bindgroup {
 
 
     public handleComputePipelineResourceIOs() {
-        console.log("handleComputePipelineResourceIOs")
-        this.createPingPongBindgroup(this.vertexBufferIO.buffers[0], this.vertexBufferIO.buffers[1])
+        //console.warn("handleComputePipelineResourceIOs")
+        if (this.vertexBufferIO) {
+            this.createPingPongBindgroup(this.vertexBufferIO.buffers[0], this.vertexBufferIO.buffers[1])
+        }
+
 
 
     }
 
 
     public handleRenderPipelineResourceIOs() {
+
+
+
         //a vertexBufferIO uses 2 vertexBuffers in a computePipeline 
         //but a single one is required in a renderPipeline.   
         let resource: IShaderResource;
@@ -152,33 +161,46 @@ export class Bindgroup {
                     name = this.elements[i].name;
                     parentResources[name] = undefined;
                     parentResources[name + "_out"] = undefined;
+
+
+
                     bufferIOs.push(resource);
                     bufferIOs.push(this.elements[i + 1].resource as VertexBuffer);
-                    this.elements.splice(i + 1, 1);
+                    this.elements.splice(i, 2);
                     foundIO = true;
                     break;
                 }
             }
         }
 
-        if (foundIO) {
 
-            const vb: VertexBuffer = new VertexBuffer(bufferIOs[0].attributes);
+        if (foundIO) {
+            console.log("attributes = ", bufferIOs[0].attributeDescriptor)
+            const vb: VertexBuffer = new VertexBuffer(bufferIOs[0].attributeDescriptor, { stepMode: "instance" });
+
             this.elements.push({ name, resource: vb })
 
             let vertexBuffers = parentResources.types.vertexBuffers;
-            let buffers: VertexBuffer[] = [];
+            let buffers: { name: string, resource: VertexBuffer }[] = [];
             for (let i = 0; i < vertexBuffers.length; i++) {
+                console.log(i, vertexBuffers[i].io)
                 if (!vertexBuffers[i].io) {
                     buffers.push(vertexBuffers[i]);
                 }
             }
-            buffers.push(vb);
+            buffers.push({ name, resource: vb });
+
+
+            console.log("=====> ", buffers)
+
+            parentResources[name] = vb;
             parentResources.types.vertexBuffers = buffers;
 
             vb.initBufferIO([bufferIOs[0].buffer, bufferIOs[1].buffer])
 
         }
+        console.log("vertexBufferIO = ", this.vertexBufferIO, this.parent)
+
     }
 
 

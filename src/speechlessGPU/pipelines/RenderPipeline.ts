@@ -96,24 +96,22 @@ export class RenderPipeline extends Pipeline {
             }
         }
 
-        const vertexOutput = descriptor.vertexShader.outputs;
-        const fragmentOutput = descriptor.fragmentShader.outputs;
-        const vOutput = [];
-        const fOutput = [];
 
-        let o: any;
-        for (let z in vertexOutput) {
-            o = vertexOutput[z];
-            vOutput.push({ name: z, ...o })
+        const createArrayOfObjects = (obj: any) => {
+            const result = [];
+            let o: any;
+            for (let z in obj) {
+                o = obj[z];
+                result.push({ name: z, ...o })
+            }
+            return result;
         }
 
-        for (let z in fragmentOutput) {
-            o = fragmentOutput[z];
-            fOutput.push({ name: z, ...o })
-        }
+        this.vertexShader.inputs = createArrayOfObjects(descriptor.vertexShader.inputs);
+        this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);;
 
-        this.vertexShader.outputs = vOutput;
-        this.fragmentShader.outputs = fOutput;
+        this.vertexShader.outputs = createArrayOfObjects(descriptor.vertexShader.outputs);
+        this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);;
 
         if (descriptor.vertexShader.code) this.vertexShader.code.text = descriptor.vertexShader.code;
         this.vertexShader.main.text = descriptor.vertexShader.main;
@@ -225,17 +223,23 @@ export class RenderPipeline extends Pipeline {
     protected cleanInputs(/*initIO: boolean = false*/) {
         const _inputs = [];
         const t = this.vertexShader.inputs;
+        console.log(t)
         //let o: any;
+        /*
         let k = 0;
+        
         for (let i = 0; i < t.length; i++) {
-            /*
-            o = t[i];
-            if ((o instanceof VertexBufferIO) || (o instanceof TextureIO)) {
+            
+            //o = t[i];
+            //if ((o instanceof VertexBufferIO) || (o instanceof TextureIO)) {
                 //must be overrided
-                continue;
-            }*/
-            _inputs[k++] = t[i];
-        }
+            //    continue;
+            //}
+            //_inputs[k++] = t[i];
+        }*/
+
+        for (let z in t) _inputs.push({ name: z, ...t[z] });
+        console.log("inputs = ", _inputs)
         this.vertexShader.inputs = _inputs;
         return _inputs;
     }
@@ -335,8 +339,10 @@ export class RenderPipeline extends Pipeline {
         if (this.drawConfig.vertexCount === 0) {
             if (this.vertexBuffers.length) {
                 this.drawConfig.vertexCount = this.vertexBuffers[0].nbVertex;
+
             }
         }
+        //console.log("drawConfig = ", this.drawConfig)
 
         if ((this.canvas as any).dimensionChanged) {
             if (this.multisampleTexture) {
@@ -396,8 +402,12 @@ export class RenderPipeline extends Pipeline {
         }
 
         if (buffers) {
+            //console.log("DRAW BUFFERS ", buffers)
+            let k = 0;
             for (let i = 0; i < buffers.length; i++) {
-                renderPass.setVertexBuffer(i, buffers[i].resource.buffer)
+                //if (i > 2) continue;
+                //console.log(" renderPass.setVertexBuffer(", k, ",", buffers[i].resource.getCurrentBuffer(), ", 0,", buffers[i].resource.getCurrentBuffer().size, ")")
+                renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
             }
         }
 
@@ -412,8 +422,9 @@ export class RenderPipeline extends Pipeline {
             renderPass.setIndexBuffer(indexBuffer, indexBuffer.dataType);
             renderPass.drawIndexed(indexBuffer.nbPoint);
         } else {
-            //console.log("drawConfig = ", this.drawConfig)
+
             if (this.drawConfig.vertexCount !== -1) {
+
                 renderPass.draw(this.drawConfig.vertexCount, this.drawConfig.instanceCount, this.drawConfig.firstVertexId, this.drawConfig.firstInstanceId)
             }
         }

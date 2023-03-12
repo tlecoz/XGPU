@@ -61,10 +61,13 @@ export class VertexBuffer implements IShaderResource {
         this.descriptor = descriptor;
 
         const items: any = attributes;
-        let buffer;
+        let buffer, offset;
         for (let name in items) {
             buffer = items[name];
-            this.createArray(name, buffer.type, buffer.offset);
+            offset = buffer.offset;
+            //console.log("=> ", name, buffer.offset)
+
+            this.createArray(name, buffer.type, offset);
         }
         if (descriptor.datas) this.datas = descriptor.datas;
 
@@ -72,6 +75,7 @@ export class VertexBuffer implements IShaderResource {
 
     protected gpuBufferIOs: GPUBuffer[];
     protected gpuBufferIO_index: number = 1;
+
     public initBufferIO(buffers: GPUBuffer[]) {
         this.gpuBufferIOs = buffers;
     }
@@ -80,9 +84,14 @@ export class VertexBuffer implements IShaderResource {
     public get buffer(): GPUBuffer {
         if (this.gpuBufferIOs) {
             const buf: any = this.gpuBufferIOs[this.gpuBufferIO_index++ % 2]
-            //console.warn("buf ", buf.debug);
             return buf;
         }
+        return this.gpuResource;
+    }
+
+    public getCurrentBuffer() {
+
+        if (this.gpuBufferIOs) return this.gpuBufferIOs[(this.gpuBufferIO_index + 1) % 2]
         return this.gpuResource;
     }
 
@@ -159,8 +168,22 @@ export class VertexBuffer implements IShaderResource {
         this.datas = new Float32Array(result);
     }
 
+    public get attributeDescriptor(): any {
+        const result = {};
+        let o;
+        for (let name in this.attributes) {
+            o = this.attributes[name] as VertexAttribute;
+            result[name] = {
+                type: o.format,
+                offset: o.dataOffset
+            }
+        }
+        return result;
+    }
+
     private _byteCount: number = 0;
     public createArray(name: string, dataType: string, offset?: number): VertexAttribute {
+        // console.log("new VertexAttribute ", name, dataType, offset)
         const v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
         const nbCompo = v.nbComponent;
         this._nbComponent += nbCompo;
@@ -286,10 +309,10 @@ export class VertexBuffer implements IShaderResource {
 
 
             if (this.io === 1) {
-                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST /* ------ */ | GPUBufferUsage.COPY_SRC;
+                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX/* ------ | GPUBufferUsage.COPY_SRC*/;
                 this.descriptor.accessMode = "read";
             } else if (this.io === 2) {
-                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.VERTEX;
                 this.descriptor.accessMode = "read_write" as any;
             }
         }
@@ -315,7 +338,7 @@ export class VertexBuffer implements IShaderResource {
 
         let nb = this._nbComponent;
         if (this.nbComponentData) nb = this.nbComponentData;
-
+        console.log("vertex layout ", this.descriptor, this.attributeDescriptor)
         const obj = {
             stepMode: this.descriptor.stepMode,
             arrayStride: Float32Array.BYTES_PER_ELEMENT * nb,

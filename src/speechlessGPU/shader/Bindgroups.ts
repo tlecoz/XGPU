@@ -260,7 +260,7 @@ export class Bindgroups {
 
     public handleComputePipelineResourceIOs() {
         for (let i = 0; i < this.groups.length; i++) {
-            console.log(i, this.groups[i])
+            //console.log(i, this.groups[i])
             this.groups[i].handleComputePipelineResourceIOs();
         }
     }
