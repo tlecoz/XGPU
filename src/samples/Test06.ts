@@ -23,7 +23,7 @@ export class Test06 {
 
             const size = 512;
             const ctx = this.setupCanvas2D(size, size);
-            const nbParticle = 5000;
+            const nbParticle = 15000;
             const particleDatas = this.createParticleDatas(nbParticle, size, size);
 
             const pipeline = new ComputePipeline();

@@ -223,7 +223,7 @@ export class RenderPipeline extends Pipeline {
     protected cleanInputs(/*initIO: boolean = false*/) {
         const _inputs = [];
         const t = this.vertexShader.inputs;
-        console.log(t)
+        //console.log(t)
         //let o: any;
         /*
         let k = 0;
@@ -239,7 +239,7 @@ export class RenderPipeline extends Pipeline {
         }*/
 
         for (let z in t) _inputs.push({ name: z, ...t[z] });
-        console.log("inputs = ", _inputs)
+        //console.log("inputs = ", _inputs)
         this.vertexShader.inputs = _inputs;
         return _inputs;
     }
@@ -324,7 +324,7 @@ export class RenderPipeline extends Pipeline {
 
         this.description.layout = this.gpuPipelineLayout;
 
-        console.log("buildGPUPipeline description = ", this.description)
+        //console.log("buildGPUPipeline description = ", this.description)
         this.gpuPipeline = GPU.createRenderPipeline(this.description);
 
         return this.gpuPipeline;

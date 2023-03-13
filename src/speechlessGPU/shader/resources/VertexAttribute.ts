@@ -43,11 +43,11 @@ export class VertexAttribute {
 
     private _name: string;
     private _dataType: string;
-    private _dataOffset: number;
     private nbValues: number;
     private vertexType: { name: string, nbComponent: number, bytes: number, varType: string };
-    public data: number[];
 
+    public data: number[];
+    public dataOffset: number;
     public mustBeTransfered: boolean = false;
 
     constructor(name: string, dataType: string, offset?: number) {
@@ -56,7 +56,7 @@ export class VertexAttribute {
 
         this._name = name;
         this._dataType = dataType;
-        this._dataOffset = offset;
+        this.dataOffset = offset;
 
         if (VertexAttribute.types[dataType]) {
             this.vertexType = VertexAttribute.types[dataType];
@@ -78,7 +78,7 @@ export class VertexAttribute {
     public get varType(): string { return this.vertexType.varType }
     public get name(): string { return this._name; }
     public get nbComponent(): number { return this.nbValues; }
-    public get dataOffset(): number { return this._dataOffset; }
+
 
     private renameVertexDataType(type: string): string {
         switch (type) {

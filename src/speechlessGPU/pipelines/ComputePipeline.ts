@@ -227,7 +227,7 @@ export class ComputePipeline extends Pipeline {
         const buffer = this.bufferIOs[0].buffer
 
         if (this.onReceiveData) {
-            const buffer = this.bufferIOs[0].buffer
+            //onst buffer = this.bufferIOs[0].buffer
             if (!this.canCallMapAsync) return
 
             if (!this.stagingBuffer) this.stagingBuffer = GPU.createStagingBuffer(this.bufferSize);

@@ -10,7 +10,7 @@ export class VertexShader extends ShaderStage {
     }
 
     public build(pipeline: any, input: ShaderStruct): { code: string, output: ShaderStruct } {
-        console.log("VS inputs = ", input)
+        //console.log("VS inputs = ", input)
         let result = this.code.value + "\n\n";
         const obj = pipeline.bindGroups.getVertexShaderDeclaration();
         result += obj.result;
@@ -33,7 +33,7 @@ export class VertexShader extends ShaderStage {
         result += this.main.value;
         result += "   return output;\n"
         result += "}\n";
-        console.warn(result)
+        //console.warn(result)
         return { code: result, output: output };
     }
 }

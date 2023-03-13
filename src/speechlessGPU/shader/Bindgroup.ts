@@ -175,8 +175,19 @@ export class Bindgroup {
 
 
         if (foundIO) {
-            console.log("attributes = ", bufferIOs[0].attributeDescriptor)
-            const vb: VertexBuffer = new VertexBuffer(bufferIOs[0].attributeDescriptor, { stepMode: "instance" });
+            //console.log("attributes = ", bufferIOs[0].attributeDescriptor)
+
+            const attributes = bufferIOs[0].attributeDescriptor;
+
+            /*
+            const attributes = {
+                radius: { type: "float32", offset: 0 },
+                position: { type: "float32x2", offset: 2 },
+                velocity: { type: "float32x2", offset: 4 },
+            }
+            */
+
+            const vb: VertexBuffer = new VertexBuffer(attributes, { stepMode: "instance" });
 
             this.elements.push({ name, resource: vb })
 
@@ -199,7 +210,7 @@ export class Bindgroup {
             vb.initBufferIO([bufferIOs[0].buffer, bufferIOs[1].buffer])
 
         }
-        console.log("vertexBufferIO = ", this.vertexBufferIO, this.parent)
+        //console.log("vertexBufferIO = ", this.vertexBufferIO, this.parent)
 
     }
 

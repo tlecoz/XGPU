@@ -20,7 +20,7 @@ export class FragmentShader extends ShaderStage {
         const obj = shaderPipeline.bindGroups.getVertexShaderDeclaration();
         result += obj.result;
 
-        console.log("-------- FRAGMENT -----------");
+        //console.log("-------- FRAGMENT -----------");
         //console.log(result)
 
         for (let i = 0; i < this.inputs.length; i++) {
