@@ -134,7 +134,7 @@ export class Bindgroup {
     public handleComputePipelineResourceIOs() {
         //console.warn("handleComputePipelineResourceIOs")
         if (this.vertexBufferIO) {
-            console.log(this.vertexBufferIO.buffers[0])
+            //console.log(this.vertexBufferIO.buffers[0])
             this.createPingPongBindgroup(this.vertexBufferIO.buffers[0], this.vertexBufferIO.buffers[1])
         }
 
@@ -203,7 +203,7 @@ export class Bindgroup {
             buffers.push({ name, resource: vb });
 
 
-            console.log("=====> ", buffers)
+            //console.log("=====> ", buffers)
 
             parentResources[name] = vb;
             parentResources.types.vertexBuffers = buffers;
@@ -228,7 +228,7 @@ export class Bindgroup {
         group.elements = this.getSwappedElements(resource1, resource2);
         //console.log("=> group.elements ", group.elements)
 
-        console.log("MMMMMM")
+        //console.log("MMMMMM")
 
         if (resource1 instanceof VertexBuffer) {
 

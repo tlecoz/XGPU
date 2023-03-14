@@ -3,10 +3,11 @@ import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
 import { MixedPipeline } from "../speechlessGPU/pipelines/MixedPipeline";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { Float, Vec2 } from "../speechlessGPU/shader/PrimitiveType";
+import { Float, Matrix4x4, Vec2 } from "../speechlessGPU/shader/PrimitiveType";
 import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
 import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
+import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
 import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../speechlessGPU/shader/resources/VertexBufferIO";
 import { ShaderType } from "../speechlessGPU/shader/ShaderType";
@@ -25,7 +26,7 @@ export class Test09 extends Sample {
 
         //console.log("START")
         const { bmp, bmp2, video } = this.medias;
-        const size = 2;
+        const size = 10;
         const nbParticle = size * size;
         const particleDatas = this.createParticleDatas(nbParticle, renderer.canvas.width, renderer.canvas.height);
 
@@ -83,7 +84,7 @@ export class Test09 extends Sample {
                 var col = textureSampleLevel(myTexture,mySampler,vec2( (0.5 + idx) / gridSize  , (0.5 + idy) / gridSize  ),0.0);
 
                 let px =  (0.5 + idx) * (p.radius + marge*2.0);
-                let py =  screen.y -  (0.5 + idy) * (p.radius + marge*2.0);
+                let py =    (0.5 + idy) * (p.radius + marge*2.0);
 
                 
                 var out:Particles = particles_out[index];
@@ -97,6 +98,8 @@ export class Test09 extends Sample {
         })
 
 
+        let modelMatrix = new Matrix4x4();
+        //modelMatrix.x = 150;
 
         let quadSize = 0.001;
         mixedPipeline.initFromObject({
@@ -115,6 +118,11 @@ export class Test09 extends Sample {
                             +quadSize, +quadSize, 0.0,
                             -quadSize, +quadSize, 0.0,
                         ])
+                    }),
+                    uniforms: new UniformBuffer({
+                        model: modelMatrix,
+                        projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height),
+
                     })
                 },
                 io: computeResources.bindgroups.io,
@@ -131,8 +139,12 @@ export class Test09 extends Sample {
                 },
                 main: `
                 
-                let a = -1.0 + position / 512.0;
-                output.position = vec4( vertexPos.xy * radius + a, 0.0 , 1.0);
+                let a = 0.;//+position;//-1.0 + position / 512.0;
+
+                let pos =  uniforms.model *  vec4( vertexPos * radius, 1.0);
+                //pos.xy *= radius;
+                output.position = pos;
+                
                 output.color = color;
                 //output.position = vec4( vertexPos.xy + position , 0.0 , 1.0);
                 `

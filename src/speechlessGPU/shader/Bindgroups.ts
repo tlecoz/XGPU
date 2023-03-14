@@ -110,7 +110,7 @@ export class Bindgroups {
                 if (resource instanceof UniformBuffer) {
 
                     let item;
-                    console.log("uniforms = ", resource.items)
+                    //console.log("uniforms = ", resource.items)
 
 
                     for (let z in resource.items) {

@@ -16,10 +16,10 @@ export class MixedPipeline extends RenderPipeline {
     public get computePipeline(): ComputePipeline { return this._computePipeline; }
 
     public buildPipelines() {
-        console.log("build compute")
+        //console.log("build compute")
         this._computePipeline.buildGpuPipeline();
 
-        console.log("build render")
+        //console.log("build render")
         super.buildGpuPipeline();
     }
 

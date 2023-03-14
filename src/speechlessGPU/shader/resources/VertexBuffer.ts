@@ -391,7 +391,7 @@ export class VertexBuffer implements IShaderResource {
             //but we can't swap bindgroupLayout that define the accessMode
             //that's why I forced to use "read_write" for both in that scenario
 
-            console.log("---compute mixed")
+            //console.log("---compute mixed")
 
             if (this.io === 1) {
                 this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE;
@@ -411,7 +411,7 @@ export class VertexBuffer implements IShaderResource {
 
             //that's why I use one buffer with "read" accessMode and a second one with "read_write"
 
-            console.log("---compute")
+            //console.log("---compute")
             this.canRefactorData = false;
             if (this.io === 1) {
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
