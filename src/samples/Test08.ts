@@ -25,7 +25,7 @@ export class Test08 extends Sample {
 
         //console.log("START")
         const { bmp, bmp2, video } = this.medias;
-        const size = 500;
+        const size = 200;
         const nbParticle = size * size;
         const particleDatas = this.createParticleDatas(nbParticle, renderer.canvas.width, renderer.canvas.height);
 

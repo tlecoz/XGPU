@@ -216,6 +216,7 @@ export class VertexBuffer implements IShaderResource {
         let byteCount = 0;
         let length;
         let k = 0, kk = 0;
+
         for (let i = 0; i < len; i += nbCompo) {
 
 
@@ -240,6 +241,7 @@ export class VertexBuffer implements IShaderResource {
                 //-------
                 if (i === 0) {
                     this.vertexArrays[j].dataOffset = k;
+                    //console.log("dataOffset = ", k, this.nbComponent)
                 }
 
                 //-------
@@ -248,7 +250,16 @@ export class VertexBuffer implements IShaderResource {
                 for (let n = 0; n < length; n++) result[k++] = datas[kk++];
             }
 
+            if (i === 0) {
+                //console.log("KKKKK ", k)
+                this.nbComponentData = k;
+            }
+
         }
+
+
+
+
 
 
         this.datas = new Float32Array(result);

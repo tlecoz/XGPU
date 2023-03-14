@@ -81,14 +81,14 @@ export class UniformBuffer implements IShaderResource {
 
             if (type.dataType != oldType) {
                 oldType = type.dataType;
-                console.log("======+>>>>> ", offset % 16)
+                //console.log("======+>>>>> ", offset % 16)
                 offset += 16 - (offset % 16);
-                console.log("-> ", offset)
+                //console.log("-> ", offset)
             }
 
             uniform.startId = offset;
 
-            console.log(uniform.name, offset);
+            //console.log(uniform.name, offset);
 
             if (type.isArray) {
                 if (type.isArrayOfVectors) offset += 16 * type.arrayLength;
@@ -104,13 +104,13 @@ export class UniformBuffer implements IShaderResource {
                     offset += 16;
                 }
 
-                console.log("type = ", type, offset);
+                //console.log("type = ", type, offset);
                 //offset += 16;
             }
 
         }
         this.byteSize = offset;
-        console.log("byteSize = ", this.byteSize)
+        //console.log("byteSize = ", this.byteSize)
     }
 
 
@@ -126,7 +126,7 @@ export class UniformBuffer implements IShaderResource {
             uniform = this.uniforms[i];
             uniform.update();
             if (uniform.mustBeTransfered) {
-                console.log(uniform.name, uniform.startId, uniform.byteLength)
+                //console.log(uniform.name, uniform.startId, uniform.byteLength)
                 uniform.mustBeTransfered = false;
                 GPU.device.queue.writeBuffer(
                     this.gpuResource,

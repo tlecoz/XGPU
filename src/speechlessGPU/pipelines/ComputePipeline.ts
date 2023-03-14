@@ -144,7 +144,7 @@ export class ComputePipeline extends Pipeline {
 
 
             const nbVertex = this.bindGroups.resources.types.vertexBuffers[0].resource.nbVertex;
-            //console.log("=> ", nbVertex)
+            console.log("workgroups => ", nbVertex, nb)
 
             this.setDispatchWorkgroup(Math.ceil(nbVertex / nb))
         }
