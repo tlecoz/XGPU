@@ -1,4 +1,9 @@
-corriger le probleme de reorganisation de donnée des buffer 
+
+uniformBuffer alignment ...
+
+
+
+
 
 gerer plusieurs vertexBufferIO 
 

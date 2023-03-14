@@ -73,22 +73,44 @@ export class UniformBuffer implements IShaderResource {
         let offset = 0;
         let type: GPUType;
         let uniform: PrimitiveType;
+        let oldType = "f32";
         for (let i = 0; i < this.uniforms.length; i++) {
             uniform = this.uniforms[i];
             type = uniform.type;
+
+
+            if (type.dataType != oldType) {
+                oldType = type.dataType;
+                console.log("======+>>>>> ", offset % 16)
+                offset += 16 - (offset % 16);
+                console.log("-> ", offset)
+            }
+
             uniform.startId = offset;
 
-            //console.log(uniform.name, offset);
+            console.log(uniform.name, offset);
 
             if (type.isArray) {
                 if (type.isArrayOfVectors) offset += 16 * type.arrayLength;
                 else offset += 4 * type.nbValues;
             } else if (type.isMatrix) offset += type.nbValues * 4
-            else offset += 16;
+            else {
+
+                if (type.dataType === "f32") {
+                    offset += 4;
+                } else if (type.dataType === "vec2<f32>") {
+                    offset += 8;
+                } else {
+                    offset += 16;
+                }
+
+                console.log("type = ", type, offset);
+                //offset += 16;
+            }
 
         }
         this.byteSize = offset;
-
+        console.log("byteSize = ", this.byteSize)
     }
 
 
@@ -104,7 +126,7 @@ export class UniformBuffer implements IShaderResource {
             uniform = this.uniforms[i];
             uniform.update();
             if (uniform.mustBeTransfered) {
-
+                console.log(uniform.name, uniform.startId, uniform.byteLength)
                 uniform.mustBeTransfered = false;
                 GPU.device.queue.writeBuffer(
                     this.gpuResource,
@@ -213,10 +235,11 @@ export class UniformBuffer implements IShaderResource {
 
     //public get bufferType(): string { return "uniform"; }
 
-    public setPipelineType(pipelineType: "compute" | "render" | "mixed") {
+    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
 
         //use to handle particular cases in descriptor relative to the nature of pipeline
-        if (pipelineType === "compute") this.descriptor.visibility = GPUShaderStage.COMPUTE;
+        if (pipelineType === "compute" || pipelineType === "compute_mixed") this.descriptor.visibility = GPUShaderStage.COMPUTE;
+
         else this.descriptor.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
     }
 }

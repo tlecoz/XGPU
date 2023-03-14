@@ -81,6 +81,7 @@ export class Test06 {
             let oldTime = new Date().getTime();
             pipeline.onReceiveData = (datas: Float32Array) => {
 
+                //console.log(datas.slice(6, 7))
 
                 let time = (new Date().getTime() - oldTime) / 1000000;
                 timeObj.x = time;

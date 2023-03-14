@@ -110,7 +110,7 @@ export class ImageTexture implements IShaderResource {
 
         return {
             binding: bindingId,
-            visibility: GPUShaderStage.FRAGMENT,
+            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
             texture: {
                 sampleType: "float",
                 viewDimension: "2d",
@@ -128,7 +128,7 @@ export class ImageTexture implements IShaderResource {
         }
     }
 
-    public setPipelineType(pipelineType: "compute" | "render" | "mixed") {
+    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
         if (pipelineType) { }
         //use to handle particular cases in descriptor relative to the nature of pipeline
     }

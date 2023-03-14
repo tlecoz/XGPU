@@ -6,7 +6,7 @@ import { Test05 } from "./samples/Test05";
 import { Test06 } from "./samples/Test06";
 import { Test07 } from "./samples/Test07";
 import { Test08 } from "./samples/Test08";
-
+import { Test09 } from "./samples/Test09";
 
 const id = 8;
 
@@ -19,5 +19,5 @@ else if (id === 5) new Test05();
 else if (id === 6) new Test06();
 else if (id === 7) new Test07();
 else if (id === 8) new Test08();
-
+else if (id === 9) new Test09();
 

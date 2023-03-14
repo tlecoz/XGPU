@@ -83,9 +83,11 @@ export class VertexBuffer implements IShaderResource {
 
     public get buffer(): GPUBuffer {
         if (this.gpuBufferIOs) {
+
             const buf: any = this.gpuBufferIOs[this.gpuBufferIO_index++ % 2]
             return buf;
         }
+
         return this.gpuResource;
     }
 
@@ -117,8 +119,10 @@ export class VertexBuffer implements IShaderResource {
     protected refactorInfos: { nbCompo: number, nbEmpty: number }[] = [];
     //protected emptyMapIndex:number[] = [];
 
+    /*
     private refactorData(): void {
-        //return
+
+
         //console.warn("Warning , VertexBuffer.datas has been refactored in order to respect bytes-align")
         const result = [];
         const aligns = [];
@@ -138,8 +142,76 @@ export class VertexBuffer implements IShaderResource {
         const datas = this.datas;
         const len = datas.length
 
-        console.log(new Float32Array(datas.buffer))
-        console.log("refactorData nbData = ", nbData, " , nbCompo = ", nbCompo, " , lengths[0] = ", lengths[0], ", len = ", len)
+        //console.log(new Float32Array(datas.buffer))
+        //console.log("refactorData nbData = ", nbData, " , nbCompo = ", nbCompo, " , lengths[0] = ", lengths[0], ", len = ", len)
+
+        let byteCount = 0;
+        let length;
+        let k = 0, kk = 0;
+        for (let i = 0; i < len; i += nbCompo) {
+
+
+            for (let j = 0; j < nbData; j++) {
+                if (j > 0) {
+
+                    const dif = byteCount % aligns[j];
+
+                    if (dif !== 0) {
+                        const v = values[j - 1];
+                        const nb = Math.ceil(dif / v);
+
+                        byteCount += nb * v;
+                        for (let n = 0; n < nb; n++) result[k++] = 0;
+                    }
+                }
+
+                length = lengths[j];
+
+                byteCount += values[j] * length;
+
+                //-------
+                if (i === 0) {
+                    this.vertexArrays[j].dataOffset = k;
+                }
+
+                //-------
+                //console.log(j, k)
+
+                for (let n = 0; n < length; n++) result[k++] = datas[kk++];
+            }
+
+        }
+
+
+        this.datas = new Float32Array(result);
+    }*/
+
+
+
+    private refactorData(): void {
+
+        if (!this.canRefactorData) return;
+        //console.warn("Warning , VertexBuffer.datas has been refactored in order to respect bytes-align")
+        const result = [];
+        const aligns = [];
+        const lengths = [];
+        const values = [];
+        let type: GPUType;
+
+        for (let i = 0; i < this.vertexArrays.length; i++) {
+            type = new GPUType(this.vertexArrays[i].varType);
+            values[i] = type.byteValue;
+            lengths[i] = this.vertexArrays[i].nbComponent;
+            aligns[i] = type.byteAlign;
+        }
+
+        const nbData = lengths.length;
+        const nbCompo = this.nbComponent;
+        const datas = this.datas;
+        const len = datas.length
+
+        //console.log(new Float32Array(datas.buffer))
+        //console.log("refactorData nbData = ", nbData, " , nbCompo = ", nbCompo, " , lengths[0] = ", lengths[0], ", len = ", len)
 
         let byteCount = 0;
         let length;
@@ -181,6 +253,7 @@ export class VertexBuffer implements IShaderResource {
 
         this.datas = new Float32Array(result);
     }
+
 
     public get attributeDescriptor(): any {
         const result = {};
@@ -286,7 +359,8 @@ export class VertexBuffer implements IShaderResource {
         }
     }
 
-    public setPipelineType(pipelineType: "compute" | "render" | "mixed") {
+    protected canRefactorData: boolean = true;
+    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
 
         //use to handle particular cases in descriptor relative to the nature of pipeline
 
@@ -294,7 +368,7 @@ export class VertexBuffer implements IShaderResource {
             this.descriptor.accessMode = "read";
             this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 
-        } else if (pipelineType === "mixed") {
+        } else if (pipelineType === "compute_mixed") {
 
             //i use accessMode = "read_write" for both here because we will apply a ping-pong structure: 
             //the computeShader result will be used as input of the computeShader itself for the next frame. 
@@ -306,12 +380,13 @@ export class VertexBuffer implements IShaderResource {
             //but we can't swap bindgroupLayout that define the accessMode
             //that's why I forced to use "read_write" for both in that scenario
 
+            console.log("---compute mixed")
 
             if (this.io === 1) {
                 this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE;
-                this.descriptor.accessMode = "read_write";
+                this.descriptor.accessMode = "read";
             } else if (this.io === 2) {
-                this.descriptor.usage = GPUBufferUsage.COPY_SRC | GPUBufferUsage.STORAGE;
+                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
                 this.descriptor.accessMode = "read_write";
             }
 
@@ -325,12 +400,13 @@ export class VertexBuffer implements IShaderResource {
 
             //that's why I use one buffer with "read" accessMode and a second one with "read_write"
 
-
+            console.log("---compute")
+            this.canRefactorData = false;
             if (this.io === 1) {
-                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX/* ------ | GPUBufferUsage.COPY_SRC*/;
+                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read";
             } else if (this.io === 2) {
-                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.VERTEX;
+                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read_write" as any;
             }
         }

@@ -26,14 +26,14 @@ export class Pipeline {
     protected gpuBindgroups: GPUBindGroup[] = [];
     protected gpuBindGroupLayouts: GPUBindGroupLayout[] = [];
     protected gpuPipelineLayout: GPUPipelineLayout;
-    protected type: "compute" | "mixed" | "render" = null;
+    protected type: "compute" | "compute_mixed" | "render" = null;
 
     constructor() {
         this.bindGroups = new Bindgroups("pipeline");
     }
-    public get isComputePipeline(): boolean { return this.type === "compute"; }
+    public get isComputePipeline(): boolean { return this.type === "compute" || this.type === "compute_mixed"; }
     public get isRenderPipeline(): boolean { return this.type === "render"; }
-    public get isMixedPipeline(): boolean { return this.type === "mixed"; }
+    public get isMixedPipeline(): boolean { return this.type === "compute_mixed"; }
 
     public addBindgroup(group: Bindgroup) {
         this.bindGroups.add(group);

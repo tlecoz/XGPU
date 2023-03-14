@@ -131,7 +131,7 @@ export class TextureSampler implements IShaderResource {
 
         return {
             binding: bindingId,
-            visibility: GPUShaderStage.FRAGMENT,
+            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
             sampler: {
                 type: type
             },
@@ -146,7 +146,7 @@ export class TextureSampler implements IShaderResource {
         }
     }
 
-    public setPipelineType(pipelineType: "compute" | "render" | "mixed") {
+    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
         if (pipelineType) { }
         //use to handle particular cases in descriptor relative to the nature of pipeline
     }

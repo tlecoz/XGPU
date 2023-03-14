@@ -30,7 +30,6 @@ export class RenderPipeline extends Pipeline {
 
     protected gpuPipeline: GPURenderPipeline;
 
-    protected _computePipeline: ComputePipeline
     public onDrawEnd: () => void;
 
     constructor(renderer: GPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
@@ -52,13 +51,7 @@ export class RenderPipeline extends Pipeline {
         this.outputColor = this.createColorAttachment(bgColor);
     }
 
-    public get computePipeline(): ComputePipeline { return this._computePipeline }
-    public set computePipeline(computePipeline: ComputePipeline) {
-        this._computePipeline = computePipeline;
-        computePipeline.useRenderPipeline = true;
-        if (computePipeline) this.type = "mixed";
-        else this.type = "render";
-    }
+
 
 
     public initFromObject(descriptor: {

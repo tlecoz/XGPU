@@ -1,11 +1,15 @@
 import { BuiltIns } from "../speechlessGPU/Builtins";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
+import { MixedPipeline } from "../speechlessGPU/pipelines/MixedPipeline";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { Float } from "../speechlessGPU/shader/PrimitiveType";
+import { Float, Vec2 } from "../speechlessGPU/shader/PrimitiveType";
+import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
+import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../speechlessGPU/shader/resources/VertexBufferIO";
+import { ShaderType } from "../speechlessGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 
 export class Test08 extends Sample {
@@ -20,12 +24,15 @@ export class Test08 extends Sample {
     protected async start(renderer: GPURenderer) {
 
         //console.log("START")
-
-        const nbParticle = 10;
+        const { bmp, bmp2, video } = this.medias;
+        const size = 500;
+        const nbParticle = size * size;
         const particleDatas = this.createParticleDatas(nbParticle, renderer.canvas.width, renderer.canvas.height);
 
+        let mixedPipeline = new MixedPipeline(renderer);
+        mixedPipeline.setupDraw({ instanceCount: nbParticle, vertexCount: 6 })
 
-        let computePipeline = new ComputePipeline();
+        let computePipeline = mixedPipeline.computePipeline; //new ComputePipeline();
         let computeResources = computePipeline.initFromObject({
             bindgroups: {
                 io: {
@@ -33,6 +40,7 @@ export class Test08 extends Sample {
                         radius: VertexBuffer.Float(),
                         position: VertexBuffer.Vec2(),
                         velocity: VertexBuffer.Vec2(),
+                        color: VertexBuffer.Vec4(),
 
                     },
                         { datas: particleDatas }
@@ -40,8 +48,14 @@ export class Test08 extends Sample {
                 },
                 datas: {
                     uniforms: new UniformBuffer({
-                        time: new Float(0, true)
-                    })
+                        time: new Float(0, true),
+                        gridSize: new Float(size, true),
+                        time2: new Float(0, true),
+                        test: new Vec2(size, size, true),
+                        test2: new Vec2(size, size, true),
+                    }),
+                    mySampler: new TextureSampler({ minFilter: "linear", magFilter: "linear" }),
+                    myTexture: new ImageTexture({ source: bmp }),
                 }
             }, computeShader: {
                 inputs: {
@@ -55,28 +69,38 @@ export class Test08 extends Sample {
                 }
 
 
+                
+
                 var p = particles[index];
                 var id = f32(index);
-                p.radius = 10.0 + id * 10.0;
+
+                
+                let marge = 1.0;
+                p.radius = 2.0;// 40.0 ;
+
+                var idx = (id % test2.x);
+                var idy = floor(id / test2.y);
+
+                var col = textureSampleLevel(myTexture,mySampler,vec2( (0.5 + idx) / gridSize  , (0.5 + idy) / gridSize  ),0.0);
+
+                let px =  0.5 + idx * (p.radius + marge*2.0);
+                let py =  0.5 + idy * (p.radius + marge*2.0);
+
                 
                 var out:Particles = particles_out[index];
-                particles_out[index].radius = p.radius;
-                particles_out[index].position =  vec2(250 + id * 60.0,512.0);
+                particles_out[index].radius = p.radius ;
+                particles_out[index].position =  vec2(px,py); //vec2(250 + id * 60.0 + sin(time) * 100.0 ,512.0);
                 particles_out[index].velocity = p.velocity;
+                particles_out[index].color = col;
                
                 `
             }
         })
 
 
-        let renderPipeline = new RenderPipeline(renderer);
-        renderPipeline.setupDraw({
-            instanceCount: nbParticle,
-            vertexCount: 6
-        })
 
         let quadSize = 0.001;
-        renderPipeline.initFromObject({
+        mixedPipeline.initFromObject({
 
             bindgroups: {
                 vertexResources: {
@@ -95,14 +119,7 @@ export class Test08 extends Sample {
                     })
                 },
                 io: computeResources.bindgroups.io,
-                /*io: {
-                    
-                    particles: new VertexBuffer({
-                        radius: VertexBuffer.Float(),
-                        position: VertexBuffer.Vec2(1),
-                        velocity: VertexBuffer.Vec2(3)
-                    }, { datas: particleDatas, stepMode: "instance" })
-                }*/
+
             },
 
             vertexShader: {
@@ -110,13 +127,14 @@ export class Test08 extends Sample {
                     instanceId: BuiltIns.vertexInputs.instanceIndex
                 },
                 outputs: {
-                    position: BuiltIns.vertexOutputs.position
+                    position: BuiltIns.vertexOutputs.position,
+                    color: ShaderType.Vec4
                 },
                 main: `
                 
                 let a = -1.0 + position / 512.0;
                 output.position = vec4( vertexPos.xy * radius + a, 0.0 , 1.0);
-                
+                output.color = color;
                 //output.position = vec4( vertexPos.xy + position , 0.0 , 1.0);
                 `
             },
@@ -126,7 +144,7 @@ export class Test08 extends Sample {
                     color: BuiltIns.fragmentOutputs.color
                 },
                 main: `
-                    output.color = vec4(1.0,0.0,0.0,1.0);
+                    output.color = color;//vec4(1.0,0.0,0.0,1.0);
                 `
             }
 
@@ -134,21 +152,16 @@ export class Test08 extends Sample {
         })
 
 
-
-        computePipeline.buildGpuPipeline();
-
-
-
-        renderPipeline.buildGpuPipeline();
+        mixedPipeline.buildPipelines()
 
         /*
         computePipeline.onReceiveData = (data: Float32Array) => {
-            console.log(data.slice(0, 5))
-        }*/
-        computePipeline.nextFrame();
-        computePipeline.nextFrame();
+            console.log(data.slice(0, 6))
+        }
+        */
 
-        //const time = computeResources.bindgroups.datas.uniforms.items.time;
+        const time = computeResources.bindgroups.datas.uniforms.items.time;
+
         //console.log("time = ", time)
 
 
@@ -157,13 +170,15 @@ export class Test08 extends Sample {
 
 
         let oldTime = new Date().getTime();
-        renderPipeline.onDrawEnd = () => {
-            //time.x = (new Date().getTime() - oldTime) / 1000000;
+        mixedPipeline.onDrawEnd = () => {
+            //renderPipeline.onDrawEnd = () => {
+
+            time.x = (new Date().getTime() - oldTime) / 1000;
             //console.log("nextFrame")
             computePipeline.nextFrame();
         }
 
-        renderer.addPipeline(renderPipeline);
+        renderer.addPipeline(mixedPipeline);
 
 
     }
@@ -182,9 +197,9 @@ export class Test08 extends Sample {
             a = Math.random() * pi2;
             speedX = Math.cos(a);
             speedY = Math.sin(a);
-            console.log(x, y)
+
             //datas.push(radius, x, y, speedX, speedY, x, y);
-            datas.push(radius, x, y, speedX, speedY);
+            datas.push(radius, x, y, speedX, speedY, 0, 0, 0, 1);
             //datas.push(x, y, speedX, speedY);
         }
         return new Float32Array(datas);

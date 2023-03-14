@@ -30,7 +30,7 @@ export class ComputePipeline extends Pipeline {
     }
 
     public set useRenderPipeline(b: boolean) {
-        if (b) this.type = "mixed";
+        if (b) this.type = "compute_mixed";
         else this.type = "compute";
     }
 
@@ -227,7 +227,7 @@ export class ComputePipeline extends Pipeline {
         const buffer = this.bufferIOs[0].buffer
 
         if (this.onReceiveData) {
-            //onst buffer = this.bufferIOs[0].buffer
+
             if (!this.canCallMapAsync) return
 
             if (!this.stagingBuffer) this.stagingBuffer = GPU.createStagingBuffer(this.bufferSize);

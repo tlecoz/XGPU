@@ -21,7 +21,7 @@ export class Test07 extends Sample {
 
         console.log("START")
 
-        const nbParticle = 3000000;
+        const nbParticle = 1000000;
         const particleDatas = this.createParticleDatas(nbParticle, renderer.canvas.width, renderer.canvas.height);
 
         let computePipeline = new ComputePipeline();
@@ -72,11 +72,11 @@ export class Test07 extends Sample {
                 
                 
                 
-                p.position.x = cx + cos( a+ uniforms.time) * d ;  //sin( p.velocity.x * uniforms.time) * (100.0 + cos(uniforms.time)*100.0);
-                p.position.y = cy + sin(a + uniforms.time) * d ;
+                p.position.x = cx + cos( a + uniforms.time ) * d ;  //sin( p.velocity.x * uniforms.time) * (100.0 + cos(uniforms.time)*100.0);
+                p.position.y = cy + sin(a + uniforms.time ) * d ;
                 
                 var out:Particles = particles_out[index];
-                particles_out[index].radius = abs(time + sin(f32(index)/100.0));
+                particles_out[index].radius = (5+abs(sin( time*10.0 + a) * 5.0));
                 particles_out[index].position =  p.position;
                 particles_out[index].velocity = vec2(cos(a + sin(d)) *2.15);
                
@@ -91,7 +91,7 @@ export class Test07 extends Sample {
             vertexCount: 6
         })
 
-        let quadSize = 0.0004;
+        let quadSize = 0.0001;
         renderPipeline.initFromObject({
 
             bindgroups: {
@@ -142,7 +142,7 @@ export class Test07 extends Sample {
         })
 
 
-
+        computePipeline.useRenderPipeline = true;
         computePipeline.buildGpuPipeline();
 
 
