@@ -80,9 +80,21 @@ export class UniformBuffer implements IShaderResource {
 
 
             if (type.dataType != oldType) {
+
                 oldType = type.dataType;
+
+                if (type.dataType === "vec2<f32>") {
+                    if (offset > 8) {
+                        offset += 16 - (offset % 16);
+                    }
+                } else {
+                    offset += 16 - (offset % 16);
+                }
+
+
+
                 //console.log("======+>>>>> ", offset % 16)
-                offset += 16 - (offset % 16);
+
                 //console.log("-> ", offset)
             }
 
