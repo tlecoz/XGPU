@@ -26,33 +26,46 @@ export class Test09 extends Sample {
 
         //console.log("START")
         const { bmp, bmp2, video } = this.medias;
-        const size = 10;
-        const nbParticle = size * size;
-        const particleDatas = this.createParticleDatas(nbParticle, renderer.canvas.width, renderer.canvas.height);
+
+        const mediaW = bmp.width;
+        const mediaH = bmp.height;
+
+        console.log("media = ", mediaW, mediaH)
+
+        const nbParticle = renderer.canvas.width * renderer.canvas.height;
+        console.log("nbParticle = ", nbParticle)
 
         let mixedPipeline = new MixedPipeline(renderer);
         mixedPipeline.setupDraw({ instanceCount: nbParticle, vertexCount: 6 })
+        mixedPipeline.setupDepthStencilView({ size: [1024, 1024, 1] })
+
+
+
 
         let computePipeline = mixedPipeline.computePipeline; //new ComputePipeline();
         let computeResources = computePipeline.initFromObject({
             bindgroups: {
                 io: {
                     particles: new VertexBufferIO({
-                        radius: VertexBuffer.Float(),
-                        position: VertexBuffer.Vec2(),
-                        velocity: VertexBuffer.Vec2(),
-                        color: VertexBuffer.Vec4(),
+
+                        //ra: VertexBuffer.Float(),
+                        //ra7: VertexBuffer.Float(),
+                        //radius: VertexBuffer.Vec2(),
+                        //r2: VertexBuffer.Vec2(),
+
+
+                        position: VertexBuffer.Vec3(),
+                        r5: VertexBuffer.Float(),
+                        //radius2: VertexBuffer.Vec2()
 
                     },
-                        { datas: particleDatas }
+                        { datas: new Float32Array(nbParticle * 4) }
                     ),
                 },
                 datas: {
                     uniforms: new UniformBuffer({
-                        time: new Float(0, true),
-                        gridSize: new Float(size, true),
+                        mediaSize: new Vec2(mediaW, mediaH, true),
                         screen: new Vec2(renderer.canvas.width, renderer.canvas.height, true)
-
                     }),
                     mySampler: new TextureSampler({ minFilter: "linear", magFilter: "linear" }),
                     myTexture: new ImageTexture({ source: bmp }),
@@ -62,12 +75,13 @@ export class Test09 extends Sample {
                     global_id: BuiltIns.computeInputs.globalInvocationId
                 },
                 main: `
+                /*
                 let nbParticle = arrayLength(&particles);
-                let index = global_id.x;
+               
                 if(index >= nbParticle){
                     return;
-                }
-
+                }*/
+                let index = global_id.x;
 
                 
 
@@ -75,33 +89,43 @@ export class Test09 extends Sample {
                 var id = f32(index);
 
                 
-                let marge = 1.0;
-                p.radius = 100.0;// 40.0 ;
+               
+                var idx = (id % screen.x);
+                var idy = floor(id / screen.x);
 
-                var idx = (id % gridSize);
-                var idy = floor(id / gridSize);
+                
 
-                var col = textureSampleLevel(myTexture,mySampler,vec2( (0.5 + idx) / gridSize  , (0.5 + idy) / gridSize  ),0.0);
+                let px = -0.5+(idx / screen.x) ;
+                let py = -0.5+(idy / screen.y) ;
 
-                let px =  (0.5 + idx) * (p.radius + marge*2.0);
-                let py =    (0.5 + idy) * (p.radius + marge*2.0);
+                var col = textureSampleLevel(myTexture,mySampler,vec2( (0.5 + px) , (0.5+ py)),0.0);
+
+
+
+                let pz = distance(col.rgb,vec3(0.5)) ;
 
                 
                 var out:Particles = particles_out[index];
-                particles_out[index].radius = p.radius ;
-                particles_out[index].position =  vec2(px,py); //vec2(250 + id * 60.0 + sin(time) * 100.0 ,512.0);
-                particles_out[index].velocity = p.velocity;
-                particles_out[index].color = col;
+                
+                particles_out[index].position =  vec3(px,py,pz);
+               
                
                 `
             }
         })
 
+        computePipeline.buildGpuPipeline();
+        computePipeline.nextFrame();
+
+
 
         let modelMatrix = new Matrix4x4();
-        //modelMatrix.x = 150;
+        //modelMatrix.z = -0.73
 
-        let quadSize = 0.001;
+        let viewMatrix = new Matrix4x4();
+        viewMatrix.z = 0.;
+
+        let quadSize = 1 / 1024;
         mixedPipeline.initFromObject({
 
             bindgroups: {
@@ -121,7 +145,9 @@ export class Test09 extends Sample {
                     }),
                     uniforms: new UniformBuffer({
                         model: modelMatrix,
-                        projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height),
+                        view: viewMatrix,
+                        projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height, 45),
+
 
                     })
                 },
@@ -139,14 +165,10 @@ export class Test09 extends Sample {
                 },
                 main: `
                 
-                let a = 0.;//+position;//-1.0 + position / 512.0;
-
-                let pos =  uniforms.model *  vec4( vertexPos * radius, 1.0);
-                //pos.xy *= radius;
-                output.position = pos;
                 
-                output.color = color;
-                //output.position = vec4( vertexPos.xy + position , 0.0 , 1.0);
+
+                output.position = uniforms.projection *  uniforms.view * uniforms.model * vec4( (vertexPos.xy + position.xy)*1024.0 ,position.z*100.0, 1.0);
+                output.color = vec4(vec3(position.z),1.0);
                 `
             },
 
@@ -165,11 +187,7 @@ export class Test09 extends Sample {
 
         mixedPipeline.buildPipelines()
 
-        /*
-        computePipeline.onReceiveData = (data: Float32Array) => {
-            console.log(data.slice(0, 6))
-        }
-        */
+
 
         const time = computeResources.bindgroups.datas.uniforms.items.time;
 
@@ -182,9 +200,14 @@ export class Test09 extends Sample {
 
         let oldTime = new Date().getTime();
         mixedPipeline.onDrawEnd = () => {
+            modelMatrix.rotationY += 0.01;
+            modelMatrix.rotationX += 0.01;
+            modelMatrix.rotationZ += 0.01;
+
+            viewMatrix.z = 1000
+
             //renderPipeline.onDrawEnd = () => {
 
-            time.x = (new Date().getTime() - oldTime) / 1000;
             //console.log("nextFrame")
             computePipeline.nextFrame();
         }
@@ -197,22 +220,4 @@ export class Test09 extends Sample {
 
 
 
-    private createParticleDatas(nb: number, w, h) {
-        const pi2 = Math.PI * 2;
-        let radius: number, x: number, y: number, a: number, speedX: number, speedY: number;
-        const datas: number[] = [];
-        for (let i = 0; i < nb; i++) {
-            radius = 40;
-            x = 250//(0.5 + i % 10) * (w / 10);//Math.random() * w;
-            y = h / 2 + 50 * i;// + ((i / 10) >> 0) * (h / 10)//Math.random() * h;
-            a = Math.random() * pi2;
-            speedX = Math.cos(a);
-            speedY = Math.sin(a);
-
-            //datas.push(radius, x, y, speedX, speedY, x, y);
-            datas.push(radius, x, y, speedX, speedY, 0, 0, 0, 1);
-            //datas.push(x, y, speedX, speedY);
-        }
-        return new Float32Array(datas);
-    }
 }

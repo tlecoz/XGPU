@@ -78,10 +78,10 @@ export class UniformBuffer implements IShaderResource {
             uniform = this.uniforms[i];
             type = uniform.type;
 
-            console.log("#0 ", offset)
+            //console.log("#0 ", offset)
             if (type.dataType != oldType && offset > 0) {
 
-                oldType = type.dataType;
+
 
                 if (type.dataType === "vec2<f32>") {
                     if (offset > 8) {
@@ -98,15 +98,21 @@ export class UniformBuffer implements IShaderResource {
 
             }
 
+            oldType = type.dataType;
+
             uniform.startId = offset;
 
-            console.log(uniform.name, offset);
+            // console.log(uniform.name, offset);
 
             if (type.isArray) {
+
                 if (type.isArrayOfVectors) offset += 16 * type.arrayLength;
                 else offset += 4 * type.nbValues;
-            } else if (type.isMatrix) offset += type.nbValues * 4
-            else {
+            } else if (type.isMatrix) {
+                //console.log("nbValue = ", offset, type.nbValues)
+                offset += type.nbValues * 4
+                //console.log("=> ", offset)
+            } else {
 
                 if (type.dataType === "f32") {
                     offset += 4;
@@ -122,7 +128,7 @@ export class UniformBuffer implements IShaderResource {
 
         }
         this.byteSize = offset;
-        console.log("byteSize = ", this.byteSize)
+        //console.log("byteSize = ", this.byteSize)
     }
 
 

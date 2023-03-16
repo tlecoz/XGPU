@@ -210,24 +210,29 @@ export class VertexBuffer implements IShaderResource {
         const datas = this.datas;
         const len = datas.length
 
+
         //console.log(new Float32Array(datas.buffer))
         //console.log("refactorData nbData = ", nbData, " , nbCompo = ", nbCompo, " , lengths[0] = ", lengths[0], ", len = ", len)
 
         let byteCount = 0;
         let length;
         let k = 0, kk = 0;
-
+        let dif;
         for (let i = 0; i < len; i += nbCompo) {
 
-
+            if (i == 0) console.log("nb = ", len, nbData)
             for (let j = 0; j < nbData; j++) {
                 if (j > 0) {
 
                     const dif = byteCount % aligns[j];
 
+
+
                     if (dif !== 0) {
                         const v = values[j - 1];
                         const nb = Math.ceil(dif / v);
+
+
 
                         byteCount += nb * v;
                         for (let n = 0; n < nb; n++) result[k++] = 0;
@@ -251,15 +256,24 @@ export class VertexBuffer implements IShaderResource {
             }
 
             if (i === 0) {
-                //console.log("KKKKK ", k)
-                this.nbComponentData = k;
+                console.log("KKKKK ", k)
+
+                dif = (4 - k % 4) % 4;
+
+                this.nbComponentData = Math.ceil(k / 4) * 4;
+
+                console.log("dif = ", dif)
+            }
+
+            for (let o = 0; o < dif; o++) {
+                result[k++] = 0;
             }
 
         }
 
 
 
-
+        console.log("datas.length = ", result.length)
 
 
         this.datas = new Float32Array(result);
@@ -378,6 +392,7 @@ export class VertexBuffer implements IShaderResource {
         if (pipelineType === "render") {
             this.descriptor.accessMode = "read";
             this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
+            this.canRefactorData = false;
 
         } else if (pipelineType === "compute_mixed") {
 
@@ -474,9 +489,10 @@ export class VertexBuffer implements IShaderResource {
     public createGpuResource() {
 
 
-        if (!this.datas || this.gpuBufferIOs || this.gpuResource) return;
+        if (!this.datas || this.gpuBufferIOs) return;
         if (this.mustRefactorData) this.refactorData();
 
+        if (this.gpuResource) this.gpuResource.destroy();
 
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = GPU.device.createBuffer({
@@ -501,6 +517,7 @@ export class VertexBuffer implements IShaderResource {
 
         }
 
+        if (this.datas.byteLength != this._bufferSize) this.createGpuResource();
 
         GPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
 

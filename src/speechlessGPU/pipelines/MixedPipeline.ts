@@ -18,7 +18,7 @@ export class MixedPipeline extends RenderPipeline {
     public buildPipelines() {
         //console.log("build compute")
         this._computePipeline.buildGpuPipeline();
-
+        this._computePipeline.nextFrame();
         //console.log("build render")
         super.buildGpuPipeline();
     }

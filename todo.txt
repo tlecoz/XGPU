@@ -1,8 +1,9 @@
 
-uniformBuffer alignment ...
 
 
 
+
+VectorGraphics : D:\WWW\NEW_OLD\xshader_and_xfilters
 
 
 gerer plusieurs vertexBufferIO 
@@ -33,10 +34,6 @@ AudioShader ?
 
 
 
-- computePipeline
-
-  => regler les pbm d'usage et de visibilité en fonction de si on utile une RenderPipeline, une ComplexPipeline ou une ComputePipeline
-
 
 
 - instanciation de plusieurs elements dans un canvas en utilisant la meme pipeline
@@ -44,7 +41,7 @@ AudioShader ?
      => ajout d'une propriété 'clonable' sur les IShaderResource (pour que plusieurs pipeline puisse exploiter le meme VertexBuffer par exemple)
   => différencier le build des layout et l'exploitation des bindgroup 
 
-- sortir GPU du renderer pour avoir plusieurs renderer 
+
   => appeler Renderer GPUCanvas 
 
 - creer un deuxieme canvas et une deuxieme pipeline 

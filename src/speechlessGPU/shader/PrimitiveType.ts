@@ -639,6 +639,7 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
     public update() {
 
 
+
         mat4.identity(this);
 
         mat4.rotate(this, this, this._rx, vec3.fromValues(1, 0, 0));
