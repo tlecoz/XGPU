@@ -1,5 +1,4 @@
-import { GPU } from "../../GPU";
-import { Pipeline } from "../../pipelines/Pipeline";
+import { SLGPU } from "../../SLGPU";
 import { IShaderResource } from "./IShaderResource";
 
 export type TextureSamplerDescriptor = {
@@ -99,7 +98,7 @@ export class TextureSampler implements IShaderResource {
 
     public createGpuResource(): void {
         if (!this.gpuResource) {
-            this.gpuResource = GPU.device.createSampler(this.descriptor);
+            this.gpuResource = SLGPU.device.createSampler(this.descriptor);
         }
     }
     public destroyGpuResource() {

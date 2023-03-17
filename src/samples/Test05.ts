@@ -88,9 +88,9 @@ export class Test05 extends Sample {
                 
                 var pos = transform.matrix * vec4(p ,1.0) ;
                 
-                output.position = vec4(pos.xyz + vec3(0.0,0.0,0.5) , 1.0);
+                output.position = vec4(pos.xyz  , 1.0);
                 
-                output.fragUV = 0.5 + vertexPos.xy;
+                output.fragUV = (1.0 + vertexPos.xy)*0.5;
                 output.fragPosition = 0.5+ (vec4<f32>(vertexPos, 1.0));
                 `
             },
@@ -111,6 +111,8 @@ export class Test05 extends Sample {
     
                 output.color *= fragPosition;      
                 output.color.a *= 0.5 ;  
+
+                
                 `
             }
         });
@@ -139,7 +141,7 @@ export class Test05 extends Sample {
             //matrix.rotationX = Math.sin((Date.now() / 1000)) * Math.PI * 2;
             //matrix.rotationY = Math.sin((Date.now() / 1000)) * Math.PI * 2;
             matrix.rotationZ = Math.sin((Date.now() / 1000)) * Math.PI * 2;
-            matrix.z = Math.sin((Date.now() / 1000)) * 0.5;
+            //matrix.z = Math.sin((Date.now() / 1000)) * 0.5;
             //mat4.rotate(model, temp, rotaX, vec3.fromValues(1, 0, 0));
             //mat4.rotate(model, temp, rotaY, vec3.fromValues(0, 1, 0));
             //mat4.rotate(model, temp, rotaZ, vec3.fromValues(0, 0, 1));
@@ -152,8 +154,8 @@ export class Test05 extends Sample {
             //mat4.multiply(m, mat4.perspective(mat4.create(), (Math.PI * 2) / 5, 1, 0.1, 10000), m);
 
             //matrix.setMatrix(m as Float32Array);
-            //matrix.z = Math.sin((Date.now() / 1000)) * 500;
-            //matrix.scaleX = matrix.scaleY = ((500 + matrix.z) / 1000) * 2
+            var t = Math.sin((Date.now() / 1000)) * 500;
+            matrix.scaleX = matrix.scaleY = 0.5;//((500 + t) / 1000) * 2
 
 
             //uniforms.dimension.data.x = Math.sin(Date.now() / 1000);
@@ -162,5 +164,9 @@ export class Test05 extends Sample {
         pipeline.setupDepthStencilView({ size: [renderer.canvas.width, renderer.canvas.height], format: "depth24plus" })
         pipeline.buildGpuPipeline();
         renderer.addPipeline(pipeline);
+
+        pipeline.onDrawEnd = () => {
+            //console.log("update")
+        }
     }
 }

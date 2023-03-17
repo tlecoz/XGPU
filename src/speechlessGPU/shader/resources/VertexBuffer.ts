@@ -1,6 +1,5 @@
-import { GPU } from "../../GPU";
+import { SLGPU } from "../../SLGPU";
 import { GPUType } from "../../GPUType";
-import { Pipeline } from "../../pipelines/Pipeline";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
 import { VertexAttribute } from "./VertexAttribute";
@@ -269,6 +268,8 @@ export class VertexBuffer implements IShaderResource {
                 result[k++] = 0;
             }
 
+
+
         }
 
 
@@ -494,12 +495,16 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.gpuResource) this.gpuResource.destroy();
 
+
+
         this._bufferSize = this.datas.byteLength;
-        this.gpuResource = GPU.device.createBuffer({
+        this.gpuResource = SLGPU.device.createBuffer({
             size: this.datas.byteLength,
             usage: this.descriptor.usage,
             mappedAtCreation: false,
         })
+
+
     }
 
     public destroyGpuResource() {
@@ -519,7 +524,9 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.datas.byteLength != this._bufferSize) this.createGpuResource();
 
-        GPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
+
+
+        SLGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
 
         /*
         console.warn("DATA ", this.gpuResource.mapState)

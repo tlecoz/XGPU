@@ -1,9 +1,11 @@
 import { BuiltIns } from "../speechlessGPU/Builtins";
+import { SLGPU } from "../speechlessGPU/SLGPU";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
 import { MixedPipeline } from "../speechlessGPU/pipelines/MixedPipeline";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { Float, Matrix4x4, Vec2 } from "../speechlessGPU/shader/PrimitiveType";
+import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
+import { Matrix4x4, Vec2 } from "../speechlessGPU/shader/PrimitiveType";
 import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
 import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
@@ -29,7 +31,7 @@ export class Test09 extends Sample {
 
         const mediaW = bmp.width;
         const mediaH = bmp.height;
-
+        console.log("format = ", SLGPU.getPreferredCanvasFormat())
         console.log("media = ", mediaW, mediaH)
 
         const nbParticle = renderer.canvas.width * renderer.canvas.height;
@@ -37,7 +39,7 @@ export class Test09 extends Sample {
 
         let mixedPipeline = new MixedPipeline(renderer);
         mixedPipeline.setupDraw({ instanceCount: nbParticle, vertexCount: 6 })
-        mixedPipeline.setupDepthStencilView({ size: [1024, 1024, 1] })
+        mixedPipeline.setupDepthStencilView({ size: [renderer.canvas.width, renderer.canvas.height, 1] })
 
 
 
@@ -47,20 +49,10 @@ export class Test09 extends Sample {
             bindgroups: {
                 io: {
                     particles: new VertexBufferIO({
+                        //position: VertexBuffer.Vec3(),
+                        depth: VertexBuffer.Float(),
 
-                        //ra: VertexBuffer.Float(),
-                        //ra7: VertexBuffer.Float(),
-                        //radius: VertexBuffer.Vec2(),
-                        //r2: VertexBuffer.Vec2(),
-
-
-                        position: VertexBuffer.Vec3(),
-                        r5: VertexBuffer.Float(),
-                        //radius2: VertexBuffer.Vec2()
-
-                    },
-                        { datas: new Float32Array(nbParticle * 4) }
-                    ),
+                    }),
                 },
                 datas: {
                     uniforms: new UniformBuffer({
@@ -75,81 +67,54 @@ export class Test09 extends Sample {
                     global_id: BuiltIns.computeInputs.globalInvocationId
                 },
                 main: `
-                /*
-                let nbParticle = arrayLength(&particles);
-               
-                if(index >= nbParticle){
-                    return;
-                }*/
+                
                 let index = global_id.x;
-
-                
-
                 var p = particles[index];
-                var id = f32(index);
-
-                
                
+                var id = f32(index);
                 var idx = (id % screen.x);
                 var idy = floor(id / screen.x);
-
-                
-
                 let px = -0.5+(idx / screen.x) ;
                 let py = -0.5+(idy / screen.y) ;
-
+                
                 var col = textureSampleLevel(myTexture,mySampler,vec2( (0.5 + px) , (0.5+ py)),0.0);
-
-
-
-                let pz = distance(col.rgb,vec3(0.5)) ;
-
-                
-                var out:Particles = particles_out[index];
-                
-                particles_out[index].position =  vec3(px,py,pz);
+                var nbStep = 15.0; 
+                particles_out[index].depth = - 0.5 + ceil( distance(col.rgb,vec3(0.5)) * nbStep) / nbStep;
                
                
                 `
             }
         })
 
+        computeResources.bindgroups.io.particles.datas = new Float32Array(nbParticle)
         computePipeline.buildGpuPipeline();
-        computePipeline.nextFrame();
-
 
 
         let modelMatrix = new Matrix4x4();
-        //modelMatrix.z = -0.73
+
 
         let viewMatrix = new Matrix4x4();
-        viewMatrix.z = 0.;
 
-        let quadSize = 1 / 1024;
-        mixedPipeline.initFromObject({
+        let quadSize = 1 // 1024;
 
+        let renderPassTexture = mixedPipeline.renderPass;
+
+
+        let renderResource = mixedPipeline.initFromObject({
+            blendMode: new AlphaBlendMode(),
             bindgroups: {
                 vertexResources: {
                     geom: new VertexBuffer({
                         vertexPos: VertexBuffer.Vec3(0)
-                    }, {
-                        datas: new Float32Array([
-                            -quadSize, -quadSize, 0.0,
-                            +quadSize, -quadSize, 0.0,
-                            -quadSize, +quadSize, 0.0,
-
-                            +quadSize, -quadSize, 0.0,
-                            +quadSize, +quadSize, 0.0,
-                            -quadSize, +quadSize, 0.0,
-                        ])
                     }),
                     uniforms: new UniformBuffer({
                         model: modelMatrix,
                         view: viewMatrix,
                         projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height, 45),
-
-
-                    })
+                    }),
+                    renderPass: new ImageTexture({ source: renderPassTexture.gpuResource }),
+                    myTexture: new ImageTexture({ source: computeResources.bindgroups.datas.myTexture.gpuResource }),//computeResources.bindgroups.datas.myTexture,
+                    mySampler: computeResources.bindgroups.datas.mySampler,
                 },
                 io: computeResources.bindgroups.io,
 
@@ -161,14 +126,18 @@ export class Test09 extends Sample {
                 },
                 outputs: {
                     position: BuiltIns.vertexOutputs.position,
-                    color: ShaderType.Vec4
+                    color: ShaderType.Vec4,
+                    uv: ShaderType.Vec2,
                 },
                 main: `
                 
-                
+                var id = f32(instanceId);
+                var px = -512.0 + (id % 1024.0);
+                var py = -512.0 + floor(id / 1024.0);
 
-                output.position = uniforms.projection *  uniforms.view * uniforms.model * vec4( (vertexPos.xy + position.xy)*1024.0 ,position.z*100.0, 1.0);
-                output.color = vec4(vec3(position.z),1.0);
+                output.position = uniforms.projection *  uniforms.view * uniforms.model * vec4( (vertexPos.xy + vec2(px,py)) ,depth*100.0, 1.0);
+                output.color = vec4(vec3(depth),1.0);
+                output.uv = vec2(px,py)/1024.0 + 0.5;
                 `
             },
 
@@ -177,14 +146,22 @@ export class Test09 extends Sample {
                     color: BuiltIns.fragmentOutputs.color
                 },
                 main: `
-                    output.color = color;//vec4(1.0,0.0,0.0,1.0);
+                    output.color = textureSample(myTexture,mySampler,uv) ;
                 `
             }
 
 
         })
 
+        renderResource.bindgroups.vertexResources.geom.datas = new Float32Array([
+            -quadSize, -quadSize, 0.0,
+            +quadSize, -quadSize, 0.0,
+            -quadSize, +quadSize, 0.0,
 
+            +quadSize, -quadSize, 0.0,
+            +quadSize, +quadSize, 0.0,
+            -quadSize, +quadSize, 0.0,
+        ])
         mixedPipeline.buildPipelines()
 
 
@@ -201,10 +178,10 @@ export class Test09 extends Sample {
         let oldTime = new Date().getTime();
         mixedPipeline.onDrawEnd = () => {
             modelMatrix.rotationY += 0.01;
-            modelMatrix.rotationX += 0.01;
-            modelMatrix.rotationZ += 0.01;
+            modelMatrix.rotationX += 0.005;
+            modelMatrix.rotationZ += 0.001;
 
-            viewMatrix.z = 1000
+            viewMatrix.z = 1000 + Math.sin(modelMatrix.rotationX * 0.5) * 500.0;
 
             //renderPipeline.onDrawEnd = () => {
 

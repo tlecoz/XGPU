@@ -1,4 +1,4 @@
-import { GPU } from "../GPU";
+import { SLGPU } from "../SLGPU";
 import { Bindgroup } from "../shader/Bindgroup";
 import { ComputeShader } from "../shader/ComputeShader";
 import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
@@ -6,7 +6,7 @@ import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { Pipeline } from "./Pipeline";
-import { RenderPipeline } from "./RenderPipeline";
+
 
 export class ComputePipeline extends Pipeline {
 
@@ -15,7 +15,7 @@ export class ComputePipeline extends Pipeline {
 
 
     protected gpuComputePipeline: GPUComputePipeline;
-    protected workgroups: number[];
+    public workgroups: number[];
     protected dispatchWorkgroup: number[];
     protected bufferSize: number;
     protected stagingBuffer: GPUBuffer;
@@ -166,14 +166,14 @@ export class ComputePipeline extends Pipeline {
         const { code, output } = this.computeShader.build(this, inputStruct)
 
         this.description.compute = {
-            module: GPU.device.createShaderModule({ code: code }),
+            module: SLGPU.device.createShaderModule({ code: code }),
             entryPoint: "main"
         }
         this.description.layout = this.gpuPipelineLayout;
 
         //console.log("description = ", this.description)
 
-        this.gpuComputePipeline = GPU.createComputePipeline(this.description);
+        this.gpuComputePipeline = SLGPU.createComputePipeline(this.description);
 
 
         return this.gpuComputePipeline;
@@ -190,7 +190,7 @@ export class ComputePipeline extends Pipeline {
     public async nextFrame() {
 
 
-        const commandEncoder = GPU.device.createCommandEncoder();
+        const commandEncoder = SLGPU.device.createCommandEncoder();
 
         this.update();
 
@@ -230,14 +230,14 @@ export class ComputePipeline extends Pipeline {
 
             if (!this.canCallMapAsync) return
 
-            if (!this.stagingBuffer) this.stagingBuffer = GPU.createStagingBuffer(this.bufferSize);
-            const copyEncoder = GPU.device.createCommandEncoder();
+            if (!this.stagingBuffer) this.stagingBuffer = SLGPU.createStagingBuffer(this.bufferSize);
+            const copyEncoder = SLGPU.device.createCommandEncoder();
             const stage = this.stagingBuffer;
 
 
             copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
 
-            GPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
+            SLGPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
 
             this.canCallMapAsync = false;
             await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
@@ -250,7 +250,7 @@ export class ComputePipeline extends Pipeline {
             this.onReceiveData(new Float32Array(data));
 
         } else {
-            GPU.device.queue.submit([commandEncoder.finish()]);
+            SLGPU.device.queue.submit([commandEncoder.finish()]);
         }
 
     }

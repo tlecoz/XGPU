@@ -1,4 +1,4 @@
-import { GPU } from "../../GPU";
+import { SLGPU } from "../../SLGPU";
 import { ImageTexture } from "./ImageTexture";
 import { IShaderResource } from "./IShaderResource";
 
@@ -87,7 +87,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
 
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
-        this.gpuResource = GPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
+        this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
     }
 
     public update(): void {
@@ -98,7 +98,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
             for (let i = 0; i < 6; i++) {
                 bmp = this._sides[i];
                 if (bmp) {
-                    GPU.device.queue.copyExternalImageToTexture(
+                    SLGPU.device.queue.copyExternalImageToTexture(
                         { source: bmp },
                         { texture: this.gpuResource, origin: [0, 0, i] },
                         [bmp.width, bmp.height]

@@ -1,14 +1,12 @@
-import { GPU } from "../GPU";
+import { SLGPU } from "../SLGPU";
 import { GPURenderer } from "../GPURenderer";
+import { HeadlessGPURenderer } from "../HeadlessGPURenderer";
 import { Bindgroup } from "../shader/Bindgroup";
-import { Bindgroups } from "../shader/Bindgroups";
 import { FragmentShader } from "../shader/FragmentShader";
-import { IShaderResource } from "../shader/resources/IShaderResource";
 import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
-import { ComputePipeline } from "./ComputePipeline";
 import { Pipeline } from "./Pipeline";
 import { BlendMode } from "./resources/blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
@@ -18,8 +16,8 @@ import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 export class RenderPipeline extends Pipeline {
 
 
-    protected renderer: GPURenderer;
-    protected canvas: HTMLCanvasElement;
+    protected renderer: GPURenderer | HeadlessGPURenderer;
+    protected canvas: { width: number, height: number, dimensionChanged: boolean };
 
     protected depthStencilTexture: DepthStencilTexture;
     protected multisampleTexture: MultiSampleTexture;
@@ -32,7 +30,7 @@ export class RenderPipeline extends Pipeline {
 
     public onDrawEnd: () => void;
 
-    constructor(renderer: GPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
+    constructor(renderer: GPURenderer | HeadlessGPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
         super();
 
         if (!renderer.canvas) {
@@ -40,7 +38,7 @@ export class RenderPipeline extends Pipeline {
         }
         this.type = "render";
         this.renderer = renderer;
-        this.canvas = renderer.canvas;
+        this.canvas = renderer.canvas as any;
         this.vertexShader = new VertexShader();
         this.fragmentShader = new FragmentShader();
         this.description.primitive = {
@@ -241,7 +239,8 @@ export class RenderPipeline extends Pipeline {
     public blendMode: BlendMode;
     private getFragmentShaderColorOptions() {
         const o: any = {
-            format: GPU.getPreferredCanvasFormat()
+            format: SLGPU.getPreferredCanvasFormat(),
+
         }
         if (this.blendMode) o.blend = this.blendMode;
         return o;
@@ -279,7 +278,7 @@ export class RenderPipeline extends Pipeline {
         const fragmentShader: { code: string, output: ShaderStruct } = this.fragmentShader.build(this, vertexShader.output.getInputFromOutput());
 
         this.description.vertex = {
-            module: GPU.device.createShaderModule({
+            module: SLGPU.device.createShaderModule({
                 code: vertexShader.code
             }),
             entryPoint: "main",
@@ -287,7 +286,7 @@ export class RenderPipeline extends Pipeline {
         }
 
         this.description.fragment = {
-            module: GPU.device.createShaderModule({
+            module: SLGPU.device.createShaderModule({
                 code: fragmentShader.code
             }),
             entryPoint: "main",
@@ -295,7 +294,7 @@ export class RenderPipeline extends Pipeline {
                 this.getFragmentShaderColorOptions()
                 /*
                 {
-                    format: GPU.getPreferredCanvasFormat(),
+                    format: SLGPU.getPreferredCanvasFormat(),
                     blend: {
                         color: {
                             operation: "add",
@@ -315,10 +314,11 @@ export class RenderPipeline extends Pipeline {
         }
 
 
+
         this.description.layout = this.gpuPipelineLayout;
 
-        //console.log("buildGPUPipeline description = ", this.description)
-        this.gpuPipeline = GPU.createRenderPipeline(this.description);
+        console.log("buildGPUPipeline description = ", this.description)
+        this.gpuPipeline = SLGPU.createRenderPipeline(this.description);
 
         return this.gpuPipeline;
 
@@ -389,8 +389,13 @@ export class RenderPipeline extends Pipeline {
         //console.log("bindGroups.resources = ", this.bindGroups.resources)
         const resourceByType = this.bindGroups.resources.types;
         const buffers = resourceByType.vertexBuffers;
-        const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
+
+
         if (this.drawConfig.vertexCount === -1) {
+            if (!buffers) {
+                throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
+            }
+            const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
             this.drawConfig.vertexCount = vertexBuffer.nbVertex;
         }
 

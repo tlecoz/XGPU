@@ -1,4 +1,4 @@
-export class GPU {
+export class SLGPU {
 
     private static _ready: boolean = false;
     public static get ready(): boolean { return this._ready; }
@@ -32,6 +32,12 @@ export class GPU {
 
     public static init(): Promise<void> {
         return new Promise(async (resolve: (val: any) => void, error: () => void) => {
+
+            if (this.gpuDevice) {
+                resolve(this);
+                return;
+            }
+
             const adapter = await navigator.gpu.requestAdapter({
                 powerPreference: "high-performance",
                 forceFallbackAdapter: false
@@ -47,7 +53,7 @@ export class GPU {
     }
 
     public static get device(): GPUDevice {
-        if (!this.gpuDevice) throw new Error("you must use GPU.init() to get the reference of the gpuDevice")
+        if (!this.gpuDevice) throw new Error("you must use SLGPU.init() to get the reference of the gpuDevice")
         return this.gpuDevice;
     }
 

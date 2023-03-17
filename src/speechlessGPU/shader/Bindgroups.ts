@@ -1,5 +1,4 @@
-import { GPU } from "../GPU";
-import { Pipeline } from "../pipelines/Pipeline";
+import { SLGPU } from "../SLGPU";
 import { Bindgroup } from "./Bindgroup";
 import { CubeMapTexture } from "./resources/CubeMapTexture";
 import { ImageTexture } from "./resources/ImageTexture";
@@ -7,7 +6,6 @@ import { IShaderResource } from "./resources/IShaderResource";
 import { TextureSampler } from "./resources/TextureSampler";
 import { UniformBuffer } from "./resources/UniformBuffer";
 import { VertexBuffer } from "./resources/VertexBuffer";
-import { VertexBufferIO } from "./resources/VertexBufferIO";
 import { VideoTexture } from "./resources/VideoTexture";
 
 export class Bindgroups {
@@ -42,7 +40,7 @@ export class Bindgroups {
         }
 
         if (autoLayout) description.layout = "auto";
-        else description.layout = GPU.createPipelineLayout({ bindGroupLayouts: layouts });
+        else description.layout = SLGPU.createPipelineLayout({ bindGroupLayouts: layouts });
 
 
         const { vertexLayouts, buffers, nbVertex } = this.createVertexBufferLayout();

@@ -1,5 +1,12 @@
 
+vertexBuffer alignment.... 
 
+pipeline => texture  (besoin de canvas ou pas ? )
+
+
+
+
+Stage / DisplayList 
 
 
 

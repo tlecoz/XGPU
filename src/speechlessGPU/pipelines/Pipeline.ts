@@ -1,4 +1,4 @@
-import { GPU } from "../GPU";
+import { SLGPU } from "../SLGPU";
 import { Bindgroup } from "../shader/Bindgroup";
 import { Bindgroups } from "../shader/Bindgroups";
 import { FragmentShader } from "../shader/FragmentShader";
@@ -7,8 +7,6 @@ import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
-
-
 
 
 export class Pipeline {
@@ -150,8 +148,8 @@ export class Pipeline {
             }
 
             if (k > 0) {
-                group.layout = this.gpuBindGroupLayouts[n] = GPU.createBindgroupLayout(layout)
-                this.gpuBindgroups[n] = GPU.createBindgroup(group)
+                group.layout = this.gpuBindGroupLayouts[n] = SLGPU.createBindgroupLayout(layout)
+                this.gpuBindgroups[n] = SLGPU.createBindgroup(group)
                 n++;
 
                 //console.log("-----")
@@ -163,7 +161,7 @@ export class Pipeline {
         }
         //console.log("this.gpuBindGroupLayouts", this.gpuBindGroupLayouts)
 
-        this.gpuPipelineLayout = GPU.createPipelineLayout({ bindGroupLayouts: this.gpuBindGroupLayouts })
+        this.gpuPipelineLayout = SLGPU.createPipelineLayout({ bindGroupLayouts: this.gpuBindGroupLayouts })
     }
 
     protected initPipelineResources(pipeline: Pipeline) {

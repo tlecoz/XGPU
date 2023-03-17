@@ -1,5 +1,5 @@
-import { GPU } from "../GPU";
-import { Pipeline } from "../pipelines/Pipeline";
+import { SLGPU } from "../SLGPU";
+
 import { Bindgroups } from "./Bindgroups";
 import { IShaderResource } from "./resources/IShaderResource";
 import { VertexBuffer } from "./resources/VertexBuffer";
@@ -110,7 +110,7 @@ export class Bindgroup {
         }
 
         //console.log("BINDGROUP LAYOUT ENTRIES ", layout)
-        this._layout = GPU.device.createBindGroupLayout(layout);
+        this._layout = SLGPU.device.createBindGroupLayout(layout);
     }
 
     protected build(): void {
@@ -127,7 +127,7 @@ export class Bindgroup {
             entries.push(resource.createBindGroupEntry(bindingId++));
         }
 
-        this._group = GPU.device.createBindGroup({ layout: this._layout, entries })
+        this._group = SLGPU.device.createBindGroup({ layout: this._layout, entries })
     }
 
 

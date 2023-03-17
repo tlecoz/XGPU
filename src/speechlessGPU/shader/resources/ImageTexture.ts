@@ -1,10 +1,9 @@
 
-import { GPU } from "../../GPU";
-import { Pipeline } from "../../pipelines/Pipeline";
+import { SLGPU } from "../../SLGPU";
 import { IShaderResource } from "./IShaderResource";
 
 export type ImageTextureDescriptor = {
-    source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas
+    source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture
     size?: GPUExtent3D,
     usage?: GPUTextureUsageFlags,
     format?: GPUTextureFormat,
@@ -21,10 +20,10 @@ export class ImageTexture implements IShaderResource {
 
     protected _view: GPUTextureView;
     protected viewDescriptor: GPUTextureViewDescriptor = undefined;
-
+    protected useOutsideTexture: boolean = false;
 
     constructor(descriptor: {
-        source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas
+        source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture
         size?: GPUExtent3D,
         usage?: GPUTextureUsageFlags,
         format?: GPUTextureFormat,
@@ -36,17 +35,31 @@ export class ImageTexture implements IShaderResource {
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
         if (undefined === descriptor.size) {
-            if (descriptor.source) descriptor.size = [descriptor.source.width, descriptor.source.height];
+            if (descriptor.source) {
+
+                descriptor.size = [descriptor.source.width, descriptor.source.height];
+
+                if (descriptor.source instanceof GPUTexture) {
+                    this.gpuResource = descriptor.source;
+                    this._view = this.gpuResource.createView();
+                    descriptor.source = undefined;
+                    this.useOutsideTexture = true;
+                }
+
+            }
             else descriptor.size = [1, 1];
         }
 
+
+
         if (descriptor.source) this.mustBeTransfered = true;
 
-        this.descriptor = descriptor;
+        this.descriptor = descriptor as any;
         this.createGpuResource()
     }
 
     public createView(viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView {
+        if (this.useOutsideTexture) return;
         let desc: GPUTextureViewDescriptor = this.viewDescriptor;
         if (viewDescriptor) desc = viewDescriptor;
         return this.gpuResource.createView(desc);
@@ -55,6 +68,7 @@ export class ImageTexture implements IShaderResource {
 
 
     public resize(w: number, h: number): ImageTexture {
+        if (this.useOutsideTexture) return;
         this.descriptor.size = [w, h];
         this.createGpuResource()
         return this;
@@ -62,13 +76,15 @@ export class ImageTexture implements IShaderResource {
 
     public get view(): GPUTextureView { return this._view; }
 
-    public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas { return this.descriptor.source }
-    public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas) {
+    public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture { return this.descriptor.source }
+    public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
+        this.useOutsideTexture = bmp instanceof GPUTexture;
         this.descriptor.source = bmp;
         this.mustBeTransfered = true;
     }
 
     public update(): void {
+        if (this.useOutsideTexture) return;
 
         if (!this.gpuResource) this.createGpuResource()
         else if (this.descriptor.source.width !== this.gpuResource.width || this.descriptor.source.height !== this.gpuResource.height) {
@@ -80,8 +96,8 @@ export class ImageTexture implements IShaderResource {
 
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
-            GPU.device.queue.copyExternalImageToTexture(
-                { source: this.descriptor.source, flipY: true },
+            SLGPU.device.queue.copyExternalImageToTexture(
+                { source: this.descriptor.source as any, flipY: true },
                 { texture: this.gpuResource },
                 this.descriptor.size
             );
@@ -91,12 +107,14 @@ export class ImageTexture implements IShaderResource {
 
 
     public createGpuResource(): void {
+        if (this.useOutsideTexture) return;
         if (this.gpuResource) this.gpuResource.destroy();
-        this.gpuResource = GPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
+        this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
     }
 
     public destroyGpuResource() {
+        if (this.useOutsideTexture) return;
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = null;
     }

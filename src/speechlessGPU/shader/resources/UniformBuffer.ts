@@ -1,6 +1,5 @@
-import { GPU } from "../../GPU";
+import { SLGPU } from "../../SLGPU";
 import { GPUType } from "../../GPUType";
-import { Pipeline } from "../../pipelines/Pipeline";
 import { PrimitiveType } from "../PrimitiveType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
@@ -78,6 +77,7 @@ export class UniformBuffer implements IShaderResource {
             uniform = this.uniforms[i];
             type = uniform.type;
 
+
             //console.log("#0 ", offset)
             if (type.dataType != oldType && offset > 0) {
 
@@ -88,7 +88,9 @@ export class UniformBuffer implements IShaderResource {
                         offset += 16 - (offset % 16);
                     }
                 } else {
-                    offset += 16 - (offset % 16);
+
+                    console.log("=> ", offset, " +=  16 - ", (offset % 16))
+                    if (offset % 16 != 0) offset += 16 - (offset % 16);
                 }
 
 
@@ -102,7 +104,7 @@ export class UniformBuffer implements IShaderResource {
 
             uniform.startId = offset;
 
-            // console.log(uniform.name, offset);
+            console.log(uniform.name, offset);
 
             if (type.isArray) {
 
@@ -144,9 +146,9 @@ export class UniformBuffer implements IShaderResource {
             uniform = this.uniforms[i];
             uniform.update();
             if (uniform.mustBeTransfered) {
-                //console.log(uniform.name, uniform.startId, uniform.byteLength)
+                //console.log(uniform.name, uniform.startId, uniform.byteLength, uniform)
                 uniform.mustBeTransfered = false;
-                GPU.device.queue.writeBuffer(
+                SLGPU.device.queue.writeBuffer(
                     this.gpuResource,
                     uniform.startId,
                     uniform.buffer,
@@ -209,7 +211,7 @@ export class UniformBuffer implements IShaderResource {
                 this.setupUniformAlignment();
             }
 
-            this.gpuResource = GPU.device.createBuffer({
+            this.gpuResource = SLGPU.device.createBuffer({
                 size: this.byteSize,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             })

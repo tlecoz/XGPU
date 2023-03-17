@@ -1,5 +1,4 @@
 import { mat4 } from "gl-matrix";
-//import { mat4 } from "../../../../wgpu-matrix.module"
 import { Matrix4x4 } from "../../PrimitiveType";
 
 export class ProjectionMatrix extends Matrix4x4 {

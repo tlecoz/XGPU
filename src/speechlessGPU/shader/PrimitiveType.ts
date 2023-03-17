@@ -647,6 +647,8 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
         mat4.rotate(this, this, this._rz, vec3.fromValues(0, 0, 1));
 
         mat4.translate(this, this, vec3.fromValues(this._x, this._y, this._z));
+
+        mat4.scale(this, this, vec3.fromValues(this._sx, this._sy, this._sz));
     }
 }
 

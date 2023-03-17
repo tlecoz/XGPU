@@ -1,7 +1,7 @@
 
 
 import { VertexAttribute } from "./VertexAttribute";
-import { VertexBuffer, VertexBufferDescriptor } from "./VertexBuffer";
+import { VertexBuffer } from "./VertexBuffer";
 
 
 
@@ -44,7 +44,10 @@ export class VertexBufferIO {
         return result + "\n";
     }
 
-
+    public set datas(v: Float32Array) {
+        this.buffers[0].datas = v;
+        this.buffers[1].datas = v;
+    }
 
     public update() {
         this.buffers[0].update();

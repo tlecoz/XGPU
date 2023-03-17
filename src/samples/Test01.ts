@@ -49,14 +49,14 @@ export class Test01 extends Sample {
             dimension: new Vec3(1.0, 1.0, 0),
             position: new Vec3(0.30, 0.0, 0),
             matrix: new Matrix4x4(),
-            test: new Vec4Array([
+            /*test: new Vec4Array([
                 new Vec4(1, 0, 0, 0),
                 new Vec4(2, 0, 0.5, 0)
             ]),
             matrixs: new Matrix4x4Array([
                 new Matrix4x4(),
                 new Matrix4x4()
-            ])
+            ])*/
 
         }))
 
@@ -74,7 +74,7 @@ export class Test01 extends Sample {
         ]
         pipeline.vertexShader.main.text = `
             let p:vec3<f32> = vec3(vertexPos * transform.dimension);
-            let a:f32 = atan2(p.y,p.x) + transform.rotation + transform.test[0].x;
+            let a:f32 = atan2(p.y,p.x) + transform.rotation ;
             let d:f32 = sqrt(p.x*p.x + p.y*p.y);
 
             output.position = transform.matrix * vec4(vec3(cos(a)*d,sin(a)*d,0.0) + transform.position,1.0);

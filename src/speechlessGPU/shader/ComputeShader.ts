@@ -1,7 +1,5 @@
 
 import { ComputePipeline } from "../pipelines/ComputePipeline";
-import { UniformBuffer } from "./resources/UniformBuffer";
-import { VertexBuffer } from "./resources/VertexBuffer";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 import { ShaderStruct } from "./shaderParts/ShaderStruct";
 

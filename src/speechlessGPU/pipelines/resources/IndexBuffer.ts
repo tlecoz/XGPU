@@ -1,4 +1,4 @@
-import { GPU } from "../../GPU";
+import { SLGPU } from "../../SLGPU";
 
 export type IndexBufferDescriptor = {
     nbPoint: number,
@@ -35,7 +35,7 @@ export class IndexBuffer {
     }
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
-        this.gpuResource = GPU.device.createBuffer({
+        this.gpuResource = SLGPU.device.createBuffer({
             size: this.getBufferSize(),
             usage: GPUBufferUsage.INDEX,
             mappedAtCreation: true

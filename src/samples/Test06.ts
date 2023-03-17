@@ -1,13 +1,11 @@
 
 import { BuiltIns } from "../speechlessGPU/Builtins";
-import { GPU } from "../speechlessGPU/GPU";
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
+import { SLGPU } from "../speechlessGPU/SLGPU";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
 import { Float } from "../speechlessGPU/shader/PrimitiveType";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../speechlessGPU/shader/resources/VertexBufferIO";
-import { Sample } from "./Sample";
 
 
 
@@ -17,7 +15,7 @@ export class Test06 {
     constructor() {
 
 
-        GPU.init().then(() => {
+        SLGPU.init().then(() => {
 
 
 
