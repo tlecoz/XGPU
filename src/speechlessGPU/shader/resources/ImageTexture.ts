@@ -195,27 +195,23 @@ export class ImageTexture implements IShaderResource {
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
 
         //use to handle particular cases in descriptor relative to the nature of pipeline
-        console.log("ImageTexture.setPipelineType")
+
         if (pipelineType === "compute_mixed") {
 
 
             if (this.io === 1) {
-                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT;
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT;
 
             } else if (this.io === 2) {
-                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.STORAGE_BINDING;
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING;
 
             }
 
         } else if (pipelineType === "compute") {
 
 
-            if (this.io === 1) {
-                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST;
-
-            } else if (this.io === 2) {
+            if (this.io !== 0) {
                 this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING;
-
             }
         }
     }

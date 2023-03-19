@@ -318,10 +318,7 @@ export class ComputePipeline extends Pipeline {
         } else {
             const texture = this.textureIOs[0].texture;
 
-            /*const copyEncoder = SLGPU.device.createCommandEncoder();
-            copyEncoder.copyTextureToTexture({ texture: this.textureIOs[1].texture }, { texture: this.textureIOs[0].texture }, [682, 682, 0]);
-            SLGPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
-            */
+
             SLGPU.device.queue.submit([commandEncoder.finish()]);
             // getting this value change the reference of the GPUBuffer and create the "ping pong"
         }

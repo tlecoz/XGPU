@@ -436,6 +436,8 @@ export class RenderPipeline extends Pipeline {
         renderPass.end();
 
         if (this.renderPassTexture) {
+            if (!this.renderPassTexture.gpuResource) this.renderPassTexture.createGpuResource();
+
             commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
         }
         if (this.onDrawEnd) this.onDrawEnd();

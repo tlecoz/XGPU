@@ -15,14 +15,14 @@ export class Test11 extends Sample {
 
     protected async start(renderer: GPURenderer) {
 
-        const { bmp } = this.medias;
+        const { bmp, bmp2 } = this.medias;
 
         const computePipeline = new ComputePipeline();
         computePipeline.useRenderPipeline = true;
         const computeResource = computePipeline.initFromObject({
             bindgroups: {
                 io: {
-                    image: new ImageTextureIO({ source: bmp }),
+                    image: new ImageTextureIO({ source: bmp2 }),
                     mySampler: new TextureSampler({ minFilter: "linear", magFilter: "linear" })
                 },
             },
@@ -32,26 +32,11 @@ export class Test11 extends Sample {
                     workgroupId: BuiltIns.computeInputs.workgroupId
                 },
                 main: `
-
-
                     let dim = vec2<f32>(textureDimensions(image));
-
                     let id = vec2<i32>(workgroupId.xy);
                     var col = textureSampleLevel(image, mySampler, (0.5+vec2<f32>(id)) / dim,0.0);
-                    col.a = 1.0;
-
-                    col.r *= 1.01;
-
+                    col.r += 0.005;
                     
-                    /*
-                    let fid = vec2<f32>(id);
-                    if(fid.x > 100.0 && fid.y > 682.0*0.5){
-                        col = vec4(1.0,0.0,0.0,1.0);
-                    }else{
-                        col = vec4(0.0,1.0,0.0,1.0);
-                    }
-                    */
-                   
                     textureStore(image_out, id, col);
                 `
             }
