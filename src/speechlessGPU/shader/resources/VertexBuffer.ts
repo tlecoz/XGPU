@@ -528,15 +528,6 @@ export class VertexBuffer implements IShaderResource {
 
         SLGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
 
-        /*
-        console.warn("DATA ", this.gpuResource.mapState)
-        if (this.gpuResource.mapState === "mapped") {
-            new Float32Array(this.gpuResource.getMappedRange()).set(this.datas);
-            this.gpuResource.unmap();
-        }*/
-
-
-
     }
 
     public getVertexArrayById(id: number): VertexAttribute { return this.vertexArrays[id]; }

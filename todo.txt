@@ -1,21 +1,20 @@
 
+textureIO 
+
+
+
 vertexBuffer alignment.... 
-
-pipeline => texture  (besoin de canvas ou pas ? )
-
-
 
 
 Stage / DisplayList 
-
-
-
 VectorGraphics : D:\WWW\NEW_OLD\xshader_and_xfilters
+
+
 
 
 gerer plusieurs vertexBufferIO 
 
-textureIO 
+
 
 
 AudioShader ? 
@@ -51,8 +50,6 @@ AudioShader ?
 
   => appeler Renderer GPUCanvas 
 
-- creer un deuxieme canvas et une deuxieme pipeline 
-  => utiliser le renderTexture du premier canvas en input du deuxieme 
 
 - Créer une classe MultiPassPipeline 
 

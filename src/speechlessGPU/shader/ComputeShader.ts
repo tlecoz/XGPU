@@ -33,7 +33,9 @@ export class ComputeShader extends ShaderStage {
         result += this.main.value;
         result += "}\n";
 
-        //console.log(result)
+        console.log("------------- COMPUTE SHADER --------------")
+        console.log(result)
+        console.log("-------------------------------------------")
         this._shaderInfos = { code: result, output: null };
         return this._shaderInfos;
 

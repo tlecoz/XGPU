@@ -13,6 +13,7 @@ export type ImageTextureDescriptor = {
 
 export class ImageTexture implements IShaderResource {
 
+    public io: number = 0;
     public mustBeTransfered: boolean = false;
     public descriptor: ImageTextureDescriptor
     public gpuResource: GPUTexture;
@@ -55,8 +56,28 @@ export class ImageTexture implements IShaderResource {
         if (descriptor.source) this.mustBeTransfered = true;
 
         this.descriptor = descriptor as any;
-        this.createGpuResource()
+        //this.createGpuResource()
     }
+
+    protected gpuTextureIOs: GPUTexture[];
+    protected gpuTextureIO_index: number = 1;
+    public initTextureIO(textures: GPUTexture[]) {
+        this.gpuTextureIOs = textures;
+    }
+
+    public get texture(): GPUTexture {
+
+        if (this.gpuTextureIOs) return this.gpuTextureIOs[this.gpuTextureIO_index++ % 2]
+        return this.gpuResource;
+    }
+
+    public getCurrentTexture(): GPUTexture {
+        if (this.gpuTextureIOs) return this.gpuTextureIOs[(this.gpuTextureIO_index + 1) % 2]
+        return this.gpuResource;
+    }
+
+
+
 
     public createView(viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView {
         if (this.useOutsideTexture) return;
@@ -74,7 +95,11 @@ export class ImageTexture implements IShaderResource {
         return this;
     }
 
-    public get view(): GPUTextureView { return this._view; }
+    public get view(): GPUTextureView {
+        //console.log("aaa")
+        return this._view;
+
+    }
 
     public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture { return this.descriptor.source }
     public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
@@ -87,11 +112,17 @@ export class ImageTexture implements IShaderResource {
         if (this.useOutsideTexture) return;
 
         if (!this.gpuResource) this.createGpuResource()
-        else if (this.descriptor.source.width !== this.gpuResource.width || this.descriptor.source.height !== this.gpuResource.height) {
-            this.descriptor.size = [this.descriptor.source.width, this.descriptor.source.height]
-            this.createGpuResource();
-            this.mustBeTransfered = true;
+
+
+        if (this.descriptor.source) {
+            if (this.descriptor.source.width !== this.gpuResource.width || this.descriptor.source.height !== this.gpuResource.height) {
+                console.log("source = ", this.descriptor.source)
+                this.descriptor.size = [this.descriptor.source.width, this.descriptor.source.height]
+                this.createGpuResource();
+                this.mustBeTransfered = true;
+            }
         }
+
 
 
         if (this.mustBeTransfered) {
@@ -107,32 +138,47 @@ export class ImageTexture implements IShaderResource {
 
 
     public createGpuResource(): void {
-        if (this.useOutsideTexture) return;
+        if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
+        console.warn("ImageTexture.createGPUResource descriptor = ", this.descriptor)
         this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
+
     }
 
     public destroyGpuResource() {
-        if (this.useOutsideTexture) return;
+        if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = null;
     }
 
     public createDeclaration(varName: string, bindingId: number, groupId: number = 0): string {
-        return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d<f32>;\n";
+
+        if (this.io != 2) return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d<f32>;\n";
+
+        return " @binding(" + (bindingId) + ") @group(" + groupId + ") var " + varName + " : texture_storage_2d<rgba8unorm, write>;\n";
     }
 
 
-    public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, texture: GPUTextureBindingLayout } {
+    public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, storageTexture?: GPUStorageTextureBindingLayout, texture?: GPUTextureBindingLayout } {
 
-        return {
+        if (this.io != 2) return {
             binding: bindingId,
             visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
             texture: {
                 sampleType: "float",
                 viewDimension: "2d",
                 multisampled: false
+            },
+
+        }
+
+        return {
+            binding: bindingId,
+            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+            storageTexture: {
+                access: "write-only",
+                format: "rgba8unorm"
             },
         }
     }
@@ -147,7 +193,31 @@ export class ImageTexture implements IShaderResource {
     }
 
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
-        if (pipelineType) { }
+
         //use to handle particular cases in descriptor relative to the nature of pipeline
+        console.log("ImageTexture.setPipelineType")
+        if (pipelineType === "compute_mixed") {
+
+
+            if (this.io === 1) {
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT;
+
+            } else if (this.io === 2) {
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.STORAGE_BINDING;
+
+            }
+
+        } else if (pipelineType === "compute") {
+
+
+            if (this.io === 1) {
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST;
+
+            } else if (this.io === 2) {
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING;
+
+            }
+        }
     }
+
 }

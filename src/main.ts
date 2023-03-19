@@ -10,7 +10,7 @@ import { Test09 } from "./samples/Test09";
 import { Test10 } from "./samples/Test10";
 import { Test11 } from "./samples/Test11";
 
-const id = 1;
+const id = 11;
 
 
 if (id === 1) new Test01();

@@ -9,7 +9,6 @@ export type TextureDescriptor = {
 
 export class Texture {
 
-
     public descriptor: TextureDescriptor;
     public gpuResource: GPUTexture = null;
     protected _view: GPUTextureView = null;
