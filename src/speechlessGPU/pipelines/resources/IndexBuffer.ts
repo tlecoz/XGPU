@@ -1,9 +1,10 @@
 import { SLGPU } from "../../SLGPU";
 
 export type IndexBufferDescriptor = {
-    nbPoint: number,
+    nbPoint?: number,
     dataType?: "uint16" | "uint32",
-    datas?: Uint16Array | Uint32Array
+    datas?: Uint16Array | Uint32Array,
+    offset?: number
 
 }
 
@@ -12,8 +13,10 @@ export class IndexBuffer {
     public gpuResource: GPUBuffer;
     public descriptor: IndexBufferDescriptor;
 
-    constructor(descriptor: IndexBufferDescriptor) {
+    private mustUpdateData: boolean = false;
 
+    constructor(descriptor?: IndexBufferDescriptor) {
+        if (!descriptor) descriptor = { nbPoint: 3 } as any;
         if (undefined === descriptor.dataType) {
             if (descriptor.datas) {
                 if (descriptor.datas instanceof Uint16Array) descriptor.dataType = "uint16";
@@ -22,23 +25,23 @@ export class IndexBuffer {
                 descriptor.dataType = "uint32";
             }
         }
+        if (undefined === descriptor.datas) descriptor.datas = new Uint32Array([0, 0, 0]);
+        if (undefined === descriptor.offset) descriptor.offset = 0;
         this.descriptor = descriptor;
     }
 
-    public init(descriptor: IndexBufferDescriptor) {
-        this.descriptor = descriptor;
-        this.createGpuResource();
-    }
+
     public destroyGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = null;
     }
     public createGpuResource(): void {
+        console.warn("create index resource ", this.getBufferSize())
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = SLGPU.device.createBuffer({
             size: this.getBufferSize(),
-            usage: GPUBufferUsage.INDEX,
-            mappedAtCreation: true
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: false
         });
         (this.gpuResource as any).dataType = this.dataType;
         (this.gpuResource as any).nbPoint = this.nbPoint;
@@ -55,12 +58,29 @@ export class IndexBuffer {
         return size;
     }
 
-    public get nbPoint(): number { return this.descriptor.nbPoint; }
-    public get dataType(): string { return this.descriptor.dataType; }
+    public get dataType(): GPUIndexFormat { return this.descriptor.dataType; }
 
-    public setValues(points: number[]): void {
-        new Uint16Array(this.gpuResource.getMappedRange()).set(points);
-        this.gpuResource.unmap();
+    public get nbPoint(): number { return this.descriptor.nbPoint; }
+    public set nbPoint(n: number) { this.descriptor.nbPoint = n; }
+
+    public get offset(): number { return this.descriptor.offset; }
+    public set offset(n: number) { this.descriptor.offset = n; }
+
+    private _datas: Uint32Array | Uint16Array;
+    public set datas(indices: Uint32Array | Uint16Array) {
+        this.mustUpdateData = true;
+        this._datas = indices;
+        this.createGpuResource();
+        this.update();
+        //new Uint16Array(this.gpuResource.getMappedRange()).set(points);
+        //this.gpuResource.unmap();
+    }
+
+    public update(): void {
+        if (this.mustUpdateData) {
+            this.mustUpdateData = false;
+            SLGPU.device.queue.writeBuffer(this.gpuResource, 0, this._datas.buffer)
+        }
     }
 
 }

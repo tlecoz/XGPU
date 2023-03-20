@@ -89,8 +89,11 @@ export class UniformBuffer implements IShaderResource {
                     }
                 } else {
 
-                    console.log("=> ", offset, " +=  16 - ", (offset % 16))
-                    if (offset % 16 != 0) offset += 16 - (offset % 16);
+
+                    if (offset % 16 != 0) {
+                        console.log("=> ", offset, " +=  16 - ", (offset % 16))
+                        offset += 16 - (offset % 16);
+                    }
                 }
 
 

@@ -1,22 +1,12 @@
 
-textureIO 
-
-
 
 vertexBuffer alignment.... 
+
+simplifier les initFromObject (bindgroup par defaut, uniformBuffer par defaut avec variable local par defaut, data des vertexbuffers , shaderInputs par defaut si non defini)
 
 
 Stage / DisplayList 
 VectorGraphics : D:\WWW\NEW_OLD\xshader_and_xfilters
-
-
-
-
-gerer plusieurs vertexBufferIO 
-
-
-
-
 AudioShader ? 
 
 

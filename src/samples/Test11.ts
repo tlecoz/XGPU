@@ -2,8 +2,10 @@ import { BuiltIns } from "../speechlessGPU/Builtins";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
+import { Float } from "../speechlessGPU/shader/PrimitiveType";
 import { ImageTextureIO } from "../speechlessGPU/shader/resources/ImageTextureIO";
 import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
+import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { ShaderType } from "../speechlessGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 
@@ -23,8 +25,15 @@ export class Test11 extends Sample {
             bindgroups: {
                 io: {
                     image: new ImageTextureIO({ source: bmp2 }),
-                    mySampler: new TextureSampler({ minFilter: "linear", magFilter: "linear" })
+                    mySampler: new TextureSampler({ minFilter: "linear", magFilter: "linear" }),
+
                 },
+                other: {
+                    uniforms: new UniformBuffer({
+                        time: new Float(0, true)
+                    })
+                }
+
             },
             computeShader: {
                 inputs: {
@@ -35,7 +44,8 @@ export class Test11 extends Sample {
                     let dim = vec2<f32>(textureDimensions(image));
                     let id = vec2<i32>(workgroupId.xy);
                     var col = textureSampleLevel(image, mySampler, (0.5+vec2<f32>(id)) / dim,0.0);
-                    col.r += 0.005;
+                    col.r = 0.5 + sin( time) * 0.5;
+                    col.g = 0.5 + cos( time + col.b) * 0.5;
                     
                     textureStore(image_out, id, col);
                 `
@@ -64,7 +74,6 @@ export class Test11 extends Sample {
                     vec2(-1.0, -1.0),
                     vec2(1.0, -1.0),
                     vec2(-1.0, 1.0),
-
                     vec2(1.0, -1.0),
                     vec2(1.0, 1.0),
                     vec2(-1.0, 1.0),
@@ -86,7 +95,9 @@ export class Test11 extends Sample {
         renderPipeline.buildGpuPipeline();
         renderer.addPipeline(renderPipeline);
 
+        let now = new Date().getTime();
         renderPipeline.onDrawEnd = () => {
+            computeResource.bindgroups.other.uniforms.items.time.x = (new Date().getTime() - now) / 1000;
             computePipeline.nextFrame();
             //console.log("a")
         }

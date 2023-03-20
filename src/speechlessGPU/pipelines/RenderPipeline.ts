@@ -12,6 +12,7 @@ import { BlendMode } from "./resources/blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
+import { IndexBuffer } from "./resources/IndexBuffer";
 
 export class RenderPipeline extends Pipeline {
 
@@ -25,6 +26,7 @@ export class RenderPipeline extends Pipeline {
 
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
+    public indexBuffer: IndexBuffer = null;
 
     protected gpuPipeline: GPURenderPipeline;
 
@@ -57,6 +59,7 @@ export class RenderPipeline extends Pipeline {
         clearColor?: { r: number, g: number, b: number, a: number },
         blendMode?: BlendMode,
         bindgroups?: any,
+        indexBuffer?: IndexBuffer,
         vertexShader: {
             outputs: any,
             main: string
@@ -71,7 +74,7 @@ export class RenderPipeline extends Pipeline {
         }
     }) {
 
-
+        if (descriptor.indexBuffer) this.indexBuffer = descriptor.indexBuffer;
 
         if (descriptor.clearColor) this.outputColor.clearValue = descriptor.clearColor;
         else descriptor.clearColor = this.outputColor.clearValue;
@@ -414,11 +417,12 @@ export class RenderPipeline extends Pipeline {
 
 
 
-        const indexBuffer: any = resourceByType.indexBuffer;
 
-        if (indexBuffer) {
-            renderPass.setIndexBuffer(indexBuffer, indexBuffer.dataType);
-            renderPass.drawIndexed(indexBuffer.nbPoint);
+
+        if (this.indexBuffer) {
+            if (!this.indexBuffer.gpuResource) this.indexBuffer.createGpuResource();
+            renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.nbPoint * 4);
+            renderPass.drawIndexed(this.indexBuffer.nbPoint);
         } else {
 
             if (this.drawConfig.vertexCount !== -1) {

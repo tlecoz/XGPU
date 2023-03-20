@@ -67,12 +67,12 @@ export class ImageTexture implements IShaderResource {
 
     public get texture(): GPUTexture {
 
-        if (this.gpuTextureIOs) return this.gpuTextureIOs[this.gpuTextureIO_index++ % 2]
+        //if (this.gpuTextureIOs) return this.gpuTextureIOs[this.gpuTextureIO_index++ % 2]
         return this.gpuResource;
     }
 
     public getCurrentTexture(): GPUTexture {
-        if (this.gpuTextureIOs) return this.gpuTextureIOs[(this.gpuTextureIO_index + 1) % 2]
+        //if (this.gpuTextureIOs) return this.gpuTextureIOs[(this.gpuTextureIO_index + 1) % 2]
         return this.gpuResource;
     }
 

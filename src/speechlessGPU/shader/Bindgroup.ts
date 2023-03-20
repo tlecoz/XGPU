@@ -61,7 +61,7 @@ export class Bindgroup {
         if (resource instanceof VideoTexture) this.mustRefreshBindgroup = true;
 
 
-        console.log("bindgroup.add ", resource)
+        //console.log("bindgroup.add ", resource)
 
         if (resource instanceof VertexBufferIO) {
             this.mustRefreshBindgroup = true;

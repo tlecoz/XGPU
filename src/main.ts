@@ -9,8 +9,10 @@ import { Test08 } from "./samples/Test08";
 import { Test09 } from "./samples/Test09";
 import { Test10 } from "./samples/Test10";
 import { Test11 } from "./samples/Test11";
+import { Test12 } from "./samples/Test12";
 
-const id = 11;
+
+const id = 12;
 
 
 if (id === 1) new Test01();
@@ -24,3 +26,4 @@ else if (id === 8) new Test08();
 else if (id === 9) new Test09();
 else if (id === 10) new Test10();
 else if (id === 11) new Test11();
+else if (id === 12) new Test12();
