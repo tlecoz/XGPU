@@ -109,7 +109,12 @@ export class VertexBuffer implements IShaderResource {
     public get datas(): Float32Array { return this._datas; }
     public set datas(f: Float32Array) {
         this._datas = f;
+        this.mustBeTransfered = true;
+    }
 
+    public setComplexDatas(datas: Float32Array, nbComponentTotal: number) {
+        this._datas = datas;
+        this._nbComponent = nbComponentTotal;
         this.mustBeTransfered = true;
     }
 
@@ -521,7 +526,7 @@ export class VertexBuffer implements IShaderResource {
             this.createGpuResource();
 
         }
-
+        console.log("updateBuffer ", this.datas.byteLength + " vs " + this._bufferSize)
         if (this.datas.byteLength != this._bufferSize) this.createGpuResource();
 
 

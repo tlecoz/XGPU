@@ -54,7 +54,7 @@ export class GraphicPipeline extends RenderPipeline {
                     uniforms: new UniformBuffer({
                         dimension: new Vec3(100, 100, 0, true),
                         scale: new Vec3(1, 1, 1, true),
-                        shapeScale: new Vec2(400, 400, true),
+                        shapeScale: new Vec2(600, 600, true),
                         center: new Vec3(0, 0, 0, true),
                         rotation: new Float(0, true),
                         shapeRotation: new Float(0, true),
@@ -132,9 +132,11 @@ export class GraphicPipeline extends RenderPipeline {
 
         this.onDrawEnd = () => {
 
-            //model.rotationX += 0.01;
+            model.rotationX += 0.01;
             model.rotationY += 0.01;
             model.rotationZ += 0.01;
+
+
 
 
         }
