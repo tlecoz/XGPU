@@ -4,7 +4,7 @@ import { HeadlessGPURenderer } from "../../speechlessGPU/HeadlessGPURenderer";
 import { RenderPipeline } from "../../speechlessGPU/pipelines/RenderPipeline";
 import { AlphaBlendMode } from "../../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
 import { IndexBuffer } from "../../speechlessGPU/pipelines/resources/IndexBuffer";
-import { Float, Vec2, Vec3 } from "../../speechlessGPU/shader/PrimitiveType";
+import { Float, Matrix4x4, Vec2, Vec3 } from "../../speechlessGPU/shader/PrimitiveType";
 import { UniformBuffer } from "../../speechlessGPU/shader/resources/UniformBuffer";
 import { ProjectionMatrix } from "../../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
 import { VertexBuffer } from "../../speechlessGPU/shader/resources/VertexBuffer";
@@ -34,8 +34,10 @@ export class GraphicPipeline extends RenderPipeline {
     constructor(renderer: GPURenderer | HeadlessGPURenderer) {
         super(renderer);
 
+        var viewMatrix = new Matrix4x4();
+        viewMatrix.z = 0
 
-
+        var model = new Matrix4x4();
 
         this.resource = this.initFromObject({
             blendMode: new AlphaBlendMode(),
@@ -52,12 +54,14 @@ export class GraphicPipeline extends RenderPipeline {
                     uniforms: new UniformBuffer({
                         dimension: new Vec3(100, 100, 0, true),
                         scale: new Vec3(1, 1, 1, true),
-                        shapeScale: new Vec2(1, 1, true),
+                        shapeScale: new Vec2(400, 400, true),
                         center: new Vec3(0, 0, 0, true),
                         rotation: new Float(0, true),
                         shapeRotation: new Float(0, true),
                         widthRatio: new Float(1.0, true),
-                        projectionMatrix: new ProjectionMatrix(1024, 1024, 60, 0.1, 1000)
+                        model: model,
+                        view: viewMatrix,
+                        projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height, 45),
                     })
 
                 }
@@ -67,11 +71,12 @@ export class GraphicPipeline extends RenderPipeline {
                 outputs: {
                     position: BuiltIns.vertexOutputs.position,
                     curves: ShaderType.Vec3,
-                    isCurve: ShaderType.Float
+                    pos: ShaderType.Vec3
                 },
                 main: `
                     var vertexPos = vec2(vertices.xy * shapeScale);
                     
+
                     
                     var a = atan2(vertexPos.y , vertexPos.x) + shapeRotation;
                     var d = sqrt(vertexPos.x * vertexPos.x + vertexPos.y * vertexPos.y);
@@ -90,39 +95,52 @@ export class GraphicPipeline extends RenderPipeline {
                     result = vec4(result.xyz *  scale + center,1.0);
                     
 
-                    output.position = vec4(vertexPos,0.0,1.0);// * uniforms.projectionMatrix;
-                    output.isCurve = 1.0; //vertexPos.w;
+                    output.position = uniforms.projection *  uniforms.view * uniforms.model * vec4(vertexPos,0.0,1.0);;
+                    output.pos = output.position.xyz;
                     output.curves = curves;
                 `
             },
 
             fragmentShader: {
+
                 outputs: {
                     color: BuiltIns.fragmentOutputs.color
                 },
                 main: `
 
                 var col = vec4(1.0);
+                var d = (curves.x * curves.x) - curves.y;
                 
-                //if(isCurve == 1.0){
-                    if(curves.z == 0.0){
-                         if((curves.x * curves.x) - curves.y > 0.0){
-                            col.a = 0.0;
-                         }
-                    }else{
-                         if((curves.x * curves.x) - curves.y < 0.0){
-                            col.a = 0.0;
-                         }
+                if(curves.z == 0.0){
+                    if(d > 0.0){
+                        col.a = 0.0;
                     }
-                //}
+                }else{
+                    if(d < 0.0){
+                        col.a = 0.0;
+                    }
+                }
                 
-              
-                output.color = col;
+                var c = 1.0-(pos.z-1000.0) / 500.0;
+
+                output.color = vec4(c,c,c,col.a);
                 `
             },
 
 
         })
+
+        this.onDrawEnd = () => {
+
+            //model.rotationX += 0.01;
+            model.rotationY += 0.01;
+            model.rotationZ += 0.01;
+
+
+        }
+
+        this.setupMultiSampleView({ size: [renderer.canvas.width, renderer.canvas.height], sampleCount: 4 })
+
     }
 
     public setGraphicById(id: number): any {

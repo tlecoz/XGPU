@@ -167,10 +167,15 @@ export class RenderPipeline extends Pipeline {
         resolveTarget?: GPUTextureView
     }) {
 
+
         if (this.multisampleTexture) this.multisampleTexture.destroy();
 
         descriptor.size = [this.canvas.width, this.canvas.height];
         this.multisampleTexture = new MultiSampleTexture(descriptor);
+
+        this.description.multisample = {
+            count: this.multisampleTexture.description.count
+        }
     }
 
     //---------------------------
@@ -353,7 +358,7 @@ export class RenderPipeline extends Pipeline {
         }
 
         if (outputView && this.outputColor) this.handleOutputColor(outputView);
-
+        //console.log("renderPassDescriptor = ", this.renderPassDescriptor);
         return commandEncoder.beginRenderPass(this.renderPassDescriptor);
     }
 
@@ -361,6 +366,8 @@ export class RenderPipeline extends Pipeline {
         if (this.outputColor) {
 
             if (this.multisampleTexture) {
+                if (!this.multisampleTexture.view) this.multisampleTexture.create();
+                //console.log("MSAA view = ", this.multisampleTexture.view)
                 this.outputColor.view = this.multisampleTexture.view;
 
                 if (this.multisampleTexture.resolveTarget) this.outputColor.resolveTarget = this.multisampleTexture.resolveTarget;

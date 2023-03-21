@@ -539,7 +539,7 @@ export class Graphics {
             vertex[k++] = 1;
 
 
-            console.log("curveData[", nbc, "] = 0.5");
+            //console.log("curveData[", nbc, "] = 0.5");
             curveData[nbc++] = 0.5;
             curveData[nbc++] = 0;
             curveData[nbc++] = sens;
@@ -553,7 +553,7 @@ export class Graphics {
             curveData[nbc++] = sens;
         }
 
-        console.log("curveDatas = ", curveData)
+        //console.log("curveDatas = ", curveData)
         ////////////////////////////////console.log("nbTriangle3 = "+nbTriangle)
 
 

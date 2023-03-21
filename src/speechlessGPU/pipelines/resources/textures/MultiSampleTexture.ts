@@ -28,7 +28,7 @@ export class MultiSampleTexture extends Texture {
 
         if (undefined === descriptor.format) descriptor.format = SLGPU.getPreferredCanvasFormat();
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
-        if (undefined === descriptor.sampleCount) descriptor.sampleCount = 1;
+        if (undefined === descriptor.sampleCount) descriptor.sampleCount = 4;
         if (undefined === descriptor.alphaToCoverageEnabled) descriptor.alphaToCoverageEnabled = false;
         if (undefined === descriptor.mask) descriptor.mask = 0xFFFFFFFF;
         if (undefined === descriptor.resolveTarget) descriptor.resolveTarget = null;
