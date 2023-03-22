@@ -87,7 +87,7 @@ export class ImageTexture implements IShaderResource {
 
 
     public createView(viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView {
-        if (this.useOutsideTexture) return;
+        if (this.useOutsideTexture) return null;
         let desc: GPUTextureViewDescriptor = this.viewDescriptor;
         if (viewDescriptor) desc = viewDescriptor;
         return this.gpuResource.createView(desc);
@@ -96,7 +96,7 @@ export class ImageTexture implements IShaderResource {
 
 
     public resize(w: number, h: number): ImageTexture {
-        if (this.useOutsideTexture) return;
+        if (this.useOutsideTexture) return null;
         this.descriptor.size = [w, h];
         this.createGpuResource()
         return this;

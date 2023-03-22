@@ -1,5 +1,3 @@
-import { Pipeline } from "../../pipelines/Pipeline";
-
 export interface IShaderResource {
 
     mustBeTransfered: boolean;

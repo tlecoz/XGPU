@@ -338,7 +338,7 @@ export class VertexBuffer implements IShaderResource {
 
     public createDeclaration(vertexBufferName: string, bindingId: number, groupId: number = 0, isInput: boolean = true): string {
         //console.warn("VB.createDeclaration ", vertexBufferName, isInput)
-
+        if (isInput) { }
 
         let structName = vertexBufferName.substring(0, 1).toUpperCase() + vertexBufferName.slice(1);
         const varName = vertexBufferName.substring(0, 1).toLowerCase() + vertexBufferName.slice(1);
