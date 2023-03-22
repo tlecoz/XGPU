@@ -46,7 +46,7 @@ export class CubeMap extends RotatingCube {
         this.onDrawEnd = () => {
 
             let time = (new Date().getTime() - now) / 1000;
-            this.scaleX = this.scaleY = this.scaleZ = 3000;
+            this.scaleX = this.scaleY = this.scaleZ = 10000;
             this.rotationY = Math.sin(time * 0.15 + 1) * Math.PI;
             this.rotationX = 0.25 + Math.cos(time * 0.4) * Math.PI * 0.1;
         }

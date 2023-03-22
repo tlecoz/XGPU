@@ -37,6 +37,8 @@ export class HeadlessGPURenderer {
 
     }
 
+    public get useSinglePipeline(): boolean { return this.renderPipelines.length === 1 }
+
     public addPipeline(pipeline: RenderPipeline) {
         this.renderPipelines.push(pipeline);
     }

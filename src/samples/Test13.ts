@@ -10,6 +10,7 @@ import { BuiltIns } from "../speechlessGPU/Builtins";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
 import { Matrix4x4 } from "../speechlessGPU/shader/PrimitiveType";
+import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
 
 
 export class RotatingCube extends RenderPipeline {
@@ -26,6 +27,8 @@ export class RotatingCube extends RenderPipeline {
         const uvOffset = cubeUVOffset / 4;
 
         const resource = {
+            clearColor: { r: 0, g: 0, b: 0, a: 0 },
+            blendMode: new AlphaBlendMode(),
             bindgroups: {
                 geom: {
                     vb: new VertexBuffer({
@@ -90,16 +93,16 @@ export class RotatingCube extends RenderPipeline {
 
 
 
-
+        this.scaleX = this.scaleY = this.scaleZ = 200.0;
 
         this.onDrawEnd = () => {
 
-            this.scaleX = this.scaleY = this.scaleZ = 200.0;
+
             this.rotationX += 0.01;
             this.rotationY += 0.01;
             this.rotationZ += 0.01;
 
-            this.z = Math.sin(this.rotationX) * 500;
+            //this.z = Math.sin(this.rotationX) * 500;
         }
 
 
@@ -156,9 +159,18 @@ export class Test13 extends Sample {
     protected async start(renderer: GPURenderer) {
 
 
-        var cube = new RotatingCube(renderer);
+        for (let i = 0; i < 100; i++) {
+            var cube = new RotatingCube(renderer);
+            cube.scaleX = cube.scaleY = cube.scaleZ = 50;
+            cube.x = -512 + Math.random() * 1024;
+            cube.y = -512 + Math.random() * 1024;
+            cube.z = -512 + Math.random() * 1024;
+            renderer.addPipeline(cube);
+        }
 
-        renderer.addPipeline(cube);
+
+
+
 
 
 

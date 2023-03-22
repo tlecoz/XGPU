@@ -46,6 +46,9 @@ export class Pipeline {
     }
 
     protected createVertexBufferLayout(): any {
+
+
+
         this.vertexBufferLayouts = [];
         this.vertexBuffers = [];
 
@@ -129,6 +132,8 @@ export class Pipeline {
 
 
     protected createLayouts(): void {
+
+
         this.gpuBindGroupLayouts = [];
         this.gpuBindgroups = [];
         this.gpuPipelineLayout = null;

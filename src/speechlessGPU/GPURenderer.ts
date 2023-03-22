@@ -63,6 +63,8 @@ export class GPURenderer {
         this.renderPipelines.push(pipeline);
     }
 
+    public get useSinglePipeline(): boolean { return this.renderPipelines.length === 1 }
+
     public update() {
         if (!SLGPU.ready || this.renderPipelines.length === 0) return;
         if (this.canvas.width != this.canvasW || this.canvas.height != this.canvasH) {
@@ -75,16 +77,26 @@ export class GPURenderer {
         const textureView = this.ctx.getCurrentTexture().createView();
 
         let pipeline: RenderPipeline, renderPass;
+
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
+
             renderPass = pipeline.beginRenderPass(commandEncoder, textureView);
 
 
-            pipeline.update();
-
+            pipeline.update()
             pipeline.draw(renderPass);
+
+
+
+
+
             pipeline.end(commandEncoder, renderPass);
+
+
         }
+
+
 
         SLGPU.device.queue.submit([commandEncoder.finish()]);
 

@@ -141,6 +141,8 @@ export class RenderPipeline extends Pipeline {
 
         this.renderPassDescriptor.colorAttachments.push(colorAttachment);
 
+
+
         return colorAttachment;
     }
     //----------- used if there is no indexBuffer ------
@@ -336,9 +338,28 @@ export class RenderPipeline extends Pipeline {
 
     //-------------------------------------------
 
+    private clearOpReady: boolean = false;
+    private rendererUseSinglePipeline: boolean = true;
 
     public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView): GPURenderPassEncoder {
         if (!this.resourceDefined) return;
+
+        let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline;
+
+        if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
+            this.clearOpReady = false;
+            this.rendererUseSinglePipeline = rendererUseSinglePipeline;
+        }
+
+        if (this.clearOpReady === false) {
+            this.clearOpReady = true;
+
+            if (rendererUseSinglePipeline) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+            else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+
+            console.log(this.renderPassDescriptor.colorAttachments[0])
+        }
+
 
         if (!this.gpuPipeline) this.buildGpuPipeline();
 
@@ -393,34 +414,44 @@ export class RenderPipeline extends Pipeline {
     }
 
 
-    public draw(renderPass: GPURenderPassEncoder) {
+    public draw(renderPass: GPURenderPassEncoder, gpuPipeline?: GPURenderPipeline) {
 
         if (!this.resourceDefined) return;
 
+        if (gpuPipeline) {
 
-        renderPass.setPipeline(this.gpuPipeline);
+            //this.initPipelineResources(this);
+            //this.build();
+            this.bindGroups.update();
 
-        //console.log("bindGroups.resources = ", this.bindGroups.resources)
-        const resourceByType = this.bindGroups.resources.types;
-        const buffers = resourceByType.vertexBuffers;
+        } else {
+
+            renderPass.setPipeline(this.gpuPipeline);
 
 
-        if (this.drawConfig.vertexCount === -1) {
-            if (!buffers) {
-                throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
+            //console.log("bindGroups.resources = ", this.bindGroups.resources)
+            const resourceByType = this.bindGroups.resources.types;
+            const buffers = resourceByType.vertexBuffers;
+
+
+            if (this.drawConfig.vertexCount === -1) {
+                if (!buffers) {
+                    throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
+                }
+                const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
+                this.drawConfig.vertexCount = vertexBuffer.nbVertex;
             }
-            const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
-            this.drawConfig.vertexCount = vertexBuffer.nbVertex;
-        }
 
-        if (buffers) {
-            //console.log("DRAW BUFFERS ", buffers)
-            let k = 0;
-            for (let i = 0; i < buffers.length; i++) {
-                //if (i > 2) continue;
-                //console.log(" renderPass.setVertexBuffer(", k, ",", buffers[i].resource.getCurrentBuffer(), ", 0,", buffers[i].resource.getCurrentBuffer().size, ")")
-                renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
+            if (buffers) {
+                //console.log("DRAW BUFFERS ", buffers)
+                let k = 0;
+                for (let i = 0; i < buffers.length; i++) {
+                    //if (i > 2) continue;
+                    //console.log(" renderPass.setVertexBuffer(", k, ",", buffers[i].resource.getCurrentBuffer(), ", 0,", buffers[i].resource.getCurrentBuffer().size, ")")
+                    renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
+                }
             }
+
         }
 
         this.bindGroups.apply(renderPass);
@@ -435,11 +466,12 @@ export class RenderPipeline extends Pipeline {
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.nbPoint * 4);
             renderPass.drawIndexed(this.indexBuffer.nbPoint);
         } else {
-
+            /*
             if (this.drawConfig.vertexCount !== -1) {
-
+                //console.log("a ", this.drawConfig)
                 renderPass.draw(this.drawConfig.vertexCount, this.drawConfig.instanceCount, this.drawConfig.firstVertexId, this.drawConfig.firstInstanceId)
-            }
+            }*/
+            renderPass.draw(36);
         }
 
     }
