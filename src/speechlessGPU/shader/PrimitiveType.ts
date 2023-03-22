@@ -22,6 +22,9 @@ export class PrimitiveFloatUniform extends Float32Array {
         this.createVariableInsideMain = createLocalVariable;
     }
 
+    public clone(): PrimitiveFloatUniform {
+        return new PrimitiveFloatUniform(this.type.rawType, this as Float32Array, this.createVariableInsideMain)
+    }
 
     public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {
         if (this.type.isArray || this.type.isMatrix) throw new Error("initStruct doesn't accept array or matrix");
@@ -80,6 +83,10 @@ export class PrimitiveIntUniform extends Int32Array {
         this.createVariableInsideMain = createLocalVariable;
     }
 
+    public clone(): PrimitiveIntUniform {
+        return new PrimitiveIntUniform(this.type.rawType, this as Int32Array, this.createVariableInsideMain)
+    }
+
     public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {
         if (this.type.isArray || this.type.isMatrix) throw new Error("initStruct doesn't accept array or matrix");
         this.propertyNames = propertyNames;
@@ -129,6 +136,10 @@ export class PrimitiveUintUniform extends Uint32Array {
         super(val);
         this.type = new GPUType(type);
         this.createVariableInsideMain = createLocalVariable;
+    }
+
+    public clone(): PrimitiveUintUniform {
+        return new PrimitiveUintUniform(this.type.rawType, this as Uint32Array, this.createVariableInsideMain)
     }
 
     public initStruct(propertyNames: string[], createVariableInsideMain: boolean = false) {

@@ -26,6 +26,10 @@ export class VertexBufferIO {
 
     }
 
+    public clone(): VertexBufferIO {
+        return new VertexBufferIO(this.buffers[0].attributeDescriptor, this.descriptor);
+    }
+
     public createDeclaration(name: string, bindingId: number, groupId: number): string {
         const structName = name.substring(0, 1).toUpperCase() + name.slice(1);
         const varName = name.substring(0, 1).toLowerCase() + name.slice(1);

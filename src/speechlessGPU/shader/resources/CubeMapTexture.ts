@@ -26,14 +26,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
     protected _sides: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[] = [];
 
     constructor(descriptor: {
-        source?: {
-            front: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
-            back: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
-            left: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
-            right: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
-            top: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
-            bottom: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas,
-        },
+        source?: ImageBitmap[], ////front,back,left,right,top,bottom
         size: GPUExtent3D,
         usage?: GPUTextureUsageFlags,
         defaultViewDescriptor?: GPUTextureViewDescriptor,
@@ -46,37 +39,44 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
 
         super(descriptor as any);
-        if (descriptor.source) this.sides = [
-            descriptor.source.front,
-            descriptor.source.back,
-            descriptor.source.left,
-            descriptor.source.right,
-            descriptor.source.top,
-            descriptor.source.bottom,
-        ];
+        if (descriptor.source) this.sides = descriptor.source
 
     }
+
+
+    public clone(): CubeMapTexture {
+        if (!this.descriptor.source) this.descriptor.source = this._sides;
+        return new CubeMapTexture(this.descriptor);
+    }
+
+
     public set right(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+
         this._sides[0] = bmp;
         this.mustBeTransfered = true;
     }
     public set left(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+        if (!this.descriptor.source) this.descriptor.source = {};
         this._sides[1] = bmp;
         this.mustBeTransfered = true;
     }
     public set bottom(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+        if (!this.descriptor.source) this.descriptor.source = {};
         this._sides[2] = bmp;
         this.mustBeTransfered = true;
     }
     public set top(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+        if (!this.descriptor.source) this.descriptor.source = {};
         this._sides[3] = bmp;
         this.mustBeTransfered = true;
     }
     public set back(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+        if (!this.descriptor.source) this.descriptor.source = {};
         this._sides[4] = bmp;
         this.mustBeTransfered = true;
     }
     public set front(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+        if (!this.descriptor.source) this.descriptor.source = {};
         this._sides[5] = bmp;
         this.mustBeTransfered = true;
     }
@@ -113,8 +113,6 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
                         [bmp.width, bmp.height]
                     );
                 }
-
-                this._sides[i] = null;
             }
             //if (bmp instanceof ImageBitmap) bmp.close();
             this.mustBeTransfered = false;

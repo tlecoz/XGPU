@@ -12,11 +12,13 @@ export class GPUType {
     private _alignOf: number;
     private _sizeOf: number;
     private _dataType: string;
+    private _rawType: string;
 
 
     //https://www.w3.org/TR/WGSL/#alignment-and-size
 
     constructor(dataType: string) {
+        this._rawType = dataType;
         dataType = this.renameDataType(dataType);
         //ex : u32,vec3<f16>,...
         this._dataType = dataType;
@@ -114,6 +116,7 @@ export class GPUType {
     public set byteAlign(n: number) { this._alignOf = n; }
 
     public get dataType(): string { return this._dataType; }
+    public get rawType(): string { return this._rawType; }
 
     public get byteValue(): number {
         if (this._primitive === "f16") return 2;

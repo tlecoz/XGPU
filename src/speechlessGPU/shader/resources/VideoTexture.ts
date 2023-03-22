@@ -49,6 +49,12 @@ export class VideoTexture implements IShaderResource {
         this.descriptor = descriptor;
 
     }
+
+    public clone(): VideoTexture {
+        return new VideoTexture(this.descriptor);
+    }
+
+
     public set source(video: HTMLVideoElement) {
         this.gpuResource = video;
         this.descriptor.source = video;

@@ -59,6 +59,13 @@ export class ImageTexture implements IShaderResource {
         //this.createGpuResource()
     }
 
+
+    public clone(): ImageTexture {
+        return new ImageTexture(this.descriptor);
+    }
+
+
+
     protected gpuTextureIOs: GPUTexture[];
     protected gpuTextureIO_index: number = 1;
     public initTextureIO(textures: GPUTexture[]) {

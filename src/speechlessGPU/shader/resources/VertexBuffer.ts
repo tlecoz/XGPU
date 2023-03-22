@@ -72,6 +72,16 @@ export class VertexBuffer implements IShaderResource {
 
     }
 
+
+    public clone(): VertexBuffer {
+        const vb = new VertexBuffer(this.attributeDescriptor, this.descriptor);
+        const data = new Float32Array(this.datas.length);
+        data.set(this.datas);
+        vb.datas = data;
+        return vb;
+    }
+
+
     protected gpuBufferIOs: GPUBuffer[];
     protected gpuBufferIO_index: number = 1;
 

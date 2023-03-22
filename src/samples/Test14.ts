@@ -20,20 +20,12 @@ export class CubeMap extends RotatingCube {
 
 
         resource.bindgroups.fragment = {
-            imgSampler: new TextureSampler({ magFilter: "linear", minFilter: "linear" }),
+            imgSampler: new TextureSampler(),
             img: new CubeMapTexture({
                 size: [1024, 1024, 6],
-                source: {
-                    front: sides[0],
-                    back: sides[1],
-                    left: sides[2],
-                    right: sides[3],
-                    top: sides[4],
-                    bottom: sides[5]
-                }
+                source: sides
             })
         }
-
 
         resource.fragmentShader.main = `
         var cubemapVec = fragPosition.xyz - vec3(0.5);
@@ -54,11 +46,7 @@ export class CubeMap extends RotatingCube {
         this.onDrawEnd = () => {
 
             let time = (new Date().getTime() - now) / 1000;
-
             this.scaleX = this.scaleY = this.scaleZ = 3000;
-            this.z = 0;
-
-
             this.rotationY = Math.sin(time * 0.15 + 1) * Math.PI;
             this.rotationX = 0.25 + Math.cos(time * 0.4) * Math.PI * 0.1;
         }

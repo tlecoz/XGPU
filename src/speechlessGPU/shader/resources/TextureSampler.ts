@@ -50,7 +50,9 @@ export class TextureSampler implements IShaderResource {
 
     }
 
-
+    public clone(): TextureSampler {
+        return new TextureSampler(this.descriptor);
+    }
 
     public get isComparison(): boolean { return !!this.descriptor.compare }
     public get isFiltering(): boolean {

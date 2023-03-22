@@ -16,4 +16,6 @@ export interface IShaderResource {
     destroyGpuResource();
     update();
 
+    clone(): IShaderResource;
+
 }

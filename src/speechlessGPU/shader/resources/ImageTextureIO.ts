@@ -41,6 +41,17 @@ export class ImageTextureIO {
         if (descriptor.source != null) this.textures[0].source = descriptor.source;
     }
 
+    public clone(): ImageTextureIO {
+        const obj = {
+            source: this.textures[0].gpuResource,
+            width: this.descriptor.size[0],
+            height: this.descriptor.size[1],
+            format: this.descriptor.format
+        }
+        return new ImageTextureIO(obj);
+    }
+
+
     public createDeclaration(name: string, bindingId: number, groupId: number): string {
 
 
