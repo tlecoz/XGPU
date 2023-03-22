@@ -13,6 +13,7 @@ export type CubeMapTextureDescriptor = {
     },
     size: GPUExtent3D,
     usage?: GPUTextureUsageFlags,
+    dimension: string,
     defaultViewDescriptor?: GPUTextureViewDescriptor
 }
 
@@ -35,10 +36,12 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
         },
         size: GPUExtent3D,
         usage?: GPUTextureUsageFlags,
-        defaultViewDescriptor?: GPUTextureViewDescriptor
+        defaultViewDescriptor?: GPUTextureViewDescriptor,
+        dimension?: string
     }) {
 
         descriptor = { ...descriptor };
+        if (!descriptor.dimension) descriptor.dimension = "2d"
 
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
 
@@ -51,7 +54,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
             descriptor.source.top,
             descriptor.source.bottom,
         ];
-        this.createGpuResource();
+
     }
     public set right(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
         this._sides[0] = bmp;
@@ -87,16 +90,22 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
 
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
+        console.log("cubemap createtexture ", this.descriptor)
         this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
+        this._view = this.gpuResource.createView({ dimension: 'cube' });
     }
 
     public update(): void {
 
 
         if (this.mustBeTransfered) {
+
+            if (!this.gpuResource) this.createGpuResource();
+
             let bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas;
             for (let i = 0; i < 6; i++) {
                 bmp = this._sides[i];
+                console.log("upload texture ", bmp)
                 if (bmp) {
                     SLGPU.device.queue.copyExternalImageToTexture(
                         { source: bmp },
@@ -135,9 +144,10 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
 
 
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUTextureView } {
+        if (!this.gpuResource) this.createGpuResource();
         return {
             binding: bindingId,
-            resource: this.gpuResource.createView({ dimension: 'cube' }),
+            resource: this._view,
         }
     }
 

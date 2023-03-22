@@ -33,6 +33,14 @@ export class Pipeline {
     public get isRenderPipeline(): boolean { return this.type === "render"; }
     public get isMixedPipeline(): boolean { return this.type === "compute_mixed"; }
 
+
+    protected _resources: any;
+    public get resources(): any { return this._resources; }
+    public initFromObject(obj: any) {
+        this._resources = obj;
+    }
+
+
     public addBindgroup(group: Bindgroup) {
         this.bindGroups.add(group);
     }

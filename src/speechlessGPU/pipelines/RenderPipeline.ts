@@ -74,6 +74,8 @@ export class RenderPipeline extends Pipeline {
         }
     }) {
 
+        super.initFromObject(descriptor);
+
         if (descriptor.indexBuffer) this.indexBuffer = descriptor.indexBuffer;
 
         if (descriptor.clearColor) this.outputColor.clearValue = descriptor.clearColor;
@@ -336,6 +338,9 @@ export class RenderPipeline extends Pipeline {
 
 
     public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView): GPURenderPassEncoder {
+        if (!this.resourceDefined) return;
+
+        if (!this.gpuPipeline) this.buildGpuPipeline();
 
         if (this.drawConfig.vertexCount === 0) {
             if (this.vertexBuffers.length) {
@@ -390,11 +395,10 @@ export class RenderPipeline extends Pipeline {
 
     public draw(renderPass: GPURenderPassEncoder) {
 
+        if (!this.resourceDefined) return;
 
-        const pipeline = this.buildGpuPipeline();
-        if (!pipeline) return;
 
-        renderPass.setPipeline(pipeline);
+        renderPass.setPipeline(this.gpuPipeline);
 
         //console.log("bindGroups.resources = ", this.bindGroups.resources)
         const resourceByType = this.bindGroups.resources.types;
@@ -444,6 +448,8 @@ export class RenderPipeline extends Pipeline {
     //-------------------------------
 
     public end(commandEncoder, renderPass) {
+        if (!this.resourceDefined) return;
+
         renderPass.end();
 
         if (this.renderPassTexture) {
@@ -453,6 +459,9 @@ export class RenderPipeline extends Pipeline {
         }
         if (this.onDrawEnd) this.onDrawEnd();
     }
+
+
+    private get resourceDefined(): boolean { return !!this.bindGroups.resources.all }
 
     public get pipeline(): GPURenderPipeline { return this.gpuPipeline }
 

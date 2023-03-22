@@ -11,9 +11,10 @@ import { Test10 } from "./samples/Test10";
 import { Test11 } from "./samples/Test11";
 import { Test12 } from "./samples/Test12";
 import { Test13 } from "./samples/Test13";
+import { Test14 } from "./samples/Test14";
 
 
-const id = 13;
+const id = 14;
 
 
 if (id === 1) new Test01();
@@ -29,3 +30,4 @@ else if (id === 10) new Test10();
 else if (id === 11) new Test11();
 else if (id === 12) new Test12();
 else if (id === 13) new Test13();
+else if (id === 14) new Test14();

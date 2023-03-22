@@ -65,7 +65,7 @@ export class Sample {
     }
 
 
-    protected async start(renderer: GPURenderer) {
+    protected async start(renderer: GPURenderer): Promise<void> {
 
     }
 

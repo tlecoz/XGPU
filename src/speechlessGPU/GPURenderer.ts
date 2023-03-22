@@ -79,13 +79,7 @@ export class GPURenderer {
             pipeline = this.renderPipelines[i];
             renderPass = pipeline.beginRenderPass(commandEncoder, textureView);
 
-            //--------------------------
-            /*
-            pipeline.bindgroups.resources => les resources du displayobject correspondant à la pipeline
-            |=> mettre en place une fonction clone dans chaque PipelineResource
 
-            */
-            //-------------------------
             pipeline.update();
 
             pipeline.draw(renderPass);

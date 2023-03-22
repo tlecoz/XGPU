@@ -24,6 +24,7 @@ export class ComputePipeline extends Pipeline {
     protected canCallMapAsync: boolean = true;
     protected bufferIOs: VertexBuffer[];
     protected textureIOs: ImageTexture[];
+
     private checkedBufferIO: boolean = false;
     private checkedTextureIO: boolean = false;
 
@@ -48,7 +49,7 @@ export class ComputePipeline extends Pipeline {
         },
     }) {
 
-
+        super.initFromObject(descriptor);
 
         if (descriptor.bindgroups) {
             let group: Bindgroup;

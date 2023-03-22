@@ -33,8 +33,8 @@ export class VertexShader extends ShaderStage {
         result += this.main.value;
         result += "   return output;\n"
         result += "}\n";
-        //console.log("------------- VERTEX SHADER --------------")
-        //console.log(result)
+        console.log("------------- VERTEX SHADER --------------")
+        console.log(result)
         //console.log("------------------------------------------")
         return { code: result, output: output };
     }
