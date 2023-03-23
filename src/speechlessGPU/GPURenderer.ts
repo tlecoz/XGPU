@@ -45,6 +45,7 @@ export class GPURenderer {
         });
     }
 
+    public get firstPipeline(): RenderPipeline { return this.renderPipelines[0]; }
 
     public get canvas(): HTMLCanvasElement { return this.domElement; }
     public get texture(): GPUTexture { return this.ctx.getCurrentTexture() }

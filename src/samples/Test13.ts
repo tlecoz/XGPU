@@ -9,14 +9,15 @@ import { ShaderType } from "../speechlessGPU/shader/ShaderType";
 import { BuiltIns } from "../speechlessGPU/Builtins";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
-import { Matrix4x4 } from "../speechlessGPU/shader/PrimitiveType";
+import { Matrix4x4, ModelViewMatrix } from "../speechlessGPU/shader/PrimitiveType";
 import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
 
 
 export class RotatingCube extends RenderPipeline {
 
-    protected model: Matrix4x4;
-    protected view: Matrix4x4;
+    //protected model: Matrix4x4;
+    //protected view: Matrix4x4;
+    protected modelView: ModelViewMatrix;
 
     protected createResources(o: { renderer: GPURenderer | HeadlessGPURenderer, options?: any }): any {
 
@@ -27,8 +28,8 @@ export class RotatingCube extends RenderPipeline {
         const uvOffset = cubeUVOffset / 4;
 
         const resource = {
-            clearColor: { r: 0, g: 0, b: 0, a: 0 },
-            blendMode: new AlphaBlendMode(),
+            //clearColor: { r: 0, g: 0, b: 0, a: 0 },
+            //blendMode: new AlphaBlendMode(),
             bindgroups: {
                 geom: {
                     vb: new VertexBuffer({
@@ -36,8 +37,9 @@ export class RotatingCube extends RenderPipeline {
                         uv: VertexBuffer.Vec2(uvOffset)
                     }),
                     uniforms: new UniformBuffer({
-                        model: new Matrix4x4(),
-                        view: new Matrix4x4(),
+                        modelView: new ModelViewMatrix(),
+                        //model: new Matrix4x4(),
+                        //view: new Matrix4x4(),
                         projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height, 45),
                     })
                 }
@@ -49,7 +51,8 @@ export class RotatingCube extends RenderPipeline {
                     fragPosition: ShaderType.Vec4
                 },
                 main: `
-                output.position = uniforms.projection *  uniforms.view * uniforms.model * position;
+                output.position = uniforms.projection *  uniforms.modelView * position;
+                //output.position = uniforms.projection *  uniforms.view * uniforms.model * position;
                 output.fragUV = uv;
                 output.fragPosition = 0.5 * (position + vec4<f32>(1.0, 1.0, 1.0, 1.0));
                 `
@@ -65,8 +68,9 @@ export class RotatingCube extends RenderPipeline {
             }
         }
 
-        this.model = resource.bindgroups.geom.uniforms.items.model;
-        this.view = resource.bindgroups.geom.uniforms.items.view;
+        this.modelView = resource.bindgroups.geom.uniforms.items.modelView;
+        //this.model = resource.bindgroups.geom.uniforms.items.model;
+        //this.view = resource.bindgroups.geom.uniforms.items.view;
 
 
         resource.bindgroups.geom.vb.setComplexDatas(cubeVertexArray, nbComponentTotal)
@@ -109,34 +113,34 @@ export class RotatingCube extends RenderPipeline {
     }
 
 
-    public get x(): number { return this.view.x; }
-    public set x(n: number) { this.view.x = n }
+    public get x(): number { return this.modelView.x; }
+    public set x(n: number) { this.modelView.x = n }
 
-    public get y(): number { return this.view.y; }
-    public set y(n: number) { this.view.y = n }
+    public get y(): number { return this.modelView.y; }
+    public set y(n: number) { this.modelView.y = n }
 
-    public get z(): number { return this.view.z; }
-    public set z(n: number) { this.view.z = n }
-
-
-    public get rotationX(): number { return this.model.rotationX; }
-    public set rotationX(n: number) { this.model.rotationX = n }
-
-    public get rotationY(): number { return this.model.rotationY; }
-    public set rotationY(n: number) { this.model.rotationY = n }
-
-    public get rotationZ(): number { return this.model.rotationZ; }
-    public set rotationZ(n: number) { this.model.rotationZ = n }
+    public get z(): number { return this.modelView.z; }
+    public set z(n: number) { this.modelView.z = n }
 
 
-    public get scaleX(): number { return this.model.scaleX; }
-    public set scaleX(n: number) { this.model.scaleX = n }
+    public get rotationX(): number { return this.modelView.rotationX; }
+    public set rotationX(n: number) { this.modelView.rotationX = n }
 
-    public get scaleY(): number { return this.model.scaleY; }
-    public set scaleY(n: number) { this.model.scaleY = n }
+    public get rotationY(): number { return this.modelView.rotationY; }
+    public set rotationY(n: number) { this.modelView.rotationY = n }
 
-    public get scaleZ(): number { return this.model.scaleZ; }
-    public set scaleZ(n: number) { this.model.scaleZ = n }
+    public get rotationZ(): number { return this.modelView.rotationZ; }
+    public set rotationZ(n: number) { this.modelView.rotationZ = n }
+
+
+    public get scaleX(): number { return this.modelView.scaleX; }
+    public set scaleX(n: number) { this.modelView.scaleX = n }
+
+    public get scaleY(): number { return this.modelView.scaleY; }
+    public set scaleY(n: number) { this.modelView.scaleY = n }
+
+    public get scaleZ(): number { return this.modelView.scaleZ; }
+    public set scaleZ(n: number) { this.modelView.scaleZ = n }
 
 
 

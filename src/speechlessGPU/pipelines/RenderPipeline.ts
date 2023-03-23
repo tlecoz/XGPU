@@ -355,9 +355,12 @@ export class RenderPipeline extends Pipeline {
             this.clearOpReady = true;
 
             if (rendererUseSinglePipeline) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-            else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+            else {
+                if (this.renderer.firstPipeline === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+            }
 
-            console.log(this.renderPassDescriptor.colorAttachments[0])
+
         }
 
 

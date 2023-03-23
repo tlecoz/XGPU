@@ -649,28 +649,149 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 
     public update() {
 
+        if (this.mustBeTransfered) {
+
+            mat4.identity(this);
+
+            mat4.rotate(this, this, this._rx, vec3.fromValues(1, 0, 0));
+            mat4.rotate(this, this, this._ry, vec3.fromValues(0, 1, 0));
+            mat4.rotate(this, this, this._rz, vec3.fromValues(0, 0, 1));
+
+            mat4.translate(this, this, vec3.fromValues(this._x, this._y, this._z));
+
+            mat4.scale(this, this, vec3.fromValues(this._sx, this._sy, this._sz));
+
+        }
 
 
-        mat4.identity(this);
+    }
+}
 
-        mat4.rotate(this, this, this._rx, vec3.fromValues(1, 0, 0));
-        mat4.rotate(this, this, this._ry, vec3.fromValues(0, 1, 0));
-        mat4.rotate(this, this, this._rz, vec3.fromValues(0, 0, 1));
+//--------------------
 
-        mat4.translate(this, this, vec3.fromValues(this._x, this._y, this._z));
+export class ModelViewMatrix extends Matrix4x4 {
 
-        mat4.scale(this, this, vec3.fromValues(this._sx, this._sy, this._sz));
+
+    protected model: Matrix4x4;
+    protected view: Matrix4x4;
+
+    constructor() {
+
+        super();
+
+        this.model = new Matrix4x4();
+        this.view = new Matrix4x4();
+    }
+
+    public get x(): number { return this.view.x; }
+    public get y(): number { return this.view.y; }
+    public get z(): number { return this.view.z; }
+
+    public get rotationX(): number { return this.model.rotationX; }
+    public get rotationY(): number { return this.model.rotationY; }
+    public get rotationZ(): number { return this.model.rotationZ; }
+
+    public get scaleX(): number { return this.model.scaleX; }
+    public get scaleY(): number { return this.model.scaleY; }
+    public get scaleZ(): number { return this.model.scaleZ; }
+
+
+    public set x(n: number) {
+        if (n === this.view.x) return;
+        this.view.x = n;
+    }
+
+    public set y(n: number) {
+        if (n === this.view.y) return;
+        this.view.y = n;
+    }
+
+    public set z(n: number) {
+        if (n === this.view.z) return;
+        this.view.z = n;
+
+    }
+
+    public set rotationX(n: number) {
+        if (n === this.model.rotationX) return;
+        this.model.rotationX = n;
+    }
+
+    public set rotationY(n: number) {
+        if (n === this.model.rotationY) return;
+        this.model.rotationY = n;
+    }
+
+    public set rotationZ(n: number) {
+        if (n === this.model.rotationZ) return;
+        this.model.rotationZ = n;
+    }
+
+    public set scaleX(n: number) {
+        if (n === this.model.scaleX) return;
+        this.model.scaleX = n;
+    }
+
+    public set scaleY(n: number) {
+        if (n === this.model.scaleY) return;
+        this.model.scaleY = n;
+    }
+
+    public set scaleZ(n: number) {
+        if (n === this.model.scaleZ) return;
+        this.model.scaleZ = n;
+    }
+
+    public setMatrix(mat: Float32Array) {
+        this.set(mat);
+        this.mustBeTransfered = true;
+    }
+
+    public update() {
+
+        if (this.model.mustBeTransfered || this.view.mustBeTransfered) {
+            if (this.model.mustBeTransfered) this.model.update();
+            if (this.view.mustBeTransfered) this.view.update();
+            //mat4.identity(this);
+            mat4.multiply(this, this.view, this.model);
+            this.model.mustBeTransfered = this.view.mustBeTransfered = false;
+            this.mustBeTransfered = true;
+        }
     }
 }
 
 //--------------------
 
 export class Matrix4x4Array extends PrimitiveFloatUniform {
+
+    public matrixs: Matrix4x4[];
+
     constructor(mat4x4Array: Matrix4x4[]) {
+
         let buf: Float32Array = new Float32Array(mat4x4Array.length * 16);
         for (let i = 0; i < mat4x4Array.length; i++) buf.set(mat4x4Array[i], i * 16);
         super("array<mat4x4<f32>," + mat4x4Array.length + ">", buf)
+
+        this.matrixs = mat4x4Array;
+        this.mustBeTransfered = true;
     }
+
+    public update(): void {
+        let mustBeTransfered = false;
+        let m: Matrix4x4;
+        for (let i = 0; i < this.matrixs.length; i++) {
+            m = this.matrixs[i];
+            m.update();
+            if (m.mustBeTransfered) {
+                mustBeTransfered = true;
+                this.set(m, i * 16);
+                m.mustBeTransfered = false;
+            }
+        }
+        this.mustBeTransfered = mustBeTransfered;
+    }
+
+
 
 
 }

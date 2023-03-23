@@ -3,7 +3,7 @@
 vertexBuffer alignment.... 
 verifier a fond uniformBufferAlignment
 
-verifier que le sample du cube fonctionne (vertexBuffer offset)
+
 
 simplifier les initFromObject (bindgroup par defaut, uniformBuffer par defaut avec variable local par defaut, data des vertexbuffers , shaderInputs par defaut si non defini)
 
