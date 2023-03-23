@@ -777,6 +777,9 @@ export class Matrix4x4Array extends PrimitiveFloatUniform {
     }
 
     public update(): void {
+
+        //console.log("matrixArray.update")
+
         let mustBeTransfered = false;
         let m: Matrix4x4;
         for (let i = 0; i < this.matrixs.length; i++) {

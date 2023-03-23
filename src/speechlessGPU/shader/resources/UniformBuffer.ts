@@ -72,6 +72,9 @@ export class UniformBuffer implements IShaderResource {
 
 
     private setupUniformAlignment() {
+
+        console.log(this.uniforms[0])
+
         this.uniforms = this.uniforms.sort((a: PrimitiveType, b: PrimitiveType) => {
             if (a.type.byteAlign > b.type.byteAlign) return 1;
             if (a.type.byteAlign < b.type.byteAlign) return -1
@@ -154,12 +157,13 @@ export class UniformBuffer implements IShaderResource {
         if (!this.gpuResource) this.createGpuResource();
 
 
+
         let uniform: PrimitiveType;
         for (let i = 0; i < this.uniforms.length; i++) {
             uniform = this.uniforms[i];
             uniform.update();
             if (uniform.mustBeTransfered) {
-                //console.log(uniform.name, uniform.startId, uniform.byteLength, uniform)
+
                 uniform.mustBeTransfered = false;
                 SLGPU.device.queue.writeBuffer(
                     this.gpuResource,

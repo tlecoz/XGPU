@@ -469,12 +469,12 @@ export class RenderPipeline extends Pipeline {
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.nbPoint * 4);
             renderPass.drawIndexed(this.indexBuffer.nbPoint);
         } else {
-            /*
+
             if (this.drawConfig.vertexCount !== -1) {
                 //console.log("a ", this.drawConfig)
                 renderPass.draw(this.drawConfig.vertexCount, this.drawConfig.instanceCount, this.drawConfig.firstVertexId, this.drawConfig.firstInstanceId)
-            }*/
-            renderPass.draw(36);
+            }
+
         }
 
     }

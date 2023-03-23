@@ -162,23 +162,9 @@ export class Test13 extends Sample {
 
     protected async start(renderer: GPURenderer) {
 
-
-        for (let i = 0; i < 100; i++) {
-            var cube = new RotatingCube(renderer);
-            cube.scaleX = cube.scaleY = cube.scaleZ = 50;
-            cube.x = -512 + Math.random() * 1024;
-            cube.y = -512 + Math.random() * 1024;
-            cube.z = -512 + Math.random() * 1024;
-            renderer.addPipeline(cube);
-        }
-
-
-
-
-
-
-
-
+        var cube = new RotatingCube(renderer);
+        cube.scaleX = cube.scaleY = cube.scaleZ = 200;
+        renderer.addPipeline(cube);
 
     }
 
