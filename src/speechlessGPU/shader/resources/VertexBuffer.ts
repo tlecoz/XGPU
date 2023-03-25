@@ -14,20 +14,116 @@ export type VertexBufferDescriptor = {
 
 export class VertexBuffer implements IShaderResource {
 
-    public static Float(offset?: number) { return { type: "float32", offset } }
-    public static Vec2(offset?: number) { return { type: "float32x2", offset } }
-    public static Vec3(offset?: number) { return { type: "float32x3", offset } }
-    public static Vec4(offset?: number) { return { type: "float32x4", offset } }
+    public static Float(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32", offset, datas }
+    }
+    public static Vec2(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32x2", offset, datas }
+    }
+    public static Vec3(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32x3", offset, datas }
+    }
+    public static Vec4(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32x4", offset, datas }
+    }
 
-    public static Int(offset?: number) { return { type: "sint32", offset } }
-    public static IVec2(offset?: number) { return { type: "sint32x2", offset } }
-    public static IVec3(offset?: number) { return { type: "sint32x3", offset } }
-    public static IVec4(offset?: number) { return { type: "sint32x4", offset } }
+    public static Int(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32", offset, datas }
+    }
+    public static IVec2(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32x2", offset, datas }
+    }
+    public static IVec3(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32x3", offset, datas }
+    }
+    public static IVec4(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32x4", offset, datas }
+    }
 
-    public static Uint(offset?: number) { return { type: "uint32", offset } }
-    public static UVec2(offset?: number) { return { type: "uint32x2", offset } }
-    public static UVec3(offset?: number) { return { type: "uint32x3", offset } }
-    public static UVec4(offset?: number) { return { type: "uint32x4", offset } }
+    public static Uint(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32", offset, datas }
+    }
+    public static UVec2(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32x2", offset, datas }
+    }
+    public static UVec3(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32x3", offset, datas }
+    }
+    public static UVec4(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32x4", offset, datas }
+    }
 
 
     public io: number = 0;
@@ -60,13 +156,15 @@ export class VertexBuffer implements IShaderResource {
         this.descriptor = descriptor;
 
         const items: any = attributes;
-        let buffer, offset;
+        let buffer, offset, datas;
+        let attribute: VertexAttribute;
         for (let name in items) {
             buffer = items[name];
             offset = buffer.offset;
-            //console.log("=> ", name, buffer.offset)
+            datas = buffer.datas;
 
-            this.createArray(name, buffer.type, offset);
+            attribute = this.createArray(name, buffer.type, offset);
+            if (datas) attribute.datas = datas;
         }
         if (descriptor.datas) this.datas = descriptor.datas;
 
@@ -538,7 +636,7 @@ export class VertexBuffer implements IShaderResource {
             this.createGpuResource();
 
         }
-        console.log("updateBuffer ", this.datas.length, this.datas.byteLength + " vs " + this._bufferSize)
+        //console.log("updateBuffer ", this.datas.length, this.datas.byteLength + " vs " + this._bufferSize)
 
         if (this.datas.byteLength != this._bufferSize) this.createGpuResource();
 
@@ -556,21 +654,21 @@ export class VertexBuffer implements IShaderResource {
         let attribute: VertexAttribute;
         attribute = this.vertexArrays[0];
         const nbAttributes = this.vertexArrays.length;
-        const nbVertex = attribute.data.length;
+        const nbVertex = attribute.datas.length;
         let offset: number = 0;
         if (!this._datas) this._datas = new Float32Array(nbVertex * this.nbComponent)
         for (let i = 0; i < nbVertex; i++) {
             for (let j = 0; j < nbAttributes; j++) {
                 attribute = this.vertexArrays[j];
                 if (attribute.mustBeTransfered) {
-                    this._datas.set(attribute.data[i], offset);
+                    this._datas.set(attribute.datas[i], offset);
 
                 }
                 offset += attribute.nbComponent;
             }
         }
 
-        console.log(this._datas)
+
         for (let j = 0; j < nbAttributes; j++) this.vertexArrays[j].mustBeTransfered = false;
 
         this.attributeChanged = false;

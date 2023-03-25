@@ -130,7 +130,7 @@ export class Bindgroup {
             layout.entries.push(resource.createBindGroupLayoutEntry(bindingId++));
         }
 
-        console.log("BINDGROUP LAYOUT ENTRIES ", layout)
+        //console.log("BINDGROUP LAYOUT ENTRIES ", layout)
         this._layout = SLGPU.device.createBindGroupLayout(layout);
     }
 

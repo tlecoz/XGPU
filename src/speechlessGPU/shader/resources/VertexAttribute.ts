@@ -72,9 +72,9 @@ export class VertexAttribute {
         }
     }
 
-    public get data(): number[][] { return this._data }
-    public set data(n: number[][]) {
-        if (this.data != n) {
+    public get datas(): number[][] { return this._data }
+    public set datas(n: number[][]) {
+        if (this._data != n) {
             this._data = n;
             this.vertexBuffer.attributeChanged = true;
             this.mustBeTransfered = true;

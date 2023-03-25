@@ -76,7 +76,7 @@ export class UniformBuffer implements IShaderResource {
 
     private setupUniformAlignment() {
 
-        console.log(this.uniforms[0])
+
 
         this.uniforms = this.uniforms.sort((a: PrimitiveType, b: PrimitiveType) => {
             if (a.type.byteAlign > b.type.byteAlign) return 1;
@@ -123,7 +123,7 @@ export class UniformBuffer implements IShaderResource {
 
             uniform.startId = offset;
 
-            console.log(uniform.name, offset);
+            //console.log(uniform.name, offset);
 
             if (type.isArray) {
 

@@ -329,7 +329,7 @@ export class RenderPipeline extends Pipeline {
 
         this.description.layout = this.gpuPipelineLayout;
 
-        console.log("buildGPUPipeline description = ", this.description)
+        //console.log("buildGPUPipeline description = ", this.description)
         this.gpuPipeline = SLGPU.createRenderPipeline(this.description);
 
         return this.gpuPipeline;
