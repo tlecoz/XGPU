@@ -6,7 +6,7 @@ import { IShaderResource } from "./IShaderResource";
 
 
 export type UniformBufferDescriptor = {
-
+    useLocalVariable?: boolean;
     visibility?: GPUShaderStageFlags;
 }
 
@@ -26,6 +26,7 @@ export class UniformBuffer implements IShaderResource {
     protected uniformAlignmentReady: boolean = false;
 
     constructor(items: any, descriptor?: {
+        useLocalVariable?: boolean;
         visibility?: GPUShaderStageFlags;
     }) {
 
@@ -60,6 +61,8 @@ export class UniformBuffer implements IShaderResource {
 
         data.uniformBuffer = this;
         data.name = name;
+
+        if (this.descriptor.useLocalVariable) data.createVariableInsideMain = true;
 
         this._items[name] = data;
         this._itemNames.push(name);

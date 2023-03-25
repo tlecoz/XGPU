@@ -5,7 +5,6 @@ export type IndexBufferDescriptor = {
     dataType?: "uint16" | "uint32",
     datas?: Uint16Array | Uint32Array,
     offset?: number
-
 }
 
 export class IndexBuffer {
@@ -15,7 +14,12 @@ export class IndexBuffer {
 
     private mustUpdateData: boolean = false;
 
-    constructor(descriptor?: IndexBufferDescriptor) {
+    constructor(descriptor?: {
+        nbPoint?: number,
+        dataType?: "uint16" | "uint32",
+        datas?: Uint16Array | Uint32Array,
+        offset?: number
+    }) {
         if (!descriptor) descriptor = { nbPoint: 3 } as any;
         if (undefined === descriptor.dataType) {
             if (descriptor.datas) {
@@ -25,9 +29,12 @@ export class IndexBuffer {
                 descriptor.dataType = "uint32";
             }
         }
-        if (undefined === descriptor.datas) descriptor.datas = new Uint32Array([0, 0, 0]);
+
         if (undefined === descriptor.offset) descriptor.offset = 0;
         this.descriptor = descriptor;
+
+        if (undefined === descriptor.datas) descriptor.datas = new Uint32Array([0, 0, 0]);
+        else this.datas = descriptor.datas;
     }
 
 

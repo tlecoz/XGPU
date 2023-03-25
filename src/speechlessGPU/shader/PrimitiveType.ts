@@ -16,10 +16,13 @@ export class PrimitiveFloatUniform extends Float32Array {
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
 
+    protected className: string;
+
     constructor(type: string, val: number[] | Float32Array, createLocalVariable: boolean = false) {
         super(val);
         this.type = new GPUType(type);
         this.createVariableInsideMain = createLocalVariable;
+        this.className = this.constructor.name;
     }
 
     public clone(): PrimitiveFloatUniform {
@@ -45,7 +48,7 @@ export class PrimitiveFloatUniform extends Float32Array {
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
-        let type = this.constructor.name;
+        let type = this.className;
         if (type === "Float") type = "f32";
         if (type === "Vec2") type = "vec2<f32>";
         if (type === "Vec3") type = "vec3<f32>";
@@ -678,7 +681,7 @@ export class ModelViewMatrix extends Matrix4x4 {
     constructor() {
 
         super();
-
+        this.className = "mat4x4<f32>"
         this.model = new Matrix4x4();
         this.view = new Matrix4x4();
     }

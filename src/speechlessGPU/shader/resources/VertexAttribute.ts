@@ -1,4 +1,5 @@
 import { GPUType } from "../../GPUType";
+import { VertexBuffer } from "./VertexBuffer";
 
 
 
@@ -46,9 +47,11 @@ export class VertexAttribute {
     private nbValues: number;
     private vertexType: { name: string, nbComponent: number, bytes: number, varType: string };
 
-    public data: number[];
+    private _data: number[][];
     public dataOffset: number;
     public mustBeTransfered: boolean = false;
+
+    public vertexBuffer: VertexBuffer;
 
     constructor(name: string, dataType: string, offset?: number) {
 
@@ -67,10 +70,18 @@ export class VertexAttribute {
             this.nbValues = infos.nbValues;
             this.vertexType = this.getVertexDataType(infos.dataType)
         }
-
-
-
     }
+
+    public get data(): number[][] { return this._data }
+    public set data(n: number[][]) {
+        if (this.data != n) {
+            this._data = n;
+            this.vertexBuffer.attributeChanged = true;
+            this.mustBeTransfered = true;
+        }
+    }
+
+
 
 
     public get format(): string { return this._dataType }

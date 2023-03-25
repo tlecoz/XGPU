@@ -43,7 +43,7 @@ export class VertexBuffer implements IShaderResource {
 
     private _datas: Float32Array;
     public nbComponentData: number;
-
+    public attributeChanged: boolean = false;
 
 
 
@@ -313,6 +313,8 @@ export class VertexBuffer implements IShaderResource {
     public createArray(name: string, dataType: string, offset?: number): VertexAttribute {
         // console.log("new VertexAttribute ", name, dataType, offset)
         const v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
+        v.vertexBuffer = this;
+
         const nbCompo = v.nbComponent;
         this._nbComponent += nbCompo;
         this._byteCount += v.nbComponent * new GPUType(v.varType).byteValue;
@@ -503,7 +505,7 @@ export class VertexBuffer implements IShaderResource {
     protected _bufferSize: number;
     public get bufferSize(): number { return this._bufferSize; }
     public createGpuResource() {
-
+        if (this.attributeChanged) this.updateAttributes();
 
         if (!this.datas || this.gpuBufferIOs) return;
         if (this.mustRefactorData) this.refactorData();
@@ -536,7 +538,8 @@ export class VertexBuffer implements IShaderResource {
             this.createGpuResource();
 
         }
-        console.log("updateBuffer ", this.datas.byteLength + " vs " + this._bufferSize)
+        console.log("updateBuffer ", this.datas.length, this.datas.byteLength + " vs " + this._bufferSize)
+
         if (this.datas.byteLength != this._bufferSize) this.createGpuResource();
 
 
@@ -547,11 +550,51 @@ export class VertexBuffer implements IShaderResource {
 
     public getVertexArrayById(id: number): VertexAttribute { return this.vertexArrays[id]; }
 
+
+    protected updateAttributes() {
+
+        let attribute: VertexAttribute;
+        attribute = this.vertexArrays[0];
+        const nbAttributes = this.vertexArrays.length;
+        const nbVertex = attribute.data.length;
+        let offset: number = 0;
+        if (!this._datas) this._datas = new Float32Array(nbVertex * this.nbComponent)
+        for (let i = 0; i < nbVertex; i++) {
+            for (let j = 0; j < nbAttributes; j++) {
+                attribute = this.vertexArrays[j];
+                if (attribute.mustBeTransfered) {
+                    this._datas.set(attribute.data[i], offset);
+
+                }
+                offset += attribute.nbComponent;
+            }
+        }
+
+        console.log(this._datas)
+        for (let j = 0; j < nbAttributes; j++) this.vertexArrays[j].mustBeTransfered = false;
+
+        this.attributeChanged = false;
+        this.mustBeTransfered = true;
+
+    }
+
+
     public update(): boolean {
         if (this.vertexArrays.length === 0) return false;
 
+
+        if (this.attributeChanged) this.updateAttributes();
+
+
+
+
+
+
+
+
+
+
         if (this.mustBeTransfered) {
-            //console.log("mustBeTransfered ")
             this.mustBeTransfered = false;
             this.updateBuffer();
         }

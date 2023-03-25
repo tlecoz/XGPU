@@ -14,8 +14,10 @@ import { Test13 } from "./samples/Test13";
 import { Test14 } from "./samples/Test14";
 import { Test15 } from "./samples/Test15";
 import { Test16 } from "./samples/Test16";
+import { Test17 } from "./samples/Test17";
+import { Test18 } from "./samples/Test18";
 
-const id = 16;
+const id = 18;
 
 
 if (id === 1) new Test01();
@@ -34,3 +36,5 @@ else if (id === 13) new Test13();
 else if (id === 14) new Test14();
 else if (id === 15) new Test15();
 else if (id === 16) new Test16();
+else if (id === 17) new Test17();
+else if (id === 18) new Test18();

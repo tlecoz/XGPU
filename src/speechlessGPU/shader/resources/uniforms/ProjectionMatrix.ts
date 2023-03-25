@@ -10,6 +10,7 @@ export class ProjectionMatrix extends Matrix4x4 {
 
         super()
 
+        this.className = "mat4x4<f32>"
 
         var w: number = screenW * 0.5;
         var h: number = screenH * 0.5;
