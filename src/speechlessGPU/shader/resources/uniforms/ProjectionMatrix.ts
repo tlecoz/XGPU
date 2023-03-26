@@ -20,7 +20,7 @@ export class ProjectionMatrix extends Matrix4x4 {
 
         const eye = new Float32Array([0, 0, -focal]);
         const target = new Float32Array([0, 0, 0]);
-        const up = new Float32Array([0, 1, 0]);
+        const up = new Float32Array([0, -1, 0]);
 
         mat4.identity(this)
 

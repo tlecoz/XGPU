@@ -434,6 +434,10 @@ export class VertexBuffer implements IShaderResource {
         return v;
     }
 
+    public getAttributeByName(name: string): VertexAttribute {
+        return this.attributes[name];
+    }
+
     //----------------------------- USED WITH COMPUTE PIPELINE ----------------------------------------
 
     public createDeclaration(vertexBufferName: string, bindingId: number, groupId: number = 0, isInput: boolean = true): string {

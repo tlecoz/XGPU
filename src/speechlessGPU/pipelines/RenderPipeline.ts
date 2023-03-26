@@ -13,11 +13,12 @@ import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
+import { Bindgroups } from "../shader/Bindgroups";
 
 export class RenderPipeline extends Pipeline {
 
 
-    protected renderer: GPURenderer | HeadlessGPURenderer;
+    public renderer: GPURenderer | HeadlessGPURenderer;
     protected canvas: { width: number, height: number, dimensionChanged: boolean };
 
     protected depthStencilTexture: DepthStencilTexture;
@@ -48,7 +49,14 @@ export class RenderPipeline extends Pipeline {
             cullMode: "none",
             frontFace: "ccw"
         }
-        this.outputColor = this.createColorAttachment(bgColor);
+
+        if (bgColor !== null) {
+            this.outputColor = this.createColorAttachment(bgColor);
+        }
+
+
+
+
     }
 
 
@@ -73,6 +81,10 @@ export class RenderPipeline extends Pipeline {
             code?: string
         }
     }) {
+
+        this.vertexShader = new VertexShader();
+        this.fragmentShader = new FragmentShader();
+        this.bindGroups.destroy();
 
         super.initFromObject(descriptor);
 
@@ -188,11 +200,12 @@ export class RenderPipeline extends Pipeline {
         descriptor: {
             size: GPUExtent3D,
             format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
+            usage?: GPUTextureUsageFlags
         },
         depthStencilDescription?: {
             depthWriteEnabled: boolean,
             depthCompare: "never" | "less" | "equal" | "less-equal" | "greater" | "not-equal" | "greater-equal" | "always",
-            format: string
+
         },
         depthStencilAttachmentOptions?: any
 

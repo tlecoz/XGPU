@@ -14,6 +14,8 @@ import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { planeMesh } from "../../assets/PlaneMesh";
 import { dragonMesh } from "../../assets/DragonMesh"
 import { HeadlessGPURenderer } from "../speechlessGPU/HeadlessGPURenderer";
+import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
+import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
 
 
 export class Plane extends RenderPipeline {
@@ -61,6 +63,8 @@ export class Plane extends RenderPipeline {
         })
         this.setupDraw({ vertexCount: 4, instanceCount: 1 })
         this.transform = resource.bindgroups.geom.uniforms.items.modelView;
+
+
 
         /*
        const vertexBuffer = resource.bindgroups.geom.vertexBuffer as VertexBuffer;
@@ -138,29 +142,44 @@ export class Test18 extends Sample {
 
         console.log(dragonMesh)
 
+        const inclinaison = 0.35;
 
-        /*
         const plane = new Plane(renderer);
-        plane.transform.scaleX = plane.transform.scaleY = plane.transform.scaleZ = 100;
-        plane.onDrawEnd = () => {
 
-            plane.transform.rotationX += 0.01;
-            plane.transform.rotationY += 0.01;
+
+
+
+
+        plane.resources.bindgroups.geom.imgSampler = new TextureSampler();
+        plane.resources.bindgroups.geom.img = new ImageTexture({ source: this.medias.bmp })
+        plane.resources.vertexShader.outputs.uv = ShaderType.Vec2;
+        plane.resources.fragmentShader.main = `
+            output.color = textureSample(img,imgSampler,uv);
+        `
+        plane.initFromObject(plane.resources);
+
+
+        console.log(plane.resources)
+        plane.transform.scaleX = plane.transform.scaleY = plane.transform.scaleZ = 2000;
+        plane.onDrawEnd = () => {
+            plane.transform.y = 100;
+            plane.transform.rotationX = Math.PI / 2 + inclinaison;
             plane.transform.rotationZ += 0.01;
+            //plane.transform.rotationZ += 0.01;
 
         }
-        */
+
         const dragon = new Dragon(renderer);
         dragon.transform.scaleX = dragon.transform.scaleY = dragon.transform.scaleZ = 300;
         dragon.onDrawEnd = () => {
-
-            dragon.transform.rotationX += 0.01;
+            dragon.transform.y = -100
+            dragon.transform.rotationX = Math.PI + inclinaison;
             dragon.transform.rotationY += 0.01;
-            dragon.transform.rotationZ += 0.01;
+            //dragon.transform.rotationZ += 0.01;
 
         }
 
-        //renderer.addPipeline(plane);
+        renderer.addPipeline(plane);
         renderer.addPipeline(dragon);
     }
 

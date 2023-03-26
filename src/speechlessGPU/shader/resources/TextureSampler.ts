@@ -117,6 +117,7 @@ export class TextureSampler implements IShaderResource {
 
 
     public createDeclaration(varName: string, bindingId: number, groupId: number = 0): string {
+        if (this.isComparison) return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":sampler_comparison;\n";
         return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":sampler;\n";
     }
 

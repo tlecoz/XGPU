@@ -1,3 +1,4 @@
+import { DepthStencilTexture } from "../pipelines/resources/textures/DepthStencilTexture";
 import { SLGPU } from "../SLGPU";
 import { Bindgroup } from "./Bindgroup";
 import { CubeMapTexture } from "./resources/CubeMapTexture";
@@ -308,6 +309,9 @@ export class Bindgroups {
                 } else if (r instanceof TextureSampler) {
                     if (!types.sampler) types.sampler = [];
                     if (types.sampler.indexOf(element) === -1) types.sampler.push(element);
+                } else if (r instanceof DepthStencilTexture) {
+                    if (!types.depthStencilTextures) types.depthStencilTextures = [];
+                    if (types.depthStencilTextures.indexOf(element) === -1) types.depthStencilTextures.push(element);
                 }
 
             }
@@ -363,4 +367,12 @@ export class Bindgroups {
         return this.groups[this.groups.length - 1]
     }
 
+
+    public destroy() {
+        for (let i = 0; i < this.groups.length; i++) {
+            this.groups[i].destroy();
+            this.groups[i] = undefined;
+        }
+        this.groups = [];
+    }
 }
