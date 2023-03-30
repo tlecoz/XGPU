@@ -2,8 +2,8 @@ import { SLGPU } from "../../SLGPU";
 import { IShaderResource } from "./IShaderResource";
 
 export type TextureSamplerDescriptor = {
-    minFilter: "nearest" | "linear",
-    magFilter: "nearest" | "linear",
+    minFilter?: "nearest" | "linear",
+    magFilter?: "nearest" | "linear",
     addressModeU?: "clamp-to-edge" | "repeat" | "mirror-repeat",
     addressModeV?: "clamp-to-edge" | "repeat" | "mirror-repeat",
     addressModeW?: "clamp-to-edge" | "repeat" | "mirror-repeat",
@@ -23,8 +23,8 @@ export class TextureSampler implements IShaderResource {
 
 
     constructor(descriptor?: {
-        minFilter: "nearest" | "linear",
-        magFilter: "nearest" | "linear",
+        minFilter?: "nearest" | "linear",
+        magFilter?: "nearest" | "linear",
         addressModeU?: "clamp-to-edge" | "repeat" | "mirror-repeat",
         addressModeV?: "clamp-to-edge" | "repeat" | "mirror-repeat",
         addressModeW?: "clamp-to-edge" | "repeat" | "mirror-repeat",
@@ -35,16 +35,24 @@ export class TextureSampler implements IShaderResource {
         compare?: "never" | "less" | "equal" | "less-equal" | "greater" | "not-equal" | "greater-equal" | "always"
     }) {
 
-        if (!descriptor) descriptor = { minFilter: "linear", magFilter: "linear" };
-        descriptor = { ...descriptor };
+        if (!descriptor) descriptor = {};
 
-        if (undefined === descriptor.addressModeU) descriptor.addressModeU = "clamp-to-edge";
-        if (undefined === descriptor.addressModeV) descriptor.addressModeV = "clamp-to-edge";
-        if (undefined === descriptor.addressModeW) descriptor.addressModeW = "clamp-to-edge";
-        if (undefined === descriptor.mipmapFilter) descriptor.mipmapFilter = "nearest";
-        if (undefined === descriptor.lodMinClamp) descriptor.lodMinClamp = 0;
-        if (undefined === descriptor.lodMaxClamp) descriptor.lodMaxClamp = 32;
-        if (undefined === descriptor.maxAnisotropy) descriptor.maxAnisotropy = 1;
+        if (!descriptor.compare) {
+
+            descriptor = { ...descriptor };
+
+            if (undefined === descriptor.minFilter) descriptor.minFilter = "linear";
+            if (undefined === descriptor.magFilter) descriptor.magFilter = "linear";
+            if (undefined === descriptor.addressModeU) descriptor.addressModeU = "clamp-to-edge";
+            if (undefined === descriptor.addressModeV) descriptor.addressModeV = "clamp-to-edge";
+            if (undefined === descriptor.addressModeW) descriptor.addressModeW = "clamp-to-edge";
+            if (undefined === descriptor.mipmapFilter) descriptor.mipmapFilter = "nearest";
+            if (undefined === descriptor.lodMinClamp) descriptor.lodMinClamp = 0;
+            if (undefined === descriptor.lodMaxClamp) descriptor.lodMaxClamp = 32;
+            if (undefined === descriptor.maxAnisotropy) descriptor.maxAnisotropy = 1;
+        }
+
+
 
         if (descriptor) this.descriptor = descriptor;
 
@@ -101,6 +109,7 @@ export class TextureSampler implements IShaderResource {
 
     public createGpuResource(): void {
         if (!this.gpuResource) {
+            //console.log("create sampler : ", this.descriptor)
             this.gpuResource = SLGPU.device.createSampler(this.descriptor);
         }
     }

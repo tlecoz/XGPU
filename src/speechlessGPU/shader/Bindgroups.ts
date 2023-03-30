@@ -41,7 +41,10 @@ export class Bindgroups {
         }
 
         if (autoLayout) description.layout = "auto";
-        else description.layout = SLGPU.createPipelineLayout({ bindGroupLayouts: layouts });
+        else {
+            //console.log("pipelineLayout = ", layouts)
+            description.layout = SLGPU.createPipelineLayout({ bindGroupLayouts: layouts });
+        }
 
 
         const { vertexLayouts, buffers, nbVertex } = this.createVertexBufferLayout();
@@ -235,10 +238,12 @@ export class Bindgroups {
 
                 resource = resources[i].resource;
                 if (resource instanceof VertexBuffer) {
+
                     nbVertex = Math.max(nbVertex, resource.nbVertex)
                     buffers[k] = resource;
                     vertexLayouts[k++] = resource.createVertexBufferLayout(builtin);
-                    builtin += vb.vertexArrays.length;
+
+                    builtin += resource.vertexArrays.length;
                 }
             }
         }
@@ -250,6 +255,8 @@ export class Bindgroups {
             nbVertex
         }
     }
+
+
 
     public handleRenderPipelineResourceIOs() {
         for (let i = 0; i < this.groups.length; i++) {
@@ -292,8 +299,8 @@ export class Bindgroups {
                 if (this._resources.all.indexOf(r) === -1) this._resources.all.push(r);
                 res[element.name] = element.resource;
                 if (r instanceof UniformBuffer) {
-                    if (!types.uniforms) types.uniforms = [];
-                    if (types.uniforms.indexOf(element) === -1) types.uniforms.push(element);
+                    if (!types.uniformBuffers) types.uniformBuffers = [];
+                    if (types.uniformBuffers.indexOf(element) === -1) types.uniformBuffers.push(element);
                 } else if (r instanceof VertexBuffer) {
                     if (!types.vertexBuffers) types.vertexBuffers = [];
                     if (types.vertexBuffers.indexOf(element) === -1) types.vertexBuffers.push(element);
@@ -362,6 +369,34 @@ export class Bindgroups {
         return obj;
     }
 
+
+    public propertyNameIsUsed(propertyName: string): boolean {
+        for (let i = 0; i < this.groups.length; i++) {
+            if (this.groups[i].get(propertyName)) return true
+        }
+        return false;
+    }
+    public get(propertyName: string): IShaderResource {
+        let o: IShaderResource;
+        for (let i = 0; i < this.groups.length; i++) {
+            o = this.groups[i].get(propertyName);
+            if (o) return o;
+        }
+        return null;
+    }
+
+    public getNameByResource(resource: IShaderResource): string {
+        let o: IShaderResource, elements: { name: string, resource: IShaderResource }[];
+        for (let i = 0; i < this.groups.length; i++) {
+            elements = this.groups[i].elements;
+            for (let j = 0; j < elements.length; j++) {
+                if (elements[j].resource === resource) {
+                    return elements[j].name;
+                }
+            }
+        }
+        return null;
+    }
 
     public get current(): Bindgroup {
         return this.groups[this.groups.length - 1]

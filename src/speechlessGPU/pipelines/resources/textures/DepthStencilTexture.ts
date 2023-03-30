@@ -16,7 +16,7 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
 
 
 
-
+    protected _isDepthTexture: boolean = false;
 
     private _description: { depthWriteEnabled: boolean, depthCompare: string, format: string };
     public get description(): { depthWriteEnabled: boolean, depthCompare: string, format: string } { return this._description; }
@@ -56,13 +56,23 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
             depthLoadOp: 'clear',
             depthStoreOp: 'store',
         }
+
+        if (descriptor.format === "depth24plus-stencil8") {
+            this._attachment.stencilClearValue = 0;
+            this._attachment.stencilLoadOp = "clear";
+            this._attachment.stencilStoreOp = "store";
+        } else if (descriptor.format === "depth32float") {
+            this._isDepthTexture = true;
+
+        }
+
         for (let z in depthStencilAttachmentOptions) {
             this._attachment[z] = depthStencilAttachmentOptions[z];
         }
 
 
     }
-
+    public get isDepthTexture(): boolean { return this._isDepthTexture; }
 
     //--------------------------------- IShaderResource ---------------------------------------------------------
 
@@ -76,6 +86,7 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
     }
 
     public createBindGroupEntry(bindingId: number) {
+        console.log("view = ", this._view)
         return {
             binding: bindingId,
             resource: this._view
@@ -84,14 +95,14 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
     public createBindGroupLayoutEntry(bindingId: number) {
         return {
             binding: bindingId,
-            visibility: GPUShaderStage.FRAGMENT,
+            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX,
             texture: {
-                sampleType: "depth"
+                sampleType: "depth",
             }
         }
     }
     public createDeclaration(varName: string, bindingId: number, groupId: number): string {
-        return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_depth_2d<f32>;\n";
+        return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_depth_2d;\n";
     }
 
     public createGpuResource() {

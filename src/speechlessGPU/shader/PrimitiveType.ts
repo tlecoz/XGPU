@@ -54,6 +54,10 @@ export class PrimitiveFloatUniform extends Float32Array {
         if (type === "Vec3") type = "vec3<f32>";
         if (type === "Vec4") type = "vec4<f32>";
 
+
+
+
+
         const items = this.uniformBuffer.items;
         let name: string;
         for (let z in items) {
@@ -79,11 +83,13 @@ export class PrimitiveIntUniform extends Int32Array {
 
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
+    protected className: string;
 
     constructor(type: string, val: number[] | Int32Array, createLocalVariable: boolean = false) {
         super(val);
         this.type = new GPUType(type);
         this.createVariableInsideMain = createLocalVariable;
+        this.className = this.constructor.name;
     }
 
     public clone(): PrimitiveIntUniform {
@@ -109,6 +115,13 @@ export class PrimitiveIntUniform extends Int32Array {
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
+        let type = this.className;
+        if (type === "Int") type = "i32";
+        if (type === "IVec2") type = "vec2<i32>";
+        if (type === "IVec3") type = "vec3<i32>";
+        if (type === "IVec4") type = "vec4<i32>";
+
+
         const items = this.uniformBuffer.items;
         let name: string;
         for (let z in items) {
@@ -116,7 +129,7 @@ export class PrimitiveIntUniform extends Int32Array {
                 name = z;
             }
         }
-        return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
+        return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
     }
 
     public update() { }
@@ -134,11 +147,12 @@ export class PrimitiveUintUniform extends Uint32Array {
 
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
-
+    protected className: string;
     constructor(type: string, val: number[] | Uint32Array, createLocalVariable: boolean = false) {
         super(val);
         this.type = new GPUType(type);
         this.createVariableInsideMain = createLocalVariable;
+        this.className = this.constructor.name;
     }
 
     public clone(): PrimitiveUintUniform {
@@ -164,6 +178,12 @@ export class PrimitiveUintUniform extends Uint32Array {
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
+        let type = this.className;
+        if (type === "Uint") type = "u32";
+        if (type === "UVec2") type = "vec2<u32>";
+        if (type === "UVec3") type = "vec3<u32>";
+        if (type === "UVec4") type = "vec4<u32>";
+
         const items = this.uniformBuffer.items;
         let name: string;
         for (let z in items) {
@@ -171,7 +191,7 @@ export class PrimitiveUintUniform extends Uint32Array {
                 name = z;
             }
         }
-        return "   var " + this.constructor.name.toLowerCase() + ":" + this.constructor.name + " = " + uniformBufferName + "." + name + ";"
+        return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
     }
 
     public update() { }
@@ -572,9 +592,14 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
     protected _ry: number = 0;
     protected _rz: number = 0;
 
-    constructor(floatArray: Float32Array = null) {
+    protected disableUpdate: boolean;
+
+    constructor(floatArray: Float32Array = null, disableUpdate: boolean = false) {
         if (!floatArray) floatArray = mat4.create() as Float32Array;
         super("mat4x4<f32>", floatArray);
+        this.className = "mat4x4<f32>"
+        this.disableUpdate = disableUpdate;
+
     }
 
     public get x(): number { return this._x; }
@@ -651,6 +676,7 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
     }
 
     public update() {
+        if (this.disableUpdate) return;
 
         if (this.mustBeTransfered) {
 
@@ -675,8 +701,8 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 export class ModelViewMatrix extends Matrix4x4 {
 
 
-    protected model: Matrix4x4;
-    protected view: Matrix4x4;
+    public model: Matrix4x4;
+    public view: Matrix4x4;
 
     constructor() {
 

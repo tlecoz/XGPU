@@ -45,6 +45,8 @@ export class Pipeline {
         this.bindGroups.add(group);
     }
 
+
+
     protected createVertexBufferLayout(): any {
 
 
@@ -184,11 +186,6 @@ export class Pipeline {
 
 
     protected build() {
-
-
-
-
-
 
         this.createVertexBufferLayout();
         this.createLayouts();

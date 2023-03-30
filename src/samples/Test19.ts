@@ -257,7 +257,7 @@ export class Dragon extends RenderPipeline {
 
 
 
-export class Test18 extends Sample {
+export class Test19 extends Sample {
 
     constructor() {
         super(1024, 1024);

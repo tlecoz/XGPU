@@ -60,11 +60,17 @@ export class GPURenderer {
         })
     }
 
-    public addPipeline(pipeline: RenderPipeline) {
-        this.renderPipelines.push(pipeline);
+    protected nbColorAttachment: number = 0;
+
+    public addPipeline(pipeline: RenderPipeline, offset: number = null) {
+
+        if (offset === null) this.renderPipelines.push(pipeline);
+        else this.renderPipelines.splice(offset, 0, pipeline)
+
+        if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment++;
     }
 
-    public get useSinglePipeline(): boolean { return this.renderPipelines.length === 1 }
+    public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
 
     public update() {
         if (!SLGPU.ready || this.renderPipelines.length === 0) return;

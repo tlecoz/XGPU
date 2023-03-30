@@ -26,9 +26,10 @@ export class IndexBuffer {
                 if (descriptor.datas instanceof Uint16Array) descriptor.dataType = "uint16";
                 else descriptor.dataType = "uint32";
             } else {
-                descriptor.dataType = "uint32";
+                descriptor.dataType = "uint16";
             }
         }
+
 
         if (undefined === descriptor.offset) descriptor.offset = 0;
         this.descriptor = descriptor;
@@ -43,7 +44,7 @@ export class IndexBuffer {
         this.gpuResource = null;
     }
     public createGpuResource(): void {
-        console.warn("create index resource ", this.getBufferSize())
+        //console.warn("create index resource ", this.getBufferSize())
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = SLGPU.device.createBuffer({
             size: this.getBufferSize(),
@@ -54,14 +55,14 @@ export class IndexBuffer {
         (this.gpuResource as any).nbPoint = this.nbPoint;
     }
 
-    private getBufferSize(): number {
+    public getBufferSize(): number {
         let size: number = this.nbPoint * Uint16Array.BYTES_PER_ELEMENT;
         if (this.dataType === "uint32") size = this.nbPoint * Uint32Array.BYTES_PER_ELEMENT;
-        else {
+        /*else {
             let n = 0;
             while (n < size) n += 4;
             size = n;
-        }
+        }*/
         return size;
     }
 

@@ -64,11 +64,13 @@ export class ShaderNode {
 
         if (this.subNodes) {
             for (let i = 0; i < this.subNodes.length; i++) {
-                result += this.subNodes[i].text + "\n";
+                result += this.subNodes[i].value + "\n";
             }
         }
 
         if (!this.executeSubNodeAfterCode) result += this.text + "\n";
+
+
 
         return result;
     }

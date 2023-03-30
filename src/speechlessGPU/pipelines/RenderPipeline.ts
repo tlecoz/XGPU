@@ -13,7 +13,11 @@ import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
-import { Bindgroups } from "../shader/Bindgroups";
+import { Shadow } from "./resources/Shadow";
+import { UniformBuffer } from "../shader/resources/UniformBuffer";
+import { Light } from "./resources/Light";
+import { TextureSampler } from "../shader/resources/TextureSampler";
+import { IShaderResource } from "../shader/resources/IShaderResource";
 
 export class RenderPipeline extends Pipeline {
 
@@ -21,16 +25,23 @@ export class RenderPipeline extends Pipeline {
     public renderer: GPURenderer | HeadlessGPURenderer;
     protected canvas: { width: number, height: number, dimensionChanged: boolean };
 
-    protected depthStencilTexture: DepthStencilTexture;
+    protected _depthStencilTexture: DepthStencilTexture;
     protected multisampleTexture: MultiSampleTexture;
     protected renderPassTexture: RenderPassTexture;
 
+    /*
+    protected shadow: Shadow = null;
+    protected _light: Light = null;
+    */
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
     public indexBuffer: IndexBuffer = null;
 
+
     protected gpuPipeline: GPURenderPipeline;
 
+    public debug: string = "renderPipeline";
+    public onDrawBegin: () => void;
     public onDrawEnd: () => void;
 
     constructor(renderer: GPURenderer | HeadlessGPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
@@ -59,7 +70,7 @@ export class RenderPipeline extends Pipeline {
 
     }
 
-
+    public get depthStencilTexture(): DepthStencilTexture { return this._depthStencilTexture; }
 
 
     public initFromObject(descriptor: {
@@ -74,7 +85,7 @@ export class RenderPipeline extends Pipeline {
             inputs?: any,
             code?: string,
         },
-        fragmentShader: {
+        fragmentShader?: {
             outputs: any,
             main: string,
             inputs?: any,
@@ -82,16 +93,20 @@ export class RenderPipeline extends Pipeline {
         }
     }) {
 
-        this.vertexShader = new VertexShader();
-        this.fragmentShader = new FragmentShader();
+        this.vertexShader = null;
+        this.fragmentShader = null;
+
         this.bindGroups.destroy();
 
         super.initFromObject(descriptor);
 
         if (descriptor.indexBuffer) this.indexBuffer = descriptor.indexBuffer;
 
-        if (descriptor.clearColor) this.outputColor.clearValue = descriptor.clearColor;
-        else descriptor.clearColor = this.outputColor.clearValue;
+        if (this.outputColor) {
+            if (descriptor.clearColor) this.outputColor.clearValue = descriptor.clearColor;
+            else descriptor.clearColor = this.outputColor.clearValue;
+        }
+
 
         if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
 
@@ -115,17 +130,21 @@ export class RenderPipeline extends Pipeline {
             return result;
         }
 
+
+        this.vertexShader = new VertexShader();
         this.vertexShader.inputs = createArrayOfObjects(descriptor.vertexShader.inputs);
-        this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);;
-
         this.vertexShader.outputs = createArrayOfObjects(descriptor.vertexShader.outputs);
-        this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);;
-
         if (descriptor.vertexShader.code) this.vertexShader.code.text = descriptor.vertexShader.code;
         this.vertexShader.main.text = descriptor.vertexShader.main;
 
-        if (descriptor.fragmentShader.code) this.fragmentShader.code.text = descriptor.fragmentShader.code;
-        this.fragmentShader.main.text = descriptor.fragmentShader.main;
+        if (descriptor.fragmentShader) {
+            this.fragmentShader = new FragmentShader();
+            this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);;
+            this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);;
+            if (descriptor.fragmentShader.code) this.fragmentShader.code.text = descriptor.fragmentShader.code;
+            this.fragmentShader.main.text = descriptor.fragmentShader.main;
+        }
+
 
         return descriptor;
 
@@ -211,12 +230,15 @@ export class RenderPipeline extends Pipeline {
 
     ) {
 
-        if (this.depthStencilTexture) this.depthStencilTexture.destroy();
-        this.depthStencilTexture = new DepthStencilTexture(descriptor, depthStencilDescription, depthStencilAttachmentOptions)
+        if (this._depthStencilTexture) this._depthStencilTexture.destroy();
+        this._depthStencilTexture = new DepthStencilTexture(descriptor, depthStencilDescription, depthStencilAttachmentOptions)
 
-        console.log("depthStencilAttachment ", this.depthStencilTexture.attachment)
+
         this.renderPassDescriptor.depthStencilAttachment = this.depthStencilTexture.attachment;
         this.description.depthStencil = this.depthStencilTexture.description;
+
+        //console.log("depthStencilAttachment ", this.depthStencilTexture.attachment)
+        //console.log("this.description.depthStencil ", this.description.depthStencil)
 
     }
     //----------------------------------------
@@ -231,31 +253,10 @@ export class RenderPipeline extends Pipeline {
 
 
 
-    //----------------------------------------
-
-
-
-
     protected cleanInputs(/*initIO: boolean = false*/) {
         const _inputs = [];
         const t = this.vertexShader.inputs;
-        //console.log(t)
-        //let o: any;
-        /*
-        let k = 0;
-        
-        for (let i = 0; i < t.length; i++) {
-            
-            //o = t[i];
-            //if ((o instanceof VertexBufferIO) || (o instanceof TextureIO)) {
-                //must be overrided
-            //    continue;
-            //}
-            //_inputs[k++] = t[i];
-        }*/
-
         for (let z in t) _inputs.push({ name: z, ...t[z] });
-        //console.log("inputs = ", _inputs)
         this.vertexShader.inputs = _inputs;
         return _inputs;
     }
@@ -271,23 +272,32 @@ export class RenderPipeline extends Pipeline {
         return o;
     }
 
+
     public buildGpuPipeline(): GPURenderPipeline {
-        if (this.gpuPipeline) return this.gpuPipeline
+        if (this.gpuPipeline) return this.gpuPipeline;
+
 
         this.bindGroups.handleRenderPipelineResourceIOs();
-
         this.initPipelineResources(this);
-        this.build();
+
+
+        const o = this.bindGroups.build();
+        const buffers: VertexBuffer[] = o.buffers;
+        this.description.vertex = o.description.vertex;
+
+        if (o.description.layout) this.description.layout = o.description.layout;
+        else this.description.layout = "auto";
+
 
         //setup vertexShader inputs ------
         const vertexInput: ShaderStruct = new ShaderStruct("Input", this.cleanInputs());;
 
-        if (this.vertexBuffers.length) {
+        if (buffers.length) {
             let buffer: VertexBuffer;
             let arrays: VertexAttribute[];
             let builtin: number = 0;
-            for (let i = 0; i < this.vertexBuffers.length; i++) {
-                buffer = this.vertexBuffers[i];
+            for (let i = 0; i < buffers.length; i++) {
+                buffer = buffers[i];
                 arrays = buffer.vertexArrays;
                 for (let j = 0; j < arrays.length; j++) {
                     vertexInput.addProperty({ name: arrays[j].name, type: arrays[j].varType, builtin: "@location(" + builtin + ")" })
@@ -300,51 +310,45 @@ export class RenderPipeline extends Pipeline {
 
 
         const vertexShader: { code: string, output: ShaderStruct } = this.vertexShader.build(this, vertexInput);
-        const fragmentShader: { code: string, output: ShaderStruct } = this.fragmentShader.build(this, vertexShader.output.getInputFromOutput());
+
+
+        let fragmentShader: { code: string, output: ShaderStruct };
+        if (this.fragmentShader) {
+            fragmentShader = this.fragmentShader.build(this, vertexShader.output.getInputFromOutput());
+        }
+
 
         this.description.vertex = {
             module: SLGPU.device.createShaderModule({
                 code: vertexShader.code
             }),
             entryPoint: "main",
-            buffers: this.createVertexBufferLayout()
+            buffers: o.description.vertex.buffers//this.createVertexBufferLayout()
         }
 
-        this.description.fragment = {
-            module: SLGPU.device.createShaderModule({
-                code: fragmentShader.code
-            }),
-            entryPoint: "main",
-            targets: [
-                this.getFragmentShaderColorOptions()
-                /*
-                {
-                    format: SLGPU.getPreferredCanvasFormat(),
-                    blend: {
-                        color: {
-                            operation: "add",
-                            srcFactor: "src-alpha",
-                            dstFactor: "one-minus-src-alpha"
-                        },
-                        alpha: {
-                            operation: "add",
-                            srcFactor: "src-alpha",
-                            dstFactor: "one-minus-src-alpha"
-                        }
-                    }
-                },*/
+        if (this.fragmentShader) {
 
+            this.description.fragment = {
+                module: SLGPU.device.createShaderModule({
+                    code: fragmentShader.code
+                }),
+                entryPoint: "main",
+                targets: [
+                    this.getFragmentShaderColorOptions()
+                ]
 
-            ]
+            }
         }
 
 
 
-        this.description.layout = this.gpuPipelineLayout;
+
+
+        //this.description.layout = this.gpuPipelineLayout;
 
         //console.log("buildGPUPipeline description = ", this.description)
         this.gpuPipeline = SLGPU.createRenderPipeline(this.description);
-
+        //console.log("gpuPipeline = ", this.gpuPipeline)
         return this.gpuPipeline;
 
     }
@@ -357,6 +361,8 @@ export class RenderPipeline extends Pipeline {
     public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView): GPURenderPassEncoder {
         if (!this.resourceDefined) return;
 
+        if (this.onDrawBegin) this.onDrawBegin();
+
         let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline;
 
         if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
@@ -364,8 +370,10 @@ export class RenderPipeline extends Pipeline {
             this.rendererUseSinglePipeline = rendererUseSinglePipeline;
         }
 
-        if (this.clearOpReady === false) {
+        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0]) {
             this.clearOpReady = true;
+
+
 
             if (rendererUseSinglePipeline) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
             else {
@@ -400,6 +408,8 @@ export class RenderPipeline extends Pipeline {
         }
 
         if (outputView && this.outputColor) this.handleOutputColor(outputView);
+
+
         //console.log("renderPassDescriptor = ", this.renderPassDescriptor);
         return commandEncoder.beginRenderPass(this.renderPassDescriptor);
     }
@@ -440,6 +450,7 @@ export class RenderPipeline extends Pipeline {
             //this.build();
             this.bindGroups.update();
 
+
         } else {
 
             renderPass.setPipeline(this.gpuPipeline);
@@ -478,13 +489,15 @@ export class RenderPipeline extends Pipeline {
 
 
         if (this.indexBuffer) {
+            //console.log("a ", this.debug, this.drawConfig)
             if (!this.indexBuffer.gpuResource) this.indexBuffer.createGpuResource();
-            renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.nbPoint * 4);
+
+            renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize());
             renderPass.drawIndexed(this.indexBuffer.nbPoint);
         } else {
 
             if (this.drawConfig.vertexCount !== -1) {
-                //console.log("a ", this.drawConfig)
+
                 renderPass.draw(this.drawConfig.vertexCount, this.drawConfig.instanceCount, this.drawConfig.firstVertexId, this.drawConfig.firstInstanceId)
             }
 

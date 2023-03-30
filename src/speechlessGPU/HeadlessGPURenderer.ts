@@ -38,11 +38,19 @@ export class HeadlessGPURenderer {
     }
 
     public get firstPipeline(): RenderPipeline { return this.renderPipelines[0]; }
-    public get useSinglePipeline(): boolean { return this.renderPipelines.length === 1 }
 
-    public addPipeline(pipeline: RenderPipeline) {
-        this.renderPipelines.push(pipeline);
+    protected nbColorAttachment: number = 0;
+
+    public addPipeline(pipeline: RenderPipeline, offset: number = null) {
+
+        if (offset === null) this.renderPipelines.push(pipeline);
+        else this.renderPipelines.splice(offset, 0, pipeline)
+
+
+        if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment++;
     }
+
+    public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
 
     public resize(w: number, h: number) {
         this.dimension.width = w;
@@ -69,15 +77,6 @@ export class HeadlessGPURenderer {
 
         this.dimension.dimensionChanged = false;
     }
-
-
-
-
-
-
-
-
-
 
 
     public get canvas(): { width: number, height: number } { return this.dimension; }

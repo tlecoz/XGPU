@@ -35,23 +35,7 @@ export class Bindgroup {
 
 
 
-    private getSwappedElements(resource1: IShaderResource, resource2: IShaderResource): { name: string, resource: IShaderResource }[] {
 
-        let id1, id2;
-        let element: IShaderResource;
-        for (let i = 0; i < this.elements.length; i++) {
-            element = this.elements[i].resource;
-            if (element === resource1) id1 = i;
-            else if (element === resource2) id2 = i;
-        }
-
-        const result = this.elements.concat();
-        const temp = result[id1];
-        result[id1] = result[id2];
-        result[id2] = temp;
-
-        return result;
-    }
 
 
 
@@ -94,6 +78,24 @@ export class Bindgroup {
         this.elements.push({ name, resource });
         if (this.parent) this.parent.add(this);
         return resource;
+    }
+
+    private getSwappedElements(resource1: IShaderResource, resource2: IShaderResource): { name: string, resource: IShaderResource }[] {
+
+        let id1, id2;
+        let element: IShaderResource;
+        for (let i = 0; i < this.elements.length; i++) {
+            element = this.elements[i].resource;
+            if (element === resource1) id1 = i;
+            else if (element === resource2) id2 = i;
+        }
+
+        const result = this.elements.concat();
+        const temp = result[id1];
+        result[id1] = result[id2];
+        result[id2] = temp;
+
+        return result;
     }
 
     public get(name: string): IShaderResource {

@@ -10,6 +10,7 @@ export class ShaderStage {
     public export: { name: string, type: any }[] = [];
     public require: { name: string, type: any }[] = [];
 
+    public constants: any = {};
     public code: ShaderNode;
     public main: ShaderNode;
 

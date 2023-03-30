@@ -19,8 +19,9 @@ export class Texture {
         usage?: GPUTextureUsageFlags,
         sampleCount?: GPUSize32,
     }) {
-        if (!descriptor.usage) descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
-        if (!descriptor.sampleCount) descriptor.sampleCount = 1;
+        //console.log(descriptor.format + " ::: " + descriptor.usage)
+        if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
+        if (undefined === descriptor.sampleCount && descriptor.format !== "depth32float") descriptor.sampleCount = 1;
         this.descriptor = descriptor;
 
     }
@@ -36,13 +37,14 @@ export class Texture {
     }
     public create(): void {
         if (this.gpuResource) this.gpuResource.destroy();
+        //console.log("createTexture ", this.descriptor)
         this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this.createView();
     }
 
     private createView(): void {
         this._view = this.gpuResource.createView();
-        (this._view as any).texture = this;
+        //(this._view as any).texture = this;
     }
 
     public resize(width: number, height: number): void {

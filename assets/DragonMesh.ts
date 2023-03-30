@@ -43,15 +43,15 @@ const normalize = (datas: number[][]) => {
 
     for (let i = 0; i < datas.length; i++) {
 
-        datas[i][0] = -1 + (datas[i][0] - minx) / dx * rx;
-        datas[i][1] = -0.5 + (datas[i][1] - miny) / dy * ry;
+        datas[i][0] = -0.5 * rx + (datas[i][0] - minx) / dx * rx;
+        datas[i][1] = -0.5 * ry + (datas[i][1] - miny) / dy * ry;
         datas[i][2] = -0.5 + (datas[i][2] - minz) / dz;
 
         //console.log(datas[i][0], datas[i][1], datas[i][2])
     }
 }
 
-normalize(dragonMesh.positions);
+
 
 
 
@@ -60,10 +60,46 @@ var indices = [];
 for (let i = 0; i < dragonRawData.cells.length; i++) {
     indices.push(...dragonRawData.cells[i]);
 }
+
+//add plane ------------------
+indices.push(dragonMesh.positions.length, dragonMesh.positions.length + 2, dragonMesh.positions.length + 1)
+indices.push(dragonMesh.positions.length, dragonMesh.positions.length + 1, dragonMesh.positions.length + 3);
+
+
+
+dragonMesh.normals = computeSurfaceNormals(dragonMesh.positions, dragonRawData.cells);
+
+
+dragonMesh.positions.push(
+    [-100, 20, -100], //
+    [100, 20, 100], //
+    [-100, 20, 100], //
+    [100, 20, -100]
+);
+
+//normalize(dragonMesh.positions);
+dragonMesh.normals.push(
+    [0, 1, 0], //
+    [0, 1, 0], //
+    [0, 1, 0], //
+    [0, 1, 0]
+);
+dragonMesh.uvs.push(
+    [0, 0], //
+    [1, 1], //
+    [0, 1], //
+    [1, 0]
+);
+
+
+
+
+
+
 dragonMesh.triangles = indices;
 
 // Compute surface normals
-dragonMesh.normals = computeSurfaceNormals(dragonMesh.positions, dragonRawData.cells);
+
 
 // Compute some easy uvs for testing
 dragonMesh.uvs = computeProjectedPlaneUVs(dragonMesh.positions, 'xy');
