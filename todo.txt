@@ -3,10 +3,7 @@
 vertexBuffer alignment.... 
 verifier a fond uniformBufferAlignment
 
-virer x/y/z/rotationX/... de matrix4x4 
-|-> la fonction update rend compliqué le fait de passer un Float32Array en paramètre du constructeur 
-|-> ces propriété devraient exister dans ModelViewMatrix  
-   |-> verifier les anciens samples 
+
 
 overrider PrimitiveFloatUniform / Int / Uint .set  => activer mustBeTransfered = true 
 

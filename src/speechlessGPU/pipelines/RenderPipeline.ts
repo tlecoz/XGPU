@@ -74,7 +74,12 @@ export class RenderPipeline extends Pipeline {
 
 
     public initFromObject(descriptor: {
-        stepMode?: "vertex" | "instance",
+        //description primitive : 
+        cullMode?: "front" | "back" | "none",
+        topology?: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip",
+        frontFace?: "ccw" | "cw",
+        stripIndexFormat?: "uint16" | "uint32"
+
         clearColor?: { r: number, g: number, b: number, a: number },
         blendMode?: BlendMode,
         bindgroups?: any,
@@ -99,6 +104,23 @@ export class RenderPipeline extends Pipeline {
         this.bindGroups.destroy();
 
         super.initFromObject(descriptor);
+
+        if (!descriptor.cullMode) this.description.primitive.cullMode = "none";
+        else this.description.primitive.cullMode = descriptor.cullMode;
+
+        if (!descriptor.topology) this.description.primitive.topology = "triangle-list";
+        else {
+            this.description.primitive.topology = descriptor.topology;
+            if (descriptor.topology === "line-strip" || descriptor.topology === "triangle-strip") {
+                if (!descriptor.stripIndexFormat) {
+                    throw new Error("You must define a 'stripIndexFormat' in order to use a topology 'triangle-strip' or 'line-strip'. See https://www.w3.org/TR/webgpu/#enumdef-gpuindexformat for more details")
+                }
+            }
+        }
+
+        if (!descriptor.frontFace) this.description.primitive.frontFace = "ccw";
+        else this.description.primitive.frontFace = descriptor.frontFace;
+
 
         if (descriptor.indexBuffer) this.indexBuffer = descriptor.indexBuffer;
 
@@ -492,8 +514,12 @@ export class RenderPipeline extends Pipeline {
             //console.log("a ", this.debug, this.drawConfig)
             if (!this.indexBuffer.gpuResource) this.indexBuffer.createGpuResource();
 
+
+
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize());
             renderPass.drawIndexed(this.indexBuffer.nbPoint);
+
+
         } else {
 
             if (this.drawConfig.vertexCount !== -1) {
@@ -526,9 +552,15 @@ export class RenderPipeline extends Pipeline {
 
     public get pipeline(): GPURenderPipeline { return this.gpuPipeline }
 
-    public get cullMode(): string { return this.description.primitive.cullMode }
-    public set cullMode(s: string) { this.description.primitive.cullMode = s }
+    public get cullMode(): "front" | "back" | "none" { return this.description.primitive.cullMode }
+    public set cullMode(s: "front" | "back" | "none") { this.description.primitive.cullMode = s }
 
-    public get topology(): string { return this.description.primitive.topology }
-    public set topology(s: string) { this.description.primitive.topology = s }
+    public get topology(): "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip" { return this.description.primitive.topology }
+    public set topology(s: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip") { this.description.primitive.topology = s }
+
+    public get frontFace(): "ccw" | "cw" { return this.description.primitive.frontFace }
+    public set frontFace(s: "ccw" | "cw") { this.description.primitive.frontFace = s }
+
+    public get stripIndexFormat(): "uint16" | "uint32" { return this.description.primitive.stripIndexFormat }
+    public set stripIndexFormat(s: "uint16" | "uint32") { this.description.primitive.stripIndexFormat = s }
 }

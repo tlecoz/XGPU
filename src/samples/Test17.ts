@@ -97,13 +97,13 @@ export class CubeGrid extends RenderPipeline {
                 let idz = floor(id / (grid.x * grid.y));
 
                 let size = 400.0;
-                let offset = vec3(size / grid.x , size / grid.y , size / grid.z) * 0.5;
+                let offset = vec3(size / grid.x , size / grid.y , size / grid.z) * 0.05;
                 var px = (-0.5 + idx / grid.x) * size;// + cos(time + id) * 1.0/grid.x * 100.0;
                 var py = (-0.5 + idy / grid.y) * size;// + sin(time + id) * 1.0/grid.y * 100.0;
                 var pz = (-0.5 + idz / grid.z) * size;// + sin(time + id) * 1.0/grid.z * 100.0;
 
                 
-                var pos = vec4(offset,0.0) + rotationX(id + time) /* rotationY(id + time) * rotationZ(id + time)*/  * vec4((position.xyz / grid.xyz) * 30.0 , 1.0) ;
+                var pos = vec4(offset,0.0) /* +   rotationX(id + time) rotationY(id + time) * rotationZ(id + time)*/  * vec4((position.xyz / grid.xyz) * 30.0 , 1.0) ;
                 
                 
                 pos.x += px;
@@ -117,7 +117,7 @@ export class CubeGrid extends RenderPipeline {
                 
                 //output.position = uniforms.projection *  uniforms.view * uniforms.model * position;
                 output.fragUV = uv;
-                output.fragPosition = 0.5 * (position + vec4<f32>(1.0, 1.0, 1.0, 1.0));
+                output.fragPosition = (position + vec4<f32>(1.0, 1.0, 1.0, 1.0));
                 `
             },
 
@@ -205,14 +205,14 @@ export class Test17 extends Sample {
 
     protected async start(renderer: GPURenderer): Promise<void> {
 
-        const cube = new CubeGrid(renderer, 30, 30, 30);
+        const cube = new CubeGrid(renderer, 100, 100, 100);
         renderer.addPipeline(cube);
 
         const now = new Date().getTime();
         cube.onDrawEnd = () => {
             const time = (new Date().getTime() - now) * 0.01;
             cube.currentTime = time;
-            cube.scaleX = cube.scaleY = cube.scaleZ = Math.sin(time * 0.0001) * 100;
+            cube.scaleX = cube.scaleY = cube.scaleZ = Math.sin(time * 0.001) * 100;
             cube.rotationX += 0.003;
             cube.rotationY += 0.003;
             cube.rotationZ += 0.003;

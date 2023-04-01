@@ -45,6 +45,11 @@ export class PrimitiveFloatUniform extends Float32Array {
         return result;
     }
 
+    public override set(m: Float32Array, offset?: number) {
+        super.set(m, offset);
+        this.mustBeTransfered = true;
+    }
+
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
@@ -578,7 +583,7 @@ export class Matrix2x3 extends PrimitiveFloatUniform {
 
 export class Matrix4x4 extends PrimitiveFloatUniform {
 
-    protected mustUpdate: boolean = false;
+
 
     protected _x: number = 0;
     protected _y: number = 0;
@@ -594,13 +599,16 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 
     protected disableUpdate: boolean;
 
-    constructor(floatArray: Float32Array = null, disableUpdate: boolean = false) {
+
+    constructor(floatArray: Float32Array = null) {
+        const disableUpdate = !!floatArray;
         if (!floatArray) floatArray = mat4.create() as Float32Array;
         super("mat4x4<f32>", floatArray);
         this.className = "mat4x4<f32>"
         this.disableUpdate = disableUpdate;
 
     }
+
 
     public get x(): number { return this._x; }
     public get y(): number { return this._y; }
@@ -694,6 +702,7 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 
 
     }
+
 }
 
 //--------------------
@@ -771,6 +780,10 @@ export class ModelViewMatrix extends Matrix4x4 {
         this.model.scaleZ = n;
     }
 
+    public override set(m: Float32Array, offset?: number) {
+        super.set(m, offset);
+        this.mustBeTransfered = true;
+    }
     public setMatrix(mat: Float32Array) {
         this.set(mat);
         this.mustBeTransfered = true;

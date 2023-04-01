@@ -12,6 +12,8 @@ import { Matrix4x4, ModelViewMatrix, Vec3, Vec4 } from "../speechlessGPU/shader/
 import { mat4, vec3 } from "gl-matrix";
 import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
 import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
+import { Camera } from "../speechlessGPU/shader/resources/uniforms/Camera";
+import { Light } from "../speechlessGPU/pipelines/resources/Light";
 
 
 export class ShadowPipeline extends RenderPipeline {
@@ -20,16 +22,18 @@ export class ShadowPipeline extends RenderPipeline {
         indexBuffer: IndexBuffer,
         vertexBuffer_position: VertexBuffer,
         model_modelMatrix: UniformBuffer,
-        scene_lightViewProjMatrix: UniformBuffer
+        light: Light,
     }) {
         super(renderer, null);
+
         this.initFromObject({
             indexBuffer: target.indexBuffer,
             bindgroups: {
                 geom: {
                     vertexBuffer: target.vertexBuffer_position,
                     model: target.model_modelMatrix,
-                    scene: target.scene_lightViewProjMatrix
+                    light: target.light
+
                 }
             },
             vertexShader: {
@@ -37,7 +41,7 @@ export class ShadowPipeline extends RenderPipeline {
                     position: BuiltIns.vertexOutputs.position
                 },
                 main: `
-                output.position = scene.lightViewProjMatrix * model.modelMatrix * vec4(position, 1.0);
+                output.position = light.projection * model.modelMatrix *  vec4(position , 1.0);
                 `
             }
         });
@@ -58,88 +62,17 @@ export class ShadowPipeline extends RenderPipeline {
 
 export class Dragon extends RenderPipeline {
 
-    public model: UniformBuffer;
-    public scene: UniformBuffer;
-    public cameraViewProjMatrix: Matrix4x4;
-    public lightViewProjMatrix: Matrix4x4;
-    public vertexBuffer: VertexBuffer;
+    public model: Matrix4x4;
+    public camera: Camera;
+    public light: Light;
 
-    private shadow: ShadowPipeline;
-
-    public _update: () => void;
 
     constructor(renderer: GPURenderer | HeadlessGPURenderer) {
-        super(renderer, { r: 0, g: 0, b: 0, a: 1 });
-
-
-
-        //----------
-
-        const aspect = renderer.canvas.width / renderer.canvas.height;
-
-        const eyePosition = vec3.fromValues(0, 50, -100);
-        const upVector = vec3.fromValues(0, 1, 0);
-        const origin = vec3.fromValues(0, 0, 0);
-
-        const projectionMatrix = mat4.create();
-        mat4.perspective(projectionMatrix, Math.PI / 180 * 90, aspect, 0.1, 2000.0);
-
-        const viewMatrix = mat4.create();
-        mat4.lookAt(viewMatrix, eyePosition, origin, upVector);
-
-        const lightPosition = vec3.fromValues(50, 100, -100);
-        const lightViewMatrix = mat4.create();
-        mat4.lookAt(lightViewMatrix, lightPosition, origin, upVector);
-
-        const lightProjectionMatrix = mat4.create();
-        {
-            const left = -80;
-            const right = 80;
-            const bottom = -80;
-            const top = 80;
-            const near = -200;
-            const far = 300;
-            mat4.ortho(lightProjectionMatrix, left, right, bottom, top, near, far);
-        }
-
-        const lightViewProjMatrix = mat4.create();
-        mat4.multiply(lightViewProjMatrix, lightProjectionMatrix, lightViewMatrix);
-
-        const viewProjMatrix = mat4.create();
-        mat4.multiply(viewProjMatrix, projectionMatrix, viewMatrix);
-
-        // Move the model so it's centered.
-        const modelMatrix = mat4.create();
-        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, -50, 0));
-
-
-        let time = Date.now();
-        this._update = () => {
-
-            const rad = Math.PI * ((Date.now() - time) / 2000);
-
-
-            const v3 = vec3.fromValues(0, 50, -100) //eye position
-
-            vec3.rotateY(v3, v3, origin, rad);
-
-            const viewMatrix = mat4.create();
-            mat4.lookAt(viewMatrix, v3, origin, upVector);
-
-            mat4.multiply(viewProjMatrix, projectionMatrix, viewMatrix);
-
-
-            this.cameraViewProjMatrix.set(viewProjMatrix);
-            this.cameraViewProjMatrix.mustBeTransfered = true;
-
-            //return viewProjMatrix as Float32Array;
-        }
-
-        //-----------
+        super(renderer);
 
         const resource: any = {
-
-            indexBuffer: new IndexBuffer({ nbPoint: dragonMesh.triangles.length * 3, datas: new Uint16Array(dragonMesh.triangles) }),
+            cullMode: "back",
+            indexBuffer: new IndexBuffer({ nbPoint: dragonMesh.triangles.length, datas: new Uint16Array(dragonMesh.triangles) }),
             bindgroups: {
                 geom: {
                     vertexBuffer: new VertexBuffer({
@@ -147,13 +80,12 @@ export class Dragon extends RenderPipeline {
                         normal: VertexBuffer.Vec3(dragonMesh.normals),
                         uv: VertexBuffer.Vec2(dragonMesh.uvs),
                     }),
+                    light: new Light(renderer.canvas.width, renderer.canvas.height),
                     scene: new UniformBuffer({
-                        lightViewProjMatrix: new Matrix4x4(lightViewProjMatrix as Float32Array, true),
-                        cameraViewProjMatrix: new Matrix4x4(viewProjMatrix as Float32Array, true),
-                        lightPos: new Vec3(lightPosition[0], lightPosition[1], lightPosition[2])
-                    }, { useLocalVariable: true }),
+                        cameraViewProjMatrix: new Camera(renderer.canvas.width, renderer.canvas.height, 60),
+                    }),
                     model: new UniformBuffer({
-                        modelMatrix: new Matrix4x4(modelMatrix as Float32Array, true)
+                        modelMatrix: new Matrix4x4()
                     })
 
                 }
@@ -163,23 +95,27 @@ export class Dragon extends RenderPipeline {
                     position: BuiltIns.vertexOutputs.position,
                     fragNorm: ShaderType.Vec3,
                     fragPos: ShaderType.Vec3,
-                    shadowPos: ShaderType.Vec3
+                    shadowPos: ShaderType.Vec3,
+                    transformedLightPos: ShaderType.Vec3
                 },
                 main: `
                 
-                output.position = scene.cameraViewProjMatrix * model.modelMatrix * vec4(position, 1.0);
+                output.position = scene.cameraViewProjMatrix  *  model.modelMatrix * vec4(position, 1.0);
                 output.fragPos = output.position.xyz;
                 output.fragNorm = normal;
 
                 // XY is in (-1, 1) space, Z is in (0, 1) space
-                let posFromLight = scene.lightViewProjMatrix * model.modelMatrix * vec4(position, 1.0);
-              
+                let posFromLight = light.projection  *  model.modelMatrix * vec4(position , 1.0) ;
+                
                 // Convert XY to (0, 1)
                 // Y is flipped because texture coords are Y-down.
                 output.shadowPos = vec3(
                   posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5),
                   posFromLight.z
                 );
+
+                
+                output.transformedLightPos = vec4(scene.cameraViewProjMatrix  *  model.modelMatrix * vec4(light.position,1.0)).xyz;
                 `
             },
             fragmentShader: {
@@ -202,15 +138,22 @@ export class Dragon extends RenderPipeline {
 
                     visibility += textureSampleCompare(
                         shadowMap, shadowSampler,
-                        shadowPos.xy + offset, shadowPos.z - 0.007
+                        shadowPos.xy + offset, shadowPos.z - 0.003
                     );
                     }
                 }
                 visibility /= 9.0;
 
-                let lambertFactor = max(dot(normalize(scene.lightPos - fragPos), fragNorm), 0.0);
-                let lightingFactor = min(ambientFactor + visibility * lambertFactor, 1.0);             
-                output.color = vec4(lightingFactor * albedo, 1.0);
+                let lambertFactor = max(dot(normalize(transformedLightPos  - fragPos), fragNorm), 0.0);
+
+                let lightingFactor = vec3(
+                    min(light.ambient.r + lambertFactor * visibility, 1.0),
+                    min(light.ambient.g + lambertFactor * visibility, 1.0),
+                    min(light.ambient.b + lambertFactor * visibility, 1.0),
+                );
+
+                        
+                output.color = vec4(lightingFactor * light.color.rgb, 1.0);
                 `
             }
         }
@@ -219,21 +162,25 @@ export class Dragon extends RenderPipeline {
 
         const model = resource.bindgroups.geom.model;
         const scene = resource.bindgroups.geom.scene;
+        const light = resource.bindgroups.geom.light;
         const indexBuffer = resource.indexBuffer;
         const vertexBuffer = resource.bindgroups.geom.vertexBuffer;
 
-        this.cameraViewProjMatrix = scene.items.cameraViewProjMatrix;
+        this.model = model.items.modelMatrix;
+        this.camera = scene.items.cameraViewProjMatrix
+        this.light = light;
 
-        this.shadow = new ShadowPipeline(this.renderer, {
+
+        const shadow = new ShadowPipeline(this.renderer, {
             indexBuffer: indexBuffer,
             vertexBuffer_position: vertexBuffer,
             model_modelMatrix: model,
-            scene_lightViewProjMatrix: scene
+            light: light
         })
 
-        this.renderer.addPipeline(this.shadow)
+        this.renderer.addPipeline(shadow)
 
-        resource.bindgroups.geom.shadowMap = this.shadow.depthStencilTexture;
+        resource.bindgroups.geom.shadowMap = shadow.depthStencilTexture;
         resource.bindgroups.geom.shadowSampler = new TextureSampler({ compare: "less" });
 
 
@@ -241,17 +188,13 @@ export class Dragon extends RenderPipeline {
 
 
         this.initFromObject(resource);
-        this.setupDepthStencilView({ size: [renderer.canvas.width, renderer.canvas.height], format: "depth24plus" })
+        this.setupDepthStencilView({ size: [renderer.canvas.width, renderer.canvas.height], format: "depth32float" })
 
 
 
     }
 
-    public update() {
 
-        this._update();
-        super.update();
-    }
 
 }
 
@@ -268,9 +211,30 @@ export class Test19 extends Sample {
 
 
         const dragon = new Dragon(renderer);
-        dragon.description.primitive.cullMode = "back";
+
+        dragon.model.scaleX = dragon.model.scaleY = dragon.model.scaleZ = 600;
         renderer.addPipeline(dragon);
 
+
+        let now = new Date().getTime();
+
+        dragon.onDrawBegin = () => {
+            //dragon.camera.rotationY = 2.5;
+            dragon.camera.rotationY += 0.0025;
+
+            let time = (new Date().getTime() - now) / 1000;
+
+            dragon.light.x = Math.cos(time) * 250;
+            dragon.light.z = Math.sin(time) * 250;
+
+            dragon.light.g = Math.abs(Math.cos(time / 2));
+            dragon.light.b = Math.abs(Math.cos(time / 3));
+
+            dragon.light.ambientR = 0.2 * Math.abs(Math.cos(time / 6));
+            dragon.light.ambientG = 0.2 * Math.abs(Math.sin(time / 8));
+            dragon.light.ambientB = 0.2 * Math.abs(Math.sin(time / 12));
+
+        }
 
     }
 

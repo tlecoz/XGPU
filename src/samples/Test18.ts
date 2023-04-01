@@ -109,9 +109,9 @@ export class Dragon extends RenderPipeline {
         mat4.multiply(viewProjMatrix, projectionMatrix, viewMatrix);
 
         // Move the model so it's centered.
-        const modelMatrix = mat4.create();
-        mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, -50, 0));
-
+        const modelMatrix = new ModelViewMatrix();//mat4.create();
+        //mat4.translate(modelMatrix, modelMatrix, vec3.fromValues(0, -50, 0));
+        modelMatrix.y = -50;
 
         let time = Date.now();
         this._update = () => {
@@ -148,12 +148,12 @@ export class Dragon extends RenderPipeline {
                         uv: VertexBuffer.Vec2(dragonMesh.uvs),
                     }),
                     scene: new UniformBuffer({
-                        lightViewProjMatrix: new Matrix4x4(lightViewProjMatrix as Float32Array, true),
-                        cameraViewProjMatrix: new Matrix4x4(viewProjMatrix as Float32Array, true),
+                        lightViewProjMatrix: new Matrix4x4(lightViewProjMatrix as Float32Array),
+                        cameraViewProjMatrix: new Matrix4x4(viewProjMatrix as Float32Array),
                         lightPos: new Vec3(lightPosition[0], lightPosition[1], lightPosition[2])
                     }, { useLocalVariable: true }),
                     model: new UniformBuffer({
-                        modelMatrix: new Matrix4x4(modelMatrix as Float32Array, true)
+                        modelMatrix: new Matrix4x4(modelMatrix as Float32Array)
                     })
 
                 }
