@@ -4,12 +4,16 @@ vertexBuffer alignment....
 verifier a fond uniformBufferAlignment
 
 
+virer MixedPipeline et adapter le sample qui l'utilise
 
-overrider PrimitiveFloatUniform / Int / Uint .set  => activer mustBeTransfered = true 
 
+distinguer DephTexture et depthStencilTest 
 bouger DepthStencilTexture dans shader/resources 
 
-shader constants
+
+
+
+shader constants & pipeline constants 
 
 simplifier les initFromObject (bindgroup par defaut, uniformBuffer par defaut avec variable local par defaut, data des vertexbuffers , shaderInputs par defaut si non defini)
 
@@ -18,18 +22,6 @@ simplifier les initFromObject (bindgroup par defaut, uniformBuffer par defaut av
 Stage / DisplayList 
 
 AudioShader ? 
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

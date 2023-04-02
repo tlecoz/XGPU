@@ -13,11 +13,7 @@ import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
-import { Shadow } from "./resources/Shadow";
-import { UniformBuffer } from "../shader/resources/UniformBuffer";
-import { Light } from "./resources/Light";
-import { TextureSampler } from "../shader/resources/TextureSampler";
-import { IShaderResource } from "../shader/resources/IShaderResource";
+
 
 export class RenderPipeline extends Pipeline {
 
@@ -214,8 +210,8 @@ export class RenderPipeline extends Pipeline {
     }
     //------------------------------------------------
 
-    public setupMultiSampleView(descriptor: {
-        size: GPUExtent3D,
+    public setupMultiSampleView(descriptor?: {
+        size?: GPUExtent3D,
         format?: GPUTextureFormat,
         usage?: GPUTextureUsageFlags,
         sampleCount?: GPUSize32,
@@ -226,9 +222,9 @@ export class RenderPipeline extends Pipeline {
 
 
         if (this.multisampleTexture) this.multisampleTexture.destroy();
-
-        descriptor.size = [this.canvas.width, this.canvas.height];
-        this.multisampleTexture = new MultiSampleTexture(descriptor);
+        if (!descriptor) descriptor = {};
+        if (!descriptor.size) descriptor.size = [this.canvas.width, this.canvas.height];
+        this.multisampleTexture = new MultiSampleTexture(descriptor as any);
 
         this.description.multisample = {
             count: this.multisampleTexture.description.count
@@ -238,8 +234,8 @@ export class RenderPipeline extends Pipeline {
     //---------------------------
 
     public setupDepthStencilView(
-        descriptor: {
-            size: GPUExtent3D,
+        descriptor?: {
+            size?: GPUExtent3D,
             format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
             usage?: GPUTextureUsageFlags
         },
@@ -252,8 +248,12 @@ export class RenderPipeline extends Pipeline {
 
     ) {
 
+        if (!descriptor) descriptor = {}
+        if (!descriptor.size) descriptor.size = [this.renderer.width, this.renderer.height];
+
+
         if (this._depthStencilTexture) this._depthStencilTexture.destroy();
-        this._depthStencilTexture = new DepthStencilTexture(descriptor, depthStencilDescription, depthStencilAttachmentOptions)
+        this._depthStencilTexture = new DepthStencilTexture(descriptor as any, depthStencilDescription, depthStencilAttachmentOptions)
 
 
         this.renderPassDescriptor.depthStencilAttachment = this.depthStencilTexture.attachment;

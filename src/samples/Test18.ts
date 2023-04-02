@@ -12,41 +12,60 @@ import { Float, Matrix4x4, ModelViewMatrix, Vec3, Vec4 } from "../speechlessGPU/
 import { mat4, vec3 } from "gl-matrix";
 import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
 import { Camera } from "../speechlessGPU/shader/resources/uniforms/Camera";
+import { VertexAttribute } from "../speechlessGPU/shader/resources/VertexAttribute";
 
 
 
 export class ShadowPipeline extends RenderPipeline {
 
-    constructor(renderer: GPURenderer | HeadlessGPURenderer, target: {
+    constructor(lightPipeline: RenderPipeline, required: {
         indexBuffer: IndexBuffer,
-        vertexBuffer_position: VertexBuffer,
-        model_modelMatrix: UniformBuffer,
-        light: Light,
+        position: VertexAttribute,
+        model: Matrix4x4,
+        lightProjection: Matrix4x4,
     }) {
-        super(renderer, null);
+        super(lightPipeline.renderer, null);
+
+        const position: string = required.position.name;
+        let model: string = required.model.name;
+        let lightProjection: string = required.lightProjection.name;
+
+        const geom: any = {
+            vertexBuffer: required.position.vertexBuffer,
+        }
+
+        if (required.model.uniformBuffer === required.lightProjection.uniformBuffer) {
+            geom.uniforms = required.model.uniformBuffer;
+            model = "uniforms." + required.model.name;
+            lightProjection = "uniforms." + required.lightProjection.name;
+        } else {
+            geom.model = required.model.uniformBuffer;
+            model = "model." + required.model.name;
+
+            geom.light = required.lightProjection.uniformBuffer;
+            lightProjection = "light." + required.lightProjection.name;
+        }
+
+
+
 
         this.initFromObject({
-            indexBuffer: target.indexBuffer,
+            indexBuffer: required.indexBuffer,
             bindgroups: {
-                geom: {
-                    vertexBuffer: target.vertexBuffer_position,
-                    model: target.model_modelMatrix,
-                    light: target.light
-
-                }
+                geom: geom
             },
             vertexShader: {
                 outputs: {
                     position: BuiltIns.vertexOutputs.position
                 },
                 main: `
-                output.position = light.projection * model.modelMatrix *  vec4(position , 1.0);
+                output.position = ${lightProjection} * ${model} *  vec4(${required.position.name} , 1.0);
                 `
             }
         });
 
         this.setupDepthStencilView({
-            size: [renderer.canvas.width, renderer.canvas.height, 1],
+            size: [lightPipeline.renderer.canvas.width, lightPipeline.renderer.canvas.height, 1],
             format: "depth32float",
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
         })
@@ -213,9 +232,7 @@ export class Dragon extends RenderPipeline {
                     color: BuiltIns.fragmentOutputs.color
                 },
                 code: `
-                const shadowDepthTextureSize: f32 = 1024.0;
-                const albedo = vec3<f32>(0.9);
-                const ambientFactor = 0.2;
+                const shadowDepthTextureSize: f32 = 1024.0; 
                 `,
                 main: `
                 // Percentage-closer filtering. Sample texels in the region
@@ -228,7 +245,7 @@ export class Dragon extends RenderPipeline {
 
                     visibility += textureSampleCompare(
                         shadowMap, shadowSampler,
-                        shadowPos.xy + offset, shadowPos.z - 0.003
+                        shadowPos.xy + offset, shadowPos.z - 0.005
                     );
                     }
                 }
@@ -261,11 +278,11 @@ export class Dragon extends RenderPipeline {
         this.light = light;
 
 
-        const shadow = new ShadowPipeline(this.renderer, {
+        const shadow = new ShadowPipeline(this, {
             indexBuffer: indexBuffer,
-            vertexBuffer_position: vertexBuffer,
-            model_modelMatrix: model,
-            light: light
+            position: vertexBuffer.attributes.position,
+            model: this.model,
+            lightProjection: light.items.projection,
         })
 
         this.renderer.addPipeline(shadow)

@@ -199,4 +199,26 @@ export class Pipeline {
         }
         //must be overided
     }
+
+
+    public getResourceName(resource: any) {
+
+        if (resource instanceof VertexAttribute) {
+            if (this.type !== "render") {
+                const buffer: VertexBuffer = resource.vertexBuffer;
+                const bufferName: string = this.bindGroups.getNameByResource(buffer);
+                return bufferName + "." + resource.name;
+            } else {
+                return resource.name;
+            }
+        } else {
+
+            if (resource.uniformBuffer) {
+                const bufferName: string = this.bindGroups.getNameByResource(resource.uniformBuffer);
+                return bufferName + "." + resource.name;
+            } else {
+                return this.bindGroups.getNameByResource(resource);
+            }
+        }
+    }
 }

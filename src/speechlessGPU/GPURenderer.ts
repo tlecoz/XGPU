@@ -50,6 +50,10 @@ export class GPURenderer {
     public get canvas(): HTMLCanvasElement { return this.domElement; }
     public get texture(): GPUTexture { return this.ctx.getCurrentTexture() }
 
+    public get width(): number { return this.canvas.width }
+    public get height(): number { return this.canvas.height }
+
+
     public configure(textureUsage: GPUTextureUsageFlags = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC, alphaMode: "opaque" | "premultiplied" = "opaque") {
         this.ctx.configure({
             device: SLGPU.device,

@@ -678,6 +678,12 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
         this._sz = n;
     }
 
+    public set scaleXYZ(n: number) {
+        this._sx = this._sy = this._sz = n;
+        this.mustBeTransfered = true;
+    }
+
+
     public setMatrix(mat: Float32Array) {
         this.set(mat);
         this.mustBeTransfered = true;

@@ -74,6 +74,9 @@ export class UniformBuffer implements IShaderResource {
     }
 
 
+
+
+
     private setupUniformAlignment() {
 
 

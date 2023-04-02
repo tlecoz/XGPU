@@ -80,6 +80,8 @@ export class HeadlessGPURenderer {
 
 
     public get canvas(): { width: number, height: number } { return this.dimension; }
+    public get width(): number { return this.canvas.width }
+    public get height(): number { return this.canvas.height }
 
     public get texture(): GPUTexture {
         if (!this.textureObj) throw new Error("HeadlessGPURenderer is not initialized yet. You must Use HeadlessGPURenderer.init in order to initialize it")
