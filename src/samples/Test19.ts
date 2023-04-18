@@ -13,7 +13,7 @@ import { Light, ShadowPipeline } from "./Test18";
 import { dragonMesh } from "../../assets/DragonMesh"
 import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { BuiltIns } from "../speechlessGPU/Builtins";
+import { BuiltIns } from "../speechlessGPU/BuiltIns";
 import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
 
 
@@ -50,14 +50,11 @@ export class LightPlugin extends PipelinePlugin {
         const shaderCode: string[] = [];
 
         /*
-        I decompose the code in 2 parts because LightPlugin can be used as base class to handle
+        I decompose the code in 2 parts because LightPlugin can be used as base class to handle shadow 
         */
 
         shaderCode[0] = `var visibility = 1.0;`
         shaderCode[1] = `
-
-        
-
         let lambertFactor = max(dot(normalize(transformedLightPos-fragPos), fragNorm), 0.0);
         let lightingFactor = vec3(
            min(light.ambient.r + lambertFactor * visibility, 1.0),

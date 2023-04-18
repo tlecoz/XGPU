@@ -1,8 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { Matrix4x4, Vec3, Vec4 } from "../../PrimitiveType";
-import { UniformBuffer } from "../UniformBuffer";
-import { OrthographicMatrix } from "./OrthographicMatrix";
-import { ProjectionMatrix } from "./ProjectionMatrix";
+import { Matrix4x4, Vec3 } from "../../PrimitiveType";
 
 export class Camera extends Matrix4x4 {
 
@@ -104,7 +101,6 @@ export class Camera extends Matrix4x4 {
 
     public update(): void {
 
-        let viewMatrixChanged: boolean = false;
 
         if (this.mustBeTransfered || this.eyePosition.mustBeTransfered || this.target.mustBeTransfered) {
 

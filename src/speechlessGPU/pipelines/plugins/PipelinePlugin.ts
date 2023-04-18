@@ -1,9 +1,4 @@
-import { IShaderResource } from "../../shader/resources/IShaderResource";
-import { UniformBuffer } from "../../shader/resources/UniformBuffer";
-import { VertexAttribute } from "../../shader/resources/VertexAttribute";
-import { VertexBuffer } from "../../shader/resources/VertexBuffer";
 import { ShaderNode } from "../../shader/shaderParts/ShaderNode";
-import { ComputePipeline } from "../ComputePipeline";
 import { Pipeline } from "../Pipeline";
 
 export class PipelinePlugin {

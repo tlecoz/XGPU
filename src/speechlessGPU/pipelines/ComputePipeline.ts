@@ -130,7 +130,6 @@ export class ComputePipeline extends Pipeline {
 
         if (this.gpuComputePipeline) return this.gpuComputePipeline;
 
-        let pipeline: Pipeline = this;
 
         this.initPipelineResources(this);
 
@@ -173,9 +172,7 @@ export class ComputePipeline extends Pipeline {
                 const w = textureIo.gpuResource.width;
                 const h = textureIo.gpuResource.height;
 
-                let groupSize = 16;
-                //this.workgroups[0] = this.workgroups[1] = groupSize;
-                //this.setDispatchWorkgroup(Math.ceil(w / groupSize), Math.ceil(h / groupSize));
+
                 this.workgroups[0] = this.workgroups[1] = 1;
                 this.setDispatchWorkgroup(w, h);
             }
@@ -200,7 +197,7 @@ export class ComputePipeline extends Pipeline {
 
 
         const inputStruct: ShaderStruct = new ShaderStruct("Input", [...inputs]);;
-        const { code, output } = this.computeShader.build(this, inputStruct)
+        const { code } = this.computeShader.build(this, inputStruct)
 
         this.description.compute = {
             module: SLGPU.device.createShaderModule({ code: code }),
@@ -317,7 +314,7 @@ export class ComputePipeline extends Pipeline {
             }
 
         } else {
-            const texture = this.textureIOs[0].texture;
+            //const texture = this.textureIOs[0].texture;
 
 
             SLGPU.device.queue.submit([commandEncoder.finish()]);

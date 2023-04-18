@@ -1,4 +1,4 @@
-import { BuiltIns } from "../speechlessGPU/Builtins";
+import { BuiltIns } from "../speechlessGPU/BuiltIns";
 import { SLGPU } from "../speechlessGPU/SLGPU";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";

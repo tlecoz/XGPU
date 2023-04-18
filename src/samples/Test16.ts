@@ -8,7 +8,7 @@ import { cubeVertexArray, cubeVertexSize, cubeUVOffset, cubePositionOffset } fro
 import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
 import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
-import { BuiltIns } from "../speechlessGPU/Builtins";
+import { BuiltIns } from "../speechlessGPU/BuiltIns";
 import { ShaderType } from "../speechlessGPU/shader/ShaderType";
 import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
 

@@ -17,12 +17,15 @@ export class SLGPU {
         else if (usage === 40) return "GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST";
         else if (usage === 140) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST";
         else if (usage === 172) return ""
+
+        return ""
     }
 
     public static debugShaderStage(n: number) {
         if (n === GPUShaderStage.COMPUTE) return "GPUShaderStage.COMPUTE"
         else if (n === GPUShaderStage.VERTEX) return "GPUShaderStage.VERTEX"
         else if (n === GPUShaderStage.FRAGMENT) return "GPUShaderStage.FRAGMENT"
+        return ""
     }
 
 

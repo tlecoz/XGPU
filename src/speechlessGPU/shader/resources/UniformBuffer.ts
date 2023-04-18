@@ -36,12 +36,9 @@ export class UniformBuffer implements IShaderResource {
 
         this.descriptor = descriptor;
 
-        let o: any, type: string;
-        for (let name in items) {
 
-            o = items[name];
-            type = o.type;
-            this.add(name, o)
+        for (let name in items) {
+            this.add(name, items[name])
         }
     }
 

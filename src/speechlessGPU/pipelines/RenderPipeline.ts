@@ -381,7 +381,7 @@ export class RenderPipeline extends Pipeline {
     private rendererUseSinglePipeline: boolean = true;
 
     public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView): GPURenderPassEncoder {
-        if (!this.resourceDefined) return;
+        if (!this.resourceDefined) return null;
 
         if (this.onDrawBegin) this.onDrawBegin();
 

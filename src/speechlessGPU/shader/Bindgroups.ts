@@ -225,7 +225,7 @@ export class Bindgroups {
         let group: Bindgroup;
         let resources: { name: string, resource: IShaderResource }[];
         let resource: IShaderResource;
-        let vb: VertexBuffer;
+
         let k: number = 0;
         let builtin: number = 0;
         let nbVertex: number = 0;
@@ -386,7 +386,7 @@ export class Bindgroups {
     }
 
     public getNameByResource(resource: IShaderResource): string {
-        let o: IShaderResource, elements: { name: string, resource: IShaderResource }[];
+        let elements: { name: string, resource: IShaderResource }[];
         for (let i = 0; i < this.groups.length; i++) {
             elements = this.groups[i].elements;
             for (let j = 0; j < elements.length; j++) {

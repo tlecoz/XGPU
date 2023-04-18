@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { BuiltIns } from "../speechlessGPU/Builtins";
+import { BuiltIns } from "../speechlessGPU/BuiltIns";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
 import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
