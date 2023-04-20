@@ -6,6 +6,118 @@ import { VertexBuffer } from "./VertexBuffer";
 
 export class VertexAttribute {
 
+
+    public static Float(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32", offset, datas }
+    }
+    public static Vec2(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32x2", offset, datas }
+    }
+    public static Vec3(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32x3", offset, datas }
+    }
+    public static Vec4(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "float32x4", offset, datas }
+    }
+
+    public static Int(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32", offset, datas }
+    }
+    public static IVec2(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32x2", offset, datas }
+    }
+    public static IVec3(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32x3", offset, datas }
+    }
+    public static IVec4(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "sint32x4", offset, datas }
+    }
+
+    public static Uint(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32", offset, datas }
+    }
+    public static UVec2(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32x2", offset, datas }
+    }
+    public static UVec3(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32x3", offset, datas }
+    }
+    public static UVec4(datas?: number[][] | number, offset?: number) {
+        if (datas && !offset) {
+            if (typeof datas === "number") {
+                offset = datas;
+                datas = undefined;
+            }
+        }
+        return { type: "uint32x4", offset, datas }
+    }
+
     public static get types(): any {
         return {
             "uint8x2": { nbComponent: 2, bytes: 2, varType: "vec2<u32>" },

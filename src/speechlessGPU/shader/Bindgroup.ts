@@ -106,16 +106,20 @@ export class Bindgroup {
     }
 
 
-    public initFromObject(object: any): void {
+    public initFromObject(object: any): IShaderResource[] {
         //console.log("group.initFromObject ", object)
+        const result: IShaderResource[] = [];
+        let k = 0;
         let o;
         for (let z in object) {
             o = object[z];
+            if (!o) continue;
             //console.log(z + " : " + object[z])
             if (o.createGpuResource || o instanceof VertexBufferIO || o instanceof ImageTextureIO) { //if it's a shader resource 
-                this.add(z, o);
+                result[k++] = this.add(z, o);
             }
         }
+        return result;
     }
     //---------------------------------------------------------------------------
 
@@ -308,8 +312,8 @@ export class Bindgroup {
         return this._layout;
     }
     public get group(): GPUBindGroup {
-        //console.log("this._pingponggroup = ", this._pingPongBindgroup, this.ioGroups)
-        if (!this._group) this.build();
+
+        if (!this._group || this.mustRefreshBindgroup) this.build();
 
 
         if (this.ioGroups) {
@@ -320,7 +324,7 @@ export class Bindgroup {
         }
 
 
-        if (!this._group || this.mustRefreshBindgroup) this.build();
+
         return this._group;
     }
 

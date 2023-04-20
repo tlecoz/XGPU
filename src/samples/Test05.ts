@@ -47,7 +47,7 @@ export class Test05 extends Sample {
             bindgroups: {
                 myVertexResources: {
                     geom: new VertexBuffer({
-                        vertexPos: VertexBuffer.Vec3()
+                        vertexPos: VertexAttribute.Vec3()
                     }),
 
                     transform: new UniformBuffer({

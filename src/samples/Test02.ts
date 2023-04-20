@@ -31,7 +31,7 @@ export class Test02 extends Sample {
         const obj = {
             geom: new VertexBuffer({
 
-                vertexPos: VertexBuffer.Vec3()
+                vertexPos: VertexAttribute.Vec3()
 
             }),
 

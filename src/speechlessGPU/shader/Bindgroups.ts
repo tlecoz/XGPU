@@ -21,6 +21,7 @@ export class Bindgroups {
 
     constructor(name: string) {
         this._name = name;
+
     }
 
 
@@ -32,6 +33,7 @@ export class Bindgroups {
         const description: any = {};
         const layouts: GPUBindGroupLayout[] = [];
         const bindgroups: GPUBindGroup[] = [];
+
 
 
         for (let i = 0; i < this.groups.length; i++) {
@@ -286,6 +288,7 @@ export class Bindgroups {
 
 
 
+
         const addResources = (res: any, elements: { name: string, resource: IShaderResource }[]) => {
             //console.log("call addResource ", elements)
             let element: { name: string, resource: IShaderResource };
@@ -302,6 +305,7 @@ export class Bindgroups {
                     if (!types.uniformBuffers) types.uniformBuffers = [];
                     if (types.uniformBuffers.indexOf(element) === -1) types.uniformBuffers.push(element);
                 } else if (r instanceof VertexBuffer) {
+
                     if (!types.vertexBuffers) types.vertexBuffers = [];
                     if (types.vertexBuffers.indexOf(element) === -1) types.vertexBuffers.push(element);
                 } else if (r instanceof ImageTexture) {

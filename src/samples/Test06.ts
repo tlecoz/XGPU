@@ -29,9 +29,9 @@ export class Test06 {
                 bindgroups: {
                     myComputeResources: {
                         particles: new VertexBufferIO({
-                            radius: VertexBuffer.Float(),
-                            position: VertexBuffer.Vec2(),
-                            velocity: VertexBuffer.Vec2()
+                            radius: VertexAttribute.Float(),
+                            position: VertexAttribute.Vec2(),
+                            velocity: VertexAttribute.Vec2()
                         }, { datas: particleDatas }),
 
                         uniforms: new UniformBuffer({

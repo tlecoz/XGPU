@@ -49,8 +49,8 @@ export class Test09 extends Sample {
             bindgroups: {
                 io: {
                     particles: new VertexBufferIO({
-                        //position: VertexBuffer.Vec3(),
-                        depth: VertexBuffer.Float(),
+                        //position: VertexAttribute.Vec3(),
+                        depth: VertexAttribute.Float(),
 
                     }),
                 },
@@ -105,7 +105,7 @@ export class Test09 extends Sample {
             bindgroups: {
                 vertexResources: {
                     geom: new VertexBuffer({
-                        vertexPos: VertexBuffer.Vec3(0)
+                        vertexPos: VertexAttribute.Vec3(0)
                     }),
                     uniforms: new UniformBuffer({
                         model: modelMatrix,

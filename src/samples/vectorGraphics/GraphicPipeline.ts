@@ -45,8 +45,8 @@ export class GraphicPipeline extends RenderPipeline {
             bindgroups: {
                 geom: {
                     vertexBuffer: new VertexBuffer({
-                        vertices: VertexBuffer.Vec4(),
-                        curves: VertexBuffer.Vec3(),
+                        vertices: VertexAttribute.Vec4(),
+                        curves: VertexAttribute.Vec3(),
                     }),
 
 

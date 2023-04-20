@@ -1,3 +1,4 @@
+import { BuiltIns } from "../BuiltIns";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 import { ShaderStruct } from "./shaderParts/ShaderStruct";
 
@@ -27,7 +28,9 @@ export class FragmentShader extends ShaderStage {
             inputs.addProperty(this.inputs[i]);
         }
 
-
+        if (this.outputs.length === 0) {
+            this.outputs[0] = { name: "color", ...BuiltIns.fragmentOutputs.color }
+        }
         const output: ShaderStruct = new ShaderStruct("Output", this.outputs);
         result += output.struct + "\n"
 

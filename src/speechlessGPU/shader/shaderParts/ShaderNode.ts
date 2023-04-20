@@ -25,25 +25,26 @@ export class ShaderNode {
         let line;
         let nbTabMin = 99999999;
 
-        for (let i = 0; i < lines.length; i++) {
-            line = lines[i];
-            for (let j = 0; j < lines[i].length; j++) {
-                if (line[j] === "\n") continue;
-                if (line[j] !== " ") {
-                    if (nbTabMin > j - 1) nbTabMin = j - 1;
-                    break;
+        if (lines.length > 1) {
+            for (let i = 0; i < lines.length; i++) {
+                line = lines[i];
+                console.log(line)
+                for (let j = 0; j < line.length; j++) {
+                    if (line[j] === "\n") continue;
+                    if (line[j] !== " ") {
+                        if (nbTabMin > j) nbTabMin = j;
+                        break;
+                    }
                 }
             }
 
+            if (this.insideMainFunction && nbTabMin >= 3) nbTabMin -= 3;
+            for (let i = 0; i < lines.length; i++) {
+                lines[i] = lines[i].slice(nbTabMin);
+            }
 
+            s = lines.join("\n");
         }
-        if (this.insideMainFunction && nbTabMin >= 3) nbTabMin -= 3;
-        for (let i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].slice(nbTabMin);
-        }
-
-        s = lines.join("\n");
-
         //-----------------------------------------------------------------------
 
         this._text = s;
@@ -60,8 +61,10 @@ export class ShaderNode {
 
         let result = "";
 
-        if (this.executeSubNodeAfterCode) result += this.text + "\n";
+        if (this.executeSubNodeAfterCode) {
 
+            result += this.text + "\n";
+        }
         if (this.subNodes) {
             for (let i = 0; i < this.subNodes.length; i++) {
                 result += this.subNodes[i].value + "\n";
@@ -71,7 +74,7 @@ export class ShaderNode {
         if (!this.executeSubNodeAfterCode) result += this.text + "\n";
 
 
-
+        //console.log(this.text + " vs " + result)
         return result;
     }
 

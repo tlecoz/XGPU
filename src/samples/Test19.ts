@@ -167,8 +167,8 @@ export class DragonWithoutLight extends RenderPipeline {
             bindgroups: {
                 geom: {
                     vertexBuffer: new VertexBuffer({
-                        position: VertexBuffer.Vec3(dragonMesh.positions),
-                        normal: VertexBuffer.Vec3(dragonMesh.normals),
+                        position: VertexAttribute.Vec3(dragonMesh.positions),
+                        normal: VertexAttribute.Vec3(dragonMesh.normals),
                     }),
                     scene: new UniformBuffer({
                         cameraViewProjMatrix: new Camera(renderer.canvas.width, renderer.canvas.height, 60),

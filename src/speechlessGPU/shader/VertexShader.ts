@@ -1,3 +1,4 @@
+import { BuiltIns } from "../BuiltIns";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 import { ShaderStruct } from "./shaderParts/ShaderStruct";
 
@@ -21,6 +22,10 @@ export class VertexShader extends ShaderStage {
         result += input.getComputeVariableDeclaration();
 
         //-----
+        if (this.outputs.length === 0) {
+            this.outputs[0] = { name: "position", ...BuiltIns.vertexOutputs.position }
+        }
+
         let output: ShaderStruct = new ShaderStruct("Output", [...this.outputs]);
         result += output.struct + "\n"
 
@@ -30,11 +35,12 @@ export class VertexShader extends ShaderStage {
         result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
         result += obj.variables + "\n";
         result += "   var output:Output;\n";
+        console.log(this.main.text)
         result += this.main.value;
         result += "   return output;\n"
         result += "}\n";
         //console.log("------------- VERTEX SHADER --------------")
-        //console.log(result)
+        console.log(result)
         //console.log("------------------------------------------")
         return { code: result, output: output };
     }

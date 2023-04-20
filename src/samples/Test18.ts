@@ -185,9 +185,9 @@ export class Dragon extends RenderPipeline {
             bindgroups: {
                 geom: {
                     vertexBuffer: new VertexBuffer({
-                        position: VertexBuffer.Vec3(dragonMesh.positions),
-                        normal: VertexBuffer.Vec3(dragonMesh.normals),
-                        uv: VertexBuffer.Vec2(dragonMesh.uvs),
+                        position: VertexAttribute.Vec3(dragonMesh.positions),
+                        normal: VertexAttribute.Vec3(dragonMesh.normals),
+                        uv: VertexAttribute.Vec2(dragonMesh.uvs),
                     }),
                     light: new Light(renderer.canvas.width, renderer.canvas.height),
                     scene: new UniformBuffer({

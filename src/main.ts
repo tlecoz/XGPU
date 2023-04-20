@@ -1,22 +1,39 @@
-import { Test01 } from "../public/samples/Test01";
-import { Test02 } from "../public/samples/Test02";
-import { Test03 } from "../public/samples/Test03";
-import { Test04 } from "../public/samples/Test04";
-import { Test05 } from "../public/samples/Test05";
-import { Test06 } from "../public/samples/Test06";
-import { Test07 } from "../public/samples/Test07";
-import { Test08 } from "../public/samples/Test08";
-import { Test09 } from "../public/samples/Test09";
-import { Test10 } from "../public/samples/Test10";
-import { Test11 } from "../public/samples/Test11";
-import { Test12 } from "../public/samples/Test12";
-import { Test13 } from "../public/samples/Test13";
-import { Test14 } from "../public/samples/Test14";
-import { Test15 } from "../public/samples/Test15";
-import { Test16 } from "../public/samples/Test16";
-import { Test17 } from "../public/samples/Test17";
-import { Test18 } from "../public/samples/Test18";
-import { Test19 } from "../public/samples/Test19";
+import { HelloTriangle_inline } from "./samples/basics/HelloTriangle_inline";
+import { HelloTriangle_buffer } from "./samples/basics/HelloTriangle_buffer";
+import { HelloTriangle_buffer_shorter } from "./samples/basics/HelloTriangle_buffer_shorter";
+import { HelloTriangle_inline_shorter } from "./samples/basics/HelloTriangle_inline_shorter";
+import { HelloTriangle_uniform } from "./samples/basics/HelloTriangle_uniform";
+import { HelloTriangle_uniform_shorter } from "./samples/basics/HelloTriangle_uniform_shorter";
+import { HelloTriangle_raw } from "./samples/basics/HelloTriangle_raw";
+
+//new HelloTriangle_inline();
+//new HelloTriangle_inline_shorter();
+//new HelloTriangle_buffer();
+//new HelloTriangle_buffer_shorter();
+//new HelloTriangle_uniform();
+//new HelloTriangle_uniform_shorter();
+new HelloTriangle_raw();
+/*
+
+import { Test01 } from "./samples/Test01";
+import { Test02 } from "./samples/Test02";
+import { Test03 } from "./samples/Test03";
+import { Test04 } from "./samples/Test04";
+import { Test05 } from "./samples/Test05";
+import { Test06 } from "./samples/Test06";
+import { Test07 } from "./samples/Test07";
+import { Test08 } from "./samples/Test08";
+import { Test09 } from "./samples/Test09";
+import { Test10 } from "./samples/Test10";
+import { Test11 } from "./samples/Test11";
+import { Test12 } from "./samples/Test12";
+import { Test13 } from "./samples/Test13";
+import { Test14 } from "./samples/Test14";
+import { Test15 } from "./samples/Test15";
+import { Test16 } from "./samples/Test16";
+import { Test17 } from "./samples/Test17";
+import { Test18 } from "./samples/Test18";
+import { Test19 } from "./samples/Test19";
 
 const id = 19;
 
@@ -40,3 +57,4 @@ else if (id === 16) new Test16();
 else if (id === 17) new Test17();
 else if (id === 18) new Test18();
 else if (id === 19) new Test19();
+*/

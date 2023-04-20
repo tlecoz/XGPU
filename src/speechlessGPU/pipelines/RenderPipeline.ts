@@ -13,6 +13,10 @@ import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
+import { BuiltIns } from "../BuiltIns";
+import { IShaderResource } from "../shader/resources/IShaderResource";
+import { UniformBuffer } from "../shader/resources/UniformBuffer";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
 
 
 export class RenderPipeline extends Pipeline {
@@ -68,6 +72,251 @@ export class RenderPipeline extends Pipeline {
 
     public get depthStencilTexture(): DepthStencilTexture { return this._depthStencilTexture; }
 
+    //=============================== HIGH LEVEL PARSING ================================================================
+
+    private parseShaderBuiltins(descriptor: any) {
+        //------------- VERTEX INPUTS -----------------
+
+        const addVertexInput = (name: string, val: any) => {
+            if (typeof descriptor.vertexShader === "string") {
+                const main: string = descriptor.vertexShader;
+                descriptor.vertexShader = {
+                    main
+                }
+            }
+            if (!descriptor.vertexShader.inputs) descriptor.vertexShader.inputs = {};
+            descriptor.vertexShader.inputs[name] = val;
+        }
+        const checkVertexInputBuiltIns = (name: string, o: any) => {
+
+            for (let z in BuiltIns.vertexInputs) {
+                if (o === BuiltIns.vertexInputs[z]) {
+                    addVertexInput(name, o);
+                }
+            }
+        }
+
+        //-------------- VERTEX OUTPUTS ------------
+        const addVertexOutput = (name: string, val: any) => {
+            if (typeof descriptor.vertexShader === "string") {
+                const main: string = descriptor.vertexShader;
+                descriptor.vertexShader = {
+                    main
+                }
+            }
+            if (!descriptor.vertexShader.outputs) descriptor.vertexShader.outputs = {};
+            descriptor.vertexShader.outputs[name] = val;
+        }
+        const checkVertexOutputBuiltIns = (name: string, o: any) => {
+            for (let z in BuiltIns.vertexOutputs) {
+                if (o === BuiltIns.vertexOutputs[z]) {
+                    addVertexOutput(name, o);
+                }
+            }
+        }
+
+        //------------- FRAGMENT INPUTS -----------------
+
+        const addFragmentInput = (name: string, val: any) => {
+            if (typeof descriptor.fragmentShader === "string") {
+                const main: string = descriptor.fragmentShader;
+                descriptor.fragmentShader = {
+                    main
+                }
+            }
+            if (!descriptor.fragmentShader.inputs) descriptor.fragmentShader.inputs = {};
+            descriptor.fragmentShader.inputs[name] = val;
+        }
+        const checkFragmentInputBuiltIns = (name: string, o: any) => {
+
+            for (let z in BuiltIns.fragmentInputs) {
+                if (o === BuiltIns.vertexInputs[z]) {
+                    addFragmentInput(name, o);
+                }
+            }
+        }
+
+        //-------------- FRAGMENT OUTPUTS ------------
+        const addFragmentOutput = (name: string, val: any) => {
+            if (typeof descriptor.fragmentShader === "string") {
+                const main: string = descriptor.fragmentShader;
+                descriptor.fragmentShader = {
+                    main
+                }
+            }
+            if (!descriptor.fragmentShader.outputs) descriptor.fragmentShader.outputs = {};
+            descriptor.fragmentShader.outputs[name] = val;
+        }
+        const checkFragmentOutputBuiltIns = (name: string, o: any) => {
+            for (let z in BuiltIns.fragmentOutputs) {
+                if (o === BuiltIns.fragmentOutputs[z]) {
+                    addFragmentOutput(name, o);
+                }
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) {
+                checkVertexInputBuiltIns(z, o);
+                checkVertexOutputBuiltIns(z, o);
+                checkFragmentInputBuiltIns(z, o);
+                checkFragmentOutputBuiltIns(z, o);
+            }
+        }
+
+        return descriptor;
+    }
+
+    private parseVertexBuffers(descriptor: any) {
+
+        const addVertexBuffer = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+            descriptor.bindgroups.default[name] = o;
+            return o;
+        }
+
+        const checkVertexBuffer = (name: string, o: any) => {
+            if (o instanceof VertexBuffer) {
+                addVertexBuffer(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkVertexBuffer(z, o);
+        }
+
+        return descriptor;
+    }
+
+    private parseVertexAttributes(descriptor: any) {
+
+        const addVertexAttribute = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+
+
+            if (!descriptor.bindgroups.default.buffer) {
+                const attributes: any = {};
+                attributes[name] = o;
+                descriptor.bindgroups.default.buffer = new VertexBuffer(attributes);
+            } else {
+                const attribute = (descriptor.bindgroups.default.buffer as VertexBuffer).createArray(name, o.type, o.offset);
+                if (o.datas) attribute.datas = o.datas;
+            }
+        }
+
+        const checkVertexAttribute = (name: string, o: any) => {
+            if (o.type && VertexAttribute.types[o.type]) {
+                addVertexAttribute(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkVertexAttribute(z, o);
+        }
+
+        return descriptor;
+    }
+
+    private parseDrawConfig(descriptor: any) {
+        // vertexCount: number, instanceCount: number, firstVertexId: number, firstInstanceId: number
+        if (descriptor.vertexCount) {
+            if (isNaN(descriptor.vertexCount)) throw new Error("descriptor.vertexCount is a reserved keyword and must be a number");
+            this.drawConfig.vertexCount = descriptor.vertexCount;
+        }
+        if (descriptor.instanceCount) {
+            if (isNaN(descriptor.instanceCount)) throw new Error("descriptor.instanceCount is a reserved keyword and must be a number");
+            this.drawConfig.instanceCount = descriptor.instanceCount;
+        }
+        if (descriptor.firstVertexId) {
+            if (isNaN(descriptor.firstVertexId)) throw new Error("descriptor.firstVertexId is a reserved keyword and must be a number");
+            this.drawConfig.firstVertexId = descriptor.firstVertexId;
+        }
+        if (descriptor.firstInstanceId) {
+            if (isNaN(descriptor.firstInstanceId)) throw new Error("descriptor.firstInstanceId is a reserved keyword and must be a number");
+            this.drawConfig.firstInstanceId = descriptor.firstInstanceId;
+        }
+        return descriptor;
+    }
+
+
+
+
+    private parseUniformBuffers(descriptor: any) {
+
+        const addUniformBuffer = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+            descriptor.bindgroups.default[name] = o;
+            return o;
+        }
+
+        const checkUniformBuffer = (name: string, o: any) => {
+            if (o instanceof UniformBuffer) {
+                addUniformBuffer(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkUniformBuffer(z, o);
+        }
+
+        return descriptor;
+    }
+
+    private parseUniform(descriptor: any) {
+
+        const addUniform = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+
+
+            if (!descriptor.bindgroups.default.uniforms) {
+                const uniforms: any = {};
+                uniforms[name] = o;
+                descriptor.bindgroups.default.uniforms = new UniformBuffer(uniforms);
+            } else {
+                (descriptor.bindgroups.default.uniforms as UniformBuffer).add(name, o);
+            }
+        }
+
+        const checkUniform = (name: string, o: any) => {
+            if (o instanceof PrimitiveFloatUniform || o instanceof PrimitiveIntUniform || o instanceof PrimitiveUintUniform) {
+                addUniform(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkUniform(z, o);
+        }
+
+        return descriptor;
+    }
+
+
+    private highLevelParse(descriptor: any) {
+
+        descriptor = this.parseShaderBuiltins(descriptor);
+        descriptor = this.parseVertexBuffers(descriptor);
+        descriptor = this.parseVertexAttributes(descriptor);
+        descriptor = this.parseDrawConfig(descriptor);
+        descriptor = this.parseUniformBuffers(descriptor);
+        descriptor = this.parseUniform(descriptor);
+        console.log("descriptor = ", descriptor)
+        return descriptor;
+    }
+
 
     public initFromObject(descriptor: {
         //description primitive : 
@@ -81,18 +330,24 @@ export class RenderPipeline extends Pipeline {
         bindgroups?: any,
         indexBuffer?: IndexBuffer,
         vertexShader: {
-            outputs: any,
             main: string
+            outputs?: any,
             inputs?: any,
             code?: string,
-        },
+        } | string,
         fragmentShader?: {
-            outputs: any,
             main: string,
+            outputs?: any,
             inputs?: any,
             code?: string
-        }
+        } | string
+        , [key: string]: unknown
     }) {
+
+
+        descriptor = this.highLevelParse(descriptor);
+
+
 
         this.vertexShader = null;
         this.fragmentShader = null;
@@ -128,13 +383,30 @@ export class RenderPipeline extends Pipeline {
 
         if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
 
+
+
         if (descriptor.bindgroups) {
             let group: Bindgroup;
+            let resourcesGroups: IShaderResource[][] = [];
+            let k = 0;
             for (let z in descriptor.bindgroups) {
                 group = new Bindgroup(z);
-                group.initFromObject(descriptor.bindgroups[z]);
+                console.log("=> ", z, descriptor.bindgroups[z])
+                resourcesGroups[k++] = group.initFromObject(descriptor.bindgroups[z]);
                 this.bindGroups.add(group);
             }
+
+
+
+            if (descriptor.bindgroups.default) {
+                if (descriptor.bindgroups.default.buffer) {
+                    const attributes = (descriptor.bindgroups.default.buffer as VertexBuffer).attributes;
+                    for (let z in attributes) {
+                        if (descriptor[z]) descriptor[z] = attributes[z];
+                    }
+                }
+            }
+
         }
 
 
@@ -150,17 +422,30 @@ export class RenderPipeline extends Pipeline {
 
 
         this.vertexShader = new VertexShader();
-        this.vertexShader.inputs = createArrayOfObjects(descriptor.vertexShader.inputs);
-        this.vertexShader.outputs = createArrayOfObjects(descriptor.vertexShader.outputs);
-        if (descriptor.vertexShader.code) this.vertexShader.code.text = descriptor.vertexShader.code;
-        this.vertexShader.main.text = descriptor.vertexShader.main;
+
+        if (typeof descriptor.vertexShader === "string") {
+            this.vertexShader.main.text = descriptor.vertexShader;
+        } else {
+            this.vertexShader.inputs = createArrayOfObjects(descriptor.vertexShader.inputs);
+            this.vertexShader.outputs = createArrayOfObjects(descriptor.vertexShader.outputs);
+            if (descriptor.vertexShader.code) this.vertexShader.code.text = descriptor.vertexShader.code;
+            this.vertexShader.main.text = descriptor.vertexShader.main;
+        }
+
+
 
         if (descriptor.fragmentShader) {
             this.fragmentShader = new FragmentShader();
-            this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);;
-            this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);;
-            if (descriptor.fragmentShader.code) this.fragmentShader.code.text = descriptor.fragmentShader.code;
-            this.fragmentShader.main.text = descriptor.fragmentShader.main;
+
+            if (typeof descriptor.fragmentShader === "string") {
+                this.fragmentShader.main.text = descriptor.fragmentShader;
+            } else {
+                this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);;
+                this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);;
+                if (descriptor.fragmentShader.code) this.fragmentShader.code.text = descriptor.fragmentShader.code;
+                this.fragmentShader.main.text = descriptor.fragmentShader.main;
+            }
+
         }
 
 
@@ -297,7 +582,6 @@ export class RenderPipeline extends Pipeline {
 
     public buildGpuPipeline(): GPURenderPipeline {
         if (this.gpuPipeline) return this.gpuPipeline;
-
 
         this.bindGroups.handleRenderPipelineResourceIOs();
         this.initPipelineResources(this);
@@ -466,10 +750,10 @@ export class RenderPipeline extends Pipeline {
 
         if (!this.resourceDefined) return;
 
+
+
         if (gpuPipeline) {
 
-            //this.initPipelineResources(this);
-            //this.build();
             this.bindGroups.update();
 
 
@@ -477,29 +761,27 @@ export class RenderPipeline extends Pipeline {
 
             renderPass.setPipeline(this.gpuPipeline);
 
-
-            //console.log("bindGroups.resources = ", this.bindGroups.resources)
             const resourceByType = this.bindGroups.resources.types;
-            const buffers = resourceByType.vertexBuffers;
+            if (resourceByType) {
 
+                const buffers = resourceByType.vertexBuffers;
 
-            if (this.drawConfig.vertexCount === -1) {
-                if (!buffers) {
-                    throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
+                if (this.drawConfig.vertexCount === -1) {
+                    if (!buffers) {
+                        throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
+                    }
+                    const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
+                    this.drawConfig.vertexCount = vertexBuffer.nbVertex;
                 }
-                const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
-                this.drawConfig.vertexCount = vertexBuffer.nbVertex;
+
+                if (buffers) {
+                    let k = 0;
+                    for (let i = 0; i < buffers.length; i++) {
+                        renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
+                    }
+                }
             }
 
-            if (buffers) {
-                //console.log("DRAW BUFFERS ", buffers)
-                let k = 0;
-                for (let i = 0; i < buffers.length; i++) {
-                    //if (i > 2) continue;
-                    //console.log(" renderPass.setVertexBuffer(", k, ",", buffers[i].resource.getCurrentBuffer(), ", 0,", buffers[i].resource.getCurrentBuffer().size, ")")
-                    renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
-                }
-            }
 
         }
 
@@ -548,7 +830,20 @@ export class RenderPipeline extends Pipeline {
     }
 
 
-    private get resourceDefined(): boolean { return !!this.bindGroups.resources.all }
+    private get resourceDefined(): boolean {
+        const bool = !!this.bindGroups.resources.all
+        if (!bool) {
+            //some very basic shader can run without any resource
+            if (this.drawConfig.vertexCount > 0) {
+                if (this.vertexShader.main.text != "" && this.fragmentShader.main.text != "") {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        return true
+    }
 
     public get pipeline(): GPURenderPipeline { return this.gpuPipeline }
 

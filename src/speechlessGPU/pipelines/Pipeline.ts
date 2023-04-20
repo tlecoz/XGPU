@@ -181,6 +181,7 @@ export class Pipeline {
 
     protected initPipelineResources(pipeline: Pipeline) {
         const resources: IShaderResource[] = this.bindGroups.resources.all;
+        if (!resources) return;
         for (let i = 0; i < resources.length; i++) resources[i].setPipelineType(pipeline.type);
     }
 

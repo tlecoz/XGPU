@@ -3,9 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "dist/xGPU.umd.cjs",
-  "module": "dist/xGPU.js",
-  "types": "dist/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build:test": "tsc --project tsconfig_build.json --emitDeclarationOnly",
@@ -15,11 +12,14 @@
   },
   "devDependencies": {
     "@webgpu/types": "^0.1.26",
+    "cross-spawn": "^7.0.3",
     "rimraf": "^5.0.0",
     "typescript": "^4.6.4",
-    "vite": "^3.1.0"
+    "vite": "^3.1.0",
+    "vite-plugin-checker": "^0.5.6"
   },
   "dependencies": {
+    "@types/dom-webcodecs": "^0.1.7",
     "gl-matrix": "^3.4.3",
     "stanford-dragon": "^1.1.1",
     "vite-plugin-external": "^1.2.8"

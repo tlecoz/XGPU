@@ -38,8 +38,8 @@ export class CubeGrid extends RenderPipeline {
             bindgroups: {
                 geom: {
                     vb: new VertexBuffer({
-                        position: VertexBuffer.Vec4(positionOffset),
-                        uv: VertexBuffer.Vec2(uvOffset)
+                        position: VertexAttribute.Vec4(positionOffset),
+                        uv: VertexAttribute.Vec2(uvOffset)
                     }),
                     uniforms: new UniformBuffer({
                         time: new Float(0, true),

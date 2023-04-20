@@ -99,6 +99,8 @@ export class VideoTexture implements IShaderResource {
         np code here :
         the video update itself automaticly
         */
+
+
     }
 
     public destroyGpuResource() {
@@ -108,12 +110,18 @@ export class VideoTexture implements IShaderResource {
         }
     }
 
+    private videoFrame: VideoFrame;
+
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUExternalTexture } {
+
+        if (this.videoFrame) this.videoFrame.close();
+        this.videoFrame = new VideoFrame(this.gpuResource)
+
         if (!this.gpuResource) throw new Error("gpuResource cannot be null. You must provide a HTMLVideoElement")
         return {
             binding: bindingId,
             resource: SLGPU.device.importExternalTexture({
-                source: this.gpuResource
+                source: this.videoFrame as any
             })
         }
     }

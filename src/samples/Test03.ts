@@ -33,7 +33,7 @@ export class Test03 extends Sample {
                 myVertexResources: {
                     geom: new VertexBuffer({
 
-                        vertexPos: VertexBuffer.Vec3()
+                        vertexPos: VertexAttribute.Vec3()
 
                     }),
 

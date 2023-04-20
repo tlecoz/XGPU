@@ -123,7 +123,7 @@ export class ImageTexture implements IShaderResource {
 
         if (this.descriptor.source) {
             if (this.descriptor.source.width !== this.gpuResource.width || this.descriptor.source.height !== this.gpuResource.height) {
-                console.log("source = ", this.descriptor.source)
+                //console.log("source = ", this.descriptor.source)
                 this.descriptor.size = [this.descriptor.source.width, this.descriptor.source.height]
                 this.createGpuResource();
                 this.mustBeTransfered = true;
@@ -147,7 +147,7 @@ export class ImageTexture implements IShaderResource {
     public createGpuResource(): void {
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
-        console.warn("ImageTexture.createGPUResource descriptor = ", this.descriptor)
+        //console.warn("ImageTexture.createGPUResource descriptor = ", this.descriptor)
         this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
 

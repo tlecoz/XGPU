@@ -7,6 +7,7 @@ import { Float, Matrix4x4, Matrix4x4Array, Vec3, Vec4, Vec4Array } from "../spee
 import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
 import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
+import { VertexAttribute } from "../speechlessGPU/shader/resources/VertexAttribute";
 import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { VideoTexture } from "../speechlessGPU/shader/resources/VideoTexture";
 import { Sample } from "./Sample";
@@ -27,7 +28,7 @@ export class Test01 extends Sample {
 
 
         group.add("geom", new VertexBuffer({
-            vertexPos: VertexBuffer.Vec3()
+            vertexPos: VertexAttribute.Vec3()
         },
             {
                 datas: new Float32Array([

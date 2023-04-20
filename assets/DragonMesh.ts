@@ -60,7 +60,7 @@ var indices = [];
 for (let i = 0; i < dragonRawData.cells.length; i++) {
     indices.push(...dragonRawData.cells[i]);
 }
-console.log("cells.length = ", dragonRawData.cells.length, " vs ", indices.length)
+//console.log("cells.length = ", dragonRawData.cells.length, " vs ", indices.length)
 //add plane ------------------
 indices.push(dragonMesh.positions.length, dragonMesh.positions.length + 2, dragonMesh.positions.length + 1)
 indices.push(dragonMesh.positions.length, dragonMesh.positions.length + 1, dragonMesh.positions.length + 3);

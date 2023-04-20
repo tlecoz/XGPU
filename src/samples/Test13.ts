@@ -33,8 +33,8 @@ export class RotatingCube extends RenderPipeline {
             bindgroups: {
                 geom: {
                     vb: new VertexBuffer({
-                        position: VertexBuffer.Vec4(positionOffset),
-                        uv: VertexBuffer.Vec2(uvOffset)
+                        position: VertexAttribute.Vec4(positionOffset),
+                        uv: VertexAttribute.Vec2(uvOffset)
                     }),
                     uniforms: new UniformBuffer({
                         modelView: new ModelViewMatrix(),

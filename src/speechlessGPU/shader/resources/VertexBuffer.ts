@@ -14,116 +14,7 @@ export type VertexBufferDescriptor = {
 
 export class VertexBuffer implements IShaderResource {
 
-    public static Float(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "float32", offset, datas }
-    }
-    public static Vec2(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "float32x2", offset, datas }
-    }
-    public static Vec3(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "float32x3", offset, datas }
-    }
-    public static Vec4(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "float32x4", offset, datas }
-    }
 
-    public static Int(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "sint32", offset, datas }
-    }
-    public static IVec2(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "sint32x2", offset, datas }
-    }
-    public static IVec3(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "sint32x3", offset, datas }
-    }
-    public static IVec4(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "sint32x4", offset, datas }
-    }
-
-    public static Uint(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "uint32", offset, datas }
-    }
-    public static UVec2(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "uint32x2", offset, datas }
-    }
-    public static UVec3(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "uint32x3", offset, datas }
-    }
-    public static UVec4(datas?: number[][] | number, offset?: number) {
-        if (datas && !offset) {
-            if (typeof datas === "number") {
-                offset = datas;
-                datas = undefined;
-            }
-        }
-        return { type: "uint32x4", offset, datas }
-    }
 
 
     public io: number = 0;
@@ -665,6 +556,7 @@ export class VertexBuffer implements IShaderResource {
             for (let j = 0; j < nbAttributes; j++) {
                 attribute = this.vertexArrays[j];
                 if (attribute.mustBeTransfered) {
+                    //console.log(nbVertex, nbAttributes, offset, attribute)
                     this._datas.set(attribute.datas[i], offset);
 
                 }

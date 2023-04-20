@@ -37,10 +37,10 @@ export class Test08 extends Sample {
             bindgroups: {
                 io: {
                     particles: new VertexBufferIO({
-                        radius: VertexBuffer.Float(),
-                        position: VertexBuffer.Vec2(),
-                        velocity: VertexBuffer.Vec2(),
-                        color: VertexBuffer.Vec4(),
+                        radius: VertexAttribute.Float(),
+                        position: VertexAttribute.Vec2(),
+                        velocity: VertexAttribute.Vec2(),
+                        color: VertexAttribute.Vec4(),
 
                     },
                         { datas: particleDatas }
@@ -105,7 +105,7 @@ export class Test08 extends Sample {
             bindgroups: {
                 vertexResources: {
                     geom: new VertexBuffer({
-                        vertexPos: VertexBuffer.Vec3(0)
+                        vertexPos: VertexAttribute.Vec3(0)
                     }, {
                         datas: new Float32Array([
                             -quadSize, -quadSize, 0.0,
