@@ -54,12 +54,12 @@ export class UniformBuffer implements IShaderResource {
 
 
 
-    public add(name: string, data: PrimitiveType) {
+    public add(name: string, data: PrimitiveType, useLocalVariable: boolean = false) {
 
         data.uniformBuffer = this;
         data.name = name;
 
-        if (this.descriptor.useLocalVariable) data.createVariableInsideMain = true;
+        if (this.descriptor.useLocalVariable || useLocalVariable) data.createVariableInsideMain = true;
 
         this._items[name] = data;
         this._itemNames.push(name);

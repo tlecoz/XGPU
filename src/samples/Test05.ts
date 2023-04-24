@@ -11,6 +11,7 @@ import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
 import { VideoTexture } from "../speechlessGPU/shader/resources/VideoTexture";
 import { ShaderType } from "../speechlessGPU/shader/ShaderType";
 import { Sample } from "./Sample";
+import { VertexAttribute } from "../speechlessGPU/shader/resources/VertexAttribute";
 
 
 class Dimension extends Vec3 {

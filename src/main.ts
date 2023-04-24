@@ -5,14 +5,41 @@ import { HelloTriangle_inline_shorter } from "./samples/basics/HelloTriangle_inl
 import { HelloTriangle_uniform } from "./samples/basics/HelloTriangle_uniform";
 import { HelloTriangle_uniform_shorter } from "./samples/basics/HelloTriangle_uniform_shorter";
 import { HelloTriangle_raw } from "./samples/basics/HelloTriangle_raw";
+import { MouseTrailerSample } from "./samples/basics/mouseTrailer/MouseTrailerSample";
+import { MouseTrailerSample2 } from "./samples/basics/mouseTrailer/MouseTrailerSample2";
+import { MouseTrailerSample3 } from "./samples/basics/mouseTrailer/MouseTrailerSample3";
+import { RotatingCubeSample } from "./samples/basics/cube/RotatingCubeSample";
+import { SoundSpectrumSample } from "./samples/basics/soundSpectrum/SoundSpectrumSample";
 
-//new HelloTriangle_inline();
-//new HelloTriangle_inline_shorter();
-//new HelloTriangle_buffer();
-//new HelloTriangle_buffer_shorter();
-//new HelloTriangle_uniform();
-//new HelloTriangle_uniform_shorter();
-new HelloTriangle_raw();
+
+const canvas = document.createElement("canvas");
+canvas.width = 512;
+canvas.height = 512;
+
+//new HelloTriangle_inline(canvas);
+//new HelloTriangle_inline_shorter(canvas);
+//new HelloTriangle_buffer(canvas);
+//new HelloTriangle_buffer_shorter(canvas);
+//new HelloTriangle_uniform(canvas);
+//new HelloTriangle_uniform_shorter(canvas);
+//new HelloTriangle_raw(canvas);
+
+//new MouseTrailerSample(canvas);
+//new MouseTrailerSample2(canvas);
+//new MouseTrailerSample3(canvas);
+
+//new RotatingCubeSample();
+new SoundSpectrumSample(canvas);
+
+
+
+
+
+
+
+
+
+
 /*
 
 import { Test01 } from "./samples/Test01";

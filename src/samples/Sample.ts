@@ -8,14 +8,28 @@ export class Sample {
         video: HTMLVideoElement
     }
 
-    constructor(w: number = 512, h: number = 512) {
+    constructor(canvas: HTMLCanvasElement) {
+
+        /*constructor(w: number = 512, h: number = 512) {
+    
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;*/
+
 
         const renderer = new GPURenderer()
-        renderer.initCanvas(w, h, true).then(async (canvas) => {
+        renderer.init(canvas, "premultiplied").then(async () => {
+
+            this.medias = await this.loadMedias();
+            this.start(renderer);
+            document.body.appendChild(canvas);
+        })
+
+        /*renderer.initCanvas(w, h, true).then(async (canvas) => {
             document.body.appendChild(canvas);
             this.medias = await this.loadMedias();
             this.start(renderer);
-        })
+        })*/
 
         const animate = () => {
             renderer.update();

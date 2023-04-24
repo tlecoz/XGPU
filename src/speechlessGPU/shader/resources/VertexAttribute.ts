@@ -124,28 +124,38 @@ export class VertexAttribute {
             "uint8x4": { nbComponent: 4, bytes: 4, varType: "vec4<u32>" },
             "sint8x2": { nbComponent: 2, bytes: 2, varType: "vec2<i32>" },
             "sint8x4": { nbComponent: 4, bytes: 4, varType: "vec4<i32>" },
+
             "unorm8x2": { nbComponent: 2, bytes: 2, varType: "vec2<f32>" },
             "unorm8x4": { nbComponent: 4, bytes: 4, varType: "vec4<f32>" },
+
             "snorm8x2": { nbComponent: 2, bytes: 2, varType: "vec2<f32>" },
             "snorm8x4": { nbComponent: 4, bytes: 4, varType: "vec4<f32>" },
+
             "uint16x2": { nbComponent: 2, bytes: 4, varType: "vec2<u32>" },
             "uint16x4": { nbComponent: 4, bytes: 8, varType: "vec4<u32>" },
+
             "sint16x2": { nbComponent: 2, bytes: 4, varType: "vec2<i32>" },
             "sint16x4": { nbComponent: 4, bytes: 8, varType: "vec4<i32>" },
+
             "unorm16x2": { nbComponent: 2, bytes: 4, varType: "vec2<f32>" },
             "unorm16x4": { nbComponent: 4, bytes: 8, varType: "vec4<f32>" },
+
             "snorm16x2": { nbComponent: 2, bytes: 4, varType: "vec2<f32>" },
             "snorm16x4": { nbComponent: 4, bytes: 8, varType: "vec4<f32>" },
+
             "float16x2": { nbComponent: 2, bytes: 4, varType: "vec2<f16>" },
             "float16x4": { nbComponent: 4, bytes: 8, varType: "vec4<f16>" },
+
             "float32": { nbComponent: 1, bytes: 4, varType: "f32" },
             "float32x2": { nbComponent: 2, bytes: 8, varType: "vec2<f32>" },
             "float32x3": { nbComponent: 3, bytes: 12, varType: "vec3<f32>" },
             "float32x4": { nbComponent: 4, bytes: 16, varType: "vec4<f32>" },
+
             "uint32": { nbComponent: 1, bytes: 4, varType: "u32" },
             "uint32x2": { nbComponent: 2, bytes: 8, varType: "vec2<u32>" },
             "uint32x3": { nbComponent: 3, bytes: 12, varType: "vec3<u32>" },
             "uint32x4": { nbComponent: 4, bytes: 16, varType: "vec4<u32>" },
+
             "sint32": { nbComponent: 1, bytes: 4, varType: "i32" },
             "sint32x2": { nbComponent: 2, bytes: 8, varType: "vec2<i32>" },
             "sint32x3": { nbComponent: 3, bytes: 12, varType: "vec3<i32>" },

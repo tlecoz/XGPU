@@ -24,6 +24,42 @@ export class ShaderStage {
 
     }
 
+    public addOutputVariable(name: string, shaderType: { type: string }) {
+        this.outputs.push({ name, type: shaderType.type })
+    }
+    public addInputVariable(name: string, shaderTypeOrBuiltIn: { type: string, builtin?: string }) {
+        this.outputs.push({ name, type: shaderTypeOrBuiltIn.type, builtin: shaderTypeOrBuiltIn.builtin })
+    }
+
+    protected formatWGSLCode(code: string): string {
+        // Retire les sauts de ligne inutiles et divise le code en lignes
+        const lines = code.replace(/\n+/g, '\n').split('\n');
+
+        let formattedCode = '';
+        let indentLevel = 0;
+
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+
+            // Diminue le niveau d'indentation si la ligne contient une accolade fermante
+            if (trimmedLine.startsWith('}')) {
+                indentLevel--;
+            }
+
+            // Ajoute des espaces pour la tabulation
+            const indentedLine = '   '.repeat(indentLevel) + trimmedLine;
+
+            // Augmente le niveau d'indentation si la ligne contient une accolade ouvrante
+            if (trimmedLine.endsWith('{')) {
+                indentLevel++;
+            }
+
+            formattedCode += indentedLine + '\n';
+        }
+
+        return formattedCode;
+    }
+
 
 
     public get shaderInfos(): { code: string, output: ShaderStruct } { return this._shaderInfos; }

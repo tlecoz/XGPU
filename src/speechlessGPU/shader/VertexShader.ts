@@ -10,6 +10,7 @@ export class VertexShader extends ShaderStage {
         super("vertex");
     }
 
+
     public build(pipeline: any, input: ShaderStruct): { code: string, output: ShaderStruct } {
         //console.log("VS inputs = ", input)
         let result = this.code.value + "\n\n";
@@ -22,9 +23,16 @@ export class VertexShader extends ShaderStage {
         result += input.getComputeVariableDeclaration();
 
         //-----
-        if (this.outputs.length === 0) {
-            this.outputs[0] = { name: "position", ...BuiltIns.vertexOutputs.position }
+
+
+        let bool = false;
+        for (let i = 0; i < this.outputs.length; i++) {
+            if (this.outputs[0].builtin === BuiltIns.vertexOutputs.position.builtin) {
+                bool = true;
+            }
         }
+        if (!bool) this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position })
+
 
         let output: ShaderStruct = new ShaderStruct("Output", [...this.outputs]);
         result += output.struct + "\n"
@@ -35,12 +43,15 @@ export class VertexShader extends ShaderStage {
         result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
         result += obj.variables + "\n";
         result += "   var output:Output;\n";
-        console.log(this.main.text)
         result += this.main.value;
         result += "   return output;\n"
         result += "}\n";
+
+        result = this.formatWGSLCode(result)
+
         //console.log("------------- VERTEX SHADER --------------")
-        console.log(result)
+        console.log(result);
+
         //console.log("------------------------------------------")
         return { code: result, output: output };
     }

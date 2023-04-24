@@ -45,6 +45,8 @@ export class FragmentShader extends ShaderStage {
         result += this.main.value;
         result += "   return output;\n"
         result += "}\n";
+
+        result = this.formatWGSLCode(result)
         //console.log("------------- FRAGMENT SHADER --------------")
         //console.log(result)
         //console.log("--------------------------------------------")

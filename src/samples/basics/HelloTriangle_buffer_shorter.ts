@@ -2,7 +2,6 @@
 import { GPURenderer } from "../../speechlessGPU/GPURenderer";
 import { RenderPipeline } from "../../speechlessGPU/pipelines/RenderPipeline";
 import { VertexAttribute } from "../../speechlessGPU/shader/resources/VertexAttribute";
-import { VertexBuffer } from "../../speechlessGPU/shader/resources/VertexBuffer";
 import { Sample } from "../Sample";
 
 export class HelloTriangle_buffer_shorter extends Sample {

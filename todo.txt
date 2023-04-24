@@ -1,4 +1,42 @@
 
+DEMOS : 
+
+- gradient cube 
+- texture cube with light 
+- millions of cube with light 
+- audioSpectrum with cube with light 
+
+
+- ribbon (yugop)
+
+- wecam time stretcher 
+- video 3d
+
+
+- audioSpectrum cube 
+- cubemap 
+- particles 
+- compute shader alone 
+- compute shader particle 
+- compute shader texture 
+- light 
+- shadow 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 vertexBuffer alignment.... 
 verifier a fond uniformBufferAlignment

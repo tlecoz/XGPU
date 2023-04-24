@@ -14,24 +14,17 @@ export class GPURenderer {
     constructor() {
 
     }
-    public initCanvas(w: number, h: number, useAlphaChannel: boolean = true): Promise<HTMLCanvasElement> {
 
-        return new Promise((onResolve: (val: any) => void, onError: (val?: any) => void) => {
-
+    public init(canvas: HTMLCanvasElement, alphaMode: "opaque" | "premultiplied" = "opaque"): Promise<HTMLCanvasElement> {
+        this.canvasW = canvas.width;
+        this.canvasH = canvas.height;
+        return new Promise((resolve: (e: HTMLCanvasElement) => void, error: (e: unknown) => void) => {
             SLGPU.init().then(() => {
 
-                this.domElement = document.createElement("canvas");
-
+                this.domElement = canvas;
                 this.ctx = this.domElement.getContext("webgpu");
 
-                const devicePixelRatio = window.devicePixelRatio || 1;
-                this.canvasW = this.domElement.width = w * devicePixelRatio;
-                this.canvasH = this.domElement.height = h * devicePixelRatio;
-
-                let alphaMode: "opaque" | "premultiplied" = "opaque";
-                if (useAlphaChannel) alphaMode = "premultiplied";
-
-                if (!this.ctx.configure) onError(null);
+                if (!this.ctx.configure) error(null);
                 this.ctx.configure({
                     device: SLGPU.device,
                     format: SLGPU.getPreferredCanvasFormat(),
@@ -39,10 +32,23 @@ export class GPURenderer {
                     colorSpace: "srgb",
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
                 })
-                onResolve(this.canvas);
+                resolve(canvas);
+            });
+        })
+    }
 
-            })
-        });
+    public initCanvas(w: number, h: number, useAlphaChannel: boolean = true): Promise<HTMLCanvasElement> {
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+
+        let alphaMode: "opaque" | "premultiplied" = "opaque";
+        if (useAlphaChannel) alphaMode = "premultiplied";
+
+        return this.init(canvas, alphaMode);
+
+
     }
 
     public get firstPipeline(): RenderPipeline { return this.renderPipelines[0]; }

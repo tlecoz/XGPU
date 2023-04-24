@@ -389,6 +389,13 @@ export class Bindgroups {
         return null;
     }
 
+    public getGroupByName(name: string): Bindgroup {
+        for (let i = 0; i < this.groups.length; i++) {
+            if (this.groups[i].name === name) return this.groups[i];
+        }
+        return null;
+    }
+
     public getNameByResource(resource: IShaderResource): string {
         let elements: { name: string, resource: IShaderResource }[];
         for (let i = 0; i < this.groups.length; i++) {

@@ -11,6 +11,7 @@ import { BuiltIns } from "../speechlessGPU/BuiltIns";
 import { ShaderType } from "../speechlessGPU/shader/ShaderType";
 import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
 import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
+import { VertexAttribute } from "../speechlessGPU/shader/resources/VertexAttribute";
 
 
 

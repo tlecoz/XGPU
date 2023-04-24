@@ -7,7 +7,6 @@ import { Sample } from "../Sample";
 
 export class HelloTriangle_buffer extends Sample {
 
-
     protected async start(renderer: GPURenderer): Promise<void> {
 
         const pipeline: RenderPipeline = new RenderPipeline(renderer);
@@ -38,8 +37,5 @@ export class HelloTriangle_buffer extends Sample {
         })
 
         renderer.addPipeline(pipeline);
-
     }
-
-
 }

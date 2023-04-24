@@ -28,7 +28,6 @@ export class ShaderNode {
         if (lines.length > 1) {
             for (let i = 0; i < lines.length; i++) {
                 line = lines[i];
-                console.log(line)
                 for (let j = 0; j < line.length; j++) {
                     if (line[j] === "\n") continue;
                     if (line[j] !== " ") {

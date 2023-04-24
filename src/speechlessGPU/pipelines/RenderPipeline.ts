@@ -17,6 +17,8 @@ import { BuiltIns } from "../BuiltIns";
 import { IShaderResource } from "../shader/resources/IShaderResource";
 import { UniformBuffer } from "../shader/resources/UniformBuffer";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
+import { ImageTexture } from "../shader/resources/ImageTexture";
+import { TextureSampler } from "../shader/resources/TextureSampler";
 
 
 export class RenderPipeline extends Pipeline {
@@ -283,7 +285,7 @@ export class RenderPipeline extends Pipeline {
             if (!descriptor.bindgroups.default.uniforms) {
                 const uniforms: any = {};
                 uniforms[name] = o;
-                descriptor.bindgroups.default.uniforms = new UniformBuffer(uniforms);
+                descriptor.bindgroups.default.uniforms = new UniformBuffer(uniforms, { useLocalVariable: true });
             } else {
                 (descriptor.bindgroups.default.uniforms as UniformBuffer).add(name, o);
             }
@@ -304,6 +306,52 @@ export class RenderPipeline extends Pipeline {
         return descriptor;
     }
 
+    private parseImageTexture(descriptor: any) {
+
+        const addImageTexture = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+            descriptor.bindgroups.default[name] = o;
+        }
+
+        const checkImageTexture = (name: string, o: any) => {
+            if (o instanceof ImageTexture) {
+                addImageTexture(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkImageTexture(z, o);
+        }
+
+        return descriptor;
+    }
+
+    private parseTextureSampler(descriptor: any) {
+
+        const addTextureSampler = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+            descriptor.bindgroups.default[name] = o;
+        }
+
+        const checkTextureSampler = (name: string, o: any) => {
+            if (o instanceof TextureSampler) {
+                addTextureSampler(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkTextureSampler(z, o);
+        }
+
+        return descriptor;
+    }
+
 
     private highLevelParse(descriptor: any) {
 
@@ -313,7 +361,9 @@ export class RenderPipeline extends Pipeline {
         descriptor = this.parseDrawConfig(descriptor);
         descriptor = this.parseUniformBuffers(descriptor);
         descriptor = this.parseUniform(descriptor);
-        console.log("descriptor = ", descriptor)
+        descriptor = this.parseImageTexture(descriptor);
+        descriptor = this.parseTextureSampler(descriptor);
+        //console.log("descriptor = ", descriptor)
         return descriptor;
     }
 
@@ -324,7 +374,8 @@ export class RenderPipeline extends Pipeline {
         topology?: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip",
         frontFace?: "ccw" | "cw",
         stripIndexFormat?: "uint16" | "uint32"
-
+        antiAliasing?: boolean,
+        depthTest?: boolean,
         clearColor?: { r: number, g: number, b: number, a: number },
         blendMode?: BlendMode,
         bindgroups?: any,
@@ -383,7 +434,8 @@ export class RenderPipeline extends Pipeline {
 
         if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
 
-
+        if (descriptor.antiAliasing) this.setupMultiSampleView();
+        if (descriptor.depthTest) this.setupDepthStencilView();
 
         if (descriptor.bindgroups) {
             let group: Bindgroup;
@@ -391,7 +443,7 @@ export class RenderPipeline extends Pipeline {
             let k = 0;
             for (let z in descriptor.bindgroups) {
                 group = new Bindgroup(z);
-                console.log("=> ", z, descriptor.bindgroups[z])
+                //console.log("=> ", z, descriptor.bindgroups[z])
                 resourcesGroups[k++] = group.initFromObject(descriptor.bindgroups[z]);
                 this.bindGroups.add(group);
             }
@@ -488,11 +540,25 @@ export class RenderPipeline extends Pipeline {
     }
 
     public setupDraw(o: { instanceCount?: number, vertexCount?: number, firstVertexId?: number, firstInstanceId?: number }) {
+
         if (o.instanceCount !== undefined) this.drawConfig.instanceCount = o.instanceCount;
         if (o.vertexCount !== undefined) this.drawConfig.vertexCount = o.vertexCount;
         if (o.firstVertexId !== undefined) this.drawConfig.firstVertexId = o.firstVertexId;
         if (o.firstInstanceId !== undefined) this.drawConfig.firstInstanceId = o.firstInstanceId;
     }
+
+    public get vertexCount(): number { return this.drawConfig.vertexCount }
+    public set vertexCount(n: number) { this.drawConfig.vertexCount = n; }
+
+    public get instanceCount(): number { return this.drawConfig.instanceCount }
+    public set instanceCount(n: number) { this.drawConfig.instanceCount = n; }
+
+    public get firstVertexId(): number { return this.drawConfig.firstVertexId }
+    public set firstVertexId(n: number) { this.drawConfig.firstVertexId = n; }
+
+    public get firstInstanceId(): number { return this.drawConfig.firstInstanceId }
+    public set firstInstanceId(n: number) { this.drawConfig.firstInstanceId = n; }
+
     //------------------------------------------------
 
     public setupMultiSampleView(descriptor?: {
@@ -693,11 +759,24 @@ export class RenderPipeline extends Pipeline {
 
         if (!this.gpuPipeline) this.buildGpuPipeline();
 
-        if (this.drawConfig.vertexCount === 0) {
-            if (this.vertexBuffers.length) {
-                this.drawConfig.vertexCount = this.vertexBuffers[0].nbVertex;
+        if (this.drawConfig.vertexCount <= 0) {
 
+
+            if (this.bindGroups.resources.types) {
+
+                const vertexBuffers = this.bindGroups.resources.types.vertexBuffers;
+                if (vertexBuffers) {
+                    for (let i = 0; i < vertexBuffers.length; i++) {
+
+                        if (vertexBuffers[i].resource.descriptor.stepMode === "vertex") {
+                            this.drawConfig.vertexCount = vertexBuffers[i].resource.nbVertex; //this.vertexBuffers[0].nbVertex;
+                            break;
+                        }
+                    }
+                }
             }
+
+
         }
         //console.log("drawConfig = ", this.drawConfig)
 
@@ -766,7 +845,8 @@ export class RenderPipeline extends Pipeline {
 
                 const buffers = resourceByType.vertexBuffers;
 
-                if (this.drawConfig.vertexCount === -1) {
+                if (this.drawConfig.vertexCount <= 0) {
+
                     if (!buffers) {
                         throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
                     }
@@ -805,7 +885,7 @@ export class RenderPipeline extends Pipeline {
         } else {
 
             if (this.drawConfig.vertexCount !== -1) {
-
+                //console.log("drawConfig = ", this.drawConfig)
                 renderPass.draw(this.drawConfig.vertexCount, this.drawConfig.instanceCount, this.drawConfig.firstVertexId, this.drawConfig.firstInstanceId)
             }
 
