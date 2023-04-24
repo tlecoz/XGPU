@@ -1,11 +1,11 @@
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { HeadlessGPURenderer } from "../speechlessGPU/HeadlessGPURenderer";
-import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
-import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
-import { VideoTexture } from "../speechlessGPU/shader/resources/VideoTexture";
-import { ShaderType } from "../speechlessGPU/shader/ShaderType";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { HeadlessGPURenderer } from "../xGPU/HeadlessGPURenderer";
+import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
+import { ImageTexture } from "../xGPU/shader/resources/ImageTexture";
+import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
+import { VideoTexture } from "../xGPU/shader/resources/VideoTexture";
+import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 
 

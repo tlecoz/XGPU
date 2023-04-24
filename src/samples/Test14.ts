@@ -1,7 +1,7 @@
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { HeadlessGPURenderer } from "../speechlessGPU/HeadlessGPURenderer";
-import { CubeMapTexture } from "../speechlessGPU/shader/resources/CubeMapTexture";
-import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { HeadlessGPURenderer } from "../xGPU/HeadlessGPURenderer";
+import { CubeMapTexture } from "../xGPU/shader/resources/CubeMapTexture";
+import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
 import { Sample } from "./Sample"
 import { RotatingCube } from "./Test13";
 

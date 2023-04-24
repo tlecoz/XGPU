@@ -1,20 +1,20 @@
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { HeadlessGPURenderer } from "../speechlessGPU/HeadlessGPURenderer";
-import { PipelinePlugin } from "../speechlessGPU/pipelines/plugins/PipelinePlugin";
-import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { IndexBuffer } from "../speechlessGPU/pipelines/resources/IndexBuffer";
-import { Matrix4x4, Vec3 } from "../speechlessGPU/shader/PrimitiveType";
-import { Camera } from "../speechlessGPU/shader/resources/uniforms/Camera";
-import { VertexAttribute } from "../speechlessGPU/shader/resources/VertexAttribute";
-import { ShaderType } from "../speechlessGPU/shader/ShaderType";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { HeadlessGPURenderer } from "../xGPU/HeadlessGPURenderer";
+import { PipelinePlugin } from "../xGPU/pipelines/plugins/PipelinePlugin";
+import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
+import { IndexBuffer } from "../xGPU/pipelines/resources/IndexBuffer";
+import { Matrix4x4, Vec3 } from "../xGPU/shader/PrimitiveType";
+import { Camera } from "../xGPU/shader/resources/uniforms/Camera";
+import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
+import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 import { Light, ShadowPipeline } from "./Test18";
 
 import { dragonMesh } from "../../assets/DragonMesh"
-import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
-import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
+import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
+import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
 
 
 export class LightPlugin extends PipelinePlugin {

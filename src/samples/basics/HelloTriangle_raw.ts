@@ -1,9 +1,9 @@
-import { BuiltIns } from "../../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../../speechlessGPU/GPURenderer";
-import { RenderPipeline } from "../../speechlessGPU/pipelines/RenderPipeline";
-import { Bindgroup } from "../../speechlessGPU/shader/Bindgroup";
-import { VertexAttribute } from "../../speechlessGPU/shader/resources/VertexAttribute";
-import { VertexBuffer } from "../../speechlessGPU/shader/resources/VertexBuffer";
+import { BuiltIns } from "../../xGPU/BuiltIns";
+import { GPURenderer } from "../../xGPU/GPURenderer";
+import { RenderPipeline } from "../../xGPU/pipelines/RenderPipeline";
+import { Bindgroup } from "../../xGPU/shader/Bindgroup";
+import { VertexAttribute } from "../../xGPU/shader/resources/VertexAttribute";
+import { VertexBuffer } from "../../xGPU/shader/resources/VertexBuffer";
 import { Sample } from "../Sample";
 
 export class HelloTriangle_raw extends Sample {

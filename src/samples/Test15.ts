@@ -1,4 +1,4 @@
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
+import { GPURenderer } from "../xGPU/GPURenderer";
 import { Sample } from "./Sample";
 import { RotatingCube } from "./Test13";
 

@@ -1,14 +1,14 @@
-import { BuiltIns } from "../../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../../speechlessGPU/GPURenderer";
-import { HeadlessGPURenderer } from "../../speechlessGPU/HeadlessGPURenderer";
-import { RenderPipeline } from "../../speechlessGPU/pipelines/RenderPipeline";
-import { AlphaBlendMode } from "../../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
-import { IndexBuffer } from "../../speechlessGPU/pipelines/resources/IndexBuffer";
-import { Float, Matrix4x4, Vec2, Vec3 } from "../../speechlessGPU/shader/PrimitiveType";
-import { UniformBuffer } from "../../speechlessGPU/shader/resources/UniformBuffer";
-import { ProjectionMatrix } from "../../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
-import { VertexBuffer } from "../../speechlessGPU/shader/resources/VertexBuffer";
-import { ShaderType } from "../../speechlessGPU/shader/ShaderType";
+import { BuiltIns } from "../../xGPU/BuiltIns";
+import { GPURenderer } from "../../xGPU/GPURenderer";
+import { HeadlessGPURenderer } from "../../xGPU/HeadlessGPURenderer";
+import { RenderPipeline } from "../../xGPU/pipelines/RenderPipeline";
+import { AlphaBlendMode } from "../../xGPU/pipelines/resources/blendmodes/AlphaBlendMode";
+import { IndexBuffer } from "../../xGPU/pipelines/resources/IndexBuffer";
+import { Float, Matrix4x4, Vec2, Vec3 } from "../../xGPU/shader/PrimitiveType";
+import { UniformBuffer } from "../../xGPU/shader/resources/UniformBuffer";
+import { ProjectionMatrix } from "../../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { VertexBuffer } from "../../xGPU/shader/resources/VertexBuffer";
+import { ShaderType } from "../../xGPU/shader/ShaderType";
 import { Graphics } from "./Graphics";
 
 export class GraphicPipeline extends RenderPipeline {

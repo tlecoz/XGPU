@@ -1,12 +1,12 @@
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
-import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { Float } from "../speechlessGPU/shader/PrimitiveType";
-import { ImageTextureIO } from "../speechlessGPU/shader/resources/ImageTextureIO";
-import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
-import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { ShaderType } from "../speechlessGPU/shader/ShaderType";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { ComputePipeline } from "../xGPU/pipelines/ComputePipeline";
+import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
+import { Float } from "../xGPU/shader/PrimitiveType";
+import { ImageTextureIO } from "../xGPU/shader/resources/ImageTextureIO";
+import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
+import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 
 export class Test11 extends Sample {

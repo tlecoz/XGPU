@@ -1,4 +1,4 @@
-import { Vec4 } from "../../../speechlessGPU/shader/PrimitiveType";
+import { Vec4 } from "../../../xGPU/shader/PrimitiveType";
 
 export class MouseVec extends Vec4 {
 

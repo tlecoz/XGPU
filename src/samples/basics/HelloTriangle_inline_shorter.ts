@@ -1,6 +1,6 @@
-import { BuiltIns } from "../../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../../speechlessGPU/GPURenderer";
-import { RenderPipeline } from "../../speechlessGPU/pipelines/RenderPipeline";
+import { BuiltIns } from "../../xGPU/BuiltIns";
+import { GPURenderer } from "../../xGPU/GPURenderer";
+import { RenderPipeline } from "../../xGPU/pipelines/RenderPipeline";
 import { Sample } from "../Sample";
 
 export class HelloTriangle_inline_shorter extends Sample {

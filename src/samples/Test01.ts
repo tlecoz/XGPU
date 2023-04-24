@@ -1,15 +1,15 @@
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
-import { Bindgroup } from "../speechlessGPU/shader/Bindgroup";
-import { Float, Matrix4x4, Matrix4x4Array, Vec3, Vec4, Vec4Array } from "../speechlessGPU/shader/PrimitiveType";
-import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
-import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
-import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { VertexAttribute } from "../speechlessGPU/shader/resources/VertexAttribute";
-import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
-import { VideoTexture } from "../speechlessGPU/shader/resources/VideoTexture";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
+import { AlphaBlendMode } from "../xGPU/pipelines/resources/blendmodes/AlphaBlendMode";
+import { Bindgroup } from "../xGPU/shader/Bindgroup";
+import { Float, Matrix4x4, Matrix4x4Array, Vec3, Vec4, Vec4Array } from "../xGPU/shader/PrimitiveType";
+import { ImageTexture } from "../xGPU/shader/resources/ImageTexture";
+import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
+import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
+import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
+import { VideoTexture } from "../xGPU/shader/resources/VideoTexture";
 import { Sample } from "./Sample";
 
 export class Test01 extends Sample {

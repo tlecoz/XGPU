@@ -1,16 +1,16 @@
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { HeadlessGPURenderer } from "../speechlessGPU/HeadlessGPURenderer";
-import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { Matrix4x4Array, ModelViewMatrix } from "../speechlessGPU/shader/PrimitiveType";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { HeadlessGPURenderer } from "../xGPU/HeadlessGPURenderer";
+import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
+import { Matrix4x4Array, ModelViewMatrix } from "../xGPU/shader/PrimitiveType";
 import { Sample } from "./Sample";
 
 import { cubeVertexArray, cubeVertexSize, cubeUVOffset, cubePositionOffset } from "../../assets/CubeMesh";
-import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
-import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { ShaderType } from "../speechlessGPU/shader/ShaderType";
-import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
+import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
+import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { ProjectionMatrix } from "../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { ShaderType } from "../xGPU/shader/ShaderType";
+import { ImageTexture } from "../xGPU/shader/resources/ImageTexture";
 
 export class InstanceCube extends RenderPipeline {
 

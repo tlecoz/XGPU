@@ -1,4 +1,4 @@
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
+import { GPURenderer } from "../xGPU/GPURenderer";
 import { Sample } from "./Sample";
 import { GraphicPipeline } from "./vectorGraphics/GraphicPipeline";
 import { ShapeTest } from "./vectorGraphics/ShapeTest";

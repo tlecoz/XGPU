@@ -1,9 +1,9 @@
 
-import { BuiltIns } from "../../../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../../../speechlessGPU/GPURenderer";
-import { RenderPipeline } from "../../../speechlessGPU/pipelines/RenderPipeline";
-import { Vec2, Vec4 } from "../../../speechlessGPU/shader/PrimitiveType";
-import { VertexAttribute } from "../../../speechlessGPU/shader/resources/VertexAttribute";
+import { BuiltIns } from "../../../xGPU/BuiltIns";
+import { GPURenderer } from "../../../xGPU/GPURenderer";
+import { RenderPipeline } from "../../../xGPU/pipelines/RenderPipeline";
+import { Vec2, Vec4 } from "../../../xGPU/shader/PrimitiveType";
+import { VertexAttribute } from "../../../xGPU/shader/resources/VertexAttribute";
 import { Sample } from "../../Sample";
 import { MouseVec } from "./MouseVec";
 

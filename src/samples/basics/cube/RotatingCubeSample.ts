@@ -1,14 +1,14 @@
-import { GPURenderer } from "../../../speechlessGPU/GPURenderer";
-import { RenderPipeline } from "../../../speechlessGPU/pipelines/RenderPipeline";
+import { GPURenderer } from "../../../xGPU/GPURenderer";
+import { RenderPipeline } from "../../../xGPU/pipelines/RenderPipeline";
 import { Sample } from "../../Sample";
 
 import { cubeVertexArray, cubeVertexSize, cubeUVOffset, cubePositionOffset } from "../../../samples/meshes/CubeMesh";
-import { VertexAttribute } from "../../../speechlessGPU/shader/resources/VertexAttribute";
-import { ModelViewMatrix } from "../../../speechlessGPU/shader/PrimitiveType";
-import { ProjectionMatrix } from "../../../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
-import { BuiltIns } from "../../../speechlessGPU/BuiltIns";
-import { ShaderType } from "../../../speechlessGPU/shader/ShaderType";
-import { VertexBuffer } from "../../../speechlessGPU/shader/resources/VertexBuffer";
+import { VertexAttribute } from "../../../xGPU/shader/resources/VertexAttribute";
+import { ModelViewMatrix } from "../../../xGPU/shader/PrimitiveType";
+import { ProjectionMatrix } from "../../../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { BuiltIns } from "../../../xGPU/BuiltIns";
+import { ShaderType } from "../../../xGPU/shader/ShaderType";
+import { VertexBuffer } from "../../../xGPU/shader/resources/VertexBuffer";
 
 export class Cube extends RenderPipeline {
 

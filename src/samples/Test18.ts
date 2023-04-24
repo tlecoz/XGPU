@@ -1,18 +1,18 @@
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { HeadlessGPURenderer } from "../speechlessGPU/HeadlessGPURenderer";
-import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { IndexBuffer } from "../speechlessGPU/pipelines/resources/IndexBuffer";
-import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
-import { ShaderType } from "../speechlessGPU/shader/ShaderType";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { HeadlessGPURenderer } from "../xGPU/HeadlessGPURenderer";
+import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
+import { IndexBuffer } from "../xGPU/pipelines/resources/IndexBuffer";
+import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
+import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 import { dragonMesh } from "../../assets/DragonMesh"
-import { Float, Matrix4x4, ModelViewMatrix, Vec3, Vec4 } from "../speechlessGPU/shader/PrimitiveType";
+import { Float, Matrix4x4, ModelViewMatrix, Vec3, Vec4 } from "../xGPU/shader/PrimitiveType";
 import { mat4, vec3 } from "gl-matrix";
-import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
-import { Camera } from "../speechlessGPU/shader/resources/uniforms/Camera";
-import { VertexAttribute } from "../speechlessGPU/shader/resources/VertexAttribute";
+import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
+import { Camera } from "../xGPU/shader/resources/uniforms/Camera";
+import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 
 
 

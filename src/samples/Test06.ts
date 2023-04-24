@@ -1,11 +1,11 @@
 
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { XGPU } from "../speechlessGPU/XGPU";
-import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
-import { Float } from "../speechlessGPU/shader/PrimitiveType";
-import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
-import { VertexBufferIO } from "../speechlessGPU/shader/resources/VertexBufferIO";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { XGPU } from "../xGPU/XGPU";
+import { ComputePipeline } from "../xGPU/pipelines/ComputePipeline";
+import { Float } from "../xGPU/shader/PrimitiveType";
+import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
+import { VertexBufferIO } from "../xGPU/shader/resources/VertexBufferIO";
 
 
 

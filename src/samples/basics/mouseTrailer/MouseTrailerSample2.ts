@@ -1,5 +1,5 @@
-import { GPURenderer } from "../../../speechlessGPU/GPURenderer";
-import { ShaderType } from "../../../speechlessGPU/shader/ShaderType";
+import { GPURenderer } from "../../../xGPU/GPURenderer";
+import { ShaderType } from "../../../xGPU/shader/ShaderType";
 import { Sample } from "../../Sample";
 import { MouseTrailer } from "./MouseTrailerSample";
 

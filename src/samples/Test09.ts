@@ -1,18 +1,18 @@
-import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { XGPU } from "../speechlessGPU/XGPU";
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
-import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
-import { MixedPipeline } from "../speechlessGPU/pipelines/MixedPipeline";
-import { RenderPipeline } from "../speechlessGPU/pipelines/RenderPipeline";
-import { AlphaBlendMode } from "../speechlessGPU/pipelines/resources/blendmodes/AlphaBlendMode";
-import { Matrix4x4, Vec2 } from "../speechlessGPU/shader/PrimitiveType";
-import { ImageTexture } from "../speechlessGPU/shader/resources/ImageTexture";
-import { TextureSampler } from "../speechlessGPU/shader/resources/TextureSampler";
-import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
-import { ProjectionMatrix } from "../speechlessGPU/shader/resources/uniforms/ProjectionMatrix";
-import { VertexBuffer } from "../speechlessGPU/shader/resources/VertexBuffer";
-import { VertexBufferIO } from "../speechlessGPU/shader/resources/VertexBufferIO";
-import { ShaderType } from "../speechlessGPU/shader/ShaderType";
+import { BuiltIns } from "../xGPU/BuiltIns";
+import { XGPU } from "../xGPU/XGPU";
+import { GPURenderer } from "../xGPU/GPURenderer";
+import { ComputePipeline } from "../xGPU/pipelines/ComputePipeline";
+import { MixedPipeline } from "../xGPU/pipelines/MixedPipeline";
+import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
+import { AlphaBlendMode } from "../xGPU/pipelines/resources/blendmodes/AlphaBlendMode";
+import { Matrix4x4, Vec2 } from "../xGPU/shader/PrimitiveType";
+import { ImageTexture } from "../xGPU/shader/resources/ImageTexture";
+import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
+import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { ProjectionMatrix } from "../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
+import { VertexBufferIO } from "../xGPU/shader/resources/VertexBufferIO";
+import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 
 export class Test09 extends Sample {

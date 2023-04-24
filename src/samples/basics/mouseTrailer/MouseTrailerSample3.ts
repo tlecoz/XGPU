@@ -1,7 +1,7 @@
-import { GPURenderer } from "../../../speechlessGPU/GPURenderer";
-import { Float } from "../../../speechlessGPU/shader/PrimitiveType";
-import { ShaderType } from "../../../speechlessGPU/shader/ShaderType";
-import { UniformBuffer } from "../../../speechlessGPU/shader/resources/UniformBuffer";
+import { GPURenderer } from "../../../xGPU/GPURenderer";
+import { Float } from "../../../xGPU/shader/PrimitiveType";
+import { ShaderType } from "../../../xGPU/shader/ShaderType";
+import { UniformBuffer } from "../../../xGPU/shader/resources/UniformBuffer";
 import { Sample } from "../../Sample";
 import { MouseTrailer } from "./MouseTrailerSample";
 import { MouseTrailerDeclinaison } from "./MouseTrailerSample2";

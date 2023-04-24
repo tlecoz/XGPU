@@ -1,4 +1,4 @@
-import { GPURenderer } from "../speechlessGPU/GPURenderer";
+import { GPURenderer } from "../xGPU/GPURenderer";
 
 export class Sample {
 
