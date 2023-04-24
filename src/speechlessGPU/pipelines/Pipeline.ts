@@ -1,4 +1,4 @@
-import { SLGPU } from "../SLGPU";
+import { XGPU } from "../XGPU";
 import { Bindgroup } from "../shader/Bindgroup";
 import { Bindgroups } from "../shader/Bindgroups";
 import { FragmentShader } from "../shader/FragmentShader";
@@ -163,8 +163,8 @@ export class Pipeline {
             }
 
             if (k > 0) {
-                group.layout = this.gpuBindGroupLayouts[n] = SLGPU.createBindgroupLayout(layout)
-                this.gpuBindgroups[n] = SLGPU.createBindgroup(group)
+                group.layout = this.gpuBindGroupLayouts[n] = XGPU.createBindgroupLayout(layout)
+                this.gpuBindgroups[n] = XGPU.createBindgroup(group)
                 n++;
 
                 //console.log("-----")
@@ -176,7 +176,7 @@ export class Pipeline {
         }
         //console.log("this.gpuBindGroupLayouts", this.gpuBindGroupLayouts)
 
-        this.gpuPipelineLayout = SLGPU.createPipelineLayout({ bindGroupLayouts: this.gpuBindGroupLayouts })
+        this.gpuPipelineLayout = XGPU.createPipelineLayout({ bindGroupLayouts: this.gpuBindGroupLayouts })
     }
 
     protected initPipelineResources(pipeline: Pipeline) {

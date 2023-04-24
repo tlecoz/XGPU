@@ -1,4 +1,4 @@
-import { SLGPU } from "./SLGPU";
+import { XGPU } from "./XGPU";
 import { RenderPipeline } from "./pipelines/RenderPipeline";
 import { Texture } from "./pipelines/resources/textures/Texture";
 
@@ -16,7 +16,7 @@ export class HeadlessGPURenderer {
         this.dimension = { width: w, height: h, dimensionChanged: true };
         return new Promise((onResolve: (val: any) => void) => {
 
-            SLGPU.init().then(() => {
+            XGPU.init().then(() => {
 
 
                 if (!usage) usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC;
@@ -60,9 +60,9 @@ export class HeadlessGPURenderer {
     }
 
     public update() {
-        if (!SLGPU.ready || this.renderPipelines.length === 0) return;
+        if (!XGPU.ready || this.renderPipelines.length === 0) return;
 
-        const commandEncoder = SLGPU.device.createCommandEncoder();
+        const commandEncoder = XGPU.device.createCommandEncoder();
 
         let pipeline: RenderPipeline, renderPass;
         for (let i = 0; i < this.renderPipelines.length; i++) {
@@ -73,7 +73,7 @@ export class HeadlessGPURenderer {
             pipeline.end(commandEncoder, renderPass);
         }
 
-        SLGPU.device.queue.submit([commandEncoder.finish()]);
+        XGPU.device.queue.submit([commandEncoder.finish()]);
 
         this.dimension.dimensionChanged = false;
     }

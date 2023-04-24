@@ -1,6 +1,6 @@
 
 import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { SLGPU } from "../speechlessGPU/SLGPU";
+import { XGPU } from "../speechlessGPU/XGPU";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
 import { Float } from "../speechlessGPU/shader/PrimitiveType";
 import { UniformBuffer } from "../speechlessGPU/shader/resources/UniformBuffer";
@@ -15,7 +15,7 @@ export class Test06 {
     constructor() {
 
 
-        SLGPU.init().then(() => {
+        XGPU.init().then(() => {
 
 
 

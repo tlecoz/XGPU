@@ -1,4 +1,4 @@
-import { SLGPU } from "../SLGPU";
+import { XGPU } from "../XGPU";
 import { GPURenderer } from "../GPURenderer";
 import { HeadlessGPURenderer } from "../HeadlessGPURenderer";
 import { Bindgroup } from "../shader/Bindgroup";
@@ -638,7 +638,7 @@ export class RenderPipeline extends Pipeline {
     public blendMode: BlendMode;
     private getFragmentShaderColorOptions() {
         const o: any = {
-            format: SLGPU.getPreferredCanvasFormat(),
+            format: XGPU.getPreferredCanvasFormat(),
 
         }
         if (this.blendMode) o.blend = this.blendMode;
@@ -691,7 +691,7 @@ export class RenderPipeline extends Pipeline {
 
 
         this.description.vertex = {
-            module: SLGPU.device.createShaderModule({
+            module: XGPU.device.createShaderModule({
                 code: vertexShader.code
             }),
             entryPoint: "main",
@@ -701,7 +701,7 @@ export class RenderPipeline extends Pipeline {
         if (this.fragmentShader) {
 
             this.description.fragment = {
-                module: SLGPU.device.createShaderModule({
+                module: XGPU.device.createShaderModule({
                     code: fragmentShader.code
                 }),
                 entryPoint: "main",
@@ -719,7 +719,7 @@ export class RenderPipeline extends Pipeline {
         //this.description.layout = this.gpuPipelineLayout;
 
         //console.log("buildGPUPipeline description = ", this.description)
-        this.gpuPipeline = SLGPU.createRenderPipeline(this.description);
+        this.gpuPipeline = XGPU.createRenderPipeline(this.description);
         //console.log("gpuPipeline = ", this.gpuPipeline)
         return this.gpuPipeline;
 

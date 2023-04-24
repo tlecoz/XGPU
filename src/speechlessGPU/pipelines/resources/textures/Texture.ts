@@ -1,4 +1,4 @@
-import { SLGPU } from "../../../SLGPU";
+import { XGPU } from "../../../XGPU";
 
 export type TextureDescriptor = {
     size: GPUExtent3D,
@@ -38,7 +38,7 @@ export class Texture {
     public create(): void {
         if (this.gpuResource) this.gpuResource.destroy();
         //console.log("createTexture ", this.descriptor)
-        this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
+        this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this.createView();
     }
 

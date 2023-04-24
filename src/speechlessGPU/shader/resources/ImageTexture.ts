@@ -1,5 +1,5 @@
 
-import { SLGPU } from "../../SLGPU";
+import { XGPU } from "../../XGPU";
 import { IShaderResource } from "./IShaderResource";
 
 export type ImageTextureDescriptor = {
@@ -134,7 +134,7 @@ export class ImageTexture implements IShaderResource {
 
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
-            SLGPU.device.queue.copyExternalImageToTexture(
+            XGPU.device.queue.copyExternalImageToTexture(
                 { source: this.descriptor.source as any, flipY: true },
                 { texture: this.gpuResource },
                 this.descriptor.size
@@ -148,7 +148,7 @@ export class ImageTexture implements IShaderResource {
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
         //console.warn("ImageTexture.createGPUResource descriptor = ", this.descriptor)
-        this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
+        this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
 
     }

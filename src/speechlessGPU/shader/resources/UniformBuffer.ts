@@ -1,4 +1,4 @@
-import { SLGPU } from "../../SLGPU";
+import { XGPU } from "../../XGPU";
 import { GPUType } from "../../GPUType";
 import { PrimitiveType } from "../PrimitiveType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
@@ -168,7 +168,7 @@ export class UniformBuffer implements IShaderResource {
             if (uniform.mustBeTransfered) {
 
                 uniform.mustBeTransfered = false;
-                SLGPU.device.queue.writeBuffer(
+                XGPU.device.queue.writeBuffer(
                     this.gpuResource,
                     uniform.startId,
                     uniform.buffer,
@@ -231,7 +231,7 @@ export class UniformBuffer implements IShaderResource {
                 this.setupUniformAlignment();
             }
 
-            this.gpuResource = SLGPU.device.createBuffer({
+            this.gpuResource = XGPU.device.createBuffer({
                 size: this.byteSize,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             })

@@ -1,4 +1,4 @@
-import { SLGPU } from "../../SLGPU";
+import { XGPU } from "../../XGPU";
 
 export type IndexBufferDescriptor = {
     nbPoint?: number,
@@ -46,7 +46,7 @@ export class IndexBuffer {
     public createGpuResource(): void {
         //console.warn("create index resource ", this.getBufferSize())
         if (this.gpuResource) this.gpuResource.destroy();
-        this.gpuResource = SLGPU.device.createBuffer({
+        this.gpuResource = XGPU.device.createBuffer({
             size: this.getBufferSize(),
             usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
             mappedAtCreation: false
@@ -87,7 +87,7 @@ export class IndexBuffer {
     public update(): void {
         if (this.mustUpdateData) {
             this.mustUpdateData = false;
-            SLGPU.device.queue.writeBuffer(this.gpuResource, 0, this._datas.buffer)
+            XGPU.device.queue.writeBuffer(this.gpuResource, 0, this._datas.buffer)
         }
     }
 

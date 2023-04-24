@@ -1,4 +1,4 @@
-import { SLGPU } from "../../SLGPU";
+import { XGPU } from "../../XGPU";
 import { IShaderResource } from "./IShaderResource";
 
 
@@ -120,7 +120,7 @@ export class VideoTexture implements IShaderResource {
         if (!this.gpuResource) throw new Error("gpuResource cannot be null. You must provide a HTMLVideoElement")
         return {
             binding: bindingId,
-            resource: SLGPU.device.importExternalTexture({
+            resource: XGPU.device.importExternalTexture({
                 source: this.videoFrame as any
             })
         }

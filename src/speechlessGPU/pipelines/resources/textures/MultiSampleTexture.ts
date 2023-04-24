@@ -1,4 +1,4 @@
-import { SLGPU } from "../../../SLGPU";
+import { XGPU } from "../../../XGPU";
 import { Texture, TextureDescriptor } from "./Texture";
 
 export type MultiSampleTextureDescriptor = {
@@ -26,7 +26,7 @@ export class MultiSampleTexture extends Texture {
         resolveTarget?: GPUTextureView
     }) {
 
-        if (undefined === descriptor.format) descriptor.format = SLGPU.getPreferredCanvasFormat();
+        if (undefined === descriptor.format) descriptor.format = XGPU.getPreferredCanvasFormat();
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.sampleCount) descriptor.sampleCount = 4;
         if (undefined === descriptor.alphaToCoverageEnabled) descriptor.alphaToCoverageEnabled = false;

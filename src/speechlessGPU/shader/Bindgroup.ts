@@ -1,4 +1,4 @@
-import { SLGPU } from "../SLGPU";
+import { XGPU } from "../XGPU";
 
 import { Bindgroups } from "./Bindgroups";
 import { ImageTexture } from "./resources/ImageTexture";
@@ -137,7 +137,7 @@ export class Bindgroup {
         }
 
         //console.log("BINDGROUP LAYOUT ENTRIES ", layout)
-        this._layout = SLGPU.device.createBindGroupLayout(layout);
+        this._layout = XGPU.device.createBindGroupLayout(layout);
     }
 
     protected build(): void {
@@ -154,7 +154,7 @@ export class Bindgroup {
             entries.push(resource.createBindGroupEntry(bindingId++));
         }
 
-        this._group = SLGPU.device.createBindGroup({ layout: this._layout, entries })
+        this._group = XGPU.device.createBindGroup({ layout: this._layout, entries })
     }
 
 

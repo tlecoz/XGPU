@@ -1,4 +1,4 @@
-import { SLGPU } from "../SLGPU";
+import { XGPU } from "../XGPU";
 import { Bindgroup } from "../shader/Bindgroup";
 import { ComputeShader } from "../shader/ComputeShader";
 import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
@@ -200,14 +200,14 @@ export class ComputePipeline extends Pipeline {
         const { code } = this.computeShader.build(this, inputStruct)
 
         this.description.compute = {
-            module: SLGPU.device.createShaderModule({ code: code }),
+            module: XGPU.device.createShaderModule({ code: code }),
             entryPoint: "main"
         }
         this.description.layout = this.gpuPipelineLayout;
 
         //console.log("description = ", this.description)
 
-        this.gpuComputePipeline = SLGPU.createComputePipeline(this.description);
+        this.gpuComputePipeline = XGPU.createComputePipeline(this.description);
 
 
         return this.gpuComputePipeline;
@@ -224,7 +224,7 @@ export class ComputePipeline extends Pipeline {
     public async nextFrame() {
 
 
-        const commandEncoder = SLGPU.device.createCommandEncoder();
+        const commandEncoder = XGPU.device.createCommandEncoder();
 
         this.update();
 
@@ -290,14 +290,14 @@ export class ComputePipeline extends Pipeline {
 
                 if (!this.canCallMapAsync) return
 
-                if (!this.stagingBuffer) this.stagingBuffer = SLGPU.createStagingBuffer(this.bufferSize);
-                const copyEncoder = SLGPU.device.createCommandEncoder();
+                if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
+                const copyEncoder = XGPU.device.createCommandEncoder();
                 const stage = this.stagingBuffer;
 
 
                 copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
 
-                SLGPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
+                XGPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
 
                 this.canCallMapAsync = false;
                 await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
@@ -310,14 +310,14 @@ export class ComputePipeline extends Pipeline {
                 this.onReceiveData(new Float32Array(data));
 
             } else {
-                SLGPU.device.queue.submit([commandEncoder.finish()]);
+                XGPU.device.queue.submit([commandEncoder.finish()]);
             }
 
         } else {
             //const texture = this.textureIOs[0].texture;
 
 
-            SLGPU.device.queue.submit([commandEncoder.finish()]);
+            XGPU.device.queue.submit([commandEncoder.finish()]);
             // getting this value change the reference of the GPUBuffer and create the "ping pong"
         }
 

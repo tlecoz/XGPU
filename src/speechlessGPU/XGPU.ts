@@ -1,4 +1,4 @@
-export class SLGPU {
+export class XGPU {
 
     private static _ready: boolean = false;
     public static get ready(): boolean { return this._ready; }
@@ -56,7 +56,7 @@ export class SLGPU {
     }
 
     public static get device(): GPUDevice {
-        if (!this.gpuDevice) throw new Error("you must use SLGPU.init() to get the reference of the gpuDevice")
+        if (!this.gpuDevice) throw new Error("you must use XGPU.init() to get the reference of the gpuDevice")
         return this.gpuDevice;
     }
 

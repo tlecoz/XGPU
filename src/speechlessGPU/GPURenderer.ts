@@ -1,4 +1,4 @@
-import { SLGPU } from "./SLGPU";
+import { XGPU } from "./XGPU";
 import { RenderPipeline } from "./pipelines/RenderPipeline";
 
 export class GPURenderer {
@@ -19,15 +19,15 @@ export class GPURenderer {
         this.canvasW = canvas.width;
         this.canvasH = canvas.height;
         return new Promise((resolve: (e: HTMLCanvasElement) => void, error: (e: unknown) => void) => {
-            SLGPU.init().then(() => {
+            XGPU.init().then(() => {
 
                 this.domElement = canvas;
                 this.ctx = this.domElement.getContext("webgpu");
 
                 if (!this.ctx.configure) error(null);
                 this.ctx.configure({
-                    device: SLGPU.device,
-                    format: SLGPU.getPreferredCanvasFormat(),
+                    device: XGPU.device,
+                    format: XGPU.getPreferredCanvasFormat(),
                     alphaMode: alphaMode,
                     colorSpace: "srgb",
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
@@ -62,8 +62,8 @@ export class GPURenderer {
 
     public configure(textureUsage: GPUTextureUsageFlags = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC, alphaMode: "opaque" | "premultiplied" = "opaque") {
         this.ctx.configure({
-            device: SLGPU.device,
-            format: SLGPU.getPreferredCanvasFormat(),
+            device: XGPU.device,
+            format: XGPU.getPreferredCanvasFormat(),
             alphaMode: alphaMode,
             colorSpace: "srgb",
             usage: textureUsage
@@ -83,14 +83,14 @@ export class GPURenderer {
     public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
 
     public update() {
-        if (!SLGPU.ready || this.renderPipelines.length === 0) return;
+        if (!XGPU.ready || this.renderPipelines.length === 0) return;
         if (this.canvas.width != this.canvasW || this.canvas.height != this.canvasH) {
             this.canvasW = this.canvas.width;
             this.canvasH = this.canvas.height;
             (this.canvas as any).dimensionChanged = true;
         }
 
-        const commandEncoder = SLGPU.device.createCommandEncoder();
+        const commandEncoder = XGPU.device.createCommandEncoder();
         const textureView = this.ctx.getCurrentTexture().createView();
 
         let pipeline: RenderPipeline, renderPass;
@@ -115,7 +115,7 @@ export class GPURenderer {
 
 
 
-        SLGPU.device.queue.submit([commandEncoder.finish()]);
+        XGPU.device.queue.submit([commandEncoder.finish()]);
 
         (this.canvas as any).dimensionChanged = false;
     }

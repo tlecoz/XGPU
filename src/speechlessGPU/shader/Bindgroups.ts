@@ -1,5 +1,5 @@
 import { DepthStencilTexture } from "../pipelines/resources/textures/DepthStencilTexture";
-import { SLGPU } from "../SLGPU";
+import { XGPU } from "../XGPU";
 import { Bindgroup } from "./Bindgroup";
 import { CubeMapTexture } from "./resources/CubeMapTexture";
 import { ImageTexture } from "./resources/ImageTexture";
@@ -45,7 +45,7 @@ export class Bindgroups {
         if (autoLayout) description.layout = "auto";
         else {
             //console.log("pipelineLayout = ", layouts)
-            description.layout = SLGPU.createPipelineLayout({ bindGroupLayouts: layouts });
+            description.layout = XGPU.createPipelineLayout({ bindGroupLayouts: layouts });
         }
 
 

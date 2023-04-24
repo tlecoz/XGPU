@@ -1,4 +1,4 @@
-import { SLGPU } from "../../SLGPU";
+import { XGPU } from "../../XGPU";
 import { IShaderResource } from "./IShaderResource";
 
 export type TextureSamplerDescriptor = {
@@ -110,7 +110,7 @@ export class TextureSampler implements IShaderResource {
     public createGpuResource(): void {
         if (!this.gpuResource) {
             //console.log("create sampler : ", this.descriptor)
-            this.gpuResource = SLGPU.device.createSampler(this.descriptor);
+            this.gpuResource = XGPU.device.createSampler(this.descriptor);
         }
     }
     public destroyGpuResource() {

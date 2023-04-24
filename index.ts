@@ -1,6 +1,6 @@
 
 
-export * from "./src/speechlessGPU/SLGPU"
+export * from "./src/speechlessGPU/XGPU"
 export * from "./src/speechlessGPU/GPURenderer"
 export * from "./src/speechlessGPU/HeadlessGPURenderer"
 export * from "./src/speechlessGPU/GPUType"

@@ -1,5 +1,5 @@
 import { BuiltIns } from "../speechlessGPU/BuiltIns";
-import { SLGPU } from "../speechlessGPU/SLGPU";
+import { XGPU } from "../speechlessGPU/XGPU";
 import { GPURenderer } from "../speechlessGPU/GPURenderer";
 import { ComputePipeline } from "../speechlessGPU/pipelines/ComputePipeline";
 import { MixedPipeline } from "../speechlessGPU/pipelines/MixedPipeline";
@@ -31,7 +31,7 @@ export class Test09 extends Sample {
 
         const mediaW = bmp.width;
         const mediaH = bmp.height;
-        console.log("format = ", SLGPU.getPreferredCanvasFormat())
+        console.log("format = ", XGPU.getPreferredCanvasFormat())
         console.log("media = ", mediaW, mediaH)
 
         const nbParticle = renderer.canvas.width * renderer.canvas.height;

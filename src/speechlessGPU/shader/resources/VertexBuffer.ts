@@ -1,4 +1,4 @@
-import { SLGPU } from "../../SLGPU";
+import { XGPU } from "../../XGPU";
 import { GPUType } from "../../GPUType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
@@ -508,7 +508,7 @@ export class VertexBuffer implements IShaderResource {
 
 
         this._bufferSize = this.datas.byteLength;
-        this.gpuResource = SLGPU.device.createBuffer({
+        this.gpuResource = XGPU.device.createBuffer({
             size: this.datas.byteLength,
             usage: this.descriptor.usage,
             mappedAtCreation: false,
@@ -537,7 +537,7 @@ export class VertexBuffer implements IShaderResource {
 
 
 
-        SLGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
+        XGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
 
     }
 

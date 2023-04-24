@@ -1,4 +1,4 @@
-import { SLGPU } from "../../SLGPU";
+import { XGPU } from "../../XGPU";
 import { ImageTexture } from "./ImageTexture";
 import { IShaderResource } from "./IShaderResource";
 
@@ -91,7 +91,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
         console.log("cubemap createtexture ", this.descriptor)
-        this.gpuResource = SLGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
+        this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this._view = this.gpuResource.createView({ dimension: 'cube' });
     }
 
@@ -107,7 +107,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
                 bmp = this._sides[i];
                 console.log("upload texture ", bmp)
                 if (bmp) {
-                    SLGPU.device.queue.copyExternalImageToTexture(
+                    XGPU.device.queue.copyExternalImageToTexture(
                         { source: bmp },
                         { texture: this.gpuResource, origin: [0, 0, i] },
                         [bmp.width, bmp.height]
