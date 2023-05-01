@@ -33,8 +33,6 @@ export class MultiSampleTexture extends Texture {
         if (undefined === descriptor.mask) descriptor.mask = 0xFFFFFFFF;
         if (undefined === descriptor.resolveTarget) descriptor.resolveTarget = null;
 
-        console.log(descriptor)
-
         super(descriptor as TextureDescriptor);
 
         this._description = {

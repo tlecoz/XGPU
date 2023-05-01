@@ -9,7 +9,7 @@ import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
 import { BuiltIns } from "../xGPU/BuiltIns";
 import { ShaderType } from "../xGPU/shader/ShaderType";
-import { ProjectionMatrix } from "../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { ProjectionMatrix } from "./uniforms/ProjectionMatrix";
 import { AlphaBlendMode } from "../xGPU/pipelines/resources/blendmodes/AlphaBlendMode";
 import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 

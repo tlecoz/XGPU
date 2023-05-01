@@ -30,6 +30,8 @@ export class RenderPassTexture extends ImageTexture {
         if (!descriptor.viewFormats) descriptor.viewFormats = [];
 
         super(descriptor)
+
+        this.createGpuResource();
     }
 
     public get width(): number { return this.descriptor.size[0] }

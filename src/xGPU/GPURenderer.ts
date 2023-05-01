@@ -18,10 +18,12 @@ export class GPURenderer {
     public init(canvas: HTMLCanvasElement, alphaMode: "opaque" | "premultiplied" = "opaque"): Promise<HTMLCanvasElement> {
         this.canvasW = canvas.width;
         this.canvasH = canvas.height;
+        this.domElement = canvas;
+
         return new Promise((resolve: (e: HTMLCanvasElement) => void, error: (e: unknown) => void) => {
             XGPU.init().then(() => {
 
-                this.domElement = canvas;
+
                 this.ctx = this.domElement.getContext("webgpu");
 
                 if (!this.ctx.configure) error(null);
@@ -30,7 +32,7 @@ export class GPURenderer {
                     format: XGPU.getPreferredCanvasFormat(),
                     alphaMode: alphaMode,
                     colorSpace: "srgb",
-                    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+                    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING,
                 })
                 resolve(canvas);
             });
@@ -60,7 +62,7 @@ export class GPURenderer {
     public get height(): number { return this.canvas.height }
 
 
-    public configure(textureUsage: GPUTextureUsageFlags = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC, alphaMode: "opaque" | "premultiplied" = "opaque") {
+    public configure(textureUsage: GPUTextureUsageFlags = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING, alphaMode: "opaque" | "premultiplied" = "opaque") {
         this.ctx.configure({
             device: XGPU.device,
             format: XGPU.getPreferredCanvasFormat(),
@@ -80,7 +82,19 @@ export class GPURenderer {
         if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment++;
     }
 
+    public destroy(): void {
+        for (let i = 0; i < this.renderPipelines.length; i++) {
+            this.renderPipelines[i].destroy();
+        }
+        this.renderPipelines = [];
+        for (let z in this) {
+            this[z] = null;
+        }
+    }
+
     public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
+
+    public get nbPipeline(): number { return this.renderPipelines.length }
 
     public update() {
         if (!XGPU.ready || this.renderPipelines.length === 0) return;
@@ -88,6 +102,8 @@ export class GPURenderer {
             this.canvasW = this.canvas.width;
             this.canvasH = this.canvas.height;
             (this.canvas as any).dimensionChanged = true;
+
+            console.log("canvas resize")
         }
 
         const commandEncoder = XGPU.device.createCommandEncoder();
@@ -99,18 +115,9 @@ export class GPURenderer {
             pipeline = this.renderPipelines[i];
 
             renderPass = pipeline.beginRenderPass(commandEncoder, textureView);
-
-
             pipeline.update()
             pipeline.draw(renderPass);
-
-
-
-
-
             pipeline.end(commandEncoder, renderPass);
-
-
         }
 
 

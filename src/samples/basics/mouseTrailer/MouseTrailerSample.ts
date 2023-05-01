@@ -24,7 +24,7 @@ export class MouseTrailer extends RenderPipeline {
             instanceIndex: BuiltIns.vertexInputs.instanceIndex,
             grid: this.grid,
             mouse: new MouseVec(renderer.width, renderer.height),
-            position: VertexAttribute.Vec2([
+            pos: VertexAttribute.Vec2([
                 [0.0, 0.5],
                 [-0.5, -0.5],
                 [0.5, -0.5]
@@ -33,8 +33,8 @@ export class MouseTrailer extends RenderPipeline {
                 var px = 0.05-1.0 + f32(instanceIndex) % grid.x / grid.x * 2.0;
                 var py = 0.05-1.0 + floor(f32(instanceIndex) / grid.x) / grid.y * 2.0;
                
-                var a = atan2(position.y,position.x);
-                var d = sqrt(position.x * position.x + position.y * position.y) * grid.z;
+                var a = atan2(pos.y,pos.x);
+                var d = sqrt(pos.x * pos.x + pos.y * pos.y) * grid.z;
                 
                 var a2 = atan2(py - mouse.y,px - mouse.x);
                 var dx = px - mouse.x;

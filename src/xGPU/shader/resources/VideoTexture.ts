@@ -61,18 +61,6 @@ export class VideoTexture implements IShaderResource {
     }
 
 
-    /*
-    public get texture(): GPUTexture { return this._texture; }
-    protected _texture: GPUTexture;
-    protected _view: GPUTextureView;
-    protected textureBinding: boolean;
-    protected viewDescriptor: GPUTextureViewDescriptor = undefined;
-    public createView(viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView {
-        let desc: GPUTextureViewDescriptor = this.viewDescriptor;
-        if (viewDescriptor) desc = viewDescriptor;
-        return this._texture.createView(desc);
-    }
-    */
 
 
     public createDeclaration(varName: string, bindingId: number, groupId: number = 0): string {
@@ -107,6 +95,10 @@ export class VideoTexture implements IShaderResource {
         if (this.gpuResource) {
             this.gpuResource.src = undefined;
             this.gpuResource = null;
+        }
+        if (this.videoFrame) {
+            this.videoFrame.close();
+            this.videoFrame = null;
         }
     }
 

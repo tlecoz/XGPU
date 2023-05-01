@@ -9,7 +9,7 @@ import { Matrix4x4, Vec2 } from "../xGPU/shader/PrimitiveType";
 import { ImageTexture } from "../xGPU/shader/resources/ImageTexture";
 import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
 import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
-import { ProjectionMatrix } from "../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { ProjectionMatrix } from "./uniforms/ProjectionMatrix";
 import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../xGPU/shader/resources/VertexBufferIO";
 import { ShaderType } from "../xGPU/shader/ShaderType";

@@ -6,7 +6,7 @@ import { AlphaBlendMode } from "../../xGPU/pipelines/resources/blendmodes/AlphaB
 import { IndexBuffer } from "../../xGPU/pipelines/resources/IndexBuffer";
 import { Float, Matrix4x4, Vec2, Vec3 } from "../../xGPU/shader/PrimitiveType";
 import { UniformBuffer } from "../../xGPU/shader/resources/UniformBuffer";
-import { ProjectionMatrix } from "../../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { ProjectionMatrix } from "../uniforms/ProjectionMatrix";
 import { VertexBuffer } from "../../xGPU/shader/resources/VertexBuffer";
 import { ShaderType } from "../../xGPU/shader/ShaderType";
 import { Graphics } from "./Graphics";

@@ -21,5 +21,4 @@ export class HelloTriangle_buffer_shorter extends Sample {
         })
         renderer.addPipeline(pipeline);
     }
-
 }

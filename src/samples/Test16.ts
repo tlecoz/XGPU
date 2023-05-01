@@ -7,7 +7,7 @@ import { Sample } from "./Sample";
 import { cubeVertexArray, cubeVertexSize, cubeUVOffset, cubePositionOffset } from "../../assets/CubeMesh";
 import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
-import { ProjectionMatrix } from "../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { ProjectionMatrix } from "./uniforms/ProjectionMatrix";
 import { BuiltIns } from "../xGPU/BuiltIns";
 import { ShaderType } from "../xGPU/shader/ShaderType";
 import { ImageTexture } from "../xGPU/shader/resources/ImageTexture";

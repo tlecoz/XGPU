@@ -90,7 +90,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
 
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
-        console.log("cubemap createtexture ", this.descriptor)
+        //console.log("cubemap createtexture ", this.descriptor)
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this._view = this.gpuResource.createView({ dimension: 'cube' });
     }
@@ -105,7 +105,7 @@ export class CubeMapTexture extends ImageTexture implements IShaderResource {
             let bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas;
             for (let i = 0; i < 6; i++) {
                 bmp = this._sides[i];
-                console.log("upload texture ", bmp)
+                //console.log("upload texture ", bmp)
                 if (bmp) {
                     XGPU.device.queue.copyExternalImageToTexture(
                         { source: bmp },

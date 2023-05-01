@@ -27,13 +27,15 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
     constructor(descriptor: {
         size: GPUExtent3D,
         format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
-        usage?: GPUTextureUsageFlags
+        usage?: GPUTextureUsageFlags,
+        sampleCount?: number,
     }, depthStencilDescription: {
         depthWriteEnabled: boolean,
         depthCompare: "never" | "less" | "equal" | "less-equal" | "greater" | "not-equal" | "greater-equal" | "always",
     } = null, depthStencilAttachmentOptions: any = null) {
 
         if (undefined === descriptor.format) descriptor.format = "depth24plus";
+        if (undefined === descriptor.sampleCount) descriptor.sampleCount = 1;
 
         super(descriptor as any)
 
@@ -45,6 +47,7 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
                 depthWriteEnabled: true,
                 depthCompare: "less",
                 format: this.gpuResource.format
+
             } as any
         }
         this._description = { format: this.gpuResource.format, ...depthStencilDescription };

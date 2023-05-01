@@ -40,6 +40,15 @@ export class Pipeline {
         this._resources = obj;
     }
 
+    public static getResourceDefinition(resources: any): any {
+        const result: any = {};
+        let o: any;
+        for (let z in resources) {
+            o = resources[z];
+            result[o.name] = o;
+        }
+        return result;
+    }
 
     public addBindgroup(group: Bindgroup) {
         this.bindGroups.add(group);

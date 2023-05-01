@@ -19,6 +19,8 @@ import { UniformBuffer } from "../shader/resources/UniformBuffer";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
 import { ImageTexture } from "../shader/resources/ImageTexture";
 import { TextureSampler } from "../shader/resources/TextureSampler";
+import { VideoTexture } from "../shader/resources/VideoTexture";
+import { Bindgroups } from "../shader/Bindgroups";
 
 
 export class RenderPipeline extends Pipeline {
@@ -198,23 +200,37 @@ export class RenderPipeline extends Pipeline {
     private parseVertexAttributes(descriptor: any) {
 
         const addVertexAttribute = (name: string, o: any) => {
+
+
+
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
             if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
 
 
             if (!descriptor.bindgroups.default.buffer) {
+
                 const attributes: any = {};
                 attributes[name] = o;
                 descriptor.bindgroups.default.buffer = new VertexBuffer(attributes);
+
             } else {
                 const attribute = (descriptor.bindgroups.default.buffer as VertexBuffer).createArray(name, o.type, o.offset);
                 if (o.datas) attribute.datas = o.datas;
             }
+
+            //console.log("addVertexAttribute ", name, "buffer = ", descriptor.bindgroups.default.buffer)
         }
 
         const checkVertexAttribute = (name: string, o: any) => {
             if (o.type && VertexAttribute.types[o.type]) {
                 addVertexAttribute(name, o);
+            } else if (o instanceof VertexAttribute) {
+
+                addVertexAttribute(name, {
+                    type: o.format,
+                    offset: o.dataOffset,
+                    datas: o.datas
+                })
             }
         }
 
@@ -282,6 +298,7 @@ export class RenderPipeline extends Pipeline {
             if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
 
 
+
             if (!descriptor.bindgroups.default.uniforms) {
                 const uniforms: any = {};
                 uniforms[name] = o;
@@ -289,6 +306,8 @@ export class RenderPipeline extends Pipeline {
             } else {
                 (descriptor.bindgroups.default.uniforms as UniformBuffer).add(name, o);
             }
+
+            //console.log("addUniform ", name, " vertexBuffer = ", descriptor.bindgroups.default.buffer)
         }
 
         const checkUniform = (name: string, o: any) => {
@@ -352,6 +371,52 @@ export class RenderPipeline extends Pipeline {
         return descriptor;
     }
 
+    private parseVideoTexture(descriptor: any) {
+
+        const addVideoTexture = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+            descriptor.bindgroups.default[name] = o;
+        }
+
+        const checkVideoTexture = (name: string, o: any) => {
+            if (o instanceof VideoTexture) {
+                addVideoTexture(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkVideoTexture(z, o);
+        }
+
+        return descriptor;
+    }
+
+    private parseCubeMapTexture(descriptor: any) {
+
+        const addCubeMapTexture = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+            descriptor.bindgroups.default[name] = o;
+        }
+
+        const checkCubeMapTexture = (name: string, o: any) => {
+            if (o instanceof VideoTexture) {
+                addCubeMapTexture(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkCubeMapTexture(z, o);
+        }
+
+        return descriptor;
+    }
+
 
     private highLevelParse(descriptor: any) {
 
@@ -363,10 +428,35 @@ export class RenderPipeline extends Pipeline {
         descriptor = this.parseUniform(descriptor);
         descriptor = this.parseImageTexture(descriptor);
         descriptor = this.parseTextureSampler(descriptor);
+        descriptor = this.parseVideoTexture(descriptor);
+        descriptor = this.parseCubeMapTexture(descriptor);
         //console.log("descriptor = ", descriptor)
         return descriptor;
     }
 
+    public destroy() {
+        this.bindGroups.destroy();
+        if (this.multisampleTexture) this.multisampleTexture.destroy();
+        if (this.renderPassTexture) this.renderPassTexture.destroyGpuResource();
+        if (this.depthStencilTexture) this.depthStencilTexture.destroy();
+        for (let z in this.description) this.description[z] = null;
+        for (let z in this) {
+            try {
+                (this[z] as any).destroy();
+            } catch (e) {
+                try {
+                    (this[z] as any).destroyGpuResource();
+                } catch (e) {
+
+                }
+            }
+
+            this[z] = null;
+        }
+
+
+
+    }
 
     public initFromObject(descriptor: {
         //description primitive : 
@@ -375,6 +465,8 @@ export class RenderPipeline extends Pipeline {
         frontFace?: "ccw" | "cw",
         stripIndexFormat?: "uint16" | "uint32"
         antiAliasing?: boolean,
+        useDepthTexture?: boolean,
+        depthTextureSize?: number,
         depthTest?: boolean,
         clearColor?: { r: number, g: number, b: number, a: number },
         blendMode?: BlendMode,
@@ -396,14 +488,23 @@ export class RenderPipeline extends Pipeline {
     }) {
 
 
-        descriptor = this.highLevelParse(descriptor);
 
 
 
+        this._resources = {};
         this.vertexShader = null;
         this.fragmentShader = null;
 
         this.bindGroups.destroy();
+        this.bindGroups = new Bindgroups("pipeline");
+
+        //--------
+
+
+
+        descriptor = this.highLevelParse(descriptor);
+
+        //console.log("DESCRIPTOR ", descriptor)
 
         super.initFromObject(descriptor);
 
@@ -435,7 +536,17 @@ export class RenderPipeline extends Pipeline {
         if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
 
         if (descriptor.antiAliasing) this.setupMultiSampleView();
-        if (descriptor.depthTest) this.setupDepthStencilView();
+
+        if (descriptor.useDepthTexture) {
+            let depthTextureSize: number = 1024;
+            if (descriptor.depthTextureSize) depthTextureSize = descriptor.depthTextureSize;
+            this.setupDepthStencilView({
+                size: [depthTextureSize, depthTextureSize, 1],
+                format: "depth32float",
+                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+            })
+        } else if (descriptor.depthTest) this.setupDepthStencilView();
+
 
         if (descriptor.bindgroups) {
             let group: Bindgroup;
@@ -515,7 +626,10 @@ export class RenderPipeline extends Pipeline {
         }
     }
     */
-
+    public get clearValue(): { r: number, g: number, b: number, a: number } {
+        if (!this.renderPassDescriptor.colorAttachment) return null;
+        return this.renderPassDescriptor.colorAttachment.clearValue;
+    }
     public createColorAttachment(rgba: { r: number, g: number, b: number, a: number }, view: GPUTextureView = undefined): any {
 
         const colorAttachment = {
@@ -531,6 +645,9 @@ export class RenderPipeline extends Pipeline {
 
         return colorAttachment;
     }
+
+
+
     //----------- used if there is no indexBuffer ------
     private drawConfig: { vertexCount: number, instanceCount: number, firstVertexId: number, firstInstanceId: number } = {
         vertexCount: -1,
@@ -580,6 +697,12 @@ export class RenderPipeline extends Pipeline {
         this.description.multisample = {
             count: this.multisampleTexture.description.count
         }
+
+        if (this._depthStencilTexture) {
+            console.log("A")
+            this.renderPassDescriptor.description.sampleCount = 4;
+            this._depthStencilTexture.create();
+        }
     }
 
     //---------------------------
@@ -599,6 +722,9 @@ export class RenderPipeline extends Pipeline {
 
     ) {
 
+        if (!depthStencilAttachmentOptions) depthStencilAttachmentOptions = {};
+
+
         if (!descriptor) descriptor = {}
         if (!descriptor.size) descriptor.size = [this.renderer.width, this.renderer.height];
 
@@ -609,6 +735,12 @@ export class RenderPipeline extends Pipeline {
 
         this.renderPassDescriptor.depthStencilAttachment = this.depthStencilTexture.attachment;
         this.description.depthStencil = this.depthStencilTexture.description;
+
+        if (this.multisampleTexture) {
+            console.log("B")
+            this.renderPassDescriptor.description.sampleCount = 4;
+            this._depthStencilTexture.create();
+        }
 
         //console.log("depthStencilAttachment ", this.depthStencilTexture.attachment)
         //console.log("this.description.depthStencil ", this.description.depthStencil)
@@ -857,6 +989,7 @@ export class RenderPipeline extends Pipeline {
                 if (buffers) {
                     let k = 0;
                     for (let i = 0; i < buffers.length; i++) {
+                        //console.log("renderPass.setVertexBuffer ", buffers[i].resource.getCurrentBuffer())
                         renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
                     }
                 }
@@ -873,7 +1006,7 @@ export class RenderPipeline extends Pipeline {
 
 
         if (this.indexBuffer) {
-            //console.log("a ", this.debug, this.drawConfig)
+
             if (!this.indexBuffer.gpuResource) this.indexBuffer.createGpuResource();
 
 
@@ -906,6 +1039,8 @@ export class RenderPipeline extends Pipeline {
 
             commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
         }
+
+
         if (this.onDrawEnd) this.onDrawEnd();
     }
 

@@ -144,8 +144,8 @@ export class GPUImage extends GPURenderer {
 
 export class Test10 extends Sample {
 
-    constructor() {
-        super(1, 1);
+    constructor(canvas) {
+        super(canvas);
     }
 
     protected async start(renderer: GPURenderer) {

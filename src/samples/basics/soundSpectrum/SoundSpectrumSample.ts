@@ -1,6 +1,6 @@
 import { BuiltIns } from "../../../xGPU/BuiltIns";
 import { GPURenderer } from "../../../xGPU/GPURenderer";
-import { Float, Vec2 } from "../../../xGPU/shader/PrimitiveType";
+import { Float } from "../../../xGPU/shader/PrimitiveType";
 import { ShaderType } from "../../../xGPU/shader/ShaderType";
 import { ImageTexture } from "../../../xGPU/shader/resources/ImageTexture";
 import { TextureSampler } from "../../../xGPU/shader/resources/TextureSampler";
@@ -36,9 +36,8 @@ export class SoundSpectrumBuffer extends VertexBuffer {
 
     public play(): void {
         this.spectrum.play((audioData: Uint8Array) => {
-            console.log(audioData.length)
-            this.datas.set(new Float32Array(audioData));
-            this.mustBeTransfered = true;
+            //update the buffer with audiodata 
+            this.datas = new Float32Array(audioData);
         })
     }
 
@@ -74,7 +73,7 @@ export class SoundSpectrumSample extends Sample {
             vertexShader: {
                 outputs: {
                     fragUV: ShaderType.Vec2,
-                    fragPosition: ShaderType.Vec4,
+                    dist: ShaderType.Float,
                 },
                 code: `
                 fn createMatrix( x:f32,y:f32,z:f32, sx:f32, sy:f32, sz:f32)->mat4x4<f32> {
@@ -97,20 +96,21 @@ export class SoundSpectrumSample extends Sample {
                 let pct = amplitude / 256.0;
                 
                 let size =  200 + 200.0  * pct;
-                let margin = 0.0;//5.0*(pct*0.5);
-                let quadSize = size / gridSize - margin;
+                let quadSize = size / gridSize -5.0*pct;
                 let depthMax = 100.0;
                 
                 output.position = uniforms.projection * uniforms.modelView * createMatrix(px*size,py*size,0.0, quadSize,quadSize,pct *depthMax)  *  position;
                 output.fragUV = vec2(0.5+ position.xy/size*quadSize);
                 output.fragUV += vec2(px,py);
-                
-                output.fragPosition = 0.5 * (position + vec4(1.0, 1.0, 1.0, 1.0));
+
+                //cheap light effect 
+                output.dist = 1.0-distance(output.position, vec4(0.0,0.0,1000.0,1.0))/1800.0;
+               
             `}
-            , fragmentShader: `output.color = textureSample(image, textureSampler, fragUV);`
+            , fragmentShader: `output.color = vec4( textureSample(image, textureSampler, fragUV).rgb * dist*2.5  , 1.0);`
         })
 
-        const transform = cube.modelView;
+        const transform = cube.transform;
         transform.scaleX = transform.scaleY = transform.scaleZ = 2;
 
         cube.onDrawBegin = () => {

@@ -5,13 +5,11 @@ export class SoundSpectrum {
     protected sourceNode: AudioBufferSourceNode;
     protected processor: ScriptProcessorNode;
     protected analyser: AnalyserNode;
-
+    protected gain: GainNode;
 
     //a basic sound spectrum class based on WebAudio 
 
     constructor(audioFileUrl: string, spectrumBufferSize: number = 1024, onReady?: () => void, options?: AudioContextOptions) {
-
-        console.log("aaa ", spectrumBufferSize)
 
         this.ctx = new AudioContext(options);
         this.getAudioBuffer(audioFileUrl).then((buffer) => {
@@ -21,34 +19,23 @@ export class SoundSpectrum {
                 loop: true
             })
 
-            this.sourceNode = new AudioBufferSourceNode(this.ctx, {
-                buffer,
-                loop: true
-            });
-
-
-
-            this.gain = this.ctx.createGain();//new GainNode(this.ctx);
+            this.gain = this.ctx.createGain();
             this.analyser = new AnalyserNode(this.ctx);
             this.processor = this.ctx.createScriptProcessor(spectrumBufferSize, 2, 1);
 
-            this.sourceNode.connect(this.gain); // Connectez le noeud source au noeud de gain
+            this.sourceNode.connect(this.gain);
             this.gain.connect(this.ctx.destination);
             this.sourceNode.connect(this.analyser);
             this.analyser.connect(this.processor);
             this.processor.connect(this.ctx.destination);
 
-
             if (onReady) onReady();
         })
     }
 
-    public get volume(): number { return this.gain.gain.value; }
 
-    protected gain: GainNode;
-    public set volume(n: number) {
-        this.gain.gain.value = n;
-    }
+    public get volume(): number { return this.gain.gain.value; }
+    public set volume(n: number) { this.gain.gain.value = n; }
 
     public play(onGetAudioData: (audioData: Uint8Array) => void, options?: { when?: number, offset?: number, duration?: number }) {
         if (options) this.sourceNode.start(options.when, options.offset, options.duration);
@@ -58,8 +45,6 @@ export class SoundSpectrum {
 
             const bufferSize = this.processor.bufferSize;
             const amplitudeArray = new Uint8Array(bufferSize);
-
-            //const amplitudeArray = new Uint8Array(this.analyser.frequencyBinCount);
             this.analyser.getByteTimeDomainData(amplitudeArray);
             if (this.ctx.state === "running") {
                 onGetAudioData(amplitudeArray);
@@ -74,7 +59,7 @@ export class SoundSpectrum {
                 .then((response) => response.arrayBuffer())
                 .then((loadedBuffer) => this.ctx.decodeAudioData(loadedBuffer))
                 .then((audioData) => {
-                    console.log(audioData)
+
                     resolve(audioData)
                 }).catch((e) => {
                     error(e);

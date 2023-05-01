@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { Matrix4x4, Vec3 } from "../../PrimitiveType";
+import { Matrix4x4, Vec3 } from "../../xGPU/shader/PrimitiveType";
 
 export class Camera extends Matrix4x4 {
 

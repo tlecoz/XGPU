@@ -40,6 +40,8 @@ export class VertexBuffer implements IShaderResource {
         datas?: Float32Array
     }) {
 
+        console.log("VERTEX BUFFER")
+
         if (!descriptor) descriptor = {};
         else descriptor = { ...descriptor };
 
@@ -54,8 +56,13 @@ export class VertexBuffer implements IShaderResource {
             offset = buffer.offset;
             datas = buffer.datas;
 
-            attribute = this.createArray(name, buffer.type, offset);
-            if (datas) attribute.datas = datas;
+            if (!this.attributes[name]) {
+                attribute = this.createArray(name, buffer.type, offset);
+                if (datas) attribute.datas = datas;
+            } else {
+                console.log(this.attributes[name])
+            }
+
         }
         if (descriptor.datas) this.datas = descriptor.datas;
 
@@ -301,6 +308,12 @@ export class VertexBuffer implements IShaderResource {
     private _byteCount: number = 0;
     public createArray(name: string, dataType: string, offset?: number): VertexAttribute {
         // console.log("new VertexAttribute ", name, dataType, offset)
+
+        if (this.attributes[name]) {
+
+            return this.attributes[name];
+        }
+
         const v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
         v.vertexBuffer = this;
 

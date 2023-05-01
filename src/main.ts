@@ -10,11 +10,13 @@ import { MouseTrailerSample2 } from "./samples/basics/mouseTrailer/MouseTrailerS
 import { MouseTrailerSample3 } from "./samples/basics/mouseTrailer/MouseTrailerSample3";
 import { RotatingCubeSample } from "./samples/basics/cube/RotatingCubeSample";
 import { SoundSpectrumSample } from "./samples/basics/soundSpectrum/SoundSpectrumSample";
+import { FractalCubeSample } from "./samples/basics/cube/FractalCubeSample";
+import { Test10 } from "./samples/Test10";
 
 
 const canvas = document.createElement("canvas");
-canvas.width = 512;
-canvas.height = 512;
+canvas.width = canvas.height = 512;
+
 
 //new HelloTriangle_inline(canvas);
 //new HelloTriangle_inline_shorter(canvas);
@@ -26,19 +28,21 @@ canvas.height = 512;
 
 //new MouseTrailerSample(canvas);
 //new MouseTrailerSample2(canvas);
+
 //new MouseTrailerSample3(canvas);
 
 //new RotatingCubeSample();
 new SoundSpectrumSample(canvas);
 
+//new FractalCubeSample(canvas);
+
+//new Test10(canvas);
 
 
 
 
-
-
-
-
+//import { Test20 } from "./samples/Test20";
+//new Test20(canvas);
 
 /*
 

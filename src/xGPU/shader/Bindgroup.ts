@@ -43,6 +43,10 @@ export class Bindgroup {
 
     public add(name: string, resource: IShaderResource): IShaderResource {
         if (resource instanceof VideoTexture) this.mustRefreshBindgroup = true;
+        else if (resource instanceof ImageTexture && (resource.source instanceof GPUTexture || !resource.source)) {
+            this.mustRefreshBindgroup = true;
+
+        }
 
 
         //console.log("bindgroup.add ", resource)
@@ -133,7 +137,9 @@ export class Bindgroup {
             resource = this.elements[i].resource;
 
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
-            layout.entries.push(resource.createBindGroupLayoutEntry(bindingId++));
+            let bgl = resource.createBindGroupLayoutEntry(bindingId++);
+            //console.log("bindgroupLayout entry ", (bindingId - 1), bgl);
+            layout.entries.push(bgl);
         }
 
         //console.log("BINDGROUP LAYOUT ENTRIES ", layout)
@@ -151,7 +157,10 @@ export class Bindgroup {
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
-            entries.push(resource.createBindGroupEntry(bindingId++));
+
+            let entry = resource.createBindGroupEntry(bindingId++)
+            //console.log("bindgroup entry ", (bindingId - 1), entry);
+            entries.push(entry);
         }
 
         this._group = XGPU.device.createBindGroup({ layout: this._layout, entries })
@@ -313,8 +322,10 @@ export class Bindgroup {
     }
     public get group(): GPUBindGroup {
 
-        if (!this._group || this.mustRefreshBindgroup) this.build();
+        if (!this._group || this.mustRefreshBindgroup) {
 
+            this.build();
+        }
 
         if (this.ioGroups) {
             const group = this.ioGroups[this.io_index++ % 2];
@@ -337,7 +348,9 @@ export class Bindgroup {
 
 
     public destroy() {
+        console.log("bindgroup.destroy")
         for (let i = 0; i < this.elements.length; i++) {
+            console.log("this.elements[i] = ", this.elements[i].resource)
             this.elements[i].resource.destroyGpuResource();
         }
         this.elements = [];

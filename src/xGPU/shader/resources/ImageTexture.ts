@@ -111,8 +111,13 @@ export class ImageTexture implements IShaderResource {
     public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture { return this.descriptor.source }
     public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
         this.useOutsideTexture = bmp instanceof GPUTexture;
+        if (this.useOutsideTexture) {
+            this._view = (bmp as GPUTexture).createView();
+
+        } else this.mustBeTransfered = true;
         this.descriptor.source = bmp;
-        this.mustBeTransfered = true;
+
+
     }
 
     public update(): void {
@@ -134,11 +139,14 @@ export class ImageTexture implements IShaderResource {
 
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
+            //console.log("descriptor.source = ", this.descriptor.source)
             XGPU.device.queue.copyExternalImageToTexture(
                 { source: this.descriptor.source as any, flipY: true },
                 { texture: this.gpuResource },
                 this.descriptor.size
             );
+
+
         }
 
     }
@@ -154,6 +162,7 @@ export class ImageTexture implements IShaderResource {
     }
 
     public destroyGpuResource() {
+
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = null;
@@ -193,6 +202,7 @@ export class ImageTexture implements IShaderResource {
 
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUTextureView } {
         if (!this.gpuResource) this.createGpuResource();
+
         return {
             binding: bindingId,
             resource: this._view

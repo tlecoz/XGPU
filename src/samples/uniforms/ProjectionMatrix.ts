@@ -1,18 +1,12 @@
 import { mat4 } from "gl-matrix";
-import { Matrix4x4 } from "../../PrimitiveType";
+import { Matrix4x4 } from "../../xGPU/shader/PrimitiveType";
 
 export class ProjectionMatrix extends Matrix4x4 {
-
-
-
 
     constructor(screenW: number, screenH: number, fovInDegree: number = 90, zNear: number = 0.1, zFar: number = 100000) {
 
         super()
-
         this.className = "mat4x4<f32>"
-
-
 
         var w: number = screenW;
         var h: number = screenH;
@@ -39,15 +33,10 @@ export class ProjectionMatrix extends Matrix4x4 {
         console.log("#0 this ", this)
         mat4.multiply(this, projection, camera);
 
-
-
         this.mustBeTransfered = true;
     }
 
     public update(): void {
         return;
     }
-
-
-
 }

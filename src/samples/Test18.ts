@@ -7,11 +7,11 @@ import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
 import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
-import { dragonMesh } from "../../assets/DragonMesh"
+import { dragonMesh } from "./meshes/DragonMesh"
 import { Float, Matrix4x4, ModelViewMatrix, Vec3, Vec4 } from "../xGPU/shader/PrimitiveType";
 import { mat4, vec3 } from "gl-matrix";
 import { TextureSampler } from "../xGPU/shader/resources/TextureSampler";
-import { Camera } from "../xGPU/shader/resources/uniforms/Camera";
+import { Camera } from "./uniforms/Camera";
 import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 
 

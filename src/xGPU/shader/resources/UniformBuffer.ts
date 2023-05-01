@@ -61,12 +61,18 @@ export class UniformBuffer implements IShaderResource {
 
         if (this.descriptor.useLocalVariable || useLocalVariable) data.createVariableInsideMain = true;
 
-        this._items[name] = data;
-        this._itemNames.push(name);
-        data.startId = this.byteSize;
-        this._nbComponent += data.length;
 
-        this.uniforms.push(data)
+        const alreadyDefined: boolean = !!this._items[name];
+        this._items[name] = data;
+
+        if (!alreadyDefined) {
+            this._itemNames.push(name);
+            data.startId = this.byteSize;
+            this._nbComponent += data.length;
+            this.uniforms.push(data)
+        }
+        this.mustBeTransfered = true;
+
         return data;
     }
 
@@ -166,7 +172,7 @@ export class UniformBuffer implements IShaderResource {
             uniform = this.uniforms[i];
             uniform.update();
             if (uniform.mustBeTransfered) {
-
+                //console.log("update uniform ", uniform.startId, new Float32Array(uniform.buffer))
                 uniform.mustBeTransfered = false;
                 XGPU.device.queue.writeBuffer(
                     this.gpuResource,

@@ -4,15 +4,15 @@ import { Sample } from "../../Sample";
 
 import { cubeVertexArray, cubeVertexSize, cubeUVOffset, cubePositionOffset } from "../../../samples/meshes/CubeMesh";
 import { VertexAttribute } from "../../../xGPU/shader/resources/VertexAttribute";
-import { ModelViewMatrix } from "../../../xGPU/shader/PrimitiveType";
-import { ProjectionMatrix } from "../../../xGPU/shader/resources/uniforms/ProjectionMatrix";
+import { ProjectionMatrix } from "../../uniforms/ProjectionMatrix";
 import { BuiltIns } from "../../../xGPU/BuiltIns";
 import { ShaderType } from "../../../xGPU/shader/ShaderType";
 import { VertexBuffer } from "../../../xGPU/shader/resources/VertexBuffer";
+import { ModelViewMatrix } from "../../uniforms/ModelViewMatrix";
 
 export class Cube extends RenderPipeline {
 
-    public modelView: ModelViewMatrix = new ModelViewMatrix();
+    public transform: ModelViewMatrix = new ModelViewMatrix();
 
     constructor(renderer, options?: any) {
         super(renderer);
@@ -36,7 +36,7 @@ export class Cube extends RenderPipeline {
             depthTest: true,
             position: VertexAttribute.Vec4(positionOffset),
             uv: VertexAttribute.Vec2(uvOffset),
-            modelView: this.modelView,
+            modelView: this.transform,
             projection: new ProjectionMatrix(this.renderer.width, this.renderer.height, fieldOfViewInDegree),
 
             vertexShader: {
@@ -55,8 +55,6 @@ export class Cube extends RenderPipeline {
             ...options
         }
     }
-
-
 }
 
 
@@ -68,7 +66,7 @@ export class RotatingCubeSample extends Sample {
 
 
         const cube = new Cube(renderer);
-        const transform = cube.modelView;
+        const transform = cube.transform;
         transform.scaleX = transform.scaleY = transform.scaleZ = 200;
         cube.onDrawBegin = () => {
             transform.rotationX += 0.01;

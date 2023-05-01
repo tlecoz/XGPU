@@ -1,5 +1,5 @@
 import { mat4 } from "gl-matrix";
-import { Matrix4x4 } from "../../PrimitiveType";
+import { Matrix4x4 } from "../../xGPU/shader/PrimitiveType";
 
 export class OrthographicMatrix extends Matrix4x4 {
 

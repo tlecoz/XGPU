@@ -1,3 +1,4 @@
+import { UniformBuffer } from "../../shader/resources/UniformBuffer";
 import { ShaderNode } from "../../shader/shaderParts/ShaderNode";
 import { Pipeline } from "../Pipeline";
 
@@ -46,7 +47,12 @@ export class PipelinePlugin {
 
 
         //------ VERTEX SHADER --------
-        const vs = this.target.resources.vertexShader;
+
+
+
+        let vs = this.target.resources.vertexShader;
+        if (typeof vs === "string") vs = { main: vs }
+
         if (this.vertexShader.outputs) {
             if (!vs.outputs) vs.outputs = {};
             for (let z in this.vertexShader.outputs) {
@@ -77,9 +83,11 @@ export class PipelinePlugin {
                 vs.main += main;
             }
         }
+        this.target.resources.vertexShader = vs;
 
         //-------- FRAGMENT SHADER --------
-        const fs = this.target.resources.fragmentShader;
+        let fs = this.target.resources.fragmentShader;
+        if (typeof fs === "string") fs = { main: fs };
 
         if (this.fragmentShader.outputs) {
             if (!fs.outputs) fs.outputs = {};
@@ -111,7 +119,7 @@ export class PipelinePlugin {
                 fs.main += main;
             }
         }
-
+        this.target.resources.fragmentShader = fs;
 
         this.target.initFromObject(this.target.resources);
 

@@ -4,13 +4,13 @@ import { PipelinePlugin } from "../xGPU/pipelines/plugins/PipelinePlugin";
 import { RenderPipeline } from "../xGPU/pipelines/RenderPipeline";
 import { IndexBuffer } from "../xGPU/pipelines/resources/IndexBuffer";
 import { Matrix4x4, Vec3 } from "../xGPU/shader/PrimitiveType";
-import { Camera } from "../xGPU/shader/resources/uniforms/Camera";
+import { Camera } from "./uniforms/Camera";
 import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
 import { Light, ShadowPipeline } from "./Test18";
 
-import { dragonMesh } from "../../assets/DragonMesh"
+import { dragonMesh } from "./meshes/DragonMesh"
 import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
 import { BuiltIns } from "../xGPU/BuiltIns";
@@ -125,7 +125,7 @@ export class LightShadowPlugin extends LightPlugin {
         `
 
         this.fragmentShader.code = `
-        const shadowDepthTextureSize: f32 = 1024.0; 
+        const shadowDepthTextureSize: f32 = ${Math.round(target.renderer.canvas.width)}.0; 
         `;
 
         (this.fragmentShader.main as string[])[0] = `
@@ -171,7 +171,7 @@ export class DragonWithoutLight extends RenderPipeline {
                         normal: VertexAttribute.Vec3(dragonMesh.normals),
                     }),
                     scene: new UniformBuffer({
-                        cameraViewProjMatrix: new Camera(renderer.canvas.width, renderer.canvas.height, 60),
+                        cameraViewProjMatrix: new Camera(renderer.canvas.width, renderer.canvas.height, 60, 0.1, 100000),
                     }),
                     model: new UniformBuffer({
                         modelMatrix: new Matrix4x4()
@@ -216,8 +216,8 @@ export class DragonWithoutLight extends RenderPipeline {
 
 export class Test19 extends Sample {
 
-    constructor() {
-        super(1024, 1024);
+    constructor(canvas) {
+        super(canvas);
     }
 
     protected async start(renderer: GPURenderer): Promise<void> {
@@ -244,15 +244,15 @@ export class Test19 extends Sample {
         light.apply();
 
 
-        dragon.model.scaleXYZ = 600;
+        dragon.model.scaleXYZ = renderer.canvas.width;
 
         const now = new Date().getTime();
 
-        light.position.y = 1000;
+        light.position.y = renderer.canvas.width * 0.9;
         dragon.onDrawBegin = () => {
             const time = (new Date().getTime() - now) / 1000;
             dragon.camera.rotationY += 0.01;
-            light.position.z = (Math.sin(time) * 1000);
+            light.position.z = (Math.sin(time) * renderer.canvas.width);
 
         }
 
