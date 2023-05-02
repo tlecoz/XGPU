@@ -89,7 +89,7 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
     }
 
     public createBindGroupEntry(bindingId: number) {
-        console.log("view = ", this._view)
+        //console.log("view = ", this._view)
         return {
             binding: bindingId,
             resource: this._view

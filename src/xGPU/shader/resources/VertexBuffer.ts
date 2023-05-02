@@ -40,7 +40,7 @@ export class VertexBuffer implements IShaderResource {
         datas?: Float32Array
     }) {
 
-        console.log("VERTEX BUFFER")
+        //console.log("VERTEX BUFFER")
 
         if (!descriptor) descriptor = {};
         else descriptor = { ...descriptor };
@@ -129,9 +129,10 @@ export class VertexBuffer implements IShaderResource {
     protected refactorInfos: { nbCompo: number, nbEmpty: number }[] = [];
     //protected emptyMapIndex:number[] = [];
 
-    /*
+
     private refactorData(): void {
 
+        if (!this.canRefactorData) return;
 
         //console.warn("Warning , VertexBuffer.datas has been refactored in order to respect bytes-align")
         const result = [];
@@ -194,13 +195,17 @@ export class VertexBuffer implements IShaderResource {
 
 
         this.datas = new Float32Array(result);
-    }*/
+    }
 
 
-
+    /*
     private refactorData(): void {
 
         if (!this.canRefactorData) return;
+
+
+
+        console.log("REFACTOR DATA");
         //console.warn("Warning , VertexBuffer.datas has been refactored in order to respect bytes-align")
         const result = [];
         const aligns = [];
@@ -289,7 +294,7 @@ export class VertexBuffer implements IShaderResource {
 
 
         this.datas = new Float32Array(result);
-    }
+    }*/
 
 
     public get attributeDescriptor(): any {
@@ -451,7 +456,13 @@ export class VertexBuffer implements IShaderResource {
             //that's why I use one buffer with "read" accessMode and a second one with "read_write"
 
             //console.log("---compute")
-            this.canRefactorData = false;
+
+
+
+            this.canRefactorData = true;
+
+
+
             if (this.io === 1) {
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read";
@@ -518,7 +529,7 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.gpuResource) this.gpuResource.destroy();
 
-
+        //console.log("VB.createGPUResource ", this.datas, this.datas.byteLength)
 
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({

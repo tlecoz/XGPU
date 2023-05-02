@@ -348,9 +348,9 @@ export class Bindgroup {
 
 
     public destroy() {
-        console.log("bindgroup.destroy")
+        //console.log("bindgroup.destroy")
         for (let i = 0; i < this.elements.length; i++) {
-            console.log("this.elements[i] = ", this.elements[i].resource)
+            //console.log("this.elements[i] = ", this.elements[i].resource)
             this.elements[i].resource.destroyGpuResource();
         }
         this.elements = [];

@@ -7,6 +7,7 @@ import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { Pipeline } from "./Pipeline";
 import { ImageTexture } from "../shader/resources/ImageTexture";
+import { Bindgroups } from "../shader/Bindgroups";
 
 
 export class ComputePipeline extends Pipeline {
@@ -44,23 +45,84 @@ export class ComputePipeline extends Pipeline {
         computeShader: {
             outputs?: any,
             main: string
-            inputs: any,
+            inputs?: any,
             code?: string,
-        },
+        } | string,
+        [key: string]: unknown
     }) {
 
+
+        this._resources = {};
+        this.vertexShader = null;
+        this.fragmentShader = null;
+
+        this.bindGroups.destroy();
+        this.bindGroups = new Bindgroups("pipeline");
+
+        descriptor = this.highLevelParse(descriptor);
+
         super.initFromObject(descriptor);
+
+
+
+
 
         if (descriptor.bindgroups) {
             let group: Bindgroup;
             for (let z in descriptor.bindgroups) {
                 group = new Bindgroup(z);
                 group.initFromObject(descriptor.bindgroups[z]);
-                //console.log(group)
                 this.bindGroups.add(group);
             }
+
+            if (descriptor.bindgroups.default) {
+                if (descriptor.bindgroups.default.buffer) {
+                    const attributes = (descriptor.bindgroups.default.buffer as VertexBuffer).attributes;
+                    for (let z in attributes) {
+                        if (descriptor[z]) descriptor[z] = attributes[z];
+                    }
+                }
+            }
+
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+        const createArrayOfObjects = (obj: any) => {
+            const result = [];
+            let o: any;
+            for (let z in obj) {
+                o = obj[z];
+                result.push({ name: z, ...o })
+            }
+            return result;
+        }
+
+
+        this.computeShader = new ComputeShader();
+
+        if (typeof descriptor.computeShader === "string") {
+            this.computeShader.main.text = descriptor.computeShader;
+        } else {
+            this.computeShader.inputs = createArrayOfObjects(descriptor.computeShader.inputs);
+            this.computeShader.outputs = createArrayOfObjects(descriptor.computeShader.outputs);
+            if (descriptor.computeShader.code) this.computeShader.code.text = descriptor.computeShader.code;
+            this.computeShader.main.text = descriptor.computeShader.main;
+        }
+
+
+
+        /*
         const computeOutput = descriptor.computeShader.outputs;
 
         if (computeOutput) {
@@ -81,7 +143,7 @@ export class ComputePipeline extends Pipeline {
 
         if (descriptor.computeShader.code) this.computeShader.code.text = descriptor.computeShader.code;
         this.computeShader.main.text = descriptor.computeShader.main;
-
+        */
         return descriptor;
 
     }
