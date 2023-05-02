@@ -711,7 +711,8 @@ export class RenderPipeline extends Pipeline {
         descriptor?: {
             size?: GPUExtent3D,
             format?: "stencil8" | "depth16unorm" | "depth24plus" | "depth24plus-stencil8" | "depth32float",
-            usage?: GPUTextureUsageFlags
+            usage?: GPUTextureUsageFlags,
+            sampleCount?: number,
         },
         depthStencilDescription?: {
             depthWriteEnabled: boolean,
@@ -727,6 +728,8 @@ export class RenderPipeline extends Pipeline {
 
         if (!descriptor) descriptor = {}
         if (!descriptor.size) descriptor.size = [this.renderer.width, this.renderer.height];
+        if (this.multisampleTexture) descriptor.sampleCount = 4;
+        else descriptor.sampleCount = 1;
 
 
         if (this._depthStencilTexture) this._depthStencilTexture.destroy();
@@ -736,11 +739,7 @@ export class RenderPipeline extends Pipeline {
         this.renderPassDescriptor.depthStencilAttachment = this.depthStencilTexture.attachment;
         this.description.depthStencil = this.depthStencilTexture.description;
 
-        if (this.multisampleTexture) {
-            console.log("B")
-            this.renderPassDescriptor.description.sampleCount = 4;
-            this._depthStencilTexture.create();
-        }
+
 
         //console.log("depthStencilAttachment ", this.depthStencilTexture.attachment)
         //console.log("this.description.depthStencil ", this.description.depthStencil)

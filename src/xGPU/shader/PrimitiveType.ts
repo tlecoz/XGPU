@@ -10,7 +10,19 @@ export class PrimitiveFloatUniform extends Float32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
-    public mustBeTransfered: boolean = true;
+
+
+    public onChange: () => void;
+    protected _mustBeTransfered: boolean = true;
+    public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
+    public set mustBeTransfered(b: boolean) {
+        if (b != this._mustBeTransfered) {
+            if (!b && this.onChange) this.onChange();
+            this._mustBeTransfered = b;
+        }
+    }
+
+
     public uniformBuffer: UniformBuffer;
 
     public propertyNames: string[];
@@ -79,7 +91,17 @@ export class PrimitiveIntUniform extends Int32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
-    public mustBeTransfered: boolean = true;
+
+    public onChange: () => void;
+    protected _mustBeTransfered: boolean = true;
+    public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
+    public set mustBeTransfered(b: boolean) {
+        if (b != this._mustBeTransfered) {
+            if (!b && this.onChange) this.onChange();
+            this._mustBeTransfered = b;
+        }
+    }
+
     public uniformBuffer: UniformBuffer;
 
     public propertyNames: string[];
@@ -143,8 +165,17 @@ export class PrimitiveUintUniform extends Uint32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
-    public mustBeTransfered: boolean = true;
     public uniformBuffer: UniformBuffer;
+
+    public onChange: () => void;
+    protected _mustBeTransfered: boolean = true;
+    public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
+    public set mustBeTransfered(b: boolean) {
+        if (b != this._mustBeTransfered) {
+            if (!b && this.onChange) this.onChange();
+            this._mustBeTransfered = b;
+        }
+    }
 
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;

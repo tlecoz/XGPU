@@ -503,7 +503,7 @@ export class VertexBuffer implements IShaderResource {
             componentId += this.vertexArrays[i].nbComponent;
         }
 
-        obj.arrayStride = componentId * Float32Array.BYTES_PER_ELEMENT;
+        obj.arrayStride = nb * Float32Array.BYTES_PER_ELEMENT;
 
         return obj;
     }

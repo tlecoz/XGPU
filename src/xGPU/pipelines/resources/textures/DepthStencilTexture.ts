@@ -18,8 +18,8 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
 
     protected _isDepthTexture: boolean = false;
 
-    private _description: { depthWriteEnabled: boolean, depthCompare: string, format: string };
-    public get description(): { depthWriteEnabled: boolean, depthCompare: string, format: string } { return this._description; }
+    private _description: { depthWriteEnabled: boolean, depthCompare: string, format: string, sampleCount?: number };
+    public get description(): { depthWriteEnabled: boolean, depthCompare: string, format: string, sampleCount?: number } { return this._description; }
 
     private _attachment: any;
     public get attachment(): any { return this._attachment };
