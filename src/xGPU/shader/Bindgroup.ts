@@ -75,7 +75,9 @@ export class Bindgroup {
             return resource;
         }
 
-
+        if (resource instanceof VideoTexture) {
+            resource.addBindgroup(this);
+        }
 
 
 
@@ -146,7 +148,7 @@ export class Bindgroup {
         this._layout = XGPU.device.createBindGroupLayout(layout);
     }
 
-    protected build(): void {
+    public build(): void {
 
         if (!this._layout) this.buildLayout();
 

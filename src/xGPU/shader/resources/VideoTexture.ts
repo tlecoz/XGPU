@@ -1,4 +1,5 @@
 import { XGPU } from "../../XGPU";
+import { Bindgroup } from "../Bindgroup";
 import { IShaderResource } from "./IShaderResource";
 
 
@@ -23,6 +24,18 @@ export class VideoTexture implements IShaderResource {
     public gpuResource: HTMLVideoElement
     public useWebcodec: boolean = false; //still in beta 
 
+    /*
+    bindgroups: an array of bindgroup that contains the VideoTexture 
+    => I need it to call its "build" function onVideoFrameCallback
+    => a videoTexture can be contained in multiple bindgroups, that's why it's an array
+    */
+    protected bindgroups: Bindgroup[] = [];
+    public addBindgroup(bindgroup: Bindgroup) {
+        if (this.bindgroups.indexOf(bindgroup) === -1) {
+            this.bindgroups.push(bindgroup);
+        }
+    }
+
     constructor(descriptor: {
         source?: HTMLVideoElement,
         format?: GPUTextureFormat,
@@ -43,13 +56,9 @@ export class VideoTexture implements IShaderResource {
         if (undefined === descriptor.dimension) descriptor.dimension = "2d";
         if (undefined === descriptor.viewFormats) descriptor.viewFormats = [];
 
-        if (descriptor.source) {
-            this.gpuResource = descriptor.source;
-            descriptor.size = [descriptor.source.width, descriptor.source.height];
-        }
-
         this.descriptor = descriptor;
 
+        if (descriptor.source) this.source = descriptor.source;
     }
 
     public clone(): VideoTexture {
@@ -60,6 +69,14 @@ export class VideoTexture implements IShaderResource {
     public set source(video: HTMLVideoElement) {
         this.gpuResource = video;
         this.descriptor.source = video;
+        this.descriptor.size = [video.width, video.height];
+
+        const frame = () => {
+            this.bindgroups.forEach(b => b.build())
+            video.requestVideoFrameCallback(frame);
+        }
+
+        video.requestVideoFrameCallback(frame)
     }
 
 
