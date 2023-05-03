@@ -21,6 +21,7 @@ export class VideoTexture implements IShaderResource {
     public mustBeTransfered: boolean = true;
     public descriptor: VideoTextureDescriptor;
     public gpuResource: HTMLVideoElement
+    public useWebcodec: boolean = false; //still in beta 
 
     constructor(descriptor: {
         source?: HTMLVideoElement,
@@ -31,7 +32,8 @@ export class VideoTexture implements IShaderResource {
         sampleCount?: GPUSize32,
         dimension?: GPUTextureDimension,
         viewFormats?: GPUTextureFormat[],
-        defaultViewDescriptor?: any
+        defaultViewDescriptor?: any,
+
     }) {
 
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
@@ -106,14 +108,17 @@ export class VideoTexture implements IShaderResource {
 
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUExternalTexture } {
 
-        if (this.videoFrame) this.videoFrame.close();
-        this.videoFrame = new VideoFrame(this.gpuResource)
+        if (this.useWebcodec) {
+            if (this.videoFrame) this.videoFrame.close();
+            this.videoFrame = new VideoFrame(this.gpuResource)
+        }
+
 
         if (!this.gpuResource) throw new Error("gpuResource cannot be null. You must provide a HTMLVideoElement")
         return {
             binding: bindingId,
             resource: XGPU.device.importExternalTexture({
-                source: this.videoFrame as any
+                source: this.useWebcodec ? this.videoFrame as any : this.gpuResource
             })
         }
     }
