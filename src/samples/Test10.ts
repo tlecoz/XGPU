@@ -15,7 +15,7 @@ export class GPUVideo extends HeadlessGPURenderer {
 
 
     constructor(video: HTMLVideoElement, onReady?: (canvas: HTMLCanvasElement) => void) {
-        super()
+        super(true)
 
         this.init(video.width, video.height).then((canvas: HTMLCanvasElement) => {
 

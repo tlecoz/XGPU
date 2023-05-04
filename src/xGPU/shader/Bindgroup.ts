@@ -251,6 +251,7 @@ export class Bindgroup {
 
         } else if (foundTextureIO) {
 
+            console.log(" textureIOs[0].gpuResource = ", textureIOs[0])
 
             const img = new ImageTexture({ source: textureIOs[0].gpuResource })
             this.elements.push({ name, resource: img })
@@ -296,10 +297,22 @@ export class Bindgroup {
 
             resource1.initBufferIO(buffers);
         } else if (resource1 instanceof ImageTexture) {
-            console.log(resource1.gpuResource === resource2.gpuResource)
+
+            if (!resource1.gpuResource) resource1.createGpuResource();
+            if (!resource2.gpuResource) resource2.createGpuResource();
+
+            console.log(resource1, resource2)
+            //console.log(resource1.gpuResource === resource2.gpuResource)
+
             const textures = [resource1.gpuResource, resource2.gpuResource];
-            (textures[0] as any).debug = 1;
-            (textures[1] as any).debug = 2;
+            try {
+                (textures[0] as any).debug = 1;
+                (textures[1] as any).debug = 2;
+            } catch (e) {
+
+            }
+
+
 
             resource1.initTextureIO(textures);
         }

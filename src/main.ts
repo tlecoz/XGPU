@@ -12,6 +12,7 @@ import { RotatingCubeSample } from "./samples/basics/cube/RotatingCubeSample";
 import { SoundSpectrumSample } from "./samples/basics/soundSpectrum/SoundSpectrumSample";
 import { FractalCubeSample } from "./samples/basics/cube/FractalCubeSample";
 import { Test10 } from "./samples/Test10";
+import { Test09 } from "./samples/Test09";
 
 
 const canvas = document.createElement("canvas");
@@ -32,12 +33,12 @@ canvas.width = canvas.height = 512;
 //new MouseTrailerSample3(canvas);
 
 //new RotatingCubeSample();
-new SoundSpectrumSample(canvas);
+//new SoundSpectrumSample(canvas);
 
 //new FractalCubeSample(canvas);
 
 //new Test10(canvas);
-
+new Test09(canvas);
 
 
 

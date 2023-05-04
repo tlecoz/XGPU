@@ -8,8 +8,10 @@ export class HeadlessGPURenderer {
     protected dimension: { width: number, height: number, dimensionChanged: boolean };
     protected renderPipelines: RenderPipeline[] = [];
 
-    constructor() {
+    protected useTextureInComputeShader;
 
+    constructor(useTextureInComputeShader: boolean = false) {
+        this.useTextureInComputeShader = useTextureInComputeShader;
     }
 
     public init(w: number, h: number, usage?: number, sampleCount?: number) {
@@ -21,13 +23,23 @@ export class HeadlessGPURenderer {
 
                 if (!usage) usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC;
 
+                let format: GPUTextureFormat = "bgra8unorm";
+                if (this.useTextureInComputeShader) {
+                    format = "rgba8unorm";
+                    usage += GPUTextureUsage.STORAGE_BINDING;
+                }
+
+
+                const bool = true;
+
                 this.textureObj = new Texture({
                     size: [w, h],
-                    format: "bgra8unorm",
+                    format,
                     usage,
                     sampleCount
                 })
                 this.textureObj.create();
+                console.log("textureObj = ", this.textureObj)
 
                 onResolve(this);
             });

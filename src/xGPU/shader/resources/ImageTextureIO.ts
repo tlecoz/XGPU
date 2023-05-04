@@ -3,7 +3,7 @@ import { ImageTexture } from "./ImageTexture";
 export class ImageTextureIO {
 
     public textures: ImageTexture[] = [];
-    public descriptor: { size: GPUExtent3D, format: GPUTextureFormat }
+    public descriptor: { size: GPUExtent3D, format: GPUTextureFormat, usage?: number }
 
     constructor(descriptor: {
         source: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture | null,
@@ -26,7 +26,8 @@ export class ImageTextureIO {
 
         this.descriptor = {
             size: [w, h],
-            format: "rgba8unorm"
+            format: "rgba8unorm",
+            usage: (descriptor.source instanceof GPUTexture) ? descriptor.source.usage : undefined
         };
         if (descriptor.format) this.descriptor.format = descriptor.format;
 
@@ -34,6 +35,7 @@ export class ImageTextureIO {
 
         this.textures[0] = new ImageTexture(this.descriptor);
         this.textures[1] = new ImageTexture(this.descriptor)
+
 
         this.textures[0].io = 1;
         this.textures[1].io = 2;

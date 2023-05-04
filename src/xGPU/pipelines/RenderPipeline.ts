@@ -445,10 +445,11 @@ export class RenderPipeline extends Pipeline {
 
     public blendMode: BlendMode;
     private getFragmentShaderColorOptions() {
+
         const o: any = {
             format: XGPU.getPreferredCanvasFormat(),
-
         }
+
         if (this.blendMode) o.blend = this.blendMode;
         return o;
     }
@@ -665,7 +666,7 @@ export class RenderPipeline extends Pipeline {
                 if (buffers) {
                     let k = 0;
                     for (let i = 0; i < buffers.length; i++) {
-                        //console.log("renderPass.setVertexBuffer ", buffers[i].resource.getCurrentBuffer())
+                        //console.warn("renderPass.setVertexBuffer ", buffers[i].resource)
                         renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
                     }
                 }

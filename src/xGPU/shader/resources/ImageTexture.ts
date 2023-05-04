@@ -33,6 +33,8 @@ export class ImageTexture implements IShaderResource {
 
         descriptor = { ...descriptor };
 
+        console.warn("imageTExture descriptor = ", descriptor);
+
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
         if (undefined === descriptor.size) {
@@ -42,6 +44,9 @@ export class ImageTexture implements IShaderResource {
 
                 if (descriptor.source instanceof GPUTexture) {
                     this.gpuResource = descriptor.source;
+                    descriptor.format = descriptor.source.format;
+                    descriptor.usage = descriptor.source.usage;
+                    console.log("AAAAAAAAAAAAAAAAAA ", this.gpuResource)
                     this._view = this.gpuResource.createView();
                     descriptor.source = undefined;
                     this.useOutsideTexture = true;
@@ -112,6 +117,7 @@ export class ImageTexture implements IShaderResource {
     public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
         this.useOutsideTexture = bmp instanceof GPUTexture;
         if (this.useOutsideTexture) {
+            this.gpuResource = bmp as GPUTexture;
             this._view = (bmp as GPUTexture).createView();
 
         } else this.mustBeTransfered = true;
@@ -155,7 +161,7 @@ export class ImageTexture implements IShaderResource {
     public createGpuResource(): void {
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
-        //console.warn("ImageTexture.createGPUResource descriptor = ", this.descriptor)
+        console.warn("ImageTexture.createGPUResource descriptor = ", this.descriptor)
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
 

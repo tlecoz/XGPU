@@ -131,7 +131,7 @@ export class VertexBuffer implements IShaderResource {
 
 
     private refactorData(): void {
-
+        return
         if (!this.canRefactorData) return;
 
         //console.warn("Warning , VertexBuffer.datas has been refactored in order to respect bytes-align")

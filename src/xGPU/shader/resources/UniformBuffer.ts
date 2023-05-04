@@ -71,7 +71,7 @@ export class UniformBuffer implements IShaderResource {
             this._nbComponent += data.length;
             this.uniforms.push(data)
         }
-        this.mustBeTransfered = true;
+        this.mustBeTransfered = data.mustBeTransfered = true;
 
         return data;
     }

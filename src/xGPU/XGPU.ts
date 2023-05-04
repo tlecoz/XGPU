@@ -60,8 +60,16 @@ export class XGPU {
         return this.gpuDevice;
     }
 
+    private static _preferedCanvasFormat: GPUTextureFormat;
+
     public static getPreferredCanvasFormat(): GPUTextureFormat {
-        return navigator.gpu.getPreferredCanvasFormat();
+        if (!this._preferedCanvasFormat) this._preferedCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
+        console.warn("getPreferedCanvasFormat = ", this._preferedCanvasFormat)
+        return this._preferedCanvasFormat;
+    }
+
+    public static setPreferredCanvasFormat(format: GPUTextureFormat) {
+        this._preferedCanvasFormat = format;
     }
 
 

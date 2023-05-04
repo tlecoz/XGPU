@@ -14,12 +14,13 @@ import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../xGPU/shader/resources/VertexBufferIO";
 import { ShaderType } from "../xGPU/shader/ShaderType";
 import { Sample } from "./Sample";
+import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 
 export class Test09 extends Sample {
 
 
-    constructor() {
-        super(1024, 1024);
+    constructor(canvas) {
+        super(canvas);
     }
 
 
@@ -35,7 +36,7 @@ export class Test09 extends Sample {
         console.log("media = ", mediaW, mediaH)
 
         const nbParticle = renderer.canvas.width * renderer.canvas.height;
-        console.log("nbParticle = ", nbParticle)
+        console.log("nbParticle = ", nbParticle, renderer.canvas.width, renderer.canvas.height)
 
         let mixedPipeline = new MixedPipeline(renderer);
         mixedPipeline.setupDraw({ instanceCount: nbParticle, vertexCount: 6 })
@@ -110,9 +111,9 @@ export class Test09 extends Sample {
                     uniforms: new UniformBuffer({
                         model: modelMatrix,
                         view: viewMatrix,
-                        projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height, 45),
+                        projection: new ProjectionMatrix(renderer.canvas.width, renderer.canvas.height, 45, 0.1, 1000000),
                     }),
-                    renderPass: new ImageTexture({ source: renderPassTexture.gpuResource }),
+
                     myTexture: new ImageTexture({ source: computeResources.bindgroups.datas.myTexture.gpuResource }),//computeResources.bindgroups.datas.myTexture,
                     mySampler: computeResources.bindgroups.datas.mySampler,
                 },

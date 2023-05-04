@@ -223,6 +223,9 @@ export class ComputePipeline extends Pipeline {
 
             } else if (this.bindGroups.resources.types.imageTextures) {
                 let images = this.bindGroups.resources.types.imageTextures;
+
+                console.log("images = ", images)
+
                 let textureIo: ImageTexture;
                 for (let i = 0; images.length; i++) {
                     if (images[i].resource.io == 1) {
@@ -230,6 +233,8 @@ export class ComputePipeline extends Pipeline {
                         break;
                     }
                 }
+
+
 
                 const w = textureIo.gpuResource.width;
                 const h = textureIo.gpuResource.height;
