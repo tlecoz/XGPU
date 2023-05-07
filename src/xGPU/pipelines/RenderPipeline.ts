@@ -13,13 +13,7 @@ import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
-import { BuiltIns } from "../BuiltIns";
 import { IShaderResource } from "../shader/resources/IShaderResource";
-import { UniformBuffer } from "../shader/resources/UniformBuffer";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
-import { ImageTexture } from "../shader/resources/ImageTexture";
-import { TextureSampler } from "../shader/resources/TextureSampler";
-import { VideoTexture } from "../shader/resources/VideoTexture";
 import { Bindgroups } from "../shader/Bindgroups";
 
 
@@ -40,6 +34,7 @@ export class RenderPipeline extends Pipeline {
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
     public indexBuffer: IndexBuffer = null;
+    public nbDrawCall: number = 1;
 
 
     protected gpuPipeline: GPURenderPipeline;
@@ -47,6 +42,7 @@ export class RenderPipeline extends Pipeline {
     public debug: string = "renderPipeline";
     public onDrawBegin: () => void;
     public onDrawEnd: () => void;
+    public onDraw: (drawCallId: number) => void;
 
     constructor(renderer: GPURenderer | HeadlessGPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
         super();
@@ -141,6 +137,8 @@ export class RenderPipeline extends Pipeline {
         topology?: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip",
         frontFace?: "ccw" | "cw",
         stripIndexFormat?: "uint16" | "uint32"
+        keepRendererAspectRatio?: boolean,
+        nbDrawCall?: number,
         antiAliasing?: boolean,
         useDepthTexture?: boolean,
         depthTextureSize?: number,
@@ -194,6 +192,8 @@ export class RenderPipeline extends Pipeline {
             if (descriptor.topology === "line-strip" || descriptor.topology === "triangle-strip") {
                 if (!descriptor.stripIndexFormat) {
                     throw new Error("You must define a 'stripIndexFormat' in order to use a topology 'triangle-strip' or 'line-strip'. See https://www.w3.org/TR/webgpu/#enumdef-gpuindexformat for more details")
+                } else {
+                    this.description.primitive.stripIndexFormat = descriptor.stripIndexFormat;
                 }
             }
         }
@@ -209,6 +209,7 @@ export class RenderPipeline extends Pipeline {
             else descriptor.clearColor = this.outputColor.clearValue;
         }
 
+        if (descriptor.nbDrawCall) this.nbDrawCall = descriptor.nbDrawCall;
 
         if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
 
@@ -262,6 +263,8 @@ export class RenderPipeline extends Pipeline {
 
 
         this.vertexShader = new VertexShader();
+
+        if (descriptor.keepRendererAspectRatio !== undefined) this.vertexShader.keepRendererAspectRatio = descriptor.keepRendererAspectRatio;
 
         if (typeof descriptor.vertexShader === "string") {
             this.vertexShader.main.text = descriptor.vertexShader;
@@ -539,27 +542,35 @@ export class RenderPipeline extends Pipeline {
     private clearOpReady: boolean = false;
     private rendererUseSinglePipeline: boolean = true;
 
-    public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView): GPURenderPassEncoder {
+    public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView, drawCallId?: number): GPURenderPassEncoder {
         if (!this.resourceDefined) return null;
 
         if (this.onDrawBegin) this.onDrawBegin();
 
-        let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline;
+        let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline && this.nbDrawCall === 1;
 
         if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
             this.clearOpReady = false;
             this.rendererUseSinglePipeline = rendererUseSinglePipeline;
         }
 
-        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0]) {
+        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.nbDrawCall > 1) {
             this.clearOpReady = true;
 
 
 
-            if (rendererUseSinglePipeline) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+            if (rendererUseSinglePipeline && this.nbDrawCall == 1) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
             else {
-                if (this.renderer.firstPipeline === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-                else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                if (this.nbDrawCall === 1) {
+                    if (this.renderer.firstPipeline === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                    else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                } else {
+
+                    this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                    if (drawCallId === 0) { }
+                    else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                }
+
             }
 
 
@@ -665,9 +676,12 @@ export class RenderPipeline extends Pipeline {
 
                 if (buffers) {
                     let k = 0;
+                    let buf;
                     for (let i = 0; i < buffers.length; i++) {
+                        buf = buffers[i].resource.getCurrentBuffer();
+                        if (!buf) continue;
                         //console.warn("renderPass.setVertexBuffer ", buffers[i].resource)
-                        renderPass.setVertexBuffer(k++, buffers[i].resource.getCurrentBuffer())
+                        renderPass.setVertexBuffer(k++, buf)
                     }
                 }
             }
@@ -685,7 +699,6 @@ export class RenderPipeline extends Pipeline {
         if (this.indexBuffer) {
 
             if (!this.indexBuffer.gpuResource) this.indexBuffer.createGpuResource();
-
 
 
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize());

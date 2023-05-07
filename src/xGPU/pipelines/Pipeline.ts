@@ -25,7 +25,6 @@ export class Pipeline {
     public bindGroups: Bindgroups;
     public vertexBuffers: VertexBuffer[];
 
-
     public vertexShader: VertexShader;
     public fragmentShader: FragmentShader;
 

@@ -1,4 +1,3 @@
-import { UniformBuffer } from "../../shader/resources/UniformBuffer";
 import { ShaderNode } from "../../shader/shaderParts/ShaderNode";
 import { Pipeline } from "../Pipeline";
 

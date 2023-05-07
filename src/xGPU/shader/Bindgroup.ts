@@ -4,6 +4,7 @@ import { Bindgroups } from "./Bindgroups";
 import { ImageTexture } from "./resources/ImageTexture";
 import { ImageTextureIO } from "./resources/ImageTextureIO";
 import { IShaderResource } from "./resources/IShaderResource";
+import { UniformBuffer } from "./resources/UniformBuffer";
 import { VertexBuffer } from "./resources/VertexBuffer";
 import { VertexBufferIO } from "./resources/VertexBufferIO";
 import { VideoTexture } from "./resources/VideoTexture";
@@ -104,10 +105,38 @@ export class Bindgroup {
         return result;
     }
 
+
+    public set(name: string, resource: IShaderResource) {
+        let found = false;
+        for (let i = 0; i < this.elements.length; i++) {
+            if (this.elements[i].name === name) {
+                this.elements[i].resource = resource;
+                found = true;
+            }
+        }
+    }
+
+    public getResourceName(resource: IShaderResource): string {
+        for (let i = 0; i < this.elements.length; i++) {
+            if (resource === this.elements[i].resource) {
+                return this.elements[i].name;
+            }
+        }
+    }
+
     public get(name: string): IShaderResource {
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i].name === name) return this.elements[i].resource;
         }
+
+        for (let i = 0; i < this.elements.length; i++) {
+            if (this.elements[i].resource instanceof UniformBuffer) {
+                if ((this.elements[i].resource as UniformBuffer).items[name]) {
+                    return this.elements[i].resource
+                }
+            }
+        }
+
         return null;
     }
 

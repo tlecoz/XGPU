@@ -12,7 +12,7 @@ export class IndexBuffer {
     public gpuResource: GPUBuffer;
     public descriptor: IndexBufferDescriptor;
 
-    private mustUpdateData: boolean = false;
+    public mustUpdateData: boolean = false;
 
     constructor(descriptor?: {
         nbPoint?: number,
@@ -31,11 +31,16 @@ export class IndexBuffer {
         }
 
 
+
         if (undefined === descriptor.offset) descriptor.offset = 0;
         this.descriptor = descriptor;
 
+        if (descriptor.nbPoint) this.nbPoint = descriptor.nbPoint;
+
         if (undefined === descriptor.datas) descriptor.datas = new Uint32Array([0, 0, 0]);
         else this.datas = descriptor.datas;
+
+
     }
 
 
@@ -44,7 +49,8 @@ export class IndexBuffer {
         this.gpuResource = null;
     }
     public createGpuResource(): void {
-        //console.warn("create index resource ", this.getBufferSize())
+        if (!this._datas)
+            console.warn("create index resource ", this.getBufferSize())
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = XGPU.device.createBuffer({
             size: this.getBufferSize(),
@@ -56,14 +62,13 @@ export class IndexBuffer {
     }
 
     public getBufferSize(): number {
-        let size: number = this.nbPoint * Uint16Array.BYTES_PER_ELEMENT;
-        if (this.dataType === "uint32") size = this.nbPoint * Uint32Array.BYTES_PER_ELEMENT;
-        /*else {
-            let n = 0;
-            while (n < size) n += 4;
-            size = n;
-        }*/
-        return size;
+
+
+        if (this.dataType === "uint16") return this.datas.length * Uint16Array.BYTES_PER_ELEMENT;
+        return this.datas.length * Uint32Array.BYTES_PER_ELEMENT;
+
+
+
     }
 
     public get dataType(): GPUIndexFormat { return this.descriptor.dataType; }
@@ -77,12 +82,58 @@ export class IndexBuffer {
     private _datas: Uint32Array | Uint16Array;
     public set datas(indices: Uint32Array | Uint16Array) {
         this.mustUpdateData = true;
-        this._datas = indices;
-        this.createGpuResource();
+
+        if (indices instanceof Uint16Array) this.descriptor.dataType = "uint16";
+        else this.descriptor.dataType = "uint32";
+
+        if (!this._datas || indices.length > this._datas.length || indices != this._datas) {
+            this._datas = indices;
+            this.createGpuResource();
+        }
         this.update();
-        //new Uint16Array(this.gpuResource.getMappedRange()).set(points);
-        //this.gpuResource.unmap();
+
     }
+
+    public updateDatas(indices: Uint32Array | Uint16Array, offset: number, len: number, extraBufferSize?: number) {
+        this.mustUpdateData = true;
+
+        if (!extraBufferSize) extraBufferSize = 1000;
+
+        if (this.datas) console.log(this.datas.length + " VS " + (offset + len))
+
+        if (!this._datas || this._datas.length < offset + len) {
+
+
+            if (indices instanceof Uint16Array) this.descriptor.dataType = "uint16";
+            else this.descriptor.dataType = "uint32";
+
+
+
+            if (!this._datas) {
+                this._datas = indices;
+                this.createGpuResource();
+            } else if ((offset + len) - this._datas.length >= extraBufferSize) {
+                this._datas = indices;
+                this.createGpuResource();
+            } else {
+
+                console.log("B")
+
+                if (indices instanceof Uint16Array) this._datas = new Uint16Array(this._datas.length + extraBufferSize);
+                else this._datas = new Uint32Array(this._datas.length + extraBufferSize);
+                this._datas.set(indices);
+                this.createGpuResource();
+            }
+        } else {
+            console.log("A ", indices.slice(offset, offset + len))
+            if (offset && len) this._datas.set(indices.slice(offset, offset + len), offset)
+            else this._datas.set(indices);
+        }
+
+        this.update();
+    }
+
+    public get datas(): Uint32Array | Uint16Array { return this._datas }
 
     public update(): void {
         if (this.mustUpdateData) {

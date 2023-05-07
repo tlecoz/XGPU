@@ -7,7 +7,7 @@ import { VertexBuffer } from "./VertexBuffer";
 export class VertexAttribute {
 
 
-    public static Float(datas?: number[][] | number, offset?: number) {
+    public static Float(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -16,7 +16,7 @@ export class VertexAttribute {
         }
         return { type: "float32", offset, datas }
     }
-    public static Vec2(datas?: number[][] | number, offset?: number) {
+    public static Vec2(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -25,7 +25,7 @@ export class VertexAttribute {
         }
         return { type: "float32x2", offset, datas }
     }
-    public static Vec3(datas?: number[][] | number, offset?: number) {
+    public static Vec3(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -34,7 +34,7 @@ export class VertexAttribute {
         }
         return { type: "float32x3", offset, datas }
     }
-    public static Vec4(datas?: number[][] | number, offset?: number) {
+    public static Vec4(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -44,7 +44,7 @@ export class VertexAttribute {
         return { type: "float32x4", offset, datas }
     }
 
-    public static Int(datas?: number[][] | number, offset?: number) {
+    public static Int(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -53,7 +53,7 @@ export class VertexAttribute {
         }
         return { type: "sint32", offset, datas }
     }
-    public static IVec2(datas?: number[][] | number, offset?: number) {
+    public static IVec2(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -62,7 +62,7 @@ export class VertexAttribute {
         }
         return { type: "sint32x2", offset, datas }
     }
-    public static IVec3(datas?: number[][] | number, offset?: number) {
+    public static IVec3(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -71,7 +71,7 @@ export class VertexAttribute {
         }
         return { type: "sint32x3", offset, datas }
     }
-    public static IVec4(datas?: number[][] | number, offset?: number) {
+    public static IVec4(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -81,7 +81,7 @@ export class VertexAttribute {
         return { type: "sint32x4", offset, datas }
     }
 
-    public static Uint(datas?: number[][] | number, offset?: number) {
+    public static Uint(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -90,7 +90,7 @@ export class VertexAttribute {
         }
         return { type: "uint32", offset, datas }
     }
-    public static UVec2(datas?: number[][] | number, offset?: number) {
+    public static UVec2(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -99,7 +99,7 @@ export class VertexAttribute {
         }
         return { type: "uint32x2", offset, datas }
     }
-    public static UVec3(datas?: number[][] | number, offset?: number) {
+    public static UVec3(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -108,7 +108,7 @@ export class VertexAttribute {
         }
         return { type: "uint32x3", offset, datas }
     }
-    public static UVec4(datas?: number[][] | number, offset?: number) {
+    public static UVec4(datas?: number[][] | number[] | number, offset?: number) {
         if (datas && !offset) {
             if (typeof datas === "number") {
                 offset = datas;
@@ -169,7 +169,7 @@ export class VertexAttribute {
     private nbValues: number;
     private vertexType: { name: string, nbComponent: number, bytes: number, varType: string };
 
-    private _data: number[][];
+    private _data: number[][] | number[];
     public dataOffset: number;
     public mustBeTransfered: boolean = false;
 
@@ -194,8 +194,8 @@ export class VertexAttribute {
         }
     }
 
-    public get datas(): number[][] { return this._data }
-    public set datas(n: number[][]) {
+    public get datas(): number[][] | number[] { return this._data }
+    public set datas(n: number[][] | number[]) {
         if (this._data != n) {
             this._data = n;
             this.vertexBuffer.attributeChanged = true;
@@ -204,7 +204,7 @@ export class VertexAttribute {
     }
 
 
-
+    public get useByVertexData(): boolean { return typeof this._data[0] != "number" }
 
     public get format(): string { return this._dataType }
     public get bytePerElement(): number { return this.vertexType.bytes }

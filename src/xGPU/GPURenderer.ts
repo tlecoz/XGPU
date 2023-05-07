@@ -114,10 +114,19 @@ export class GPURenderer {
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
 
-            renderPass = pipeline.beginRenderPass(commandEncoder, textureView);
             pipeline.update()
-            pipeline.draw(renderPass);
-            pipeline.end(commandEncoder, renderPass);
+
+            for (let j = 0; j < pipeline.nbDrawCall; j++) {
+                renderPass = pipeline.beginRenderPass(commandEncoder, textureView, j);
+                if (pipeline.onDraw) pipeline.onDraw(j);
+                pipeline.draw(renderPass);
+                pipeline.end(commandEncoder, renderPass);
+
+            }
+
+
+
+
         }
 
 

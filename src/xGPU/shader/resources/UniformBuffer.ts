@@ -43,7 +43,7 @@ export class UniformBuffer implements IShaderResource {
     }
 
     public clone(propertyNames?: string[]): UniformBuffer {
-        const items = [...this.items];
+        const items = { ...this.items };
         if (propertyNames) {
             for (let i = 0; i < propertyNames.length; i++) {
                 items[propertyNames[i]] = items[propertyNames[i]].clone();

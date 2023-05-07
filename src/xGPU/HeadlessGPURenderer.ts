@@ -30,7 +30,6 @@ export class HeadlessGPURenderer {
                 }
 
 
-                const bool = true;
 
                 this.textureObj = new Texture({
                     size: [w, h],

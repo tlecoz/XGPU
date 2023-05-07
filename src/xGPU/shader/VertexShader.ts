@@ -1,19 +1,26 @@
 import { BuiltIns } from "../BuiltIns";
+import { RenderPipeline } from "../pipelines/RenderPipeline";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 import { ShaderStruct } from "./shaderParts/ShaderStruct";
 
 
 export class VertexShader extends ShaderStage {
 
+    public keepRendererAspectRatio: boolean = true;
 
     constructor() {
         super("vertex");
     }
 
 
-    public build(pipeline: any, input: ShaderStruct): { code: string, output: ShaderStruct } {
+
+    public build(pipeline: RenderPipeline, input: ShaderStruct): { code: string, output: ShaderStruct } {
         //console.log("VS inputs = ", input)
+
+
+
         let result = this.code.value + "\n\n";
+        if (this.keepRendererAspectRatio) result += "const xgpuRendererAspectRatio = " + (pipeline.renderer.width / pipeline.renderer.height).toFixed(4) + ";\n\n";
         const obj = pipeline.bindGroups.getVertexShaderDeclaration();
         result += obj.result;
 
@@ -44,6 +51,7 @@ export class VertexShader extends ShaderStage {
         result += obj.variables + "\n";
         result += "   var output:Output;\n";
         result += this.main.value;
+        if (this.keepRendererAspectRatio) result += `   output.position = vec4(output.position.x /  xgpuRendererAspectRatio , output.position.y   ,output.position.zw);\n`;
         result += "   return output;\n"
         result += "}\n";
 

@@ -64,7 +64,7 @@ export class XGPU {
 
     public static getPreferredCanvasFormat(): GPUTextureFormat {
         if (!this._preferedCanvasFormat) this._preferedCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
-        console.warn("getPreferedCanvasFormat = ", this._preferedCanvasFormat)
+        //console.warn("getPreferedCanvasFormat = ", this._preferedCanvasFormat)
         return this._preferedCanvasFormat;
     }
 

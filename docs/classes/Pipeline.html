@@ -23,7 +23,7 @@
 <li><a href="RenderPipeline.html" class="tsd-signature-type tsd-kind-class">RenderPipeline</a></li>
 <li><a href="ComputePipeline.html" class="tsd-signature-type tsd-kind-class">ComputePipeline</a></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L12">src/xGPU/pipelines/Pipeline.ts:12</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L21">src/xGPU/pipelines/Pipeline.ts:21</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -63,10 +63,23 @@
 <a href="Pipeline.html#createShaderInput" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>create<wbr/>Shader<wbr/>Input</span></a>
 <a href="Pipeline.html#createVertexBufferLayout" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>create<wbr/>Vertex<wbr/>Buffer<wbr/>Layout</span></a>
 <a href="Pipeline.html#getResourceName" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Resource<wbr/>Name</span></a>
+<a href="Pipeline.html#highLevelParse" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>high<wbr/>Level<wbr/>Parse</span></a>
 <a href="Pipeline.html#initFromObject" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init<wbr/>From<wbr/>Object</span></a>
 <a href="Pipeline.html#initPipelineResources" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init<wbr/>Pipeline<wbr/>Resources</span></a>
 <a href="Pipeline.html#mergeBindgroupShaders" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>merge<wbr/>Bindgroup<wbr/>Shaders</span></a>
+<a href="Pipeline.html#parseCubeMapTexture" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Cube<wbr/>Map<wbr/>Texture</span></a>
+<a href="Pipeline.html#parseImageTexture" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Image<wbr/>Texture</span></a>
+<a href="Pipeline.html#parseImageTextureIOs" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Image<wbr/>TextureIOs</span></a>
+<a href="Pipeline.html#parseShaderBuiltins" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Shader<wbr/>Builtins</span></a>
+<a href="Pipeline.html#parseTextureSampler" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Texture<wbr/>Sampler</span></a>
+<a href="Pipeline.html#parseUniform" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Uniform</span></a>
+<a href="Pipeline.html#parseUniformBuffers" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Uniform<wbr/>Buffers</span></a>
+<a href="Pipeline.html#parseVertexAttributes" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Vertex<wbr/>Attributes</span></a>
+<a href="Pipeline.html#parseVertexBufferIOs" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Vertex<wbr/>BufferIOs</span></a>
+<a href="Pipeline.html#parseVertexBuffers" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Vertex<wbr/>Buffers</span></a>
+<a href="Pipeline.html#parseVideoTexture" class="tsd-index-link tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Video<wbr/>Texture</span></a>
 <a href="Pipeline.html#update" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>update</span></a>
+<a href="Pipeline.html#getResourceDefinition" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Resource<wbr/>Definition</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
@@ -77,69 +90,69 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="Pipeline.html" class="tsd-signature-type tsd-kind-class">Pipeline</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L29">src/xGPU/pipelines/Pipeline.ts:29</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L38">src/xGPU/pipelines/Pipeline.ts:38</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="_resources" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>_resources</span><a href="#_resources" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">_resources</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L37">src/xGPU/pipelines/Pipeline.ts:37</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L46">src/xGPU/pipelines/Pipeline.ts:46</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="bindGroups" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>bind<wbr/>Groups</span><a href="#bindGroups" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">bind<wbr/>Groups</span><span class="tsd-signature-symbol">:</span> <a href="Bindgroups.html" class="tsd-signature-type tsd-kind-class">Bindgroups</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L16">src/xGPU/pipelines/Pipeline.ts:16</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L25">src/xGPU/pipelines/Pipeline.ts:25</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="description" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>description</span><a href="#description" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">description</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> = {}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L14">src/xGPU/pipelines/Pipeline.ts:14</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L23">src/xGPU/pipelines/Pipeline.ts:23</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="fragmentShader" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>fragment<wbr/>Shader</span><a href="#fragmentShader" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fragment<wbr/>Shader</span><span class="tsd-signature-symbol">:</span> <a href="FragmentShader.html" class="tsd-signature-type tsd-kind-class">FragmentShader</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L21">src/xGPU/pipelines/Pipeline.ts:21</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L30">src/xGPU/pipelines/Pipeline.ts:30</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="gpuBindGroupLayouts" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>gpu<wbr/>Bind<wbr/>Group<wbr/>Layouts</span><a href="#gpuBindGroupLayouts" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">gpu<wbr/>Bind<wbr/>Group<wbr/>Layouts</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">GPUBindGroupLayout</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L25">src/xGPU/pipelines/Pipeline.ts:25</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L34">src/xGPU/pipelines/Pipeline.ts:34</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="gpuBindgroups" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>gpu<wbr/>Bindgroups</span><a href="#gpuBindgroups" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">gpu<wbr/>Bindgroups</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">GPUBindGroup</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L24">src/xGPU/pipelines/Pipeline.ts:24</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L33">src/xGPU/pipelines/Pipeline.ts:33</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="gpuPipelineLayout" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>gpu<wbr/>Pipeline<wbr/>Layout</span><a href="#gpuPipelineLayout" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">gpu<wbr/>Pipeline<wbr/>Layout</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">GPUPipelineLayout</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L26">src/xGPU/pipelines/Pipeline.ts:26</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L35">src/xGPU/pipelines/Pipeline.ts:35</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="nbVertex" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>nb<wbr/>Vertex</span><a href="#nbVertex" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">nb<wbr/>Vertex</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L15">src/xGPU/pipelines/Pipeline.ts:15</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L24">src/xGPU/pipelines/Pipeline.ts:24</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="type" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>type</span><a href="#type" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">type</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;compute&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;render&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;compute_mixed&quot;</span><span class="tsd-signature-symbol"> = null</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L27">src/xGPU/pipelines/Pipeline.ts:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L36">src/xGPU/pipelines/Pipeline.ts:36</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="vertexBufferLayouts" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>vertex<wbr/>Buffer<wbr/>Layouts</span><a href="#vertexBufferLayouts" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">vertex<wbr/>Buffer<wbr/>Layouts</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">Iterable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">GPUVertexBufferLayout</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L23">src/xGPU/pipelines/Pipeline.ts:23</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L32">src/xGPU/pipelines/Pipeline.ts:32</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="vertexBuffers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>vertex<wbr/>Buffers</span><a href="#vertexBuffers" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">vertex<wbr/>Buffers</span><span class="tsd-signature-symbol">:</span> <a href="VertexBuffer.html" class="tsd-signature-type tsd-kind-class">VertexBuffer</a><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L17">src/xGPU/pipelines/Pipeline.ts:17</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L26">src/xGPU/pipelines/Pipeline.ts:26</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="vertexShader" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>vertex<wbr/>Shader</span><a href="#vertexShader" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">vertex<wbr/>Shader</span><span class="tsd-signature-symbol">:</span> <a href="VertexShader.html" class="tsd-signature-type tsd-kind-class">VertexShader</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L20">src/xGPU/pipelines/Pipeline.ts:20</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L29">src/xGPU/pipelines/Pipeline.ts:29</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member"><a id="isComputePipeline" class="tsd-anchor"></a>
@@ -149,7 +162,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L32">src/xGPU/pipelines/Pipeline.ts:32</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L41">src/xGPU/pipelines/Pipeline.ts:41</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="isMixedPipeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>is<wbr/>Mixed<wbr/>Pipeline</span><a href="#isMixedPipeline" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -157,7 +170,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L34">src/xGPU/pipelines/Pipeline.ts:34</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L43">src/xGPU/pipelines/Pipeline.ts:43</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="isRenderPipeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>is<wbr/>Render<wbr/>Pipeline</span><a href="#isRenderPipeline" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -165,7 +178,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L33">src/xGPU/pipelines/Pipeline.ts:33</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L42">src/xGPU/pipelines/Pipeline.ts:42</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="resources" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>resources</span><a href="#resources" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -173,7 +186,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L38">src/xGPU/pipelines/Pipeline.ts:38</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L47">src/xGPU/pipelines/Pipeline.ts:47</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member"><a id="addBindgroup" class="tsd-anchor"></a>
@@ -188,7 +201,7 @@
 <h5><span class="tsd-kind-parameter">group</span>: <a href="Bindgroup.html" class="tsd-signature-type tsd-kind-class">Bindgroup</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L44">src/xGPU/pipelines/Pipeline.ts:44</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L502">src/xGPU/pipelines/Pipeline.ts:502</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="build" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>build</span><a href="#build" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
@@ -196,7 +209,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L189">src/xGPU/pipelines/Pipeline.ts:189</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L647">src/xGPU/pipelines/Pipeline.ts:647</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="createLayouts" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>create<wbr/>Layouts</span><a href="#createLayouts" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
@@ -204,7 +217,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L136">src/xGPU/pipelines/Pipeline.ts:136</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L594">src/xGPU/pipelines/Pipeline.ts:594</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="createShaderInput" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>create<wbr/>Shader<wbr/>Input</span><a href="#createShaderInput" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
@@ -219,7 +232,7 @@
 <h5><span class="tsd-kind-parameter">buffers</span>: <a href="VertexBuffer.html" class="tsd-signature-type tsd-kind-class">VertexBuffer</a><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="ShaderStruct.html" class="tsd-signature-type tsd-kind-class">ShaderStruct</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L78">src/xGPU/pipelines/Pipeline.ts:78</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L536">src/xGPU/pipelines/Pipeline.ts:536</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="createVertexBufferLayout" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>create<wbr/>Vertex<wbr/>Buffer<wbr/>Layout</span><a href="#createVertexBufferLayout" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
@@ -227,7 +240,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L50">src/xGPU/pipelines/Pipeline.ts:50</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L508">src/xGPU/pipelines/Pipeline.ts:508</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getResourceName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Resource<wbr/>Name</span><a href="#getResourceName" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -240,7 +253,20 @@
 <h5><span class="tsd-kind-parameter">resource</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L205">src/xGPU/pipelines/Pipeline.ts:205</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L663">src/xGPU/pipelines/Pipeline.ts:663</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="highLevelParse" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>high<wbr/>Level<wbr/>Parse</span><a href="#highLevelParse" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="highLevelParse.highLevelParse-1"><span class="tsd-kind-call-signature">high<wbr/>Level<wbr/>Parse</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#highLevelParse.highLevelParse-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L470">src/xGPU/pipelines/Pipeline.ts:470</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="initFromObject" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>init<wbr/>From<wbr/>Object</span><a href="#initFromObject" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -253,7 +279,7 @@
 <h5><span class="tsd-kind-parameter">obj</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L39">src/xGPU/pipelines/Pipeline.ts:39</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L48">src/xGPU/pipelines/Pipeline.ts:48</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="initPipelineResources" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>init<wbr/>Pipeline<wbr/>Resources</span><a href="#initPipelineResources" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
@@ -266,7 +292,7 @@
 <h5><span class="tsd-kind-parameter">pipeline</span>: <a href="Pipeline.html" class="tsd-signature-type tsd-kind-class">Pipeline</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L182">src/xGPU/pipelines/Pipeline.ts:182</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L640">src/xGPU/pipelines/Pipeline.ts:640</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-protected"><a id="mergeBindgroupShaders" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>merge<wbr/>Bindgroup<wbr/>Shaders</span><a href="#mergeBindgroupShaders" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-protected">
@@ -274,7 +300,150 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L96">src/xGPU/pipelines/Pipeline.ts:96</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L554">src/xGPU/pipelines/Pipeline.ts:554</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseCubeMapTexture" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Cube<wbr/>Map<wbr/>Texture</span><a href="#parseCubeMapTexture" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseCubeMapTexture.parseCubeMapTexture-1"><span class="tsd-kind-call-signature">parse<wbr/>Cube<wbr/>Map<wbr/>Texture</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseCubeMapTexture.parseCubeMapTexture-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L446">src/xGPU/pipelines/Pipeline.ts:446</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseImageTexture" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Image<wbr/>Texture</span><a href="#parseImageTexture" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseImageTexture.parseImageTexture-1"><span class="tsd-kind-call-signature">parse<wbr/>Image<wbr/>Texture</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseImageTexture.parseImageTexture-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L377">src/xGPU/pipelines/Pipeline.ts:377</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseImageTextureIOs" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Image<wbr/>TextureIOs</span><a href="#parseImageTextureIOs" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseImageTextureIOs.parseImageTextureIOs-1"><span class="tsd-kind-call-signature">parse<wbr/>Image<wbr/>TextureIOs</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseImageTextureIOs.parseImageTextureIOs-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L218">src/xGPU/pipelines/Pipeline.ts:218</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseShaderBuiltins" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Shader<wbr/>Builtins</span><a href="#parseShaderBuiltins" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseShaderBuiltins.parseShaderBuiltins-1"><span class="tsd-kind-call-signature">parse<wbr/>Shader<wbr/>Builtins</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseShaderBuiltins.parseShaderBuiltins-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L54">src/xGPU/pipelines/Pipeline.ts:54</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseTextureSampler" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Texture<wbr/>Sampler</span><a href="#parseTextureSampler" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseTextureSampler.parseTextureSampler-1"><span class="tsd-kind-call-signature">parse<wbr/>Texture<wbr/>Sampler</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseTextureSampler.parseTextureSampler-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L400">src/xGPU/pipelines/Pipeline.ts:400</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseUniform" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Uniform</span><a href="#parseUniform" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseUniform.parseUniform-1"><span class="tsd-kind-call-signature">parse<wbr/>Uniform</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseUniform.parseUniform-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L343">src/xGPU/pipelines/Pipeline.ts:343</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseUniformBuffers" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Uniform<wbr/>Buffers</span><a href="#parseUniformBuffers" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseUniformBuffers.parseUniformBuffers-1"><span class="tsd-kind-call-signature">parse<wbr/>Uniform<wbr/>Buffers</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseUniformBuffers.parseUniformBuffers-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L319">src/xGPU/pipelines/Pipeline.ts:319</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseVertexAttributes" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Vertex<wbr/>Attributes</span><a href="#parseVertexAttributes" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseVertexAttributes.parseVertexAttributes-1"><span class="tsd-kind-call-signature">parse<wbr/>Vertex<wbr/>Attributes</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseVertexAttributes.parseVertexAttributes-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L268">src/xGPU/pipelines/Pipeline.ts:268</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseVertexBufferIOs" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Vertex<wbr/>BufferIOs</span><a href="#parseVertexBufferIOs" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseVertexBufferIOs.parseVertexBufferIOs-1"><span class="tsd-kind-call-signature">parse<wbr/>Vertex<wbr/>BufferIOs</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseVertexBufferIOs.parseVertexBufferIOs-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L194">src/xGPU/pipelines/Pipeline.ts:194</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseVertexBuffers" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Vertex<wbr/>Buffers</span><a href="#parseVertexBuffers" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseVertexBuffers.parseVertexBuffers-1"><span class="tsd-kind-call-signature">parse<wbr/>Vertex<wbr/>Buffers</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseVertexBuffers.parseVertexBuffers-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L244">src/xGPU/pipelines/Pipeline.ts:244</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-protected"><a id="parseVideoTexture" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagProtected">Protected</code> <span>parse<wbr/>Video<wbr/>Texture</span><a href="#parseVideoTexture" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-protected">
+<li class="tsd-signature tsd-anchor-link" id="parseVideoTexture.parseVideoTexture-1"><span class="tsd-kind-call-signature">parse<wbr/>Video<wbr/>Texture</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">descriptor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#parseVideoTexture.parseVideoTexture-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">descriptor</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L423">src/xGPU/pipelines/Pipeline.ts:423</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="update" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update</span><a href="#update" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -287,7 +456,20 @@
 <h5><span class="tsd-kind-parameter">o</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/61c4a98/src/xGPU/pipelines/Pipeline.ts#L197">src/xGPU/pipelines/Pipeline.ts:197</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L655">src/xGPU/pipelines/Pipeline.ts:655</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="getResourceDefinition" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Resource<wbr/>Definition</span><a href="#getResourceDefinition" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="getResourceDefinition.getResourceDefinition-1"><span class="tsd-kind-call-signature">get<wbr/>Resource<wbr/>Definition</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">resources</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><a href="#getResourceDefinition.getResourceDefinition-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">resources</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/tlecoz/speechlessGPU/blob/4468612/src/xGPU/pipelines/Pipeline.ts#L492">src/xGPU/pipelines/Pipeline.ts:492</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -330,10 +512,23 @@
 <li><a href="#createShaderInput" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>create<wbr/>Shader<wbr/>Input</span></a></li>
 <li><a href="#createVertexBufferLayout" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>create<wbr/>Vertex<wbr/>Buffer<wbr/>Layout</span></a></li>
 <li><a href="#getResourceName" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Resource<wbr/>Name</span></a></li>
+<li><a href="#highLevelParse" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>high<wbr/>Level<wbr/>Parse</span></a></li>
 <li><a href="#initFromObject" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init<wbr/>From<wbr/>Object</span></a></li>
 <li><a href="#initPipelineResources" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>init<wbr/>Pipeline<wbr/>Resources</span></a></li>
 <li><a href="#mergeBindgroupShaders" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>merge<wbr/>Bindgroup<wbr/>Shaders</span></a></li>
-<li><a href="#update" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>update</span></a></li></ul></div></details></div>
+<li><a href="#parseCubeMapTexture" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Cube<wbr/>Map<wbr/>Texture</span></a></li>
+<li><a href="#parseImageTexture" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Image<wbr/>Texture</span></a></li>
+<li><a href="#parseImageTextureIOs" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Image<wbr/>TextureIOs</span></a></li>
+<li><a href="#parseShaderBuiltins" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Shader<wbr/>Builtins</span></a></li>
+<li><a href="#parseTextureSampler" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Texture<wbr/>Sampler</span></a></li>
+<li><a href="#parseUniform" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Uniform</span></a></li>
+<li><a href="#parseUniformBuffers" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Uniform<wbr/>Buffers</span></a></li>
+<li><a href="#parseVertexAttributes" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Vertex<wbr/>Attributes</span></a></li>
+<li><a href="#parseVertexBufferIOs" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Vertex<wbr/>BufferIOs</span></a></li>
+<li><a href="#parseVertexBuffers" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Vertex<wbr/>Buffers</span></a></li>
+<li><a href="#parseVideoTexture" class="tsd-is-protected"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>parse<wbr/>Video<wbr/>Texture</span></a></li>
+<li><a href="#update" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>update</span></a></li>
+<li><a href="#getResourceDefinition" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Resource<wbr/>Definition</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4-path"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)" id="icon-4-text"></path></svg><span>xgpu</span></a>
 <ul class="tsd-small-nested-navigation">
@@ -342,7 +537,6 @@
 <li><a href="Bindgroups.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Bindgroups</span></a></li>
 <li><a href="BlendMode.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Blend<wbr/>Mode</span></a></li>
 <li><a href="BuiltIns.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Built<wbr/>Ins</span></a></li>
-<li><a href="Camera.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Camera</span></a></li>
 <li><a href="ComputePipeline.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Compute<wbr/>Pipeline</span></a></li>
 <li><a href="ComputeShader.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Compute<wbr/>Shader</span></a></li>
 <li><a href="CubeMapTexture.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Cube<wbr/>Map<wbr/>Texture</span></a></li>
@@ -366,15 +560,12 @@
 <li><a href="Matrix4x4.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Matrix4x4</span></a></li>
 <li><a href="Matrix4x4Array.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Matrix4x4<wbr/>Array</span></a></li>
 <li><a href="MixedPipeline.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Mixed<wbr/>Pipeline</span></a></li>
-<li><a href="ModelViewMatrix.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Model<wbr/>View<wbr/>Matrix</span></a></li>
 <li><a href="MultiSampleTexture.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Multi<wbr/>Sample<wbr/>Texture</span></a></li>
-<li><a href="OrthographicMatrix.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Orthographic<wbr/>Matrix</span></a></li>
 <li><a href="Pipeline.html" class="current"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Pipeline</span></a></li>
 <li><a href="PipelinePlugin.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Pipeline<wbr/>Plugin</span></a></li>
 <li><a href="PrimitiveFloatUniform.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Primitive<wbr/>Float<wbr/>Uniform</span></a></li>
 <li><a href="PrimitiveIntUniform.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Primitive<wbr/>Int<wbr/>Uniform</span></a></li>
 <li><a href="PrimitiveUintUniform.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Primitive<wbr/>Uint<wbr/>Uniform</span></a></li>
-<li><a href="ProjectionMatrix.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Projection<wbr/>Matrix</span></a></li>
 <li><a href="RenderPassTexture.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Render<wbr/>Pass<wbr/>Texture</span></a></li>
 <li><a href="RenderPipeline.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Render<wbr/>Pipeline</span></a></li>
 <li><a href="ShaderNode.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Shader<wbr/>Node</span></a></li>
@@ -398,6 +589,7 @@
 <li><a href="VertexBufferIO.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Vertex<wbr/>BufferIO</span></a></li>
 <li><a href="VertexShader.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Vertex<wbr/>Shader</span></a></li>
 <li><a href="VideoTexture.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Video<wbr/>Texture</span></a></li>
+<li><a href="WgslUtils.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>Wgsl<wbr/>Utils</span></a></li>
 <li><a href="XGPU.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-128-path"></use><use href="#icon-128-text"></use></svg><span>XGPU</span></a></li>
 <li><a href="../interfaces/IShaderResource.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-256-path"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)" id="icon-256-text"></path></svg><span>IShader<wbr/>Resource</span></a></li>
 <li><a href="../types/CubeMapTextureDescriptor.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-type-alias)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6" id="icon-4194304-path"></rect><path d="M11.31 16V8.224H8.91V7.24H14.79V8.224H12.39V16H11.31Z" fill="var(--color-text)" id="icon-4194304-text"></path></svg><span>Cube<wbr/>Map<wbr/>Texture<wbr/>Descriptor</span></a></li>

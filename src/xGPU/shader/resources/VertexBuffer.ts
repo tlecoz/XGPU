@@ -576,17 +576,36 @@ export class VertexBuffer implements IShaderResource {
         const nbVertex = attribute.datas.length;
         let offset: number = 0;
         if (!this._datas) this._datas = new Float32Array(nbVertex * this.nbComponent)
-        for (let i = 0; i < nbVertex; i++) {
+
+
+        if (this.vertexArrays[0] && this.vertexArrays[0].useByVertexData) {
+
+            for (let i = 0; i < nbVertex; i++) {
+                for (let j = 0; j < nbAttributes; j++) {
+                    attribute = this.vertexArrays[j];
+                    if (attribute.mustBeTransfered) {
+                        //console.log(nbVertex, nbAttributes, offset, attribute)
+                        this._datas.set((attribute.datas as number[][])[i], offset);
+
+                    }
+                    offset += attribute.nbComponent;
+                }
+            }
+        } else {
+
             for (let j = 0; j < nbAttributes; j++) {
                 attribute = this.vertexArrays[j];
                 if (attribute.mustBeTransfered) {
-                    //console.log(nbVertex, nbAttributes, offset, attribute)
-                    this._datas.set(attribute.datas[i], offset);
 
+                    this._datas.set(attribute.datas as number[], offset);
                 }
                 offset += attribute.nbComponent;
+
             }
+
         }
+
+
 
 
         for (let j = 0; j < nbAttributes; j++) this.vertexArrays[j].mustBeTransfered = false;
