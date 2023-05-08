@@ -48,6 +48,8 @@ export class Pipeline {
         this._resources = obj;
     }
 
+    public pipelineCount: number = 1;
+
     //=============================== HIGH LEVEL PARSING ================================================================
 
     protected parseShaderBuiltins(descriptor: any) {
@@ -683,6 +685,8 @@ export class Pipeline {
 
 
     public createPipelineInstanceArray(resources: (PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform | IShaderResource)[], nbInstance: number): any[] {
+        this.pipelineCount = nbInstance;
+
         const result: any[] = [];
 
         let instance: any;

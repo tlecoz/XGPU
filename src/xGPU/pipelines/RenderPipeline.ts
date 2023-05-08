@@ -36,7 +36,7 @@ export class RenderPipeline extends Pipeline {
     public indexBuffer: IndexBuffer = null;
     //public pipelineCount: number = 1;
 
-    public pipelineCount: number = 1;
+
 
 
     protected gpuPipeline: GPURenderPipeline;
