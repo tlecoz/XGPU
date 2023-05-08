@@ -34,7 +34,9 @@ export class RenderPipeline extends Pipeline {
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
     public indexBuffer: IndexBuffer = null;
-    public nbDrawCall: number = 1;
+    //public pipelineCount: number = 1;
+
+    public pipelineCount: number = 1;
 
 
     protected gpuPipeline: GPURenderPipeline;
@@ -138,7 +140,7 @@ export class RenderPipeline extends Pipeline {
         frontFace?: "ccw" | "cw",
         stripIndexFormat?: "uint16" | "uint32"
         keepRendererAspectRatio?: boolean,
-        nbDrawCall?: number,
+        pipelineCount?: number,
         antiAliasing?: boolean,
         useDepthTexture?: boolean,
         depthTextureSize?: number,
@@ -209,7 +211,7 @@ export class RenderPipeline extends Pipeline {
             else descriptor.clearColor = this.outputColor.clearValue;
         }
 
-        if (descriptor.nbDrawCall) this.nbDrawCall = descriptor.nbDrawCall;
+        if (descriptor.pipelineCount) this.pipelineCount = descriptor.pipelineCount;
 
         if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
 
@@ -547,21 +549,21 @@ export class RenderPipeline extends Pipeline {
 
         if (this.onDrawBegin) this.onDrawBegin();
 
-        let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline && this.nbDrawCall === 1;
+        let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline && this.pipelineCount === 1;
 
         if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
             this.clearOpReady = false;
             this.rendererUseSinglePipeline = rendererUseSinglePipeline;
         }
 
-        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.nbDrawCall > 1) {
+        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
             this.clearOpReady = true;
 
 
 
-            if (rendererUseSinglePipeline && this.nbDrawCall == 1) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+            if (rendererUseSinglePipeline && this.pipelineCount == 1) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
             else {
-                if (this.nbDrawCall === 1) {
+                if (this.pipelineCount === 1) {
                     if (this.renderer.firstPipeline === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
                     else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
                 } else {
