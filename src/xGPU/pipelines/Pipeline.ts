@@ -651,7 +651,7 @@ export class Pipeline {
     }
 
 
-    public update(o: any) {
+    public update(o?: any) {
         if (o) {
 
         }
@@ -678,5 +678,94 @@ export class Pipeline {
                 return this.bindGroups.getNameByResource(resource);
             }
         }
+    }
+
+
+
+    public createPipelineInstanceArray(resources: (PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform | IShaderResource)[], nbInstance: number): any[] {
+        const result: any[] = [];
+
+        let instance: any;
+        let resource: any
+        let clonedUniformBuffers: any;
+
+
+        const resourceNames: string[] = [];
+        const resourceBindgroup: Bindgroup[] = [];
+        const resourceUniformBufferName: string[] = [];
+        for (let i = 0; i < resources.length; i++) {
+            resource = resources[i];
+            const name = this.bindGroups.getNameByResource(resource);
+
+            const bindgroup = this.bindGroups.getGroupByPropertyName(name);
+            bindgroup.mustRefreshBindgroup = true;
+
+            resourceNames[i] = name;
+            resourceBindgroup[i] = bindgroup;
+
+            if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
+                resourceUniformBufferName[i] = bindgroup.getResourceName(resource.uniformBuffer);
+            }
+        }
+
+
+
+        for (let k = 0; k < nbInstance; k++) {
+            result[k] = instance = {};
+            clonedUniformBuffers = {};
+
+            for (let i = 0; i < resources.length; i++) {
+
+
+                resource = resources[i];
+                const name = resourceNames[i];
+                const bindgroup = resourceBindgroup[i];
+
+
+
+
+                if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
+                    const uniformBufferName = resourceUniformBufferName[i];//bindgroup.getResourceName(resource.uniformBuffer);
+                    console.log("uniformBufferName = ", uniformBufferName)
+                    if (!clonedUniformBuffers[uniformBufferName]) {
+                        clonedUniformBuffers[uniformBufferName] = resource.uniformBuffer.clone();
+                        clonedUniformBuffers[uniformBufferName].name = uniformBufferName;
+                    }
+                    //console.log("===>>> uniformBufferName = ", bindgroup.getResourceName(resource.uniformBuffer))
+                    instance[uniformBufferName] = clonedUniformBuffers[uniformBufferName];
+                    (instance[uniformBufferName] as any).name = clonedUniformBuffers[uniformBufferName].name;
+                    (instance[uniformBufferName] as any).bindgroup = bindgroup;
+                    instance[name] = clonedUniformBuffers[uniformBufferName].getUniformByName(name);
+
+                } else {
+                    instance[name] = resource.clone();
+                    (instance[name] as any).bindgroup = bindgroup;
+                    (instance[name] as any).name = name;
+                }
+            }
+
+            const shaderResources: IShaderResource[] = [];
+
+            for (let z in instance) {
+                resource = instance[z];
+                if (!(resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform)) {
+                    resource.createGpuResource();
+                    shaderResources.push(resource);
+                }
+            }
+
+            instance.apply = () => {
+                let o: any;
+                for (let i = 0; i < shaderResources.length; i++) {
+                    o = shaderResources[i];
+                    o.update();
+                    //console.log(i, o.name, o)
+                    o.bindgroup.set(o.name, o);
+                }
+                this.update();
+            }
+        }
+
+        return result;
     }
 }

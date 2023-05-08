@@ -1,6 +1,6 @@
 import { XGPU } from "../../XGPU";
 import { GPUType } from "../../GPUType";
-import { PrimitiveType } from "../PrimitiveType";
+import { Matrix4x4, PrimitiveType } from "../PrimitiveType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
 
@@ -42,6 +42,7 @@ export class UniformBuffer implements IShaderResource {
         }
     }
 
+
     public clone(propertyNames?: string[]): UniformBuffer {
         const items = { ...this.items };
         if (propertyNames) {
@@ -49,7 +50,15 @@ export class UniformBuffer implements IShaderResource {
                 items[propertyNames[i]] = items[propertyNames[i]].clone();
             }
         }
-        return new UniformBuffer(items, this.descriptor)
+
+        const buffer = new UniformBuffer(items, this.descriptor);
+        (buffer as any).name = (this as any).name;
+        for (let z in items) {
+            items[z] = items[z].clone();
+            items[z].uniformBuffer = buffer;
+        }
+
+        return buffer;
     }
 
 

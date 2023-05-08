@@ -1,3 +1,4 @@
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "./PrimitiveType";
 import { DepthStencilTexture } from "../pipelines/resources/textures/DepthStencilTexture";
 import { XGPU } from "../XGPU";
 import { Bindgroup } from "./Bindgroup";
@@ -405,8 +406,15 @@ export class Bindgroups {
         return null;
     }
 
-    public getNameByResource(resource: IShaderResource): string {
+    public getNameByResource(resource: IShaderResource | PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform): string {
+
+        if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
+            return resource.name;
+        }
+
+
         let elements: { name: string, resource: IShaderResource }[];
+
         for (let i = 0; i < this.groups.length; i++) {
             elements = this.groups[i].elements;
             for (let j = 0; j < elements.length; j++) {
@@ -415,6 +423,10 @@ export class Bindgroups {
                 }
             }
         }
+
+
+
+
         return null;
     }
 

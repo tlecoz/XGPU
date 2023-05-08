@@ -38,6 +38,7 @@ export class PrimitiveFloatUniform extends Float32Array {
     }
 
     public clone(): PrimitiveFloatUniform {
+
         return new PrimitiveFloatUniform(this.type.rawType, this as Float32Array, this.createVariableInsideMain)
     }
 
@@ -636,6 +637,12 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 
     }
 
+    public clone(): PrimitiveFloatUniform {
+        const m = new Matrix4x4(this as Float32Array);
+        m.disableUpdate = this.disableUpdate;
+        return m;
+    }
+
 
     public get x(): number { return this._x; }
     public get y(): number { return this._y; }
@@ -651,6 +658,7 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 
 
     public set x(n: number) {
+
         if (n === this._x) return;
         this.mustBeTransfered = true;
         this._x = n;

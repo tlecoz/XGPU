@@ -679,7 +679,7 @@ export class RenderPipeline extends Pipeline {
                     let buf;
                     for (let i = 0; i < buffers.length; i++) {
                         buf = buffers[i].resource.getCurrentBuffer();
-                        if (!buf) continue;
+                        if (!buf) return;
                         //console.warn("renderPass.setVertexBuffer ", buffers[i].resource)
                         renderPass.setVertexBuffer(k++, buf)
                     }
