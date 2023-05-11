@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Thomas Le Coz. All rights reserved.
+// This code is governed by an MIT license that can be found in the LICENSE file.
+
 import { XGPU } from "../XGPU";
 import { Bindgroup } from "../shader/Bindgroup";
 import { ComputeShader } from "../shader/ComputeShader";
@@ -122,28 +125,7 @@ export class ComputePipeline extends Pipeline {
 
 
 
-        /*
-        const computeOutput = descriptor.computeShader.outputs;
 
-        if (computeOutput) {
-            const cOutput = [];
-            let o: any;
-            for (let z in computeOutput) {
-                o = computeOutput[z];
-                cOutput.push({ name: z, ...o })
-            }
-            this.computeShader.outputs = cOutput;
-
-        }
-
-        const t = [];
-        for (let z in descriptor.computeShader.inputs) t.push({ name: z, ...descriptor.computeShader.inputs[z] });
-        //console.log("TTTTTT ", t)
-        this.computeShader.inputs = t//descriptor.computeShader.inputs;
-
-        if (descriptor.computeShader.code) this.computeShader.code.text = descriptor.computeShader.code;
-        this.computeShader.main.text = descriptor.computeShader.main;
-        */
         return descriptor;
 
     }

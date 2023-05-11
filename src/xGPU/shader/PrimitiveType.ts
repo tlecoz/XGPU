@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Thomas Le Coz. All rights reserved.
+// This code is governed by an MIT license that can be found in the LICENSE file.
+
 import { mat2, mat2d, mat3, mat4, vec3 } from "gl-matrix";
 import { GPUType } from "../GPUType";
 import { UniformBuffer } from "./resources/UniformBuffer";
@@ -79,6 +82,7 @@ export class PrimitiveFloatUniform extends Float32Array {
                 name = z;
             }
         }
+
         return "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";"
     }
 
@@ -127,7 +131,7 @@ export class PrimitiveIntUniform extends Int32Array {
     }
 
     public createStruct(): string {
-        console.warn("createStruct")
+
         let result = "struct " + this.constructor.name + " {\n";
         for (let i = 0; i < this.propertyNames.length; i++) {
             result += "   " + this.propertyNames[i] + ":i32,\n";
@@ -199,7 +203,7 @@ export class PrimitiveUintUniform extends Uint32Array {
     }
 
     public createStruct(): string {
-        console.warn("createStruct")
+
         let result = "struct " + this.constructor.name + " {\n";
         for (let i = 0; i < this.propertyNames.length; i++) {
             result += "   " + this.propertyNames[i] + ":u32,\n";
@@ -770,7 +774,7 @@ export class Matrix4x4Array extends PrimitiveFloatUniform {
 
     public update(): void {
 
-        //console.log("matrixArray.update")
+
 
         let mustBeTransfered = false;
         let m: Matrix4x4;

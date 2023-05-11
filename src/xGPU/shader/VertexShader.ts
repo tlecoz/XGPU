@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Thomas Le Coz. All rights reserved.
+// This code is governed by an MIT license that can be found in the LICENSE file.
+
 import { BuiltIns } from "../BuiltIns";
 import { RenderPipeline } from "../pipelines/RenderPipeline";
 import { ShaderStage } from "./shaderParts/ShaderStage";
@@ -15,9 +18,6 @@ export class VertexShader extends ShaderStage {
 
 
     public build(pipeline: RenderPipeline, input: ShaderStruct): { code: string, output: ShaderStruct } {
-        //console.log("VS inputs = ", input)
-
-
 
         let result = this.code.value + "\n\n";
         if (this.keepRendererAspectRatio) result += "const xgpuRendererAspectRatio = " + (pipeline.renderer.width / pipeline.renderer.height).toFixed(4) + ";\n\n";
@@ -59,7 +59,6 @@ export class VertexShader extends ShaderStage {
 
         //console.log("------------- VERTEX SHADER --------------")
         //console.log(result);
-
         //console.log("------------------------------------------")
         return { code: result, output: output };
     }

@@ -8,7 +8,7 @@
             "DOM"
         ],
         "outDir": "dist",
-        "rootDir": "",
+        "rootDir": "src",
         "declaration": true,
         "declarationDir": "dist",
         "moduleResolution": "Node",
@@ -27,7 +27,6 @@
         ]
     },
     "include": [
-        "index.ts",
         "src/**/*.ts"
     ],
     "exclude": [

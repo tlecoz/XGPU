@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Thomas Le Coz. All rights reserved.
+// This code is governed by an MIT license that can be found in the LICENSE file.
+
 import { XGPU } from "../XGPU";
 
 import { Bindgroups } from "./Bindgroups";
@@ -30,17 +33,6 @@ export class Bindgroup {
     }
 
     public get name(): string { return this._name; }
-
-
-
-
-
-
-
-
-
-
-
 
     public add(name: string, resource: IShaderResource): IShaderResource {
         if (resource instanceof VideoTexture) this.mustRefreshBindgroup = true;
@@ -107,11 +99,9 @@ export class Bindgroup {
 
 
     public set(name: string, resource: IShaderResource) {
-        let found = false;
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i].name === name) {
                 this.elements[i].resource = resource;
-                found = true;
             }
         }
     }
@@ -122,6 +112,7 @@ export class Bindgroup {
                 return this.elements[i].name;
             }
         }
+        return null;
     }
 
     public get(name: string): IShaderResource {

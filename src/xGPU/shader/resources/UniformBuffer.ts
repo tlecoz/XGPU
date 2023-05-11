@@ -1,6 +1,9 @@
+// Copyright (c) 2023 Thomas Le Coz. All rights reserved.
+// This code is governed by an MIT license that can be found in the LICENSE file.
+
 import { XGPU } from "../../XGPU";
 import { GPUType } from "../../GPUType";
-import { Matrix4x4, PrimitiveType } from "../PrimitiveType";
+import { PrimitiveType } from "../PrimitiveType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
 

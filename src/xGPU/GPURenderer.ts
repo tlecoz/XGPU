@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Thomas Le Coz. All rights reserved.
+// This code is governed by an MIT license that can be found in the LICENSE file.
+
 import { XGPU } from "./XGPU";
 import { RenderPipeline } from "./pipelines/RenderPipeline";
 
@@ -15,18 +18,22 @@ export class GPURenderer {
 
     }
 
+
     public init(canvas: HTMLCanvasElement, alphaMode: "opaque" | "premultiplied" = "opaque"): Promise<HTMLCanvasElement> {
         this.canvasW = canvas.width;
         this.canvasH = canvas.height;
         this.domElement = canvas;
 
-        return new Promise((resolve: (e: HTMLCanvasElement) => void, error: (e: unknown) => void) => {
-            XGPU.init().then(() => {
 
 
+
+        return new Promise(async (resolve: (e: HTMLCanvasElement) => void, error: (e: unknown) => void) => {
+            await XGPU.init()
+
+            if (this.domElement == null) return
+
+            try {
                 this.ctx = this.domElement.getContext("webgpu");
-
-                if (!this.ctx.configure) error(null);
                 this.ctx.configure({
                     device: XGPU.device,
                     format: XGPU.getPreferredCanvasFormat(),
@@ -34,8 +41,12 @@ export class GPURenderer {
                     colorSpace: "srgb",
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING,
                 })
-                resolve(canvas);
-            });
+
+                resolve(canvas)
+            } catch (e) {
+                error(e)
+            }
+
         })
     }
 
@@ -97,7 +108,7 @@ export class GPURenderer {
     public get nbPipeline(): number { return this.renderPipelines.length }
 
     public update() {
-        if (!XGPU.ready || this.renderPipelines.length === 0) return;
+        if (!XGPU.ready || this.renderPipelines.length === 0 || !this.ctx) return;
         if (this.canvas.width != this.canvasW || this.canvas.height != this.canvasH) {
             this.canvasW = this.canvas.width;
             this.canvasH = this.canvas.height;
@@ -106,6 +117,9 @@ export class GPURenderer {
 
         const commandEncoder = XGPU.device.createCommandEncoder();
         const textureView = this.ctx.getCurrentTexture().createView();
+
+
+
         let pipeline: RenderPipeline, renderPass;
 
         for (let i = 0; i < this.renderPipelines.length; i++) {

@@ -5,9 +5,10 @@ export default defineConfig({
 
 
     build: {
+        minify: false,
         lib: {
             // Could also be a dictionary or array of multiple entry points
-            entry: 'index.ts',
+            entry: 'src/index.ts',
             name: 'xGPU',
             // the proper extensions will be added
             fileName: 'XGPU',
