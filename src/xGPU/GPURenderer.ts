@@ -55,7 +55,7 @@ export class GPURenderer {
 
     public get firstPipeline(): RenderPipeline { return this.renderPipelines[0]; }
 
-    public get canvas(): HTMLCanvasElement { return this.domElement; }
+    public get canvas(): { width: number, height: number, dimensionChanged: boolean } { return this.domElement as any; }
     public get texture(): GPUTexture { return this.ctx.getCurrentTexture() }
 
     public get width(): number { return this.canvas.width }
@@ -102,18 +102,14 @@ export class GPURenderer {
             this.canvasW = this.canvas.width;
             this.canvasH = this.canvas.height;
             (this.canvas as any).dimensionChanged = true;
-
-            console.log("canvas resize")
         }
 
         const commandEncoder = XGPU.device.createCommandEncoder();
         const textureView = this.ctx.getCurrentTexture().createView();
-
         let pipeline: RenderPipeline, renderPass;
 
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
-
             pipeline.update()
 
             for (let j = 0; j < pipeline.pipelineCount; j++) {

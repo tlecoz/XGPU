@@ -21,7 +21,6 @@ export class RenderPipeline extends Pipeline {
 
 
     public renderer: GPURenderer | HeadlessGPURenderer;
-    protected canvas: { width: number, height: number, dimensionChanged: boolean };
 
     protected _depthStencilTexture: DepthStencilTexture;
     protected multisampleTexture: MultiSampleTexture;
@@ -54,7 +53,7 @@ export class RenderPipeline extends Pipeline {
         }
         this.type = "render";
         this.renderer = renderer;
-        this.canvas = renderer.canvas as any;
+
         this.vertexShader = new VertexShader();
         this.fragmentShader = new FragmentShader();
         this.description.primitive = {
@@ -71,7 +70,7 @@ export class RenderPipeline extends Pipeline {
 
 
     }
-
+    public get canvas(): any { return this.renderer.canvas; }
     public get depthStencilTexture(): DepthStencilTexture { return this._depthStencilTexture; }
 
     //=============================== HIGH LEVEL PARSING ================================================================
@@ -140,7 +139,7 @@ export class RenderPipeline extends Pipeline {
         frontFace?: "ccw" | "cw",
         stripIndexFormat?: "uint16" | "uint32"
         keepRendererAspectRatio?: boolean,
-        pipelineCount?: number,
+
         antiAliasing?: boolean,
         useDepthTexture?: boolean,
         depthTextureSize?: number,
@@ -211,7 +210,7 @@ export class RenderPipeline extends Pipeline {
             else descriptor.clearColor = this.outputColor.clearValue;
         }
 
-        if (descriptor.pipelineCount) this.pipelineCount = descriptor.pipelineCount;
+
 
         if (descriptor.blendMode) this.blendMode = descriptor.blendMode;
 
@@ -602,17 +601,7 @@ export class RenderPipeline extends Pipeline {
         }
         //console.log("drawConfig = ", this.drawConfig)
 
-        if ((this.canvas as any).dimensionChanged) {
-            if (this.multisampleTexture) {
-                this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
-            }
-            if (this.depthStencilTexture) {
-                this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
-            }
-            if (this.renderPassTexture) {
-                this.renderPassTexture.resize(this.canvas.width, this.canvas.height)
-            }
-        }
+
 
         if (outputView && this.outputColor) this.handleOutputColor(outputView);
 
@@ -732,6 +721,21 @@ export class RenderPipeline extends Pipeline {
             commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
         }
 
+
+        if ((this.canvas as any).dimensionChanged) {
+
+            console.log("RESIZE CANVAS !!!!! ", this.canvas.height)
+
+            if (this.multisampleTexture) {
+                this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
+            }
+            if (this.depthStencilTexture) {
+                this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
+            }
+            if (this.renderPassTexture) {
+                this.renderPassTexture.resize(this.canvas.width, this.canvas.height)
+            }
+        }
 
         if (this.onDrawEnd) this.onDrawEnd();
     }

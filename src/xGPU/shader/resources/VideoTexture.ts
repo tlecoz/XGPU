@@ -121,13 +121,13 @@ export class VideoTexture implements IShaderResource {
         }
     }
 
-    private videoFrame: VideoFrame;
+    private videoFrame: any;
 
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUExternalTexture } {
 
         if (this.useWebcodec) {
             if (this.videoFrame) this.videoFrame.close();
-            this.videoFrame = new VideoFrame(this.gpuResource)
+            this.videoFrame = new window["VideoFrame"](this.gpuResource)
         }
 
 

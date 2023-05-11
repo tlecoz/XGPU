@@ -123,7 +123,11 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
     public update() {
 
     }
+    public resize(width: number, height: number): void {
+        super.resize(width, height);
+        this._attachment.view = this._view;
 
+    }
     public clone(): DepthStencilTexture {
         return new DepthStencilTexture(this.descriptor as any);
     }
