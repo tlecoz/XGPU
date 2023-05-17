@@ -8,16 +8,20 @@ export class VertexAttribute {
 
 
     public static Float(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+
+
+        if (datas != undefined && offset === undefined) {
+
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
             }
         }
+        //console.log("offset = ", datas, offset)
         return { type: "float32", offset, datas }
     }
     public static Vec2(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -26,7 +30,7 @@ export class VertexAttribute {
         return { type: "float32x2", offset, datas }
     }
     public static Vec3(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -35,7 +39,7 @@ export class VertexAttribute {
         return { type: "float32x3", offset, datas }
     }
     public static Vec4(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -45,7 +49,7 @@ export class VertexAttribute {
     }
 
     public static Int(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -54,7 +58,7 @@ export class VertexAttribute {
         return { type: "sint32", offset, datas }
     }
     public static IVec2(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -63,7 +67,7 @@ export class VertexAttribute {
         return { type: "sint32x2", offset, datas }
     }
     public static IVec3(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -72,7 +76,7 @@ export class VertexAttribute {
         return { type: "sint32x3", offset, datas }
     }
     public static IVec4(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -82,7 +86,7 @@ export class VertexAttribute {
     }
 
     public static Uint(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -91,7 +95,7 @@ export class VertexAttribute {
         return { type: "uint32", offset, datas }
     }
     public static UVec2(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;
@@ -100,7 +104,7 @@ export class VertexAttribute {
         return { type: "uint32x2", offset, datas }
     }
     public static UVec3(datas?: number[][] | number[] | number, offset?: number) {
-        if (datas && !offset) {
+        if (datas != undefined && offset === undefined) {
             if (typeof datas === "number") {
                 offset = datas;
                 datas = undefined;

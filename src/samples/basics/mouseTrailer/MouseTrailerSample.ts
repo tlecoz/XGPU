@@ -39,7 +39,7 @@ export class MouseTrailer extends RenderPipeline {
                 var a2 = atan2(py - mouse.y,px - mouse.x);
                 var dx = px - mouse.x;
                 var dy = py - mouse.y;
-                d *= sqrt(dx*dx + dy*dy) + mouse.wheel*0.5;
+                d *= sqrt(dx*dx + dy*dy) + 0.5;
 
                 output.position = vec4(px +  cos(a + a2) * d  ,py + sin(a + a2) * d,0.0,1.0);
             `,

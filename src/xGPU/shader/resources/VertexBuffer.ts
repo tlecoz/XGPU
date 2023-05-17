@@ -43,7 +43,7 @@ export class VertexBuffer implements IShaderResource {
         datas?: Float32Array
     }) {
 
-        //console.log("VERTEX BUFFER")
+        //console.log("VERTEX BUFFER ", attributes)
 
         if (!descriptor) descriptor = {};
         else descriptor = { ...descriptor };
@@ -58,12 +58,13 @@ export class VertexBuffer implements IShaderResource {
             buffer = items[name];
             offset = buffer.offset;
             datas = buffer.datas;
-
+            //console.log("=> ", name, offset)
             if (!this.attributes[name]) {
                 attribute = this.createArray(name, buffer.type, offset);
+                //console.log(name, offset)
                 if (datas) attribute.datas = datas;
             } else {
-                console.log(this.attributes[name])
+                //console.log(this.attributes[name])
             }
 
         }
@@ -121,183 +122,13 @@ export class VertexBuffer implements IShaderResource {
         this.mustBeTransfered = true;
     }
 
+
     public setComplexDatas(datas: Float32Array, nbComponentTotal: number) {
         this._datas = datas;
         this._nbComponent = nbComponentTotal;
         this.mustBeTransfered = true;
     }
 
-
-    protected mustRefactorData: boolean = false;
-    protected refactorInfos: { nbCompo: number, nbEmpty: number }[] = [];
-    //protected emptyMapIndex:number[] = [];
-
-
-    private refactorData(): void {
-        return
-        if (!this.canRefactorData) return;
-
-        //console.warn("Warning , VertexBuffer.datas has been refactored in order to respect bytes-align")
-        const result = [];
-        const aligns = [];
-        const lengths = [];
-        const values = [];
-        let type: GPUType;
-
-        for (let i = 0; i < this.vertexArrays.length; i++) {
-            type = new GPUType(this.vertexArrays[i].varType);
-            values[i] = type.byteValue;
-            lengths[i] = this.vertexArrays[i].nbComponent;
-            aligns[i] = type.byteAlign;
-        }
-
-        const nbData = lengths.length;
-        const nbCompo = this.nbComponent;
-        const datas = this.datas;
-        const len = datas.length
-
-        //console.log(new Float32Array(datas.buffer))
-        //console.log("refactorData nbData = ", nbData, " , nbCompo = ", nbCompo, " , lengths[0] = ", lengths[0], ", len = ", len)
-
-        let byteCount = 0;
-        let length;
-        let k = 0, kk = 0;
-        for (let i = 0; i < len; i += nbCompo) {
-
-
-            for (let j = 0; j < nbData; j++) {
-                if (j > 0) {
-
-                    const dif = byteCount % aligns[j];
-
-                    if (dif !== 0) {
-                        const v = values[j - 1];
-                        const nb = Math.ceil(dif / v);
-
-                        byteCount += nb * v;
-                        for (let n = 0; n < nb; n++) result[k++] = 0;
-                    }
-                }
-
-                length = lengths[j];
-
-                byteCount += values[j] * length;
-
-                //-------
-                if (i === 0) {
-                    this.vertexArrays[j].dataOffset = k;
-                }
-
-                //-------
-                //console.log(j, k)
-
-                for (let n = 0; n < length; n++) result[k++] = datas[kk++];
-            }
-
-        }
-
-
-        this.datas = new Float32Array(result);
-    }
-
-
-    /*
-    private refactorData(): void {
-
-        if (!this.canRefactorData) return;
-
-
-
-        console.log("REFACTOR DATA");
-        //console.warn("Warning , VertexBuffer.datas has been refactored in order to respect bytes-align")
-        const result = [];
-        const aligns = [];
-        const lengths = [];
-        const values = [];
-        let type: GPUType;
-
-        for (let i = 0; i < this.vertexArrays.length; i++) {
-            type = new GPUType(this.vertexArrays[i].varType);
-            values[i] = type.byteValue;
-            lengths[i] = this.vertexArrays[i].nbComponent;
-            aligns[i] = type.byteAlign;
-        }
-
-        const nbData = lengths.length;
-        const nbCompo = this.nbComponent;
-        const datas = this.datas;
-        const len = datas.length
-
-
-        //console.log(new Float32Array(datas.buffer))
-        //console.log("refactorData nbData = ", nbData, " , nbCompo = ", nbCompo, " , lengths[0] = ", lengths[0], ", len = ", len)
-
-        let byteCount = 0;
-        let length;
-        let k = 0, kk = 0;
-        let dif;
-        for (let i = 0; i < len; i += nbCompo) {
-
-            if (i == 0) console.log("nb = ", len, nbData)
-            for (let j = 0; j < nbData; j++) {
-                if (j > 0) {
-
-                    const dif = byteCount % aligns[j];
-
-
-
-                    if (dif !== 0) {
-                        const v = values[j - 1];
-                        const nb = Math.ceil(dif / v);
-
-
-
-                        byteCount += nb * v;
-                        for (let n = 0; n < nb; n++) result[k++] = 0;
-                    }
-                }
-
-                length = lengths[j];
-
-                byteCount += values[j] * length;
-
-                //-------
-                if (i === 0) {
-                    this.vertexArrays[j].dataOffset = k;
-                    //console.log("dataOffset = ", k, this.nbComponent)
-                }
-
-                //-------
-                //console.log(j, k)
-
-                for (let n = 0; n < length; n++) result[k++] = datas[kk++];
-            }
-
-            if (i === 0) {
-                console.log("KKKKK ", k)
-
-                dif = (4 - k % 4) % 4;
-
-                this.nbComponentData = Math.ceil(k / 4) * 4;
-
-                console.log("dif = ", dif)
-            }
-
-            for (let o = 0; o < dif; o++) {
-                result[k++] = 0;
-            }
-
-
-
-        }
-
-
-
-        console.log("datas.length = ", result.length)
-
-
-        this.datas = new Float32Array(result);
-    }*/
 
 
     public get attributeDescriptor(): any {
@@ -315,7 +146,7 @@ export class VertexBuffer implements IShaderResource {
 
     private _byteCount: number = 0;
     public createArray(name: string, dataType: string, offset?: number): VertexAttribute {
-        // console.log("new VertexAttribute ", name, dataType, offset)
+        //console.log("new VertexAttribute ", name, dataType, offset)
 
         if (this.attributes[name]) {
 
@@ -326,21 +157,15 @@ export class VertexBuffer implements IShaderResource {
         v.vertexBuffer = this;
 
         const nbCompo = v.nbComponent;
+        const _offset = v.dataOffset === undefined ? 0 : v.dataOffset;
         this._nbComponent += nbCompo;
-        this._byteCount += v.nbComponent * new GPUType(v.varType).byteValue;
+
+        if (v.dataOffset === undefined) this._byteCount += nbCompo * new GPUType(v.varType).byteValue;
+        else this._byteCount = Math.max(this._byteCount, (_offset + v.nbComponent) * new GPUType(v.varType).byteValue);
         //console.log("byteCount = ", v.nbComponent + " * " + new GPUType(v.varType).byteValue)
-        //console.log(this._byteCount);
+        //console.log("createArray ", name, this._byteCount, (_offset + v.nbComponent) * new GPUType(v.varType).byteValue);
 
-        if (!this.mustRefactorData) {
 
-            const type = new GPUType(v.varType);
-            const nb = type.byteAlign;
-            const dif = this._byteCount % nb;
-
-            //console.log("AAAAAAAAAAAAAAAAAAAA ", name, this._byteCount, nb, dif)
-
-            if (dif !== 0) this.mustRefactorData = true;
-        }
 
         this.vertexArrays.push(v);
         return v;
@@ -355,6 +180,9 @@ export class VertexBuffer implements IShaderResource {
     public createDeclaration(vertexBufferName: string, bindingId: number, groupId: number = 0, isInput: boolean = true): string {
         //console.warn("VB.createDeclaration ", vertexBufferName, isInput)
         if (isInput) { }
+
+
+        this.stackAttributes();
 
         let structName = vertexBufferName.substring(0, 1).toUpperCase() + vertexBufferName.slice(1);
         const varName = vertexBufferName.substring(0, 1).toLowerCase() + vertexBufferName.slice(1);
@@ -492,7 +320,132 @@ export class VertexBuffer implements IShaderResource {
     }
 
 
+
+    public arrayStride: number;
+    public stackAttributes(builtinOffset: number = 0) {
+
+        console.log("---------- STACK ATTRIBUTES ------------");
+
+        const result: VertexAttribute[] = []
+
+        let bound = 1;
+
+        var floats: VertexAttribute[] = [];
+        var vec2s: VertexAttribute[] = [];
+        var vec3s: VertexAttribute[] = [];
+
+        let v;
+        let offset = 0;
+        for (let i = 0; i < this.vertexArrays.length; i++) {
+            v = this.vertexArrays[i];
+            if (v.nbComponent === 1) floats.push(v);
+            else if (v.nbComponent === 2) {
+                if (bound < 2) bound = 2;
+                vec2s.push(v);
+            } else if (v.nbComponent === 3) {
+                bound = 4;
+                vec3s.push(v);
+            } else if (v.nbComponent === 4) {
+                bound = 4;
+                v.dataOffset = offset;
+                offset += 4;
+                result.push(v);
+            }
+        }
+
+
+        //------------------------
+
+
+        const addVec3 = () => {
+            v = vec3s.shift();
+            v.dataOffset = offset;
+            offset += 3;
+            result.push(v);
+            if (floats.length) {
+                const f = floats.shift();
+                f.dataOffset = offset;
+                result.push(f);
+            }
+            offset++
+        }
+
+        let nb = vec3s.length;
+        for (let i = 0; i < nb; i++) addVec3();
+
+        //--------------------------
+
+        nb = vec2s.length;
+        for (let i = 0; i < nb; i++) {
+            v = vec2s.shift();
+            v.dataOffset = offset;
+            offset += 2;
+            result.push(v);
+        }
+
+        //--------------------------
+
+        nb = floats.length;
+        for (let i = 0; i < nb; i++) {
+            v = floats.shift();
+            v.dataOffset = offset;
+            offset++;
+            result.push(v);
+        }
+
+        //--------------------------
+
+        if (offset % bound !== 0) {
+            offset += bound - (offset % bound);
+        }
+
+        //--------------------------
+        this.vertexArrays = result;
+
+        const attributes = [];
+        for (let i = 0; i < result.length; i++) {
+            attributes[i] = {
+                shaderLocation: builtinOffset + i,
+                offset: result[i].dataOffset * Float32Array.BYTES_PER_ELEMENT,
+                format: this.vertexArrays[i].format
+            }
+        }
+
+        //-----------------
+        this.arrayStride = offset;
+
+        console.log("this.arrayStride = ", offset);
+        return {
+            stepMode: this.descriptor.stepMode,
+            arrayStride: Float32Array.BYTES_PER_ELEMENT * this.arrayStride,
+            attributes
+        }
+
+
+    }
+
+
+    public addVertexInstance(instanceId: number, o: any) {
+        const start = instanceId * this.arrayStride;
+        const datas = this._datas;
+        let attribute: VertexAttribute;
+        for (let z in o) {
+            attribute = this.getAttributeByName(z);
+            if (attribute) {
+                datas[start + attribute.dataOffset] = o[z];
+            }
+        }
+    }
+
+
+
+
     public createVertexBufferLayout(builtinOffset: number = 0): any {
+
+        if (this.gpuBufferIOs) {
+            return this.stackAttributes(builtinOffset);
+        }
+
 
         let nb = this._nbComponent;
         if (this.nbComponentData) nb = this.nbComponentData;
@@ -513,11 +466,21 @@ export class VertexBuffer implements IShaderResource {
                 offset: offset * Float32Array.BYTES_PER_ELEMENT,
                 format: this.vertexArrays[i].format
             }
+
+            let type = new GPUType(this.vertexArrays[i].varType);
+            console.log("type = ", this.vertexArrays[i].varType, type.byteAlign, type.byteSize, type.byteValue);
+            //nb = offset + Math.ceil((1 + this.vertexArrays[i].nbComponent) / 2) * 2;
+            console.log("nb = ", Math.ceil((1 + this.vertexArrays[i].nbComponent) / 2) * 2)
+            //console.log("=========>>>>>> ", offset, this.vertexArrays[i].nbComponent)
             //console.log(i, obj.attributes[i])
             componentId += this.vertexArrays[i].nbComponent;
         }
 
-        obj.arrayStride = nb * Float32Array.BYTES_PER_ELEMENT;
+        console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
+
+
+
+        obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
 
         return obj;
     }
@@ -528,7 +491,7 @@ export class VertexBuffer implements IShaderResource {
         if (this.attributeChanged) this.updateAttributes();
 
         if (!this.datas || this.gpuBufferIOs) return;
-        if (this.mustRefactorData) this.refactorData();
+
 
         if (this.gpuResource) this.gpuResource.destroy();
 

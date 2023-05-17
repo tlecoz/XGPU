@@ -4,6 +4,7 @@ import { XGPU } from "../xGPU/XGPU";
 import { ComputePipeline } from "../xGPU/pipelines/ComputePipeline";
 import { Float } from "../xGPU/shader/PrimitiveType";
 import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../xGPU/shader/resources/VertexBufferIO";
 
@@ -22,28 +23,19 @@ export class Test06 {
             const size = 512;
             const ctx = this.setupCanvas2D(size, size);
             const nbParticle = 15000;
-            const particleDatas = this.createParticleDatas(nbParticle, size, size);
 
             const pipeline = new ComputePipeline();
             const obj = pipeline.initFromObject({
-                bindgroups: {
-                    myComputeResources: {
-                        particles: new VertexBufferIO({
-                            radius: VertexAttribute.Float(),
-                            position: VertexAttribute.Vec2(),
-                            velocity: VertexAttribute.Vec2()
-                        }, { datas: particleDatas }),
 
-                        uniforms: new UniformBuffer({
-                            time: new Float(0, true)
-                        })
+                time: new Float(0),
+                particles: new VertexBufferIO({
+                    radius: VertexAttribute.Float(),
+                    position: VertexAttribute.Vec2(),
+                    velocity: VertexAttribute.Vec2()
+                }),
 
-                    }
-                }, computeShader: {
-                    inputs: {
-                        global_id: BuiltIns.computeInputs.globalInvocationId
-                    },
-                    main: `
+                global_id: BuiltIns.computeInputs.globalInvocationId,
+                computeShader: `
                         let nbParticle = arrayLength(&particles);
                         let index = global_id.x;
                         if(index >= nbParticle){
@@ -66,14 +58,23 @@ export class Test06 {
                         p.position.y = (cy + sin( a + time % cos(dy + time) ) * d)  ;
                         
                         var out:Particles = particles_out[index];
-                        particles_out[index].radius = 4.0;
+                        particles_out[index].radius = 1.0;
                         particles_out[index].position =  p.position;
                         particles_out[index].velocity = vec2(cos(a + sin(a+d*time)) *5.15);
                     `
+
+            });
+
+            (obj.particles as VertexBufferIO).createVertexInstances(nbParticle, (id) => {
+                return {
+                    radius: [1],
+                    position: [Math.random() * size, Math.random() * size],
+                    velocity: [-Math.random() + Math.random() * 2, -Math.random() + Math.random() * 2]
                 }
             })
-            console.log(obj.bindgroups.myComputeResources)
-            const timeObj = obj.bindgroups.myComputeResources.uniforms.items.time;
+
+
+            const timeObj: any = obj.time;
 
 
             let oldTime = new Date().getTime();
@@ -83,32 +84,24 @@ export class Test06 {
 
                 let time = (new Date().getTime() - oldTime) / 1000000;
                 timeObj.x = time;
-                //console.log(timeObj.x, time)
+
+
+
                 ctx.clearRect(0, 0, 512, 512)
                 ctx.beginPath();
                 ctx.fillStyle = "#ff0000";
-                let radius, x, y;
-                for (let i = 0; i < datas.length; i += 6) {
-                    radius = datas[i + 0]; //because of byte-alignment, data is packed by 2 
-                    //so even if 'radius' is a single value, it takes 2 slots in the array 
-                    //=> The data have been refactored by VertexBuffer in order to be used in computePipeline
-                    //   ==> we send an array with 5 value by vertex in the vertexBuffer and it outputs an array with 6 value by vertex
-                    //       => it added a zero after the "radius" to maintain the alignment
 
-                    x = datas[i + 2];      //'x' and 'y' can be considered as a pack of two so we can just add one
-                    y = datas[i + 3];
+                let bool = true;
+                (obj.particles as VertexBufferIO).getVertexInstances(datas, (o: any) => {
 
-                    //ctx.lineWidth = 100;
-                    //ctx.moveTo(x, y);
-                    //ctx.lineTo(x + 1, y);
+                    //ctx.rect(o.position[0], o.position[1], o.radius[0], o.radius[0]);
+                    ctx.rect(o.position.x, o.position.y, o.radius.x, o.radius.x);
+                })
 
-                    ctx.rect(x, y, radius, radius);
-
-                    //ctx.arc(x, y, radius, 0, Math.PI * 2);
-                    //ctx.fill();
-
-                }
                 ctx.fill();
+
+
+
             }
 
 
@@ -140,20 +133,6 @@ export class Test06 {
         return canvas.getContext("2d", { alpha: false });
     }
 
-    private createParticleDatas(nb: number, w, h) {
-        const pi2 = Math.PI * 2;
-        let radius: number, x: number, y: number, a: number, speedX: number, speedY: number;
-        const datas: number[] = [];
-        for (let i = 0; i < nb; i++) {
-            radius = 1 + Math.random() * 2;
-            x = Math.random() * w;
-            y = Math.random() * h;
-            a = Math.random() * pi2;
-            speedX = Math.cos(a);
-            speedY = Math.sin(a);
-            datas.push(radius, x, y, speedX, speedY);
-        }
-        return new Float32Array(datas);
-    }
+
 
 }

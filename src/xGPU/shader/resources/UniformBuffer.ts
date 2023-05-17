@@ -202,11 +202,11 @@ export class UniformBuffer implements IShaderResource {
 
         const structName = uniformName.substring(0, 1).toUpperCase() + uniformName.slice(1);
         const struct = new ShaderStruct(structName);
-
+        //console.warn("---------------- createStruct-----------------")
         let o: PrimitiveType;
         for (let i = 0; i < this.uniforms.length; i++) {
             o = this.uniforms[i];
-
+            //console.log(i, o)
             if ((o as any).propertyNames) {
                 struct.addProperty({ name: o.name, type: o.constructor.name, builtin: "", size: o.byteLength, obj: o })
             } else {

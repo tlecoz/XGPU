@@ -250,9 +250,10 @@ export class Bindgroup {
 
 
         if (foundVertexIO) {
-
+            //console.log("bufferIOs = ", bufferIOs)
             const attributes = bufferIOs[0].attributeDescriptor;
-            const vb: VertexBuffer = new VertexBuffer(attributes, { stepMode: "instance" });
+            const stepMode = bufferIOs[0].descriptor.stepMode;
+            const vb: VertexBuffer = new VertexBuffer(attributes, { stepMode });
             this.elements.push({ name, resource: vb })
 
             let vertexBuffers = parentResources.types.vertexBuffers;

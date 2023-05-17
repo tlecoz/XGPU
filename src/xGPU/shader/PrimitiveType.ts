@@ -66,6 +66,12 @@ export class PrimitiveFloatUniform extends Float32Array {
         this.mustBeTransfered = true;
     }
 
+    /*public setDataFrom(input: Float32Array, start: number, len: number) {
+
+
+        for (let i = 0; i < len; i++) this[i] = input[start + i];
+    }*/
+
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 

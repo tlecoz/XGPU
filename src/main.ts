@@ -13,6 +13,9 @@ import { SoundSpectrumSample } from "./samples/basics/soundSpectrum/SoundSpectru
 import { FractalCubeSample } from "./samples/basics/cube/FractalCubeSample";
 import { Test10 } from "./samples/Test10";
 import { Test09 } from "./samples/Test09";
+import { TestAlignment_Sample } from "./samples/basics/TestAlignment/TestAlignment";
+import { Test06 } from "./samples/Test06";
+import { Test07 } from "./samples/Test07";
 
 
 const canvas = document.createElement("canvas");
@@ -38,12 +41,15 @@ canvas.width = canvas.height = 512;
 //new FractalCubeSample(canvas);
 
 //new Test10(canvas);
-new Test09(canvas);
+//new Test09(canvas);
 
+//new TestAlignment_Sample(canvas);
 
 
 //import { Test20 } from "./samples/Test20";
 //new Test20(canvas);
+
+new Test06();
 
 /*
 

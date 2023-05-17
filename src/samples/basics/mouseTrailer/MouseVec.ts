@@ -1,10 +1,10 @@
-import { Vec4 } from "../../../xGPU/shader/PrimitiveType";
+import { Vec3 } from "../../../xGPU/shader/PrimitiveType";
 
-export class MouseVec extends Vec4 {
+export class MouseVec extends Vec3 {
 
     constructor(screenW: number, screenH: number) {
         super(0, 0, 0, 0);
-        this.initStruct(["x", "y", "down", "wheel"]);
+        this.initStruct(["x", "y", "down"]);
 
         document.body.addEventListener("mousemove", (e) => {
             this.x = -1.0 + (e.clientX / screenW) * 2.0;
@@ -12,11 +12,7 @@ export class MouseVec extends Vec4 {
         })
         document.body.addEventListener("mousedown", () => { this.z = 1; })
         document.body.addEventListener("mouseup", () => { this.z = 0; })
-        document.body.addEventListener("wheel", (e) => {
-            if (e.deltaY > 0) this.w = 1;
-            else this.w = -1;
 
-        })
     }
 
     public get down(): boolean { return this.z === 1 }
@@ -24,6 +20,5 @@ export class MouseVec extends Vec4 {
         if (b) this.z = 1;
         else this.z = 0;
     }
-    public get wheelDelta(): number { return this.w }
-    public set wheelDelta(n: number) { this.w = n; }
+
 }
