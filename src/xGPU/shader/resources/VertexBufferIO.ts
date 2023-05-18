@@ -101,11 +101,8 @@ export class VertexBufferIO {
                 else if (a.nbComponent === 2) val = { x: 0, y: 0, ___offset: a.dataOffset };//new Vec2();
                 else if (a.nbComponent === 3) val = { x: 0, y: 0, z: 0, ___offset: a.dataOffset };//new Vec3();
                 else if (a.nbComponent === 4) val = { x: 0, y: 0, z: 0, w: 0, ___offset: a.dataOffset };//new Vec4();
-
                 this.view[z] = val;
-
             }
-            //console.log(this.view)
         }
 
 
@@ -116,19 +113,13 @@ export class VertexBufferIO {
         const nb = this.buffers[0].datas.length / arrayStride;
         let start: number, s: number, nbCompo;
         let v: any;
-        //let o: any;
+
         for (let i = 0; i < nb; i++) {
             start = i * arrayStride;
 
             for (let z in attributes) {
                 nbCompo = attributes[z].nbComponent;
-
-
-
-                //if (i === 0) console.log(z, attributes[z].dataOffset)
-
                 s = start + attributes[z].dataOffset;
-
                 v = view[z];
                 v.x = datas[s];
                 if (nbCompo >= 2) {
@@ -138,9 +129,6 @@ export class VertexBufferIO {
                         if (nbCompo == 4) v.w = datas[s + 3];
                     }
                 }
-
-                //view[z] = datas.slice(s, s + attributes[z].nbComponent) // .setDataFrom(datas, start + attributes[z].dataOffset, attributes[z].nbComponent)
-                //o[z] = datas[start + attributes[z].dataOffset]
             }
             onGetInstance(view);
         }

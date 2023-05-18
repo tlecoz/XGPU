@@ -2,8 +2,9 @@
 import { BuiltIns } from "../xGPU/BuiltIns";
 import { XGPU } from "../xGPU/XGPU";
 import { ComputePipeline } from "../xGPU/pipelines/ComputePipeline";
-import { Float } from "../xGPU/shader/PrimitiveType";
+import { Float, Vec2 } from "../xGPU/shader/PrimitiveType";
 import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
+import { UniformGroup } from "../xGPU/shader/resources/UniformGroup";
 import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../xGPU/shader/resources/VertexBufferIO";
@@ -17,6 +18,16 @@ export class Test06 {
 
 
         XGPU.init().then(() => {
+
+
+            const group = new UniformGroup("test", {
+                a: new Float(0.1),
+                b: new Vec2(1, 2),
+                c: [new UniformGroup("bidule", { a: new Float(55) })]
+            })
+
+            console.log(group);
+            console.log(group.getStruct());
 
 
 
@@ -52,8 +63,6 @@ export class Test06 {
                         var d = distance(p.position,center);
                         var a = atan2(dy ,dx) ;
                         
-                        
-                        //var id = f32(index) ;
                         p.position.x = (cx + cos( a + time % sin(dx + time) ) * d) ;  
                         p.position.y = (cy + sin( a + time % cos(dy + time) ) * d)  ;
                         
@@ -80,27 +89,16 @@ export class Test06 {
             let oldTime = new Date().getTime();
             pipeline.onReceiveData = (datas: Float32Array) => {
 
-                //console.log(datas.slice(6, 7))
 
-                let time = (new Date().getTime() - oldTime) / 1000000;
-                timeObj.x = time;
-
-
+                timeObj.x = (new Date().getTime() - oldTime) / 1000000;;
 
                 ctx.clearRect(0, 0, 512, 512)
                 ctx.beginPath();
                 ctx.fillStyle = "#ff0000";
-
-                let bool = true;
                 (obj.particles as VertexBufferIO).getVertexInstances(datas, (o: any) => {
-
-                    //ctx.rect(o.position[0], o.position[1], o.radius[0], o.radius[0]);
                     ctx.rect(o.position.x, o.position.y, o.radius.x, o.radius.x);
                 })
-
                 ctx.fill();
-
-
 
             }
 

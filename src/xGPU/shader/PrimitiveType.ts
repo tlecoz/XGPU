@@ -29,7 +29,7 @@ export class PrimitiveFloatUniform extends Float32Array {
     public uniformBuffer: UniformBuffer;
 
     public propertyNames: string[];
-    public createVariableInsideMain: boolean = false;;
+    public createVariableInsideMain: boolean = false;
 
     protected className: string;
 

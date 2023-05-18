@@ -4,7 +4,7 @@
 export class GPUType {
 
     private _isVector: boolean = false;
-    private _isMatrix: Boolean = false;
+    private _isMatrix: boolean = false;
     private _isArray: boolean = false;
     private _vecType: number = 1;
     private _arrayLen: number | undefined;
@@ -23,7 +23,6 @@ export class GPUType {
     constructor(dataType: string) {
         this._rawType = dataType;
         dataType = this.renameDataType(dataType);
-        //ex : u32,vec3<f16>,...
         this._dataType = dataType;
         //console.log("GPUType dataType = ", dataType)
         this.getPrimitiveDataType(dataType, 0);
@@ -105,6 +104,7 @@ export class GPUType {
 
     public get isMatrixOfVectors(): boolean { return this._isMatrix && this._isVector }
     public get isArrayOfVectors(): boolean { return this._isArray && this._isVector }
+    public get isArrayOfMatrixs(): boolean { return this._isArray && this._isMatrix }
 
     public get vectorType(): number { return this._vecType; }
     public get arrayLength(): number { return this._arrayLen; }

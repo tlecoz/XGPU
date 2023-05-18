@@ -1,2 +1,8 @@
-vertexBuffer alignment.... 
+
 verifier a fond uniformBufferAlignment
+
+uniformBuffer storage si trop gros 
+
+export to JSON 
+
+buildPipelineFromJSON 
