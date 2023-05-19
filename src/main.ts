@@ -30,7 +30,7 @@ canvas.width = canvas.height = 512;
 //new HelloTriangle_uniform_shorter(canvas);
 //new HelloTriangle_raw(canvas);
 
-//new MouseTrailerSample(canvas);
+new MouseTrailerSample(canvas);
 //new MouseTrailerSample2(canvas);
 
 //new MouseTrailerSample3(canvas);
@@ -49,7 +49,7 @@ canvas.width = canvas.height = 512;
 //import { Test20 } from "./samples/Test20";
 //new Test20(canvas);
 
-new Test06();
+//new Test06();
 
 /*
 

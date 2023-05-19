@@ -3,6 +3,25 @@ verifier a fond uniformBufferAlignment
 
 uniformBuffer storage si trop gros 
 
+renderBundle sample 
+
+rename shader.code to shader.constants 
+
+createStruct ({a:"float",b:"vec2",c:"float"})
+|-> utilisé dans UniformGroup et PrimitiveType 
+
+
+
+//----------------
+git pour les samples 
+//----------------
+
+ratio uniform dans renderer 
+
+
+
+
+
 export to JSON 
 
 buildPipelineFromJSON 

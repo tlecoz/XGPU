@@ -66,12 +66,8 @@ export class PrimitiveFloatUniform extends Float32Array {
         this.mustBeTransfered = true;
     }
 
-    /*public setDataFrom(input: Float32Array, start: number, len: number) {
 
-
-        for (let i = 0; i < len; i++) this[i] = input[start + i];
-    }*/
-
+    /*
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
@@ -90,6 +86,21 @@ export class PrimitiveFloatUniform extends Float32Array {
         }
 
         return "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";"
+    }
+    */
+    public createVariable(uniformBufferName: string): string {
+        if (!this.createVariableInsideMain) return "";
+
+        let type = this.className;
+        if (type === "Float") type = "f32";
+        if (type === "Vec2") type = "vec2<f32>";
+        if (type === "Vec3") type = "vec3<f32>";
+        if (type === "Vec4") type = "vec4<f32>";
+
+        const res: string = "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
+        console.log("createVariable = ", res);
+
+        return res;
     }
 
     public update() { }
@@ -146,6 +157,7 @@ export class PrimitiveIntUniform extends Int32Array {
         return result;
     }
 
+    /*
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
@@ -164,6 +176,19 @@ export class PrimitiveIntUniform extends Int32Array {
             }
         }
         return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
+    }
+    */
+
+    public createVariable(uniformBufferName: string): string {
+        if (!this.createVariableInsideMain) return "";
+
+        let type = this.className;
+        if (type === "Int") type = "i32";
+        if (type === "IVec2") type = "vec2<i32>";
+        if (type === "IVec3") type = "vec3<i32>";
+        if (type === "IVec4") type = "vec4<i32>";
+
+        return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n"
     }
 
     public update() { }
@@ -218,6 +243,7 @@ export class PrimitiveUintUniform extends Uint32Array {
         return result;
     }
 
+    /*
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
 
@@ -235,7 +261,22 @@ export class PrimitiveUintUniform extends Uint32Array {
             }
         }
         return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
+    }*/
+
+    public createVariable(uniformBufferName: string): string {
+        if (!this.createVariableInsideMain) return "";
+
+        let type = this.className;
+        if (type === "Uint") type = "u32";
+        if (type === "UVec2") type = "vec2<u32>";
+        if (type === "UVec3") type = "vec3<u32>";
+        if (type === "UVec4") type = "vec4<u32>";
+
+
+        return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
     }
+
+
 
     public update() { }
 }

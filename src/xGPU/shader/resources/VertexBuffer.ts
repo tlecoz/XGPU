@@ -324,7 +324,7 @@ export class VertexBuffer implements IShaderResource {
     public arrayStride: number;
     public stackAttributes(builtinOffset: number = 0) {
 
-        console.log("---------- STACK ATTRIBUTES ------------");
+        //console.log("---------- STACK ATTRIBUTES ------------");
 
         const result: VertexAttribute[] = []
 
@@ -414,7 +414,7 @@ export class VertexBuffer implements IShaderResource {
         //-----------------
         this.arrayStride = offset;
 
-        console.log("this.arrayStride = ", offset);
+        //console.log("this.arrayStride = ", offset);
         return {
             stepMode: this.descriptor.stepMode,
             arrayStride: Float32Array.BYTES_PER_ELEMENT * this.arrayStride,

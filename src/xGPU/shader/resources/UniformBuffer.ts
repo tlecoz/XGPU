@@ -1,6 +1,208 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+
+
+//NEW VERSION------
+
+import { XGPU } from "../../XGPU";
+import { PrimitiveType } from "../PrimitiveType";
+import { IShaderResource } from "./IShaderResource";
+import { UniformGroup, Uniformable } from "./UniformGroup";
+
+
+export type UniformBufferDescriptor = {
+    useLocalVariable?: boolean;
+    visibility?: GPUShaderStageFlags;
+}
+
+export class UniformBuffer implements IShaderResource {
+
+    public mustBeTransfered: boolean = false;
+    public gpuResource: GPUBuffer;
+    public descriptor: UniformBufferDescriptor;
+
+    public group: UniformGroup;
+
+
+
+
+    constructor(items: any, descriptor?: {
+        useLocalVariable?: boolean;
+        visibility?: GPUShaderStageFlags;
+    }) {
+
+
+        this.descriptor = descriptor ? { ...descriptor } : {};
+        this.group = new UniformGroup(items, this, this.descriptor.useLocalVariable);
+    }
+
+
+    public clone(propertyNames?: string[]): UniformBuffer {
+        //if propertyNames exists, it will clone only these properties and copy the others
+        //if propertyNames is undefined, it will clone every properties 
+
+        const items = { ...this.group.unstackedItems };
+
+        const cloneArray = (arr) => {
+            let t = [...arr];
+            for (let i = 0; i < t.length; i++) {
+                if (t[i] instanceof Array) {
+                    t[i] = cloneArray(t[i]);
+                } else {
+                    t[i] = t[i].clone();
+                }
+            }
+            return t;
+        }
+
+
+        if (propertyNames) {
+
+            for (let z in items) {
+                if (propertyNames.indexOf(z) !== -1) {
+                    if (items[z] instanceof Array) {
+                        items[z] = cloneArray(items[z]);
+                    } else {
+                        items[z] = items[z].clone();
+                    }
+                }
+            }
+
+        } else {
+            for (let z in items) {
+                if (items[z] instanceof Array) {
+
+                    items[z] = cloneArray(items[z]);
+
+                } else {
+                    items[z] = items[z].clone();
+                }
+            }
+        }
+
+        const buffer = new UniformBuffer(items, this.descriptor);
+        (buffer as any).name = (this as any).name;
+        return buffer;
+
+    }
+
+    public test() {
+
+    }
+
+    public add(name: string, data: PrimitiveType, useLocalVariable: boolean = false): Uniformable {
+        return this.group.add(name, data, useLocalVariable);
+    }
+
+
+
+
+
+
+    public update(): void {
+
+
+        //if (!this._data) this._data = new Float32Array(new ArrayBuffer(this.byteSize))
+        if (!this.gpuResource) this.createGpuResource();
+
+
+
+
+        this.group.update(this.gpuResource, true);
+    }
+
+    public createStruct(uniformName: string): { struct: string, localVariables: string } {
+
+
+
+
+        const o = this.group.getStruct(uniformName);
+
+
+
+        return o;
+    }
+
+    public createDeclaration(uniformName: string, bindingId: number, groupId: number = 0): string {
+
+        const structName = uniformName.substring(0, 1).toUpperCase() + uniformName.slice(1);
+        const varName = uniformName.substring(0, 1).toLowerCase() + uniformName.slice(1);
+
+        return "@binding(" + bindingId + ") @group(" + groupId + ") var<uniform> " + varName + ":" + structName + ";\n";
+    }
+
+    public getUniformById(id: number) { return this.group.items[id]; }
+    public getUniformByName(name: string) { return this.group.getElementByName(name); }
+
+    //------------------------------
+
+    public createGpuResource(): any {
+
+        if (!this.gpuResource) {
+
+            this.gpuResource = XGPU.device.createBuffer({
+                size: this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            })
+
+            this.update();
+        }
+    }
+
+    public destroyGpuResource() {
+        if (this.gpuResource) this.gpuResource.destroy();
+        this.gpuResource = null;
+    }
+
+
+    public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, buffer: { type: string } } {
+
+        return {
+            binding: bindingId,
+            visibility: this.descriptor.visibility,
+            buffer: {
+                type: "uniform",
+            },
+        }
+    }
+
+
+    public createBindGroupEntry(bindingId: number): { binding: number, resource: { buffer: GPUBuffer } } {
+        if (!this.gpuResource) this.createGpuResource();
+        return {
+            binding: bindingId,
+            resource: {
+                buffer: this.gpuResource
+            }
+        }
+    }
+
+    public get items(): any { return this.group.unstackedItems; }
+    public get itemNames(): string[] { return this.group.itemNames; }
+    public get nbComponent(): number { return this.group.arrayStride; }
+    public get nbUniforms(): number { return this.group.items.length; }
+
+    //public get bufferType(): string { return "uniform"; }
+
+    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
+
+        //use to handle particular cases in descriptor relative to the nature of pipeline
+        if (pipelineType === "compute" || pipelineType === "compute_mixed") this.descriptor.visibility = GPUShaderStage.COMPUTE;
+
+        else this.descriptor.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
+    }
+}
+
+
+
+
+/*
+
+============================ OLD VERSION =========================================
+
+
+
 import { XGPU } from "../../XGPU";
 import { GPUType } from "../../GPUType";
 import { PrimitiveType } from "../PrimitiveType";
@@ -301,3 +503,5 @@ export class UniformBuffer implements IShaderResource {
         else this.descriptor.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
     }
 }
+
+*/

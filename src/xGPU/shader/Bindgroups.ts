@@ -117,10 +117,9 @@ export class Bindgroups {
                 //console.log("=====> ", resource, resource instanceof VertexBuffer)
                 if (resource instanceof UniformBuffer) {
 
+                    /*
+                    //OLD VERSION------
                     let item;
-                    //console.log("uniforms = ", resource.items)
-
-
                     for (let z in resource.items) {
                         item = resource.items[z];
 
@@ -128,10 +127,20 @@ export class Bindgroups {
                         if (item.propertyNames) result += item.createStruct() + "\n";
                         if (item.createVariableInsideMain) obj.variables += item.createVariable(_name) + "\n"
                     }
-
-
-
                     result += resource.createStruct(name).struct + "\n";
+                    */
+
+
+
+
+                    //NEW VERSION -------
+
+                    const s: { struct: string, localVariables: string } = resource.createStruct(name);
+                    obj.variables += s.localVariables;
+                    result += s.struct;
+
+
+
                 }
 
                 result += resource.createDeclaration(name, k++, i) + "\n";

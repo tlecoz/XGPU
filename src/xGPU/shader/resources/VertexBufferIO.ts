@@ -64,7 +64,7 @@ export class VertexBufferIO {
         const arrayStride = this.buffers[0].arrayStride;
         const datas = new Float32Array(arrayStride * nbInstance);
 
-        console.log("==> ", arrayStride)
+        //console.log("==> ", arrayStride)
 
         let o: any;
         let start;

@@ -65,7 +65,17 @@ export class MouseTrailer extends RenderPipeline {
 export class MouseTrailerSample extends Sample {
 
     protected async start(renderer: GPURenderer): Promise<void> {
-        renderer.addPipeline(new MouseTrailer(renderer));
+
+        const demo = new MouseTrailer(renderer)
+        const debug = document.createElement("div");
+        document.body.appendChild(debug);
+
+        demo.onDrawBegin = () => {
+            debug.innerText = demo.resources.bindgroups.default.uniforms.group.datas.toString();
+            //console.log(demo.resources.bindgroups.default.uniforms.group.datas);
+            demo.resources
+        }
+        renderer.addPipeline(demo);
     }
 
 }

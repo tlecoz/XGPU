@@ -2,9 +2,10 @@
 import { BuiltIns } from "../xGPU/BuiltIns";
 import { XGPU } from "../xGPU/XGPU";
 import { ComputePipeline } from "../xGPU/pipelines/ComputePipeline";
-import { Float, Vec2 } from "../xGPU/shader/PrimitiveType";
+import { Float, Vec2, Vec3 } from "../xGPU/shader/PrimitiveType";
 import { UniformBuffer } from "../xGPU/shader/resources/UniformBuffer";
 import { UniformGroup } from "../xGPU/shader/resources/UniformGroup";
+import { UniformGroupArray } from "../xGPU/shader/resources/UniformGroupArray";
 import { VertexAttribute } from "../xGPU/shader/resources/VertexAttribute";
 import { VertexBuffer } from "../xGPU/shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../xGPU/shader/resources/VertexBufferIO";
@@ -19,16 +20,21 @@ export class Test06 {
 
         XGPU.init().then(() => {
 
-
-            const group = new UniformGroup("test", {
+            /*
+            const group = new UniformGroup({
                 a: new Float(0.1),
                 b: new Vec2(1, 2),
-                c: [new UniformGroup("bidule", { a: new Float(55) })]
-            })
+                c: new UniformGroup({ aaa: new Vec3(1, 2, 3) }),
+                d: new UniformGroupArray([new UniformGroup({ zzz: new Float(55) })]),
+
+            }, null, true)
 
             console.log(group);
-            console.log(group.getStruct());
+            const struct = group.getStruct("test");
 
+            console.log(struct.struct);
+            console.log(struct.localVariables);
+            */
 
 
             const size = 512;

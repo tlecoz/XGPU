@@ -28,6 +28,7 @@
     },
     "include": [
         "src",
-        "index.ts"
+        "index.ts",
+        "typings.d.ts"
     ],
 }
