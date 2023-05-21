@@ -468,15 +468,15 @@ export class VertexBuffer implements IShaderResource {
             }
 
             let type = new GPUType(this.vertexArrays[i].varType);
-            console.log("type = ", this.vertexArrays[i].varType, type.byteAlign, type.byteSize, type.byteValue);
+            //console.log("type = ", this.vertexArrays[i].varType, type.byteAlign, type.byteSize, type.byteValue);
             //nb = offset + Math.ceil((1 + this.vertexArrays[i].nbComponent) / 2) * 2;
-            console.log("nb = ", Math.ceil((1 + this.vertexArrays[i].nbComponent) / 2) * 2)
+            //console.log("nb = ", Math.ceil((1 + this.vertexArrays[i].nbComponent) / 2) * 2)
             //console.log("=========>>>>>> ", offset, this.vertexArrays[i].nbComponent)
             //console.log(i, obj.attributes[i])
             componentId += this.vertexArrays[i].nbComponent;
         }
 
-        console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
+        //console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
 
 
 

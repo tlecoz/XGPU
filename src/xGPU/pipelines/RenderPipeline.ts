@@ -155,13 +155,13 @@ export class RenderPipeline extends Pipeline {
             main: string
             outputs?: any,
             inputs?: any,
-            code?: string,
+            constants?: string,
         } | string,
         fragmentShader?: {
             main: string,
             outputs?: any,
             inputs?: any,
-            code?: string
+            constants?: string
         } | string
         , [key: string]: unknown
     }) {
@@ -275,7 +275,7 @@ export class RenderPipeline extends Pipeline {
         } else {
             this.vertexShader.inputs = createArrayOfObjects(descriptor.vertexShader.inputs);
             this.vertexShader.outputs = createArrayOfObjects(descriptor.vertexShader.outputs);
-            if (descriptor.vertexShader.code) this.vertexShader.code.text = descriptor.vertexShader.code;
+            if (descriptor.vertexShader.constants) this.vertexShader.constants.text = descriptor.vertexShader.constants;
             this.vertexShader.main.text = descriptor.vertexShader.main;
         }
 
@@ -289,7 +289,7 @@ export class RenderPipeline extends Pipeline {
             } else {
                 this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);;
                 this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);;
-                if (descriptor.fragmentShader.code) this.fragmentShader.code.text = descriptor.fragmentShader.code;
+                if (descriptor.fragmentShader.constants) this.fragmentShader.constants.text = descriptor.fragmentShader.constants;
                 this.fragmentShader.main.text = descriptor.fragmentShader.main;
             }
 

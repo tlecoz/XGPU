@@ -11,8 +11,8 @@ export class ShaderStage {
     public export: { name: string, type: any }[] = [];
     public require: { name: string, type: any }[] = [];
 
-    public constants: any = {};
-    public code: ShaderNode;
+    public pipelineConstants: any = {};
+    public constants: ShaderNode;
     public main: ShaderNode;
 
     public shaderType: "vertex" | "fragment" | "compute";
@@ -20,7 +20,7 @@ export class ShaderStage {
     constructor(shaderType: "vertex" | "fragment" | "compute") {
 
         this.shaderType = shaderType;
-        this.code = new ShaderNode();
+        this.constants = new ShaderNode();
         this.main = new ShaderNode("", true);
 
     }

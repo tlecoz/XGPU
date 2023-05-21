@@ -98,7 +98,7 @@ export class PrimitiveFloatUniform extends Float32Array {
         if (type === "Vec4") type = "vec4<f32>";
 
         const res: string = "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
-        console.log("createVariable = ", res);
+        //console.log("createVariable = ", res);
 
         return res;
     }
@@ -690,6 +690,15 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 
     public clone(): PrimitiveFloatUniform {
         const m = new Matrix4x4(this as Float32Array);
+        m.x = this.x;
+        m.y = this.y;
+        m.z = this.z;
+        m.rotationX = this.rotationX;
+        m.rotationY = this.rotationY;
+        m.rotationZ = this.rotationZ;
+        m.scaleX = this.scaleX;
+        m.scaleY = this.scaleY;
+        m.scaleZ = this.scaleZ;
         m.disableUpdate = this.disableUpdate;
         return m;
     }
@@ -776,6 +785,8 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
     }
 
     public update() {
+
+        //console.log("matrix.update ", this.disableUpdate)
         if (this.disableUpdate) return;
 
         if (this.mustBeTransfered) {

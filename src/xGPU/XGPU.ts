@@ -59,7 +59,7 @@ export class XGPU {
     }
 
     public static get device(): GPUDevice {
-        if (!this.gpuDevice) throw new Error("you must use XGPU.init() to get the reference of the gpuDevice")
+        if (!this.gpuDevice && !this.ready) throw new Error("you must use XGPU.init() to get the reference of the gpuDevice")
         return this.gpuDevice;
     }
 
@@ -75,6 +75,13 @@ export class XGPU {
         this._preferedCanvasFormat = format;
     }
 
+    public static destroy() {
+        if (this.gpuDevice) {
+            this.gpuDevice.destroy();
+            this.gpuDevice = null;
+            this._ready = false;
+        }
+    }
 
     public static createBindgroup(o: any): GPUBindGroup {
         return this.device.createBindGroup(o);

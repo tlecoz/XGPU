@@ -95,7 +95,6 @@ export class Test06 {
             let oldTime = new Date().getTime();
             pipeline.onReceiveData = (datas: Float32Array) => {
 
-
                 timeObj.x = (new Date().getTime() - oldTime) / 1000000;;
 
                 ctx.clearRect(0, 0, 512, 512)
@@ -109,8 +108,8 @@ export class Test06 {
             }
 
 
-            pipeline.buildGpuPipeline();
-            pipeline.nextFrame();
+            //pipeline.buildGpuPipeline();
+            //pipeline.nextFrame();
             const animate = () => {
                 pipeline.nextFrame();
                 requestAnimationFrame(animate)

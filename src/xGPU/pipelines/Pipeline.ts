@@ -725,24 +725,29 @@ export class Pipeline {
 
 
                 resource = resources[i];
+                resource.update();
                 const name = resourceNames[i];
                 const bindgroup = resourceBindgroup[i];
 
-
+                //console.log("resource = ", resource)
 
 
                 if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
                     const uniformBufferName = resourceUniformBufferName[i];//bindgroup.getResourceName(resource.uniformBuffer);
-                    console.log("uniformBufferName = ", uniformBufferName)
+                    //console.log("uniformBufferName = ", uniformBufferName, name)
                     if (!clonedUniformBuffers[uniformBufferName]) {
                         clonedUniformBuffers[uniformBufferName] = resource.uniformBuffer.clone();
                         clonedUniformBuffers[uniformBufferName].name = uniformBufferName;
+
+                        //console.log("cloned uniformBuffer = ", clonedUniformBuffers[uniformBufferName])
                     }
                     //console.log("===>>> uniformBufferName = ", bindgroup.getResourceName(resource.uniformBuffer))
                     instance[uniformBufferName] = clonedUniformBuffers[uniformBufferName];
                     (instance[uniformBufferName] as any).name = clonedUniformBuffers[uniformBufferName].name;
                     (instance[uniformBufferName] as any).bindgroup = bindgroup;
                     instance[name] = clonedUniformBuffers[uniformBufferName].getUniformByName(name);
+                    instance[name].debug = "azerty";
+                    console.log("instance[name] = ", instance[name])
 
                 } else {
                     instance[name] = resource.clone();
@@ -756,6 +761,7 @@ export class Pipeline {
             for (let z in instance) {
                 resource = instance[z];
                 if (!(resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform)) {
+
                     resource.createGpuResource();
                     shaderResources.push(resource);
                 }
@@ -765,6 +771,7 @@ export class Pipeline {
                 let o: any;
                 for (let i = 0; i < shaderResources.length; i++) {
                     o = shaderResources[i];
+
                     o.update();
                     //console.log(i, o.name, o)
                     o.bindgroup.set(o.name, o);

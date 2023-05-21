@@ -25,14 +25,17 @@ export class UniformGroup {
     public get uniformBuffer(): UniformBuffer { return this.buffer };
     public set uniformBuffer(buffer: UniformBuffer) {
         this.buffer = buffer;
-        if (buffer) buffer.mustBeTransfered = true;
+        if (buffer) {
+            //console.log("buffer ==== ", buffer)
+            buffer.mustBeTransfered = true;
+        }
         for (let i = 0; i < this.items.length; i++) {
             (this.items[i] as any).uniformBuffer = buffer;
         }
     }
 
 
-    constructor(items: any, uniformBuffer?: UniformBuffer, useLocalVariable?: boolean) {
+    constructor(items: any, useLocalVariable?: boolean) {
 
 
         this.createVariableInsideMain = !!useLocalVariable;
@@ -52,13 +55,9 @@ export class UniformGroup {
             this.add(z, o, this.createVariableInsideMain, false)
         }
 
-
-
         this.items = this.stackItems(items);
-
-        if (uniformBuffer) this.uniformBuffer = uniformBuffer;
-
     }
+
 
     public get name(): string { return this._name; }
     public set name(s: string) {
@@ -127,7 +126,8 @@ export class UniformGroup {
 
     public getElementByName(name: string): Uniformable {
         for (let i = 0; i < this.items.length; i++) {
-            if ((this.items[i] as any).name === name) {
+            if (this.items[i].name === name) {
+                //console.log("=>>>>>>> ", name)
                 return this.items[i];
             }
         }
@@ -135,7 +135,7 @@ export class UniformGroup {
     }
 
 
-    public get type(): { nbComponent: number, isUniformGroup: boolean, isArray: boolean } { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: false } }
+    public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: false } }
 
     protected getStructName(name: string) {
         if (!name) return null;
@@ -173,10 +173,13 @@ export class UniformGroup {
             return;
         }
 
+        //console.log(this.datas);
 
         let item: Uniformable;
         for (let i = 0; i < this.items.length; i++) {
             item = this.items[i];
+            if (!item.type.isUniformGroup) (item as any).update();
+
             if (item.mustBeTransfered) {
 
                 if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
@@ -184,6 +187,8 @@ export class UniformGroup {
                 } else {
 
                     this.datas.set(item, item.startId);
+                    //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.byteLength, item);
+
                     XGPU.device.queue.writeBuffer(
                         gpuResource,
                         item.startId * Float32Array.BYTES_PER_ELEMENT,
@@ -261,7 +266,7 @@ export class UniformGroup {
                 if (o.propertyNames) {
                     const s = o.createStruct();
 
-                    console.warn("primitiveStructs = ", primitiveStructs)
+                    //console.warn("primitiveStructs = ", primitiveStructs)
 
                     if (primitiveStructs.indexOf(s) === -1) {
                         primitiveStructs += s + "\n";
@@ -281,7 +286,7 @@ export class UniformGroup {
 
 
         struct = primitiveStructs + otherStructs + struct;
-        console.log("struct = ", struct)
+        //console.log("struct = ", struct)
         this.struct = {
             struct,
             localVariables
@@ -313,14 +318,13 @@ export class UniformGroup {
             v.name = z;
             type = v.type;
 
-            if (!type) {
-                if (v instanceof UniformGroupArray) {
 
-                    v.startId = offset;
-                    offset += v.arrayStride;
-                    result.push(v);
+            if (v instanceof UniformGroupArray) {
 
-                }
+                v.startId = offset;
+                offset += v.arrayStride;
+                result.push(v);
+
             } else {
 
                 if (type.isArray) {

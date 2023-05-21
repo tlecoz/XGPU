@@ -37,6 +37,8 @@ export class UniformGroupArray {
         return group;
     }
 
+    public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true } }
+
     protected getStructName(name: string) {
         if (!name) return null;
         return name[0].toUpperCase() + name.slice(1);

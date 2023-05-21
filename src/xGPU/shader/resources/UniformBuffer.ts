@@ -18,13 +18,17 @@ export type UniformBufferDescriptor = {
 
 export class UniformBuffer implements IShaderResource {
 
-    public mustBeTransfered: boolean = false;
+
     public gpuResource: GPUBuffer;
     public descriptor: UniformBufferDescriptor;
 
     public group: UniformGroup;
 
 
+    public get mustBeTransfered(): boolean { return this.group.mustBeTransfered; }
+    public set mustBeTransfered(b: boolean) {
+        this.group.mustBeTransfered = b;
+    }
 
 
     constructor(items: any, descriptor?: {
@@ -34,7 +38,8 @@ export class UniformBuffer implements IShaderResource {
 
 
         this.descriptor = descriptor ? { ...descriptor } : {};
-        this.group = new UniformGroup(items, this, this.descriptor.useLocalVariable);
+        this.group = new UniformGroup(items, this.descriptor.useLocalVariable);
+        this.group.uniformBuffer = this;
     }
 
 
@@ -44,52 +49,15 @@ export class UniformBuffer implements IShaderResource {
 
         const items = { ...this.group.unstackedItems };
 
-        const cloneArray = (arr) => {
-            let t = [...arr];
-            for (let i = 0; i < t.length; i++) {
-                if (t[i] instanceof Array) {
-                    t[i] = cloneArray(t[i]);
-                } else {
-                    t[i] = t[i].clone();
-                }
-            }
-            return t;
-        }
-
-
-        if (propertyNames) {
-
-            for (let z in items) {
-                if (propertyNames.indexOf(z) !== -1) {
-                    if (items[z] instanceof Array) {
-                        items[z] = cloneArray(items[z]);
-                    } else {
-                        items[z] = items[z].clone();
-                    }
-                }
-            }
-
-        } else {
-            for (let z in items) {
-                if (items[z] instanceof Array) {
-
-                    items[z] = cloneArray(items[z]);
-
-                } else {
-                    items[z] = items[z].clone();
-                }
-            }
-        }
+        for (let z in items) items[z] = items[z].clone();
 
         const buffer = new UniformBuffer(items, this.descriptor);
+
         (buffer as any).name = (this as any).name;
         return buffer;
 
     }
 
-    public test() {
-
-    }
 
     public add(name: string, data: PrimitiveType, useLocalVariable: boolean = false): Uniformable {
         return this.group.add(name, data, useLocalVariable);
@@ -105,9 +73,6 @@ export class UniformBuffer implements IShaderResource {
 
         //if (!this._data) this._data = new Float32Array(new ArrayBuffer(this.byteSize))
         if (!this.gpuResource) this.createGpuResource();
-
-
-
 
         this.group.update(this.gpuResource, true);
     }

@@ -19,7 +19,7 @@ export class VertexShader extends ShaderStage {
 
     public build(pipeline: RenderPipeline, input: ShaderStruct): { code: string, output: ShaderStruct } {
 
-        let result = this.code.value + "\n\n";
+        let result = this.constants.value + "\n\n";
         if (this.keepRendererAspectRatio) result += "const xgpuRendererAspectRatio = " + (pipeline.renderer.width / pipeline.renderer.height).toFixed(4) + ";\n\n";
         const obj = pipeline.bindGroups.getVertexShaderDeclaration();
         result += obj.result;
@@ -57,8 +57,8 @@ export class VertexShader extends ShaderStage {
 
         result = this.formatWGSLCode(result)
 
-        console.log("------------- VERTEX SHADER --------------")
-        console.log(result);
+        //console.log("------------- VERTEX SHADER --------------")
+        //console.log(result);
         //console.log("------------------------------------------")
         return { code: result, output: output };
     }

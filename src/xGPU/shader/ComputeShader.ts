@@ -22,7 +22,7 @@ export class ComputeShader extends ShaderStage {
 
 
 
-        let result = this.code.value + "\n\n";
+        let result = this.constants.value + "\n\n";
         const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
         result += obj.result;
 

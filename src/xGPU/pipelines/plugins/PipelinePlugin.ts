@@ -16,14 +16,14 @@ export class PipelinePlugin {
     public vertexShader: {
         outputs?: any,
         inputs?: any,
-        code?: string,
+        constants?: string,
         main?: string | string[],
     } = {};
 
     public fragmentShader: {
         outputs?: any,
         inputs?: any,
-        code?: string,
+        constants?: string,
         main?: string | string[],
     } = {};
 
@@ -69,9 +69,9 @@ export class PipelinePlugin {
             }
         }
 
-        if (this.vertexShader.code) {
-            if (!vs.code) vs.code = "";
-            vs.code += this.vertexShader.code;
+        if (this.vertexShader.constants) {
+            if (!vs.constants) vs.constants = "";
+            vs.constants += this.vertexShader.constants;
         }
 
         if (this.vertexShader.main) {
@@ -105,9 +105,9 @@ export class PipelinePlugin {
             }
         }
 
-        if (this.fragmentShader.code) {
-            if (!fs.code) fs.code = "";
-            fs.code += this.fragmentShader.code;
+        if (this.fragmentShader.constants) {
+            if (!fs.constants) fs.constants = "";
+            fs.constants += this.fragmentShader.constants;
         }
 
         if (this.fragmentShader.main) {
