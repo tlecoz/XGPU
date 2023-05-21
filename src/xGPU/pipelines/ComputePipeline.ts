@@ -49,7 +49,7 @@ export class ComputePipeline extends Pipeline {
             outputs?: any,
             main: string
             inputs?: any,
-            code?: string,
+            constants?: string,
         } | string,
         [key: string]: unknown
     }) {
@@ -119,7 +119,7 @@ export class ComputePipeline extends Pipeline {
         } else {
             this.computeShader.inputs = createArrayOfObjects(descriptor.computeShader.inputs);
             this.computeShader.outputs = createArrayOfObjects(descriptor.computeShader.outputs);
-            if (descriptor.computeShader.code) this.computeShader.code.text = descriptor.computeShader.code;
+            if (descriptor.computeShader.constants) this.computeShader.constants.text = descriptor.computeShader.constants;
             this.computeShader.main.text = descriptor.computeShader.main;
         }
 

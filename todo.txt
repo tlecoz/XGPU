@@ -1,20 +1,25 @@
 
 verifier a fond uniformBufferAlignment
 
+ => tester avec les UniformGroup / UniformGroupArray 
+    ==> tester avec des dizaines/centaines de ressources
+
+
+
+
+
 uniformBuffer storage si trop gros 
 
 renderBundle sample 
 
-rename shader.code to shader.constants 
+
 
 createStruct ({a:"float",b:"vec2",c:"float"})
 |-> utilisé dans UniformGroup et PrimitiveType 
 
 
 
-//----------------
-git pour les samples 
-//----------------
+
 
 ratio uniform dans renderer 
 

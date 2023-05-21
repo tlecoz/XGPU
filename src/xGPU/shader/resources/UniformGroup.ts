@@ -336,19 +336,20 @@ export class UniformGroup {
                     } else {
                         offset += 4 * type.arrayLength;
                     }
-
+                    bound = 4;
                     result.push(v);
 
 
                 } else if (type.isMatrix) {
                     v.startId = offset;
                     offset += 4 * type.matrixRows;
-
+                    bound = type.matrixRows;
                     result.push(v);
 
                 } else if (type.isUniformGroup) {
 
                     if (type.nbComponent >= 4) {
+                        bound = 4;
                         v.startId = offset;
                         offset += Math.ceil(type.nbComponent / 4) * 4;
                         result.push(v);
