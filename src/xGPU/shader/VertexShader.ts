@@ -9,7 +9,7 @@ import { ShaderStruct } from "./shaderParts/ShaderStruct";
 
 export class VertexShader extends ShaderStage {
 
-    public keepRendererAspectRatio: boolean = true;
+    //public keepRendererAspectRatio: boolean = true;
 
     constructor() {
         super("vertex");
@@ -20,7 +20,7 @@ export class VertexShader extends ShaderStage {
     public build(pipeline: RenderPipeline, input: ShaderStruct): { code: string, output: ShaderStruct } {
 
         let result = this.constants.value + "\n\n";
-        if (this.keepRendererAspectRatio) result += "const xgpuRendererAspectRatio = " + (pipeline.renderer.width / pipeline.renderer.height).toFixed(4) + ";\n\n";
+        //if (this.keepRendererAspectRatio) result += "const xgpuRendererAspectRatio = " + (pipeline.renderer.width / pipeline.renderer.height).toFixed(4) + ";\n\n";
         const obj = pipeline.bindGroups.getVertexShaderDeclaration();
         result += obj.result;
 
@@ -51,14 +51,14 @@ export class VertexShader extends ShaderStage {
         result += obj.variables + "\n";
         result += "   var output:Output;\n";
         result += this.main.value;
-        if (this.keepRendererAspectRatio) result += `   output.position = vec4(output.position.x /  xgpuRendererAspectRatio , output.position.y   ,output.position.zw);\n`;
+        //if (this.keepRendererAspectRatio) result += `   output.position = vec4(output.position.x /  xgpuRendererAspectRatio , output.position.y   ,output.position.zw);\n`;
         result += "   return output;\n"
         result += "}\n";
 
         result = this.formatWGSLCode(result)
 
-        console.log("------------- VERTEX SHADER --------------")
-        console.log(result);
+        //console.log("------------- VERTEX SHADER --------------")
+        //console.log(result);
         //console.log("------------------------------------------")
         return { code: result, output: output };
     }

@@ -40,6 +40,8 @@ export class UniformBuffer implements IShaderResource {
         this.descriptor = descriptor ? { ...descriptor } : {};
         this.group = new UniformGroup(items, this.descriptor.useLocalVariable);
         this.group.uniformBuffer = this;
+
+
     }
 
 
@@ -63,7 +65,9 @@ export class UniformBuffer implements IShaderResource {
         return this.group.add(name, data, useLocalVariable);
     }
 
-
+    public remove(name: string): Uniformable {
+        return this.group.remove(name);
+    }
 
 
 
@@ -117,6 +121,7 @@ export class UniformBuffer implements IShaderResource {
 
     public destroyGpuResource() {
         if (this.gpuResource) this.gpuResource.destroy();
+        this.group.destroy();
         this.gpuResource = null;
     }
 

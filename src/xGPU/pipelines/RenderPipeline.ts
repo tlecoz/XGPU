@@ -166,10 +166,6 @@ export class RenderPipeline extends Pipeline {
         , [key: string]: unknown
     }) {
 
-
-
-
-
         this._resources = {};
         this.vertexShader = null;
         this.fragmentShader = null;
@@ -182,6 +178,8 @@ export class RenderPipeline extends Pipeline {
 
 
         descriptor = this.highLevelParse(descriptor);
+
+        descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
 
         //console.log("DESCRIPTOR ", descriptor)
 
@@ -268,7 +266,7 @@ export class RenderPipeline extends Pipeline {
 
         this.vertexShader = new VertexShader();
 
-        if (descriptor.keepRendererAspectRatio !== undefined) this.vertexShader.keepRendererAspectRatio = descriptor.keepRendererAspectRatio;
+        //if (descriptor.keepRendererAspectRatio !== undefined) this.vertexShader.keepRendererAspectRatio = descriptor.keepRendererAspectRatio;
 
         if (typeof descriptor.vertexShader === "string") {
             this.vertexShader.main.text = descriptor.vertexShader;
@@ -727,7 +725,7 @@ export class RenderPipeline extends Pipeline {
 
         if ((this.canvas as any).dimensionChanged) {
 
-            console.log("RESIZE CANVAS !!!!! ", this.canvas.height)
+            //console.log("RESIZE CANVAS !!!!! ", this.canvas.height)
 
             if (this.multisampleTexture) {
                 this.multisampleTexture.resize(this.canvas.width, this.canvas.height);

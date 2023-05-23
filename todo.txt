@@ -1,21 +1,133 @@
 
+debug soundSpectrum et video3d
+
+
+ajouter un autre type GPUObject extends UniformGroup qui permet également de stocker les autres IShaderResources
+|-> pouvoir créer un tableau de GPUObject comme ça par exemple 
+
+
+Admettons qu'on dispose déja d'une Pipeline permettant d'afficher un carré coloré qui servira de classe de base défini comme ça 
+
+class QuadPipeline extends RenderPipeline {
+    constructor(renderer,options){
+        super(renderer);
+        this.initFromObject({
+            vertexId:BuiltIns.vertexInputs.vertexId,
+            uv:BuiltIns.vertexOutputs.Vec2,
+            vertexShader: {
+                constants: `
+                    const pos = array<vec2<f32>,6>(
+                        vec2(-1.0, -1.0),
+                        vec2(1.0, -1.0),
+                        vec2(-1.0, 1.0),
+                        vec2(1.0, -1.0),
+                        vec2(1.0, 1.0),
+                        vec2(-1.0, 1.0),
+                    );
+                `,
+                main: `
+                output.position = vec4(pos[vertexId],0.0,1.0);
+                output.uv = vec2(0.5 + pos[vertexId]*0.5);
+                `
+            },
+            fragmentShader:`output.color = vec4(uv,0.0,1.0);`,
+            ...options
+        })
+    }
+}
+
+et puis pourquoi pas un type custom de base 
+
+class Dimension extends Vec2 {
+
+    constructor(x=0,y=0){
+        super(x,y);
+        this.initStruct("width","height");
+    }
+
+    public get width():number{return this.x;}
+    public set width(n:number){this.x = n;}
+
+    public get height():number{return this.y;}
+    public set height(n:number){this.y = n;}
+
+}
+
+
+//---- 
+Quand j'arriverai au bout de ce que je suis en train de faire,
+on pourra créer 4 images à 4 position différente au sein de la même pipeline
+(ce qui est infiniment plus optimisé que de dupliquer des pipeline, mais infiniment plus compliqué à mettre en place aussi)
+
+avec un code aussi simple que :
+
+
+
+let urls = [
+    "img0.jpg",
+    "img1.jpg",
+    "img2.jpg",
+    "img3.jpg",
+]
+
+
+var images = new GPUObject({
+    choucroute:new ImageTexture(),
+    textureSampler:new TextureSampler(),
+    dimension:new Dimension(),
+    position:new Vec2(),
+}).createInstances(urls.length,(instance,instanceId)=>{
+
+    instance.choucroute.source = await getImageBitmap(urls[instanceId]);
+    instance.imgDimension.width = instance.choucroute.source.width;
+    instance.imgDimension.height = instance.choucroute.source.height;
+    instance.position.x = Math.random() * 500;
+    instance.position.y = Math.random() * 500;
+})
+
+var pipeline = new QuadPipeline(renderer,{
+    images,
+    instanceCount:images.length,
+    instanceId:BuiltIns.vertexInputs.instanceId, 
+    id:BuiltIns.vertexOutputs.Float,
+    vertexShader:{
+        main:`
+            var p = vec2(pos[vertexId].x * images[instanceId].dimension.width , pos[vertexId].y * images[instanceId].dimension.height);
+            p += images[instanceId].position;
+            output.position = vec4(p,0.0,1.0);
+            output.uv = vec2(0.5 + pos[vertexId]*0.5);
+            output.id = instanceId;
+        `
+    },
+    fragmentShader:`
+        output.color = textureSample(images[id].choucroute,textureSampler,uv)
+    `;
+});
+
+renderer.addPipeline(pipeline);
+
+
+
+
 verifier a fond uniformBufferAlignment
 
  => tester avec les UniformGroup / UniformGroupArray 
     ==> tester avec des dizaines/centaines de ressources
 
 
+UniformGroup => choisir si on veut updater
+   - "all" : tout le buffer d'un 
+     "minimal": seulement les infos mis a jour
+     "auto" : si plus de 50% des ressources doivent être updaté "all" sinon "minimal"
 
 
 
 uniformBuffer storage si trop gros 
 
 renderBundle sample 
+GameOfLife sample 
 
 
-
-createStruct ({a:"float",b:"vec2",c:"float"})
-|-> utilisé dans UniformGroup et PrimitiveType 
 
 
 
@@ -30,3 +142,79 @@ ratio uniform dans renderer
 export to JSON 
 
 buildPipelineFromJSON 
+
+
+
+/*
+creation d'une pipeline sous forme d'une classe qui n'extends rien et qui sera exploité comme un fichier texte 
+
+pour utiliser les mots clés de WGSL , on peut écrire ça au debut de la fonction 
+
+const {vec2,float,distance} = XGPU.wgsl (qui ne serait un object vide de type any)
+|-> je ne sais pas si vec2<f32> est possible à écrire directement. 
+    Si besoin, créé un repo git/npm dédié en faisant en reproduisant tout les types afin de faire de vec2 un Array et de pouvoir ecrire vec2<f32>
+
+
+==============> Au lieu de créer une classe qui n'extends rien, fais plutot une vrai classe qui extends RenderPipeline 
+avec une fonction "shader" qui ne sera jamais appelée et qui contient le code wgsl directemnt en JS !!!
+*/
+
+
+private static _wgsl:{
+        f32:(x:number)=>void,
+        vec2:(x:number,y:number)=>void,
+        vec3:(x:number,y:number,z:number)=>void,
+        vec4:(x:number,y:number,z:number,w:number)=>void,
+
+        i32:(x:number)=>void,
+        ivec2:(x:number,y:number)=>void,
+        ivec3:(x:number,y:number,z:number)=>void,
+        ivec4:(x:number,y:number,z:number,w:number)=>void,
+
+        u32:(x:number)=>void,
+        uvec2:(x:number,y:number)=>void,
+        uvec3:(x:number,y:number,z:number)=>void,
+        uvec4:(x:number,y:number,z:number,w:number)=>void,
+
+        f16:(x:number)=>void,
+        i16:(x:number)=>void,
+        u16:(x:number)=>void,
+
+        
+
+
+    }
+    public static get wgsl():any{
+       
+        let {vec4} = this._wgsl;
+        
+      
+        return this._wgsl;
+    }
+
+--------------
+
+Modifier les VertexAttributes 
+
+
+   
+
+   |->  pouvoir écrire 
+      new VertexBufferIO({
+        radius:VertexAttributes.Float, 
+        position:VertexAttributes.Vec2
+      })
+
+      au lieu de 
+
+      new VertexBufferIO({
+        radius:VertexAttributes.Float(), 
+        position:VertexAttributes.Vec2()
+      })
+
+
+      simplement dire, si c'est une fonction, on l'execute et utilise l'objet qu'elle retourne à la place 
+
+
+   
+        

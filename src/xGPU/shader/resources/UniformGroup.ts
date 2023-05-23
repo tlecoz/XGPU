@@ -1,5 +1,6 @@
 
 import { XGPU } from "../../XGPU";
+import { Pipeline } from "../../pipelines/Pipeline";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
@@ -34,6 +35,19 @@ export class UniformGroup {
         }
     }
 
+    public destroy() {
+        this.unstackedItems = {};
+        this.items = [];
+        this.itemNames = [];
+        this.arrayStride = 0;
+        this.startId = 0;
+        this.mustBeTransfered = true;
+        this.datas = null;
+        this.buffer = null;
+        this.struct = null;
+        this._name = null;
+        this.uniformBuffer = null;
+    }
 
     constructor(items: any, useLocalVariable?: boolean) {
 
@@ -51,6 +65,8 @@ export class UniformGroup {
             } else {
                 throw new Error("UniformGroup accept only PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform, UniformGroup and UniformGroupArray")
             }
+
+
 
             this.add(z, o, this.createVariableInsideMain, false)
         }
@@ -84,6 +100,18 @@ export class UniformGroup {
 
         return group;
 
+    }
+
+    public remove(name: string): Uniformable {
+        for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i].name === name) {
+                const o = this.items.splice(i, 1)[0];
+                this.itemNames.splice(this.itemNames.indexOf(name), 1);
+
+                return o
+            }
+        }
+        return null;
     }
 
 
@@ -186,6 +214,8 @@ export class UniformGroup {
                     item.update(gpuResource, false);
                 } else {
 
+
+
                     this.datas.set(item, item.startId);
                     //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.byteLength, item);
 
@@ -264,15 +294,14 @@ export class UniformGroup {
 
 
                 if (o.propertyNames) {
-                    const s = o.createStruct();
+                    let s = o.createStruct();
 
-                    //console.warn("primitiveStructs = ", primitiveStructs)
-
-                    if (primitiveStructs.indexOf(s) === -1) {
+                    if (primitiveStructs.indexOf(s) === -1 && otherStructs.indexOf(s) === -1 && struct.indexOf(s) === -1) {
                         primitiveStructs += s + "\n";
                     }
 
-                    struct += "    " + o.name + ":" + o.constructor.name + ",\n";
+
+                    struct += "     @size(16)" + o.name + ":" + o.constructor.name + ",\n";
 
                 } else {
                     struct += "    " + o.name + ":" + o.type.dataType + ",\n";
@@ -286,6 +315,9 @@ export class UniformGroup {
 
 
         struct = primitiveStructs + otherStructs + struct;
+
+
+
         //console.log("struct = ", struct)
         this.struct = {
             struct,
@@ -310,7 +342,7 @@ export class UniformGroup {
 
         let v: any, type: any, nbComponent;
         let offset = 0;
-
+        let count = 0;
         for (let z in items) {
 
 
@@ -355,6 +387,12 @@ export class UniformGroup {
                         result.push(v);
                     }
 
+                } else if ((v as PrimitiveType).propertyNames) { //if it's a customClass the extends a PrimitiveType and use a struct
+                    bound = 4;
+                    v.startId = offset;
+                    offset += 4;
+                    result.push(v);
+
                 } else {
 
 
@@ -378,8 +416,9 @@ export class UniformGroup {
                 }
 
             }
-
+            count++;
         }
+
 
 
         //------------------------
@@ -417,6 +456,7 @@ export class UniformGroup {
         for (let i = 0; i < nb; i++) {
             v = floats.shift();
             v.startId = offset;
+            console.log(v.name, v.startId * 4)
             offset++;
             result.push(v);
         }

@@ -106,6 +106,14 @@ export class Bindgroup {
         }
     }
 
+    public remove(name: string) {
+        for (let i = 0; i < this.elements.length; i++) {
+            if (this.elements[i].name === name) {
+                this.elements.splice(i, 1);
+            }
+        }
+    }
+
     public getResourceName(resource: IShaderResource): string {
         for (let i = 0; i < this.elements.length; i++) {
             if (resource === this.elements[i].resource) {
@@ -117,11 +125,14 @@ export class Bindgroup {
 
     public get(name: string): IShaderResource {
         for (let i = 0; i < this.elements.length; i++) {
+
             if (this.elements[i].name === name) return this.elements[i].resource;
         }
 
+
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i].resource instanceof UniformBuffer) {
+
                 if ((this.elements[i].resource as UniformBuffer).items[name]) {
                     return this.elements[i].resource
                 }

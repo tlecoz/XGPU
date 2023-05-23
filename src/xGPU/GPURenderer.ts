@@ -107,6 +107,8 @@ export class GPURenderer {
 
     public get nbPipeline(): number { return this.renderPipelines.length }
 
+    public get dimensionChanged(): boolean { return (this.canvas as any).dimensionChanged; }
+
     public update() {
         if (!XGPU.ready || this.renderPipelines.length === 0 || !this.ctx) return;
         if (this.canvas.width != this.canvasW || this.canvas.height != this.canvasH) {

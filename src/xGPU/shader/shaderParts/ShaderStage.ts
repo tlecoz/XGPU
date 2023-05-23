@@ -25,6 +25,10 @@ export class ShaderStage {
 
     }
 
+
+
+
+
     public addOutputVariable(name: string, shaderType: { type: string }) {
         this.outputs.push({ name, type: shaderType.type })
     }
@@ -33,6 +37,8 @@ export class ShaderStage {
     }
 
     protected formatWGSLCode(code: string): string {
+
+
         // Retire les sauts de ligne inutiles et divise le code en lignes
         const lines = code.replace(/\n+/g, '\n').split('\n');
 

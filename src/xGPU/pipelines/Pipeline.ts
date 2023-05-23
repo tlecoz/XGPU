@@ -47,6 +47,7 @@ export class Pipeline {
 
     protected _resources: any;
     public get resources(): any { return this._resources; }
+
     public initFromObject(obj: any) {
         this._resources = obj;
     }
@@ -487,6 +488,65 @@ export class Pipeline {
         //console.log("descriptor = ", descriptor)
         return descriptor;
     }
+
+
+    public findAndFixRepetitionInDataStructure(o: any): any {
+
+        let exist = {};
+        let bindgroup;
+        let resource;
+        let name: string;
+        let uniformBuffers: UniformBuffer[] = [];
+        let bool;
+        let obj;
+
+        for (let z in o.bindgroups) {
+            bindgroup = o.bindgroups[z];
+
+            for (let a in bindgroup) {
+
+                resource = bindgroup[a];
+
+                if (resource instanceof UniformBuffer) {
+                    bool = true;
+
+
+                    for (let i = resource.itemNames.length - 1; i >= 0; i--) {
+                        name = resource.itemNames[i];
+                        obj = resource.items[name];
+
+                        if (!exist[name]) {
+                            exist[name] = obj;
+                        } else {
+
+                            resource.remove(name);
+
+                            if (resource.itemNames.length === 0) {
+                                bool = false;
+                            }
+                        }
+                    }
+
+                    if (bool) uniformBuffers.push(resource);
+                    else {
+                        bindgroup[a] = undefined;
+                    }
+                }
+                resource = bindgroup[a];
+            }
+        }
+
+
+
+
+
+
+
+
+        return o;
+    }
+
+
 
     //==============================================================================================================
 

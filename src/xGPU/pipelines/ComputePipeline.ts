@@ -63,6 +63,7 @@ export class ComputePipeline extends Pipeline {
         this.bindGroups = new Bindgroups("pipeline");
 
         descriptor = this.highLevelParse(descriptor);
+        descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
 
         super.initFromObject(descriptor);
 

@@ -92,7 +92,7 @@ export class HeadlessGPURenderer {
         this.dimension.dimensionChanged = false;
     }
 
-
+    public get dimensionChanged(): boolean { return this.dimension.dimensionChanged; }
     public get canvas(): { width: number, height: number } { return this.dimension; }
     public get width(): number { return this.canvas.width }
     public get height(): number { return this.canvas.height }

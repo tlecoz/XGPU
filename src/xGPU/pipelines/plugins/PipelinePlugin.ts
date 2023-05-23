@@ -41,8 +41,16 @@ export class PipelinePlugin {
 
     public apply(vertexShaderNode: ShaderNode = null, fragmentShaderNode: ShaderNode = null): PipelinePlugin {
 
-        if (!this.target.resources.bindgroups.plugins) this.target.resources.bindgroups.plugins = {};
-        const plugins = this.target.resources.bindgroups.plugins;
+
+
+        //if (!this.target.resources.bindgroups.plugins) this.target.resources.bindgroups.plugins = {};
+        //const plugins = this.target.resources.bindgroups.plugins;
+        let plugins;
+        for (let z in this.target.resources.bindgroups) {
+            plugins = this.target.resources.bindgroups[z];
+            break;
+        }
+
 
         for (let z in this.bindgroupResources) plugins[z] = this.bindgroupResources[z];
 
