@@ -9,7 +9,8 @@ export type ImageTextureDescriptor = {
     size?: GPUExtent3D,
     usage?: GPUTextureUsageFlags,
     format?: GPUTextureFormat,
-    defaultViewDescriptor?: GPUTextureViewDescriptor
+    defaultViewDescriptor?: GPUTextureViewDescriptor,
+    sampledType?: "f32" | "i32" | "u32"
 }
 
 
@@ -25,18 +26,20 @@ export class ImageTexture implements IShaderResource {
     protected viewDescriptor: GPUTextureViewDescriptor = undefined;
     protected useOutsideTexture: boolean = false;
 
+
     constructor(descriptor: {
         source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture
         size?: GPUExtent3D,
         usage?: GPUTextureUsageFlags,
         format?: GPUTextureFormat,
-        defaultViewDescriptor?: GPUTextureViewDescriptor
+        defaultViewDescriptor?: GPUTextureViewDescriptor,
+        sampledType?: "f32" | "i32" | "u32"
     }) {
 
         descriptor = { ...descriptor };
 
         console.warn("imageTExture descriptor = ", descriptor);
-
+        if (undefined === descriptor.sampledType) descriptor.sampledType = "f32";
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
         if (undefined === descriptor.size) {
@@ -71,7 +74,8 @@ export class ImageTexture implements IShaderResource {
         return new ImageTexture(this.descriptor);
     }
 
-
+    public get sampledType(): "f32" | "i32" | "u32" { return this.descriptor.sampledType }
+    public set sampledType(type: "f32" | "i32" | "u32") { this.descriptor.sampledType = type; }
 
     protected gpuTextureIOs: GPUTexture[];
     protected gpuTextureIO_index: number = 1;
@@ -178,7 +182,7 @@ export class ImageTexture implements IShaderResource {
 
     public createDeclaration(varName: string, bindingId: number, groupId: number = 0): string {
 
-        if (this.io != 2) return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d<f32>;\n";
+        if (this.io != 2) return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d<" + this.sampledType + ">;\n";
 
         return " @binding(" + (bindingId) + ") @group(" + groupId + ") var " + varName + " : texture_storage_2d<rgba8unorm, write>;\n";
     }
@@ -186,11 +190,15 @@ export class ImageTexture implements IShaderResource {
 
     public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, storageTexture?: GPUStorageTextureBindingLayout, texture?: GPUTextureBindingLayout } {
 
+        let sampleType: GPUTextureSampleType = "float";
+        if (this.sampledType === "i32") sampleType = "sint";
+        else if (this.sampledType === "u32") sampleType = "uint";
+
         if (this.io != 2) return {
             binding: bindingId,
             visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
             texture: {
-                sampleType: "float",
+                sampleType,
                 viewDimension: "2d",
                 multisampled: false
             },

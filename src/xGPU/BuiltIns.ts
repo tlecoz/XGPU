@@ -16,6 +16,7 @@ export class BuiltIns {
         Vec3: { type: "vec3<f32>", vsOut: true },
         Vec4: { type: "vec4<f32>", vsOut: true },
 
+        /*
         Int: { type: "i32", vsOut: true },
         IVec2: { type: "vec2<i32>", vsOut: true },
         IVec3: { type: "vec3<i32>", vsOut: true },
@@ -25,6 +26,7 @@ export class BuiltIns {
         UVec2: { type: "vec2<u32>", vsOut: true },
         UVec3: { type: "vec3<u32>", vsOut: true },
         UVec4: { type: "vec4<u32>", vsOut: true },
+        */
     }
 
     //----

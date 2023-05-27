@@ -2,10 +2,10 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
-import { ImageTextureArray } from "./ImageTextureArray";
+import { ImageTexture } from "./ImageTexture";
 import { IShaderResource } from "./IShaderResource";
 
-export type CubeMapTextureDescriptor = {
+export type ImageTextureArrayDescriptor = {
     source?: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[],
     size: GPUExtent3D,
     usage?: GPUTextureUsageFlags,
@@ -15,11 +15,12 @@ export type CubeMapTextureDescriptor = {
 }
 
 
-export class CubeMapTexture extends ImageTextureArray implements IShaderResource {
+export class ImageTextureArray extends ImageTexture implements IShaderResource {
+
 
     declare public descriptor: any;
 
-
+    protected _bitmaps: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[] = [];
 
     constructor(descriptor: {
         source?: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[], ////front,back,left,right,top,bottom
@@ -32,63 +33,39 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
 
         descriptor = { ...descriptor };
         if (!descriptor.dimension) descriptor.dimension = "2d"
+
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
 
         super(descriptor as any);
-        if (descriptor.source) this.sides = descriptor.source
+        if (descriptor.source) this.bitmaps = descriptor.source
 
     }
 
 
-    public clone(): CubeMapTexture {
+    public clone(): ImageTextureArray {
         if (!this.descriptor.source) this.descriptor.source = this._bitmaps;
-        return new CubeMapTexture(this.descriptor);
+        return new ImageTextureArray(this.descriptor);
     }
 
 
-    public set right(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
 
-        this._bitmaps[0] = bmp;
-        this.mustBeTransfered = true;
-    }
-    public set left(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
-        if (!this.descriptor.source) this.descriptor.source = {};
-        this._bitmaps[1] = bmp;
-        this.mustBeTransfered = true;
-    }
-    public set bottom(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
-        if (!this.descriptor.source) this.descriptor.source = {};
-        this._bitmaps[2] = bmp;
-        this.mustBeTransfered = true;
-    }
-    public set top(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
-        if (!this.descriptor.source) this.descriptor.source = {};
-        this._bitmaps[3] = bmp;
-        this.mustBeTransfered = true;
-    }
-    public set back(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
-        if (!this.descriptor.source) this.descriptor.source = {};
-        this._bitmaps[4] = bmp;
-        this.mustBeTransfered = true;
-    }
-    public set front(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
-        if (!this.descriptor.source) this.descriptor.source = {};
-        this._bitmaps[5] = bmp;
-        this.mustBeTransfered = true;
-    }
 
-    public set sides(images: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[]) {
-        for (let i = 0; i < 6; i++) this._bitmaps[i] = images[i];
+    public set bitmaps(images: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[]) {
+        for (let i = 0; i < images.length; i++) this._bitmaps[i] = images[i];
         this.mustBeTransfered = true;
         this.update();
     }
-    public get sides(): (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[] { return this._bitmaps; }
+    public get bitmaps(): (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[] { return this._bitmaps; }
+
+    public setImageById(image: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas), id: number) {
+        this._bitmaps[id] = image;
+    }
 
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
-        //console.log("cubemap createtexture ", this.descriptor)
+        console.log("textureArray createtexture ", this.descriptor)
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
-        this._view = this.gpuResource.createView({ dimension: 'cube' });
+        this._view = this.gpuResource.createView({ dimension: '2d-array', arrayLayerCount: this._bitmaps.length });
     }
 
     public update(): void {
@@ -99,8 +76,8 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
             if (!this.gpuResource) this.createGpuResource();
 
             let bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas;
-            for (let i = 0; i < 6; i++) {
-                bmp = this._bitmaps[i];
+            for (let i = 0; i < this._bitmaps.length; i++) {
+                bmp = this.bitmaps[i];
                 //console.log("upload texture ", bmp)
                 if (bmp) {
                     XGPU.device.queue.copyExternalImageToTexture(
@@ -120,11 +97,12 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
     //-----
 
     public createDeclaration(varName: string, bindingId: number, groupId: number = 0): string {
-        return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_cube<" + this.sampledType + ">;\n";
+        return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d_array<" + this.sampledType + ">;\n";
     }
 
 
     public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, texture: GPUTextureBindingLayout } {
+
         let sampleType: GPUTextureSampleType = "float";
         if (this.sampledType === "i32") sampleType = "sint";
         else if (this.sampledType === "u32") sampleType = "uint";
@@ -134,7 +112,7 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
             visibility: GPUShaderStage.FRAGMENT,
             texture: {
                 sampleType,
-                viewDimension: "cube",
+                viewDimension: "2d-array",
                 multisampled: false
             },
         }

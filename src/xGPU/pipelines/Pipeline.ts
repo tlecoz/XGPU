@@ -21,6 +21,7 @@ import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
 import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
 import { UniformGroup } from "../shader/resources/UniformGroup";
 import { UniformGroupArray } from "../shader/resources/UniformGroupArray";
+import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
 
 
 export class Pipeline {
@@ -388,6 +389,29 @@ export class Pipeline {
 
 
 
+    protected parseImageTextureArray(descriptor: any) {
+
+        const addImageTextureArray = (name: string, o: any) => {
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+            descriptor.bindgroups.default[name] = o;
+        }
+
+        const checkImageTextureArray = (name: string, o: any) => {
+            if (o instanceof ImageTextureArray) {
+                addImageTextureArray(name, o);
+            }
+        }
+
+        let o: any;
+        for (let z in descriptor) {
+            o = descriptor[z];
+            if (o) checkImageTextureArray(z, o);
+        }
+
+        return descriptor;
+    }
+
     protected parseImageTexture(descriptor: any) {
 
         const addImageTexture = (name: string, o: any) => {
@@ -410,6 +434,7 @@ export class Pipeline {
 
         return descriptor;
     }
+
 
     protected parseTextureSampler(descriptor: any) {
 
@@ -491,6 +516,7 @@ export class Pipeline {
         descriptor = this.parseUniformBuffers(descriptor);
         descriptor = this.parseUniform(descriptor);
         descriptor = this.parseImageTexture(descriptor);
+        descriptor = this.parseImageTextureArray(descriptor);
         descriptor = this.parseTextureSampler(descriptor);
         descriptor = this.parseVideoTexture(descriptor);
         descriptor = this.parseCubeMapTexture(descriptor);

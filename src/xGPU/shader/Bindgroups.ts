@@ -12,6 +12,7 @@ import { TextureSampler } from "./resources/TextureSampler";
 import { UniformBuffer } from "./resources/UniformBuffer";
 import { VertexBuffer } from "./resources/VertexBuffer";
 import { VideoTexture } from "./resources/VideoTexture";
+import { ImageTextureArray } from "./resources/ImageTextureArray";
 
 export class Bindgroups {
 
@@ -298,7 +299,6 @@ export class Bindgroups {
                     if (!types.uniformBuffers) types.uniformBuffers = [];
                     if (types.uniformBuffers.indexOf(element) === -1) types.uniformBuffers.push(element);
                 } else if (r instanceof VertexBuffer) {
-
                     if (!types.vertexBuffers) types.vertexBuffers = [];
                     if (types.vertexBuffers.indexOf(element) === -1) types.vertexBuffers.push(element);
                 } else if (r instanceof ImageTexture) {
@@ -316,6 +316,9 @@ export class Bindgroups {
                 } else if (r instanceof DepthStencilTexture) {
                     if (!types.depthStencilTextures) types.depthStencilTextures = [];
                     if (types.depthStencilTextures.indexOf(element) === -1) types.depthStencilTextures.push(element);
+                } else if (r instanceof ImageTextureArray) {
+                    if (!types.imageTextureArrays) types.imageTextureArrays = [];
+                    if (types.imageTextureArrays.indexOf(element) === -1) types.imageTextureArrays.push(element);
                 }
 
             }
