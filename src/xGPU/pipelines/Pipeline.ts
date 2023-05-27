@@ -12,13 +12,15 @@ import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
 import { BuiltIns } from "../BuiltIns";
 import { UniformBuffer } from "../shader/resources/UniformBuffer";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../shader/PrimitiveType";
 import { ImageTexture } from "../shader/resources/ImageTexture";
 import { TextureSampler } from "../shader/resources/TextureSampler";
 import { VideoTexture } from "../shader/resources/VideoTexture";
 import { CubeMapTexture } from "../shader/resources/CubeMapTexture";
 import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
 import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
+import { UniformGroup } from "../shader/resources/UniformGroup";
+import { UniformGroupArray } from "../shader/resources/UniformGroupArray";
 
 
 export class Pipeline {
@@ -270,6 +272,7 @@ export class Pipeline {
         return descriptor;
     }
 
+
     protected parseVertexAttributes(descriptor: any) {
 
         const addVertexAttribute = (name: string, o: any) => {
@@ -365,7 +368,7 @@ export class Pipeline {
         }
 
         const checkUniform = (name: string, o: any) => {
-            if (o instanceof PrimitiveFloatUniform || o instanceof PrimitiveIntUniform || o instanceof PrimitiveUintUniform) {
+            if (o instanceof PrimitiveFloatUniform || o instanceof PrimitiveIntUniform || o instanceof PrimitiveUintUniform || o instanceof UniformGroup || o instanceof UniformGroupArray) {
                 addUniform(name, o);
             }
         }
@@ -378,6 +381,12 @@ export class Pipeline {
 
         return descriptor;
     }
+
+
+
+
+
+
 
     protected parseImageTexture(descriptor: any) {
 
@@ -472,6 +481,8 @@ export class Pipeline {
     }
 
 
+
+
     protected highLevelParse(descriptor: any) {
 
         descriptor = this.parseShaderBuiltins(descriptor);
@@ -490,15 +501,108 @@ export class Pipeline {
     }
 
 
+
+    private static DEFAULT_VERTEX_BUFFER_ID: number = 2;
+    private parseHighLevelObj(descriptor: any) {
+
+        const isBuiltIn = (obj) => {
+            for (let z in BuiltIns.vertexInputs) if (BuiltIns.vertexInputs[z] === obj) return true;
+            for (let z in BuiltIns.vertexOutputs) if (BuiltIns.vertexOutputs[z] === obj) return true;
+            for (let z in BuiltIns.fragmentInputs) if (BuiltIns.fragmentInputs[z] === obj) return true;
+            for (let z in BuiltIns.fragmentOutputs) if (BuiltIns.fragmentOutputs[z] === obj) return true;
+            for (let z in BuiltIns.computeInputs) if (BuiltIns.computeInputs[z] === obj) return true;
+            return false;
+        }
+
+        const searchComplexObject = (o: any): any[] => {
+            let name: string;
+            let obj;
+            let objs: any[] = [];
+            for (let z in o) {
+                obj = o[z];
+                name = obj.constructor.name;
+                if (name === "Object") {
+                    if (z !== "bindgroups" && z !== "vertexShader" && z !== "fragmentShader" && z !== "computeShader") {
+                        if (!isBuiltIn(obj)) {
+                            objs.push({ name, resource: obj });
+                            console.log("######## ", z)
+                        }
+                    }
+                }
+            }
+            return objs;
+        }
+
+        const analyseObjects = (objs: any[]): { primitives: { name: string, containerName: string, resource: PrimitiveType }[], vertexAttributes: { name: string, containerName: string, resource: VertexAttribute }[], shaderResources: { name: string, containerName: string, resource: IShaderResource }[] } => {
+
+            const primitives: { name: string, resource: PrimitiveType, containerName: string }[] = [];
+            const vertexAttributes: { name: string, resource: VertexAttribute, containerName: string }[] = [];
+            const shaderResources: { name: string, resource: IShaderResource, containerName: string }[] = [];
+
+            let o: any;
+            let resource: PrimitiveType | IShaderResource;
+            let containerName: string;
+            for (let i = 0; i < objs.length; i++) {
+                containerName = objs[i].name;
+                o = objs[i].resource;
+
+                for (let name in o) {
+                    resource = o[name];
+
+                    if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
+                        primitives.push({ containerName, name, resource });
+                    } else if (resource instanceof VertexAttribute) {
+                        vertexAttributes.push({ containerName, name, resource });
+                    } else {
+                        shaderResources.push({ containerName, name, resource });
+                    }
+
+                }
+            }
+
+            return { primitives, vertexAttributes, shaderResources };
+        }
+
+        let objects: any = searchComplexObject(descriptor);
+        if (objects.length) {
+
+            if (!descriptor.bindgroups) descriptor.bindgroups = {};
+            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+
+            const { primitives, vertexAttributes, shaderResources } = analyseObjects(objects);
+
+            if (primitives.length) {
+
+
+
+
+            }
+            //descriptor.bindgroup.default[]
+
+        }
+
+
+        //descriptor.bindgroups.default.buffer = new VertexBuffer(attributes);
+
+
+
+        return descriptor;
+    }
+
+
     public findAndFixRepetitionInDataStructure(o: any): any {
 
+
+        this.parseHighLevelObj(o);
+
+        let name: string;
+        let obj;
         let exist = {};
         let bindgroup;
         let resource;
-        let name: string;
         let uniformBuffers: UniformBuffer[] = [];
         let bool;
-        let obj;
+
 
         for (let z in o.bindgroups) {
             bindgroup = o.bindgroups[z];

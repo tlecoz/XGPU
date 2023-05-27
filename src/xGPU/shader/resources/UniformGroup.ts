@@ -1,6 +1,5 @@
 
 import { XGPU } from "../../XGPU";
-import { Pipeline } from "../../pipelines/Pipeline";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
@@ -19,7 +18,7 @@ export class UniformGroup {
     public mustBeTransfered: boolean = true;
 
     protected _name: string;
-    public struct: { struct: string, localVariables: string };
+    public wgsl: { struct: string, localVariables: string };
     public datas: Float32Array;
 
     protected buffer: UniformBuffer = null;
@@ -44,7 +43,7 @@ export class UniformGroup {
         this.mustBeTransfered = true;
         this.datas = null;
         this.buffer = null;
-        this.struct = null;
+        this.wgsl = null;
         this._name = null;
         this.uniformBuffer = null;
     }
@@ -145,7 +144,7 @@ export class UniformGroup {
 
         if (stackItems) this.items = this.stackItems(this.unstackedItems);
 
-        if (this.struct) this.struct = this.getStruct(this.name);
+        if (this.wgsl) this.wgsl = this.getStruct(this.name);
 
         if (this.uniformBuffer) this.uniformBuffer.mustBeTransfered = true;
 
@@ -178,7 +177,7 @@ export class UniformGroup {
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
         const varName: string = this.getVarName(this.name);
-        return "   var " + varName + ":" + this.getStructName(this.name) + " = " + uniformBufferName + "." + varName + ";\n"
+        return "   var " + varName + ":" + this.getStructName(this.name) + " = " + this.getVarName(uniformBufferName) + "." + varName + ";\n"
     }
 
 
@@ -259,30 +258,29 @@ export class UniformGroup {
 
             if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
                 if (item instanceof UniformGroup) {
-                    if (!item.struct) {
+                    if (!item.wgsl) {
                         o = item.getStruct(item.name);
                         localVariables += o.localVariables + "\n";
 
-                        if (otherStructs.indexOf(o.struct) === -1) {
-                            otherStructs = o.struct + otherStructs;
-                        }
-
+                    }
+                    if (otherStructs.indexOf(item.wgsl.struct) === -1) {
+                        otherStructs = item.wgsl.struct + otherStructs;
                     }
                     struct += "    " + this.getVarName(item.name) + ":" + item.name + ",\n"
                     localVariables += item.createVariable(this.name);
                 } else {
                     name = item.name;
 
-                    if (!(item.groups[0] as UniformGroup).struct) {
+                    if (!(item.groups[0] as UniformGroup).wgsl) {
 
                         o = (item.groups[0] as UniformGroup).getStruct(item.name);
                         localVariables += o.localVariables;
-
-                        if (otherStructs.indexOf(o.struct) === -1) {
-                            otherStructs = o.struct + otherStructs;
-                        }
-
                     }
+
+                    if (otherStructs.indexOf((item.groups[0] as UniformGroup).wgsl.struct) === -1) {
+                        otherStructs = (item.groups[0] as UniformGroup).wgsl.struct + otherStructs;
+                    }
+
                     struct += "    " + name + ":array<" + this.getStructName(name) + "," + item.length + ">,\n"
                     localVariables += item.createVariable(this.name);
                 }
@@ -301,10 +299,33 @@ export class UniformGroup {
                     }
 
 
-                    struct += "     @size(16)" + o.name + ":" + o.constructor.name + ",\n";
+                    struct += "     @size(16) " + o.name + ":" + o.constructor.name + ",\n";
 
                 } else {
-                    struct += "    " + o.name + ":" + o.type.dataType + ",\n";
+
+
+                    if (o.type.isArray) {
+                        console.log("AAAAA ", o.name, o.type.dataType)
+
+                        if (o.type.isArrayOfMatrixs) {
+
+                            let col = o.type.matrixColumns;
+                            let row = 4;
+                            if (o.type.matrixRows === 2) row = 2;
+
+
+
+                            struct += "    @size(" + (o.type.arrayLength * col * row * 4) + ") " + o.name + ":" + o.type.dataType + ",\n";
+                        } else {
+                            struct += "    @size(" + (o.type.arrayLength * 16) + ") " + o.name + ":" + o.type.dataType + ",\n";
+                        }
+
+
+                    } else {
+                        struct += "    " + o.name + ":" + o.type.dataType + ",\n";
+                    }
+
+
                 }
 
 
@@ -319,11 +340,11 @@ export class UniformGroup {
 
 
         //console.log("struct = ", struct)
-        this.struct = {
+        this.wgsl = {
             struct,
             localVariables
         };
-        return this.struct;
+        return this.wgsl;
     }
 
 
@@ -374,8 +395,12 @@ export class UniformGroup {
 
                 } else if (type.isMatrix) {
                     v.startId = offset;
-                    offset += 4 * type.matrixRows;
-                    bound = type.matrixRows;
+
+                    let col = type.matrixColumns;
+                    let row = 4;
+                    if (type.matrixRows === 2) row = 2;
+                    offset += col * row;
+                    bound = row;
                     result.push(v);
 
                 } else if (type.isUniformGroup) {
@@ -456,7 +481,7 @@ export class UniformGroup {
         for (let i = 0; i < nb; i++) {
             v = floats.shift();
             v.startId = offset;
-            console.log(v.name, v.startId * 4)
+            //console.log(v.name, v.startId * 4)
             offset++;
             result.push(v);
         }

@@ -38,15 +38,16 @@ export class GPUType {
             const t = type.split(",")
             const varType = t[0]
             const end = t[1];
-            //console.log("isArray ", varType, end)
+            console.log("isArray ", varType + ' ::: ' + "array<vec4")
             switch (varType) {
                 case "array<float":
-                    return "array<f32," + end;
-                case "array<vec2":
-                    return "array<vec2<f32>," + end;
+                //return "array<f32," + end;
+                case "array<vec2<f32>":
+                //return "array<vec2<f32>," + end;
                 case "array<vec3":
-                    return "array<vec3<f32>," + end;
+                //return "array<vec3<f32>," + end;
                 case "array<vec4":
+                    console.log("OOO")
                     return "array<vec4<f32>," + end;
             }
         }

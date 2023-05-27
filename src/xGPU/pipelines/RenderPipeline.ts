@@ -181,7 +181,7 @@ export class RenderPipeline extends Pipeline {
 
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
 
-        //console.log("DESCRIPTOR ", descriptor)
+        console.log("DESCRIPTOR ", descriptor)
 
         super.initFromObject(descriptor);
 

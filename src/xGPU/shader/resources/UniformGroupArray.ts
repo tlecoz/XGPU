@@ -51,7 +51,7 @@ export class UniformGroupArray {
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
         const varName: string = this.getVarName(this.name);
-        return "   var " + varName + ":array<" + this.getStructName(this.name) + "," + this.length + "> = " + uniformBufferName + "." + varName + ";\n"
+        return "   var " + varName + ":array<" + this.getStructName(this.name) + "," + this.length + "> = " + this.getVarName(uniformBufferName) + "." + varName + ";\n"
     }
 
     public update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {

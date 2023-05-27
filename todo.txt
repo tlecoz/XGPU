@@ -1,5 +1,136 @@
+GPUType ligne 224 : probable pbm avec i32 et u32
+        ligne 37
 
-debug soundSpectrum et video3d
+
+
+
+- ajouter floatArray, vec2Array, vec3Array (idem pour int et uint) dans PrimitiveType 
+|-> vérifier que l'alignement marche bien 
+
+- Ajouter les classe CubeMapArray , ImageTextureArray , VideoTextureArray, TextureSamplerArray dans shader/resources 
+  |-> prise en charge des données dans bindgroups 
+
+
+dans un cas comme celui là : 
+
+pipeline.initFromObject({
+    machin:{
+        a:new Float(),
+        b:new Vec2(),
+        img:new ImageTexture(),
+        sampler:new TextureSampler();
+        attribute:new VertexAttribute.Vec2(),
+        vertexBuffer:new VertexBuffer({
+            aaa:VertexAttribute.Float()
+        }),
+        obj:{
+            truc:new vec3(),
+            bidule:new vec4()
+        }
+    }
+})
+
+'machin' devient un uniformBuffer qui contient 'a' , 'b' et 'obj' sous forme d'un UniformGroup (qui produira un struct) 
+'img' et 'sampler' sont ajouté au bindgroup de la pipeline
+'vertexBuffer" est ajouté au bindgroup de la pipele 
+'attribute' est ajouté dans 'vertexBuffer' 
+
+
+dans un cas comme celui là :
+
+let objects = [];
+for(let i=0;i<4;i++){
+    objects[i] = {
+        a:new Float(),
+        b:new Vec2(),
+        img:new ImageTexture(),
+        sampler:new TextureSampler(),
+        attribute:new VertexAttribute.Vec2(),
+        vertexBuffer:new VertexBuffer({
+            aaa:VertexAttribute.Float()
+        }),
+        obj:{
+            truc:new vec3(),
+            bidule:new vec4()
+        }
+    }
+}
+
+
+pipeline.initFromObject({
+    objects
+})
+
+
+'objects' devient un UniformBuffer qui contient 'a' sous forme d'un FloatArray , 'b' sous forme d'un vec2Array et 'obj' sous forme d'une UniformGroupArray  
+
+
+'img' devient un tableau d'image 
+'sampler' devient un tableau de sampler 
+
+'attribute' passe dans 'vertexBuffer' 
+
+on ajoute un bout de code dans les constantes du shader ;
+const vertex_buffer_start_indexs:array<i32, arrayLength> = [vertexStartId1,vertexStartId2,vertexStartId3]
+const vertex_buffer_lengths:array<i32, arrayLength> = [vertexLen1,vertexLen2,vertexLen3]
+const vertex_length = vertexBuffer.attributes.length
+
+
+
+
+
+
+Idealement, il faudrait trouver un moyen de pouvoir écrire 
+
+const {a,b,objs,img,sampler,attribute, aaa} = objects[instanceId]; 
+
+directement dans le shader , ce qui produirait en réalité 
+
+
+
+//si, et seulement si, on embarque une vertexBuffer / vertexAttributes dans l'objet , on récupère l'instanceId comme ça sinon on utilise le BuiltIns.instanceId
+
+let start:i32;
+let len:i32;
+let instanceId:i32;
+for(let i=0;i<vertex_length;i++){
+    if(vertexId >= vertex_buffer_start_indexs[i]  && vertexId < vertex_buffer_start_indexs[i] + vertex_buffer_lengths[i]){
+        instanceId = i;
+        break;
+    }
+}
+
+//-------
+
+const a = objects.a[instanceId]
+const b = objects.b[instanceId]
+const objs = objects.objs[instanceId]
+const img = imgs[instanceId];
+const sampler = sampler[instanceId];
+
+
+
+
+
+==================>>>>>   IL FAUT FAIRE CA !!!!!!! 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ajouter un autre type GPUObject extends UniformGroup qui permet également de stocker les autres IShaderResources
@@ -72,13 +203,13 @@ let urls = [
 
 
 var images = new GPUObject({
-    choucroute:new ImageTexture(),
+    img:new ImageTexture(),
     textureSampler:new TextureSampler(),
     dimension:new Dimension(),
     position:new Vec2(),
 }).createInstances(urls.length,(instance,instanceId)=>{
 
-    instance.choucroute.source = await getImageBitmap(urls[instanceId]);
+    instance.img.source = await getImageBitmap(urls[instanceId]);
     instance.imgDimension.width = instance.choucroute.source.width;
     instance.imgDimension.height = instance.choucroute.source.height;
     instance.position.x = Math.random() * 500;
@@ -100,7 +231,7 @@ var pipeline = new QuadPipeline(renderer,{
         `
     },
     fragmentShader:`
-        output.color = textureSample(images[id].choucroute,textureSampler,uv)
+        output.color = textureSample(images[id].img,textureSampler,uv)
     `;
 });
 
@@ -160,37 +291,12 @@ avec une fonction "shader" qui ne sera jamais appelée et qui contient le code w
 */
 
 
-private static _wgsl:{
-        f32:(x:number)=>void,
-        vec2:(x:number,y:number)=>void,
-        vec3:(x:number,y:number,z:number)=>void,
-        vec4:(x:number,y:number,z:number,w:number)=>void,
-
-        i32:(x:number)=>void,
-        ivec2:(x:number,y:number)=>void,
-        ivec3:(x:number,y:number,z:number)=>void,
-        ivec4:(x:number,y:number,z:number,w:number)=>void,
-
-        u32:(x:number)=>void,
-        uvec2:(x:number,y:number)=>void,
-        uvec3:(x:number,y:number,z:number)=>void,
-        uvec4:(x:number,y:number,z:number,w:number)=>void,
-
-        f16:(x:number)=>void,
-        i16:(x:number)=>void,
-        u16:(x:number)=>void,
-
-        
 
 
-    }
-    public static get wgsl():any{
-       
-        let {vec4} = this._wgsl;
-        
-      
-        return this._wgsl;
-    }
+
+
+
+   
 
 --------------
 
@@ -216,5 +322,186 @@ Modifier les VertexAttributes
       simplement dire, si c'est une fonction, on l'execute et utilise l'objet qu'elle retourne à la place 
 
 
-   
-        
+
+
+
+
+
+
+
+
+//-----------------------
+
+
+const wgsl = {
+    f32: (x: number = 0) => void {},
+    vec2: (x: any = 0, y: any = 0) => void {},
+    vec3: (x: any = 0, y: any = 0, z: any = 0) => void {},
+    vec4: (x: any = 0, y: any = 0, z: any = 0, w: any = 0) => void {},
+
+    i32: (x: any = 0) => void {},
+    ivec2: (x: any = 0, y: any = 0) => void {},
+    ivec3: (x: any = 0, y: any = 0, z: any = 0) => void {},
+    ivec4: (x: any = 0, y: any = 0, z: any = 0, w: any = 0) => void {},
+
+    u32: (x: any = 0) => void {},
+    uvec2: (x: any = 0, y: any = 0) => void {},
+    uvec3: (x: any = 0, y: any = 0, z: any = 0) => void {},
+    uvec4: (x: any = 0, y: any = 0, z: any = 0, w: any = 0) => void {},
+
+    f16: (x: any = 0) => void {},
+    i16: (x: any = 0) => void {},
+    u16: (x: any = 0) => void {},
+};
+
+
+
+        const vertexShader = (vertexId: number): { position: any, uv: any } => {
+
+            const { vec2, vec4 } = wgsl;
+
+            let vertexPos = [
+                vec2(-1.0, -1.0),
+                vec2(1.0, -1.0),
+                vec2(-1.0, 1.0),
+
+                vec2(1.0, -1.0),
+                vec2(1.0, 1.0),
+                vec2(-1.0, 1.0),
+            ]
+
+            let pos = vertexPos[vertexId];
+
+            return {
+                position: vec4(pos, 0.0, 1.0),
+                uv: vec2(0.5 + pos * 0.5)
+            }
+        }
+
+        const getShaderString = () => {
+
+            const lines = ("" + vertexShader).trim().split("\n");
+            let result = "";
+
+            const getTypeInsideArray = (lineId: number) => {
+
+                let line = lines[lineId + 1];
+                console.log("getType ", lineId, lines[lineId])
+                if (line.indexOf("(")) {
+                    return line.split("(")[0].trim();
+                } else {
+                    let n = line.split(",")[0];
+                    if (n.indexOf(".")) return "f32";
+                    return "i32";
+                }
+            }
+
+            const getArrayLength = (lineId: number, isFloat: boolean) => {
+                let text: string = "";
+                lineId++;
+                let line;
+                for (let i = 0; i < 10000; i++) {//prevent porential infinite loop
+                    line = lines[lineId + i];
+                    if (line.indexOf("]") !== -1) break;
+                    text += line;
+
+                }
+
+                if (!isFloat) return text.split(")").length - 1;
+                else text.split(",").length
+            }
+
+            const getReturnValue = (lineId: number) => {
+                let text: string = "";
+                let line: string;
+                let t: string[];
+                for (let i = 1; i < 10000; i++) {//prevent porential infinite loop
+                    line = lines[lineId + i];
+                    if (line.indexOf("}") !== -1) break;
+                    t = line.split(":");
+                    text += "output." + t[0].trim() + " = " + t[1] + ";\n"
+
+
+                }
+
+                return text;
+            }
+
+
+            let line: string;
+            let openArray: boolean = false;
+            for (let i = 0; i < lines.length; i++) {
+                line = lines[i].trim();
+                if (line.indexOf("const {") !== -1) {
+                    continue;
+                }
+
+                if (line.indexOf("= [") !== -1) {
+                    //console.log("A")
+                    openArray = true;
+                    //console.log("i = ", i)
+                    let varType = getTypeInsideArray(i);
+                    let arrayLen = getArrayLength(i, varType === "f32" || varType === "i32");
+
+                    console.log(varType, arrayLen)
+
+                    let t = line.split("=");
+                    line = t[0] + " = array<" + varType + "," + arrayLen + ">("
+
+                }
+
+                if (openArray && line.indexOf("]") !== -1) {
+                    line = line.replace("]", ")");
+                    openArray = false;
+                }
+
+                if (line.indexOf("return ") !== -1) {
+                    result += getReturnValue(i) + "\n";
+                    break;
+                }
+
+                result += line + "\n";
+            }
+
+            return result;
+
+        }
+
+        const shader = getShaderString();
+        console.log("shader = ", shader)
+
+
+
+    ---------------------------------
+
+
+
+const getValues = (model: string, text: string): string[] => {
+    // Convert the model to regex pattern
+    const regexPattern = model.split("?").join("([\\w.:{}\\[\\]|'\"`\n\s]+)");
+    const regex = new RegExp(regexPattern, 'm');
+
+    // Match the regex against the input text
+    const matches = text.match(regex);
+
+    // If no match found, return empty array
+    if (!matches) return [];
+
+    // Remove the first match which is the whole string
+    matches.shift();
+
+    // Return the rest of the matches
+    return matches;
+};
+
+const input = `let o:{f32} = ['machin', 
+'bidule'];`;
+
+let result = getValues("let o:? = ['machin', \n'bidule'];", input); 
+console.log(result); // ["{f32}"]
+
+result = getValues("let ?:? = ['machin', \n'bidule'];", input); 
+console.log(result); // ["o", "{f32}"]
+
+result = getValues("let ?:? = ?;", input); 
+console.log(result); // ["o", "{f32}", "['machin', \n'bidule']"]
