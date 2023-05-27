@@ -13,6 +13,7 @@ import { UniformBuffer } from "./resources/UniformBuffer";
 import { VertexBuffer } from "./resources/VertexBuffer";
 import { VideoTexture } from "./resources/VideoTexture";
 import { ImageTextureArray } from "./resources/ImageTextureArray";
+import { CubeMapTextureArray } from "./resources/CubeMapTextureArray";
 
 export class Bindgroups {
 
@@ -295,30 +296,34 @@ export class Bindgroups {
                 r = element.resource;
                 if (this._resources.all.indexOf(r) === -1) this._resources.all.push(r);
                 res[element.name] = element.resource;
-                if (r instanceof UniformBuffer) {
+
+                if (r instanceof CubeMapTextureArray) {
+                    if (!types.cubeMapTextureArrays) types.cubeMapTextureArrays = [];
+                    if (types.cubeMapTextureArrays.indexOf(element) === -1) types.cubeMapTextureArrays.push(element);
+                } else if (r instanceof ImageTextureArray) {
+                    if (!types.imageTextureArrays) types.imageTextureArrays = [];
+                    if (types.imageTextureArrays.indexOf(element) === -1) types.imageTextureArrays.push(element);
+                } else if (r instanceof UniformBuffer) {
                     if (!types.uniformBuffers) types.uniformBuffers = [];
                     if (types.uniformBuffers.indexOf(element) === -1) types.uniformBuffers.push(element);
                 } else if (r instanceof VertexBuffer) {
                     if (!types.vertexBuffers) types.vertexBuffers = [];
                     if (types.vertexBuffers.indexOf(element) === -1) types.vertexBuffers.push(element);
+                } else if (r instanceof CubeMapTexture) {
+                    if (!types.cubeMapTexture) types.cubeMapTexture = [];
+                    if (types.cubeMapTexture.indexOf(element) === -1) types.cubeMapTexture.push(element);
                 } else if (r instanceof ImageTexture) {
                     if (!types.imageTextures) types.imageTextures = [];
                     if (types.imageTextures.indexOf(element) === -1) types.imageTextures.push(element);
                 } else if (r instanceof VideoTexture) {
                     if (!types.videoTexture) types.videoTexture = [];
                     if (types.videoTexture.indexOf(element) === -1) types.videoTexture.push(element);
-                } else if (r instanceof CubeMapTexture) {
-                    if (!types.cubeMapTexture) types.cubeMapTexture = [];
-                    if (types.cubeMapTexture.indexOf(element) === -1) types.cubeMapTexture.push(element);
                 } else if (r instanceof TextureSampler) {
                     if (!types.sampler) types.sampler = [];
                     if (types.sampler.indexOf(element) === -1) types.sampler.push(element);
                 } else if (r instanceof DepthStencilTexture) {
                     if (!types.depthStencilTextures) types.depthStencilTextures = [];
                     if (types.depthStencilTextures.indexOf(element) === -1) types.depthStencilTextures.push(element);
-                } else if (r instanceof ImageTextureArray) {
-                    if (!types.imageTextureArrays) types.imageTextureArrays = [];
-                    if (types.imageTextureArrays.indexOf(element) === -1) types.imageTextureArrays.push(element);
                 }
 
             }

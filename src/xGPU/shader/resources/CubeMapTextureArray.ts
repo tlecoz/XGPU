@@ -3,10 +3,11 @@
 
 import { XGPU } from "../../XGPU";
 import { ImageTexture } from "./ImageTexture";
+import { ImageTextureArray } from "./ImageTextureArray";
 import { IShaderResource } from "./IShaderResource";
 
 export type ImageTextureArrayDescriptor = {
-    source?: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)[],
+    source?: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[],
     size: GPUExtent3D,
     usage?: GPUTextureUsageFlags,
     dimension: string,
@@ -15,30 +16,24 @@ export type ImageTextureArrayDescriptor = {
 }
 
 
-export class ImageTextureArray extends ImageTexture implements IShaderResource {
+export class CubeMapTextureArray extends ImageTextureArray implements IShaderResource {
 
 
     declare public descriptor: any;
 
-    protected _bitmaps: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)[] = [];
-    protected mustUpdate: boolean[] = [];
-    constructor(descriptor: {
-        source?: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[], ////front,back,left,right,top,bottom
-        size: GPUExtent3D,
-        usage?: GPUTextureUsageFlags,
-        defaultViewDescriptor?: GPUTextureViewDescriptor,
-        dimension?: string,
-        sampledType?: "f32" | "i32" | "u32"
-    }) {
+
+    constructor(descriptor: ImageTextureArrayDescriptor) {
 
         descriptor = { ...descriptor };
 
-        if (descriptor.source && !descriptor.size) {
-            descriptor.size = [descriptor.source[0].width, descriptor.source[0].height, descriptor.source.length]
+        if (descriptor.source) {
+            if (descriptor.source.length === 0 || descriptor.source.length % 6 !== 0) {
+                throw new Error("CubeMapTextureArray error : descriptor.source must contains an array of (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) with a length greater than 0 and multiple of 6.")
+            }
         }
 
-        if (!descriptor.dimension) descriptor.dimension = "2d"
 
+        if (!descriptor.dimension) descriptor.dimension = "2d"
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
 
         super(descriptor as any);
@@ -47,15 +42,20 @@ export class ImageTextureArray extends ImageTexture implements IShaderResource {
     }
 
 
-    public clone(): ImageTextureArray {
+    public clone(): CubeMapTextureArray {
         if (!this.descriptor.source) this.descriptor.source = this._bitmaps;
-        return new ImageTextureArray(this.descriptor);
+        return new CubeMapTextureArray(this.descriptor);
     }
 
 
 
 
     public set bitmaps(images: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)[]) {
+
+        if (images.length === 0 || images.length % 6 !== 0) {
+            throw new Error("CubeMapTextureArray error : descriptor.source must contains an array of (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) with a length greater than 0 and multiple of 6.")
+        }
+
         for (let i = 0; i < images.length; i++) {
             this._bitmaps[i] = images[i];
             this.mustUpdate[i] = true;
@@ -65,9 +65,12 @@ export class ImageTextureArray extends ImageTexture implements IShaderResource {
     }
     public get bitmaps(): (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)[] { return this._bitmaps; }
 
-    public setImageById(image: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture), id: number) {
-        this._bitmaps[id] = image;
-        this.mustUpdate[id] = true;
+    public setCubeSideById(cubeid: number, sideId: number, image: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)) {
+
+        if (this._bitmaps[cubeid * 6 + sideId] instanceof ImageBitmap) (this._bitmaps[cubeid * 6 + sideId] as ImageBitmap).close();
+
+        this._bitmaps[cubeid * 6 + sideId] = image;
+        this.mustUpdate[cubeid * 6 + sideId] = true;
         this.mustBeTransfered = true;
     }
 
@@ -75,48 +78,18 @@ export class ImageTextureArray extends ImageTexture implements IShaderResource {
         if (this.gpuResource) this.gpuResource.destroy();
         //console.log("cubemap createtexture ", this.descriptor)
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
-        this._view = this.gpuResource.createView({ dimension: '2d-array', arrayLayerCount: this._bitmaps.length });
+        this._view = this.gpuResource.createView({ dimension: 'cube-array', arrayLayerCount: this._bitmaps.length });
     }
 
-    public updateInnerGpuTextures(commandEncoder: GPUCommandEncoder) {
-        let bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture;
-        for (let i = 0; i < this._bitmaps.length; i++) {
-            bmp = this.bitmaps[i];
-            if (bmp instanceof GPUTexture) {
-                commandEncoder.copyTextureToTexture({ texture: bmp }, { texture: this.gpuResource }, [this.gpuResource.width, this.gpuResource.height, i])
-            }
-        }
-    }
-
-    public update(): void {
 
 
-        if (this.mustBeTransfered) {
-            if (!this.gpuResource) this.createGpuResource();
 
-            let bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture;
-            for (let i = 0; i < this._bitmaps.length; i++) {
-                bmp = this.bitmaps[i];
 
-                if (!(bmp instanceof GPUTexture) && this.mustUpdate[i]) {
-                    XGPU.device.queue.copyExternalImageToTexture(
-                        { source: bmp },
-                        { texture: this.gpuResource, origin: [0, 0, i] },
-                        [bmp.width, bmp.height]
-                    );
-                    this.mustUpdate[i] = false;
-                }
-            }
-
-            this.mustBeTransfered = false;
-        }
-
-    }
 
     //-----
 
     public createDeclaration(varName: string, bindingId: number, groupId: number = 0): string {
-        return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d_array<" + this.sampledType + ">;\n";
+        return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_cube_array<" + this.sampledType + ">;\n";
     }
 
 
@@ -131,7 +104,7 @@ export class ImageTextureArray extends ImageTexture implements IShaderResource {
             visibility: GPUShaderStage.FRAGMENT,
             texture: {
                 sampleType,
-                viewDimension: "2d-array",
+                viewDimension: "cube-array",
                 multisampled: false
             },
         }

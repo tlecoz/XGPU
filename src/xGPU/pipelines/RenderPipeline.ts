@@ -18,6 +18,7 @@ import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
 import { IShaderResource } from "../shader/resources/IShaderResource";
 import { Bindgroups } from "../shader/Bindgroups";
+import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
 
 
 export class RenderPipeline extends Pipeline {
@@ -715,6 +716,27 @@ export class RenderPipeline extends Pipeline {
         if (!this.resourceDefined) return;
 
         renderPass.end();
+
+
+
+        //------ the arrays of textures may contains GPUTexture so I must use commandEncoder.copyTextureToTexture 
+        // to update the content from a GPUTexture to the texture_array_2d 
+        const types = this.bindGroups.resources.types;
+
+        if (!types.textureArrays) {
+            let textureArrays = [];
+            if (types.imageTextureArrays) textureArrays = textureArrays.concat(types.imageTextureArrays);
+            if (types.cubeMapTextureArrays) textureArrays = textureArrays.concat(types.cubeMapTextureArrays);
+            if (types.cubeMapTexture) textureArrays = textureArrays.concat(types.cubeMapTexture);
+            types.textureArrays = textureArrays;
+        }
+
+        for (let i = 0; i < types.textureArrays.length; i++) {
+            (types.textureArrays[i].resource as ImageTextureArray).updateInnerGpuTextures(commandEncoder);
+        }
+        //----------------------------------------------------------------------------------------
+
+
 
         if (this.renderPassTexture) {
             if (!this.renderPassTexture.gpuResource) this.renderPassTexture.createGpuResource();

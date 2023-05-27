@@ -70,6 +70,7 @@ export class ImageTexture implements IShaderResource {
     }
 
 
+
     public clone(): ImageTexture {
         return new ImageTexture(this.descriptor);
     }

@@ -22,7 +22,7 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
 
 
     constructor(descriptor: {
-        source?: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[], ////front,back,left,right,top,bottom
+        source?: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)[], ////front,back,left,right,top,bottom
         size: GPUExtent3D,
         usage?: GPUTextureUsageFlags,
         defaultViewDescriptor?: GPUTextureViewDescriptor,
@@ -46,43 +46,43 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
     }
 
 
-    public set right(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+    public set right(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture) {
 
         this._bitmaps[0] = bmp;
         this.mustBeTransfered = true;
     }
-    public set left(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+    public set left(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture) {
         if (!this.descriptor.source) this.descriptor.source = {};
         this._bitmaps[1] = bmp;
         this.mustBeTransfered = true;
     }
-    public set bottom(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+    public set bottom(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture) {
         if (!this.descriptor.source) this.descriptor.source = {};
         this._bitmaps[2] = bmp;
         this.mustBeTransfered = true;
     }
-    public set top(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+    public set top(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture) {
         if (!this.descriptor.source) this.descriptor.source = {};
         this._bitmaps[3] = bmp;
         this.mustBeTransfered = true;
     }
-    public set back(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+    public set back(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture) {
         if (!this.descriptor.source) this.descriptor.source = {};
         this._bitmaps[4] = bmp;
         this.mustBeTransfered = true;
     }
-    public set front(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas) {
+    public set front(bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture) {
         if (!this.descriptor.source) this.descriptor.source = {};
         this._bitmaps[5] = bmp;
         this.mustBeTransfered = true;
     }
 
-    public set sides(images: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[]) {
+    public set sides(images: (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)[]) {
         for (let i = 0; i < 6; i++) this._bitmaps[i] = images[i];
         this.mustBeTransfered = true;
         this.update();
     }
-    public get sides(): (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas)[] { return this._bitmaps; }
+    public get sides(): (ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture)[] { return this._bitmaps; }
 
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
@@ -91,31 +91,7 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
         this._view = this.gpuResource.createView({ dimension: 'cube' });
     }
 
-    public update(): void {
 
-
-        if (this.mustBeTransfered) {
-
-            if (!this.gpuResource) this.createGpuResource();
-
-            let bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas;
-            for (let i = 0; i < 6; i++) {
-                bmp = this._bitmaps[i];
-                //console.log("upload texture ", bmp)
-                if (bmp) {
-                    XGPU.device.queue.copyExternalImageToTexture(
-                        { source: bmp },
-                        { texture: this.gpuResource, origin: [0, 0, i] },
-                        [bmp.width, bmp.height]
-                    );
-                }
-            }
-            //if (bmp instanceof ImageBitmap) bmp.close();
-            this.mustBeTransfered = false;
-        }
-
-
-    }
 
     //-----
 
