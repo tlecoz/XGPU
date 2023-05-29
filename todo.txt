@@ -4,11 +4,32 @@ GPUType ligne 224 : probable pbm avec i32 et u32
 
 
 
-- ajouter floatArray, vec2Array, vec3Array (idem pour int et uint) dans PrimitiveType 
-|-> vérifier que l'alignement marche bien 
+computeShader : plusieurs IO 
 
-- Ajouter les classe CubeMapArray , ImageTextureArray , VideoTextureArray, TextureSamplerArray dans shader/resources 
-  |-> prise en charge des données dans bindgroups 
+
+
+renderBundle sample 
+GameOfLife sample 
+computeBoids sample 
+deffered rendering sample
+texture setup sample
+
+bitmapFont sample
+SDF Font Sample 
+VectorGraphic Sample
+
+export to JSON 
+
+buildPipelineFromJSON 
+
+
+uniformBuffer storage si trop gros (ne semble pas fonctionner dans les vertexShader sans layout:"auto")
+
+
+
+
+
+
 
 
 dans un cas comme celui là : 
@@ -253,11 +274,6 @@ UniformGroup => choisir si on veut updater
 
 
 
-uniformBuffer storage si trop gros 
-
-renderBundle sample 
-GameOfLife sample 
-
 
 
 
@@ -270,9 +286,6 @@ ratio uniform dans renderer
 
 
 
-export to JSON 
-
-buildPipelineFromJSON 
 
 
 

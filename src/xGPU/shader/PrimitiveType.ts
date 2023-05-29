@@ -89,8 +89,10 @@ export class PrimitiveFloatUniform extends Float32Array {
         return "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";"
     }
     */
-    public createVariable(uniformBufferName: string): string {
+    public createVariable(uniformBufferName: string, name?: string): string {
         if (!this.createVariableInsideMain) return "";
+
+        if (!name) name = this.name;
 
         let type = this.className;
         if (type === "Float") type = "f32";
@@ -98,7 +100,7 @@ export class PrimitiveFloatUniform extends Float32Array {
         if (type === "Vec3") type = "vec3<f32>";
         if (type === "Vec4") type = "vec4<f32>";
 
-        const res: string = "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
+        const res: string = "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";\n";
         //console.log("createVariable = ", res);
 
         return res;
@@ -618,41 +620,7 @@ export class Vec4Array extends PrimitiveFloatUniform {
         this.className = type;
     }
 }
-/*
-export class Vec3Array extends PrimitiveFloatUniform {
 
-    constructor(vec3Array: Vec3[]) {
-        let buf: Float32Array = new Float32Array(vec3Array.length * 4);
-        for (let i = 0; i < vec3Array.length; i++) buf.set(vec3Array[i], i * 4);
-        let type: string = "array<vec4<f32>," + vec3Array.length + ">";
-        super("array<vec4<f32>," + vec3Array.length + ">", buf)
-        this.className = type;
-    }
-}
-
-export class Vec2Array extends PrimitiveFloatUniform {
-
-    constructor(vec2Array: Vec2[]) {
-
-        let buf: Float32Array = new Float32Array(vec2Array.length * 4);
-        for (let i = 0; i < vec2Array.length; i++) buf.set(vec2Array[i], i * 4);
-        let type: string = "array<vec4<f32>," + vec2Array.length + ">";
-        super(type, buf)
-        this.className = type;
-    }
-}
-
-export class FloatArray extends PrimitiveFloatUniform {
-
-    constructor(floatArray: Float[]) {
-        let buf: Float32Array = new Float32Array(floatArray.length * 4);
-        for (let i = 0; i < floatArray.length; i++) buf.set(floatArray[i], i * 4);
-        let type: string = "array<vec4<f32>," + floatArray.length + ">";
-        super("array<vec4," + floatArray.length + ">", buf)
-        this.className = type;
-    }
-}
-*/
 
 //-------
 
@@ -663,46 +631,13 @@ export class IVec4Array extends PrimitiveIntUniform {
     constructor(ivec4Array: IVec4[]) {
         let buf: Int32Array = new Int32Array(ivec4Array.length * 4);
         for (let i = 0; i < ivec4Array.length; i++) buf.set(ivec4Array[i], i * 4);
-        let type: string = "array<ivec4<f32>," + ivec4Array.length + ">";
+        let type: string = "array<vec4<i32>," + ivec4Array.length + ">";
         super(type, buf);
         this.className = type;
     }
 }
 
-/*
-export class IVec3Array extends PrimitiveIntUniform {
 
-    constructor(ivec3Array: IVec3[]) {
-        let buf: Int32Array = new Int32Array(ivec3Array.length * 4);
-        for (let i = 0; i < ivec3Array.length; i++) buf.set(ivec3Array[i], i * 4);
-        let type: string = "array<ivec4<f32>," + ivec3Array.length + ">";
-        super(type, buf);
-        this.className = type;
-    }
-}
-
-export class IVec2Array extends PrimitiveIntUniform {
-
-    constructor(ivec2Array: IVec2[]) {
-        let buf: Int32Array = new Int32Array(ivec2Array.length * 4);
-        for (let i = 0; i < ivec2Array.length; i++) buf.set(ivec2Array[i], i * 4);
-        let type: string = "array<ivec4<f32>," + ivec2Array.length + ">";
-        super(type, buf);
-        this.className = type;
-    }
-}
-
-export class IntArray extends PrimitiveIntUniform {
-
-    constructor(intArray: Int[]) {
-        let buf: Int32Array = new Int32Array(intArray.length * 4);
-        for (let i = 0; i < intArray.length; i++) buf.set(intArray[i], i * 4);
-        let type: string = "array<ivec4<f32>," + intArray.length + ">";
-        super(type, buf);
-        this.className = type;
-    }
-}
-*/
 
 //-----
 
@@ -711,45 +646,12 @@ export class UVec4Array extends PrimitiveUintUniform {
     constructor(uvec4Array: UVec4[]) {
         let buf: Uint32Array = new Uint32Array(uvec4Array.length * 4);
         for (let i = 0; i < uvec4Array.length; i++) buf.set(uvec4Array[i], i * 4);
-        let type: string = "array<uvec4<f32>," + uvec4Array.length + ">";
+        let type: string = "array<vec4<u32>," + uvec4Array.length + ">";
         super(type, buf);
         this.className = type;
     }
 }
 
-/*
-export class UVec3Array extends PrimitiveUintUniform {
-
-    constructor(uvec3Array: IVec3[]) {
-        let buf: Uint32Array = new Uint32Array(uvec3Array.length * 4);
-        for (let i = 0; i < uvec3Array.length; i++) buf.set(uvec3Array[i], i * 4);
-        let type: string = "array<uvec4<f32>," + uvec3Array.length + ">";
-        super(type, buf);
-        this.className = type;
-    }
-}
-
-export class UVec2Array extends PrimitiveUintUniform {
-
-    constructor(uvec2Array: IVec2[]) {
-        let buf: Uint32Array = new Uint32Array(uvec2Array.length * 4);
-        for (let i = 0; i < uvec2Array.length; i++) buf.set(uvec2Array[i], i * 4);
-        let type: string = "array<uvec4<f32>," + uvec2Array.length + ">";
-        super(type, buf);
-        this.className = type;
-    }
-}
-
-export class UintArray extends PrimitiveUintUniform {
-
-    constructor(uintArray: Uint[]) {
-        let buf: Uint32Array = new Uint32Array(uintArray.length * 4);
-        for (let i = 0; i < uintArray.length; i++) buf.set(uintArray[i], i * 4);
-        let type: string = "array<uvec4<f32>," + uintArray.length + ">";
-        super(type, buf);
-        this.className = type;
-    }
-}*/
 
 
 //==============================================================

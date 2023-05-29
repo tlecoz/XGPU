@@ -2,7 +2,6 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
-import { ImageTexture } from "./ImageTexture";
 import { ImageTextureArray } from "./ImageTextureArray";
 import { IShaderResource } from "./IShaderResource";
 

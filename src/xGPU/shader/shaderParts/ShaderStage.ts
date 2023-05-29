@@ -39,6 +39,11 @@ export class ShaderStage {
     protected formatWGSLCode(code: string): string {
 
 
+
+
+
+
+
         // Retire les sauts de ligne inutiles et divise le code en lignes
         const lines = code.replace(/\n+/g, '\n').split('\n');
 
@@ -63,6 +68,11 @@ export class ShaderStage {
 
             formattedCode += indentedLine + '\n';
         }
+
+
+        //console.log("CODE-------------")
+        //console.log(code);
+        //console.log("---------------------")
 
         return formattedCode;
     }

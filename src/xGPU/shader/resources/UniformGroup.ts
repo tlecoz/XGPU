@@ -19,6 +19,12 @@ export class UniformGroup {
 
     protected _name: string;
     public wgsl: { struct: string, localVariables: string };
+
+    public wgslStructNames: string[] = []; /*an uniformGroup can be used multiple times, not necessarily in an array so we must 
+                                       so we must store the name we use when we build the 'struct' in order to write a 'struct' 
+                                       for every properties while being sure we don't have two sames structs*/
+
+
     public datas: Float32Array;
 
     protected buffer: UniformBuffer = null;
@@ -259,11 +265,13 @@ export class UniformGroup {
             if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
                 if (item instanceof UniformGroup) {
                     if (!item.wgsl) {
+                        //console.log("#1 NAME = ", item.name, otherStructs)
                         o = item.getStruct(item.name);
                         localVariables += o.localVariables + "\n";
-
+                        item.wgslStructNames.push(item.name);
                     }
                     if (otherStructs.indexOf(item.wgsl.struct) === -1) {
+                        //console.log("OHTER : ", otherStructs, item.wgsl.struct)
                         otherStructs = item.wgsl.struct + otherStructs;
                     }
                     struct += "    " + this.getVarName(item.name) + ":" + item.name + ",\n"
@@ -272,7 +280,7 @@ export class UniformGroup {
                     name = item.name;
 
                     if (!(item.groups[0] as UniformGroup).wgsl) {
-
+                        //console.log("#2 NAME = ", name)
                         o = (item.groups[0] as UniformGroup).getStruct(item.name);
                         localVariables += o.localVariables;
                     }
@@ -305,7 +313,6 @@ export class UniformGroup {
 
 
                     if (o.type.isArray) {
-                        console.log("AAAAA ", o.name, o.type.dataType)
 
                         if (o.type.isArrayOfMatrixs) {
 
@@ -317,6 +324,9 @@ export class UniformGroup {
 
                             struct += "    @size(" + (o.type.arrayLength * col * row * 4) + ") " + o.name + ":" + o.type.dataType + ",\n";
                         } else {
+
+                            console.log("PPPPPPPPPP ", o.name, o.type.dataType)
+
                             struct += "    @size(" + (o.type.arrayLength * 16) + ") " + o.name + ":" + o.type.dataType + ",\n";
                         }
 

@@ -19,6 +19,7 @@ import { IndexBuffer } from "./resources/IndexBuffer";
 import { IShaderResource } from "../shader/resources/IShaderResource";
 import { Bindgroups } from "../shader/Bindgroups";
 import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
+import { UniformGroup } from "../shader/resources/UniformGroup";
 
 
 export class RenderPipeline extends Pipeline {
@@ -464,6 +465,8 @@ export class RenderPipeline extends Pipeline {
     public buildGpuPipeline(): GPURenderPipeline {
         if (this.gpuPipeline) return this.gpuPipeline;
 
+
+
         this.bindGroups.handleRenderPipelineResourceIOs();
         this.initPipelineResources(this);
 
@@ -536,6 +539,8 @@ export class RenderPipeline extends Pipeline {
         //console.log("buildGPUPipeline description = ", this.description)
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
         //console.log("gpuPipeline = ", this.gpuPipeline)
+
+
         return this.gpuPipeline;
 
     }

@@ -51,7 +51,14 @@ export class Pipeline {
     protected _resources: any;
     public get resources(): any { return this._resources; }
 
+
+
+
+
+
+
     public initFromObject(obj: any) {
+
         this._resources = obj;
     }
 

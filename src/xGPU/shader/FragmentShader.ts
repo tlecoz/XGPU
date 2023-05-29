@@ -50,8 +50,8 @@ export class FragmentShader extends ShaderStage {
         result += "}\n";
 
         result = this.formatWGSLCode(result)
-        console.log("------------- FRAGMENT SHADER --------------")
-        console.log(result)
+        //console.log("------------- FRAGMENT SHADER --------------")
+        //console.log(result)
         //console.log("--------------------------------------------")
 
         this._shaderInfos = { code: result, output: output };

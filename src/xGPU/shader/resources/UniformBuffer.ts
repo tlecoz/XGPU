@@ -84,7 +84,7 @@ export class UniformBuffer implements IShaderResource {
     public createStruct(uniformName: string): { struct: string, localVariables: string } {
 
 
-
+        console.warn("RESOURCE NAME = ", this.group.name)
 
         const o = this.group.getStruct(uniformName);
 
@@ -98,7 +98,8 @@ export class UniformBuffer implements IShaderResource {
         const structName = uniformName.substring(0, 1).toUpperCase() + uniformName.slice(1);
         const varName = uniformName.substring(0, 1).toLowerCase() + uniformName.slice(1);
 
-        return "@binding(" + bindingId + ") @group(" + groupId + ") var<uniform> " + varName + ":" + structName + ";\n";
+        if (this.bufferType === "uniform") return "@binding(" + bindingId + ") @group(" + groupId + ") var<uniform> " + varName + ":" + structName + ";\n";
+        else return "@binding(" + bindingId + ") @group(" + groupId + ") var<storage, read> " + varName + ":" + structName + ";\n";
     }
 
     public getUniformById(id: number) { return this.group.items[id]; }
@@ -106,13 +107,25 @@ export class UniformBuffer implements IShaderResource {
 
     //------------------------------
 
+
+    public get bufferType(): "storage" | "uniform" {
+        if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536) return "uniform";
+        return "storage";
+    }
+
     public createGpuResource(): any {
 
         if (!this.gpuResource) {
 
+            const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
+            let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+
+            if (this.bufferType === "storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+
+
             this.gpuResource = XGPU.device.createBuffer({
-                size: this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+                size,
+                usage
             })
 
             this.update();
@@ -128,11 +141,14 @@ export class UniformBuffer implements IShaderResource {
 
     public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, buffer: { type: string } } {
 
+        let type: string = "uniform";
+        if (this.bufferType) type = this.bufferType;
+
         return {
             binding: bindingId,
             visibility: this.descriptor.visibility,
             buffer: {
-                type: "uniform",
+                type,
             },
         }
     }
@@ -159,8 +175,9 @@ export class UniformBuffer implements IShaderResource {
 
         //use to handle particular cases in descriptor relative to the nature of pipeline
         if (pipelineType === "compute" || pipelineType === "compute_mixed") this.descriptor.visibility = GPUShaderStage.COMPUTE;
-
-        else this.descriptor.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
+        else {
+            this.descriptor.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
+        }
     }
 }
 

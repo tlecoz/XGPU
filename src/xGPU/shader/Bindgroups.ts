@@ -14,6 +14,7 @@ import { VertexBuffer } from "./resources/VertexBuffer";
 import { VideoTexture } from "./resources/VideoTexture";
 import { ImageTextureArray } from "./resources/ImageTextureArray";
 import { CubeMapTextureArray } from "./resources/CubeMapTextureArray";
+import { DepthTextureArray } from "../pipelines/resources/textures/DepthTextureArray";
 
 export class Bindgroups {
 
@@ -107,6 +108,44 @@ export class Bindgroups {
 
         const obj = { result: "", variables: "" };
 
+        /*
+        const structNames: string[] = [];
+        const removeAlreadyDefinedStruct = (source: string) => {
+            let lines: string[] = source.split("\n");
+            let result: string = "";
+            let openStruct: boolean = false;
+            let canWrite: boolean = true;
+            let line: string;
+            let delay: number = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                line = lines[i].trim();
+
+                if (line.substring(0, "struct ".length) === "struct ") {
+                    const name = line.split(" ")[1].split("{")[0];
+                    openStruct = true;
+                    if (structNames.indexOf(name) === -1) {
+                        structNames.push(name);
+                        canWrite = true;
+                    } else {
+                        canWrite = false;
+                    }
+                } else {
+                    if (openStruct && line.indexOf("}") !== -1) {
+                        openStruct = false;
+                        if (!canWrite) delay = 1;
+                        canWrite = true;
+                    }
+                }
+
+                if (canWrite && delay-- <= 0) result += lines[i] + "\n";
+            }
+
+            return result;
+        }
+        */
+        //---------------
+
         for (let i = 0; i < this.groups.length; i++) {
             group = this.groups[i];
             resources = group.elements;
@@ -116,11 +155,17 @@ export class Bindgroups {
                 if (resource instanceof VertexBuffer) continue;
                 name = resources[j].name;
 
-                //console.log("=====> ", resource, resource instanceof VertexBuffer)
+
                 if (resource instanceof UniformBuffer) {
+                    console.log("=====> ", name, resource)
+                    /*if (resource.group.name) {
+                        resource.group = resource.group.clone();
+                        resource.group.name = undefined;
+                    }*/
 
                     const s: { struct: string, localVariables: string } = resource.createStruct(name);
                     obj.variables += s.localVariables;
+                    //result += removeAlreadyDefinedStruct(s.struct);
                     result += s.struct;
 
                 }
@@ -297,7 +342,10 @@ export class Bindgroups {
                 if (this._resources.all.indexOf(r) === -1) this._resources.all.push(r);
                 res[element.name] = element.resource;
 
-                if (r instanceof CubeMapTextureArray) {
+                if (r instanceof DepthTextureArray) {
+                    if (!types.depthTextureArrays) types.depthTextureArrays = [];
+                    if (types.depthTextureArrays.indexOf(element) === -1) types.depthTextureArrays.push(element);
+                } else if (r instanceof CubeMapTextureArray) {
                     if (!types.cubeMapTextureArrays) types.cubeMapTextureArrays = [];
                     if (types.cubeMapTextureArrays.indexOf(element) === -1) types.cubeMapTextureArrays.push(element);
                 } else if (r instanceof ImageTextureArray) {
