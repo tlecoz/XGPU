@@ -27,6 +27,10 @@ export class Bindgroup {
     public vertexBufferIO: VertexBufferIO;
     public textureIO: ImageTextureIO;
 
+
+    public resourcesIOs: (VertexBufferIO | ImageTextureIO)[] = [];
+
+
     constructor(name: string) {
         this._name = name;
 
@@ -42,12 +46,19 @@ export class Bindgroup {
         }
 
 
+
+
         //console.log("bindgroup.add ", resource)
 
         if (resource instanceof VertexBufferIO) {
+
+
+            this.resourcesIOs.push(resource);
+
+
+
             this.mustRefreshBindgroup = true;
             this.vertexBufferIO = resource;
-
             //console.log("group vertexBufferIO ", this.vertexBufferIO)
             this.elements.push({ name: name, resource: resource.buffers[0] });
             this.elements.push({ name: name + "_out", resource: resource.buffers[1] });
@@ -58,9 +69,15 @@ export class Bindgroup {
         }
 
         if (resource instanceof ImageTextureIO) {
+
+
+            this.resourcesIOs.push(resource);
+
+
+
+
             this.mustRefreshBindgroup = true;
             this.textureIO = resource;
-
             this.elements.push({ name: name, resource: resource.textures[0] });
             this.elements.push({ name: name + "_out", resource: resource.textures[1] });
 
@@ -201,19 +218,152 @@ export class Bindgroup {
 
 
     public handleComputePipelineResourceIOs() {
-        //console.warn("handleComputePipelineResourceIOs")
-        if (this.vertexBufferIO) {
-            //console.log(this.vertexBufferIO.buffers[0])
-            this.createPingPongBindgroup(this.vertexBufferIO.buffers[0], this.vertexBufferIO.buffers[1])
-        } else if (this.textureIO) {
-            //console.log("handleComputePipelineResourceIOs")
-            this.createPingPongBindgroup(this.textureIO.textures[0], this.textureIO.textures[1])
-        }
+        console.warn("handleComputePipelineResourceIOs ", this.vertexBufferIO)
 
+
+
+        if (this.resourcesIOs.length) {
+            let buf0 = [];
+            let buf1 = [];
+            for (let i = 0; i < this.resourcesIOs.length; i++) {
+                if (this.resourcesIOs[i] instanceof VertexBufferIO) {
+                    buf0[i] = (this.resourcesIOs[i] as VertexBufferIO).buffers[0];
+                    buf1[i] = (this.resourcesIOs[i] as VertexBufferIO).buffers[1];
+                } else {
+                    buf0[i] = (this.resourcesIOs[i] as ImageTextureIO).textures[0];
+                    buf1[i] = (this.resourcesIOs[i] as ImageTextureIO).textures[1];
+                }
+            }
+            this.createPingPongBindgroup(buf0, buf1);
+        }
 
 
     }
 
+
+    private swapElements() {
+        let result = this.elements.concat();
+        let temp;
+        for (let i = 0; i < this.elements.length; i += 2) {
+            temp = result[i];
+            result[i] = result[i + 1];
+            result[i + 1] = temp;
+        }
+        return result;
+    }
+
+    public createPingPongBindgroup(resource1: IShaderResource[], resource2: IShaderResource[]): Bindgroup {
+        const group = new Bindgroup(this.name);
+        group.mustRefreshBindgroup = this.mustRefreshBindgroup = true;
+        group._layout = this.layout;
+
+
+        group.elements = this.swapElements();
+
+        let res1, res2;
+        for (let i = 0; i < resource1.length; i++) {
+            res1 = resource1[i];
+            res2 = resource2[i];
+
+
+            //group.elements = this.getSwappedElements(res1, res2);
+            //console.log("=> group.elements ", group.elements[0].name, group.elements[1].name, group.elements[2].name, group.elements[3].name)
+
+
+
+            if (res1 instanceof VertexBuffer) {
+
+                const buffers = [res1.buffer, (res2 as VertexBuffer).buffer];
+                (buffers[0] as any).debug = 1;
+                (buffers[1] as any).debug = 2;
+
+                res1.initBufferIO(buffers);
+            } else if (res1 instanceof ImageTexture) {
+
+                if (!res1.gpuResource) res1.createGpuResource();
+                if (!res2.gpuResource) res2.createGpuResource();
+
+
+                //console.log(resource1.gpuResource === resource2.gpuResource)
+
+                const textures = [res1.gpuResource, res2.gpuResource];
+                try {
+                    (textures[0] as any).debug = 1;
+                    (textures[1] as any).debug = 2;
+                } catch (e) {
+
+                }
+
+
+
+                res1.initTextureIO(textures);
+            }
+        }
+
+
+
+
+
+        this.ioGroups = [this, group];
+        //console.log(this.ioGroups)
+        this.debug = 1;
+        group.debug = 2;
+
+        return group;
+
+    }
+
+
+
+
+    /*
+    -------------OLD VERSION-----------
+    public createPingPongBindgroup(resource1: IShaderResource, resource2: IShaderResource): Bindgroup {
+        const group = new Bindgroup(this.name);
+        group.mustRefreshBindgroup = this.mustRefreshBindgroup = true;
+        group._layout = this.layout;
+        group.elements = this.getSwappedElements(resource1, resource2);
+        //console.log("=> group.elements ", group.elements)
+
+
+
+        if (resource1 instanceof VertexBuffer) {
+
+            const buffers = [resource1.buffer, (resource2 as VertexBuffer).buffer];
+            (buffers[0] as any).debug = 1;
+            (buffers[1] as any).debug = 2;
+
+            resource1.initBufferIO(buffers);
+        } else if (resource1 instanceof ImageTexture) {
+
+            if (!resource1.gpuResource) resource1.createGpuResource();
+            if (!resource2.gpuResource) resource2.createGpuResource();
+
+            console.log(resource1, resource2)
+            //console.log(resource1.gpuResource === resource2.gpuResource)
+
+            const textures = [resource1.gpuResource, resource2.gpuResource];
+            try {
+                (textures[0] as any).debug = 1;
+                (textures[1] as any).debug = 2;
+            } catch (e) {
+
+            }
+
+
+
+            resource1.initTextureIO(textures);
+        }
+
+        this.ioGroups = [this, group];
+        //console.log(this.ioGroups)
+        this.debug = 1;
+        group.debug = 2;
+
+        return group;
+
+    }
+    */
 
     public handleRenderPipelineResourceIOs() {
 
@@ -312,51 +462,7 @@ export class Bindgroup {
     protected io_index: number = 0;
     public debug: any;
 
-    public createPingPongBindgroup(resource1: IShaderResource, resource2: IShaderResource): Bindgroup {
-        const group = new Bindgroup(this.name);
-        group.mustRefreshBindgroup = this.mustRefreshBindgroup = true;
-        group._layout = this.layout;
-        group.elements = this.getSwappedElements(resource1, resource2);
-        //console.log("=> group.elements ", group.elements)
 
-
-
-        if (resource1 instanceof VertexBuffer) {
-
-            const buffers = [resource1.buffer, (resource2 as VertexBuffer).buffer];
-            (buffers[0] as any).debug = 1;
-            (buffers[1] as any).debug = 2;
-
-            resource1.initBufferIO(buffers);
-        } else if (resource1 instanceof ImageTexture) {
-
-            if (!resource1.gpuResource) resource1.createGpuResource();
-            if (!resource2.gpuResource) resource2.createGpuResource();
-
-            console.log(resource1, resource2)
-            //console.log(resource1.gpuResource === resource2.gpuResource)
-
-            const textures = [resource1.gpuResource, resource2.gpuResource];
-            try {
-                (textures[0] as any).debug = 1;
-                (textures[1] as any).debug = 2;
-            } catch (e) {
-
-            }
-
-
-
-            resource1.initTextureIO(textures);
-        }
-
-        this.ioGroups = [this, group];
-        //console.log(this.ioGroups)
-        this.debug = 1;
-        group.debug = 2;
-
-        return group;
-
-    }
 
     public get pingPongBindgroup(): Bindgroup {
         return this._pingPongBindgroup;

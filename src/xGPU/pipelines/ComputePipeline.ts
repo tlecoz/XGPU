@@ -150,9 +150,12 @@ export class ComputePipeline extends Pipeline {
         let k = 0;
         for (let i = 0; i < t.length; i++) {
             o = t[i];
+
+            //console.log("cleanInputsAndInitBufferIO ", o)
             if (o instanceof VertexBufferIO || o instanceof ImageTextureIO) {
                 if (o instanceof VertexBufferIO) {
                     this.bufferSize = o.bufferSize;
+                    //console.log("this.bufferSize = ", this.bufferSize)
                 }
                 //o.init(this);
                 continue;
@@ -297,6 +300,7 @@ export class ComputePipeline extends Pipeline {
             if (vertexBuffers) {
                 for (let i = 0; i < vertexBuffers.length; i++) {
                     if (vertexBuffers[i].resource.io) {
+                        console.log("VB = ", vertexBuffers[i])
                         inputBuffer = vertexBuffers[i].resource;
                         outputBuffer = vertexBuffers[i + 1].resource;
                         break;
@@ -334,11 +338,15 @@ export class ComputePipeline extends Pipeline {
 
         if (this.bufferIOs) {
 
+
+
             const buffer = this.bufferIOs[0].buffer; // getting this value change the reference of the GPUBuffer and create the "ping pong"
 
             if (this.onReceiveData) {
 
                 if (!this.canCallMapAsync) return
+
+                console.log(this.bufferSize)
 
                 if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
                 const copyEncoder = XGPU.device.createCommandEncoder();

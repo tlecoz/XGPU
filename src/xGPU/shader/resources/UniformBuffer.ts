@@ -108,9 +108,9 @@ export class UniformBuffer implements IShaderResource {
     //------------------------------
 
 
-    public get bufferType(): "storage" | "uniform" {
+    public get bufferType(): "read-only-storage" | "uniform" {
         if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536) return "uniform";
-        return "storage";
+        return "read-only-storage";
     }
 
     public createGpuResource(): any {
@@ -120,7 +120,7 @@ export class UniformBuffer implements IShaderResource {
             const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
             let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
 
-            if (this.bufferType === "storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+            if (this.bufferType === "read-only-storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 
 
             this.gpuResource = XGPU.device.createBuffer({
@@ -143,7 +143,7 @@ export class UniformBuffer implements IShaderResource {
 
         let type: string = "uniform";
         if (this.bufferType) type = this.bufferType;
-
+        console.log("bufferType = ", this.bufferType);
         return {
             binding: bindingId,
             visibility: this.descriptor.visibility,
