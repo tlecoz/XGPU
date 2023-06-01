@@ -33,6 +33,7 @@ export class ImageTextureIO {
             h = descriptor.height;
         }
 
+
         this.descriptor = {
             size: [w, h],
             format: "rgba8unorm",
