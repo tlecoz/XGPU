@@ -157,7 +157,7 @@ export class Bindgroups {
 
 
                 if (resource instanceof UniformBuffer) {
-                    console.log("=====> ", name, resource)
+
                     /*if (resource.group.name) {
                         resource.group = resource.group.clone();
                         resource.group.name = undefined;

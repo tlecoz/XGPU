@@ -20,12 +20,13 @@ import { IShaderResource } from "../shader/resources/IShaderResource";
 import { Bindgroups } from "../shader/Bindgroups";
 import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
 import { UniformGroup } from "../shader/resources/UniformGroup";
+import { IRenderer } from "../IRenderer";
 
 
 export class RenderPipeline extends Pipeline {
 
 
-    public renderer: GPURenderer | HeadlessGPURenderer;
+    public renderer: IRenderer;//GPURenderer | HeadlessGPURenderer;
 
     protected _depthStencilTexture: DepthStencilTexture;
     protected multisampleTexture: MultiSampleTexture;
@@ -50,7 +51,7 @@ export class RenderPipeline extends Pipeline {
     public onDrawEnd: () => void;
     public onDraw: (drawCallId: number) => void;
 
-    constructor(renderer: GPURenderer | HeadlessGPURenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
+    constructor(renderer: IRenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
         super();
 
         if (!renderer.canvas) {

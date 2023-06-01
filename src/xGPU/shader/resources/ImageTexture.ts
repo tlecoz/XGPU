@@ -178,10 +178,11 @@ export class ImageTexture implements IShaderResource {
     }
 
     public destroyGpuResource() {
-
+        if (this.resourceIO) this.resourceIO.destroy();
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = null;
+        this.resourceIO = null;
     }
 
     public createDeclaration(varName: string, bindingId: number, groupId: number = 0): string {

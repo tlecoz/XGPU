@@ -510,6 +510,10 @@ export class VertexBuffer implements IShaderResource {
     }
 
     public destroyGpuResource() {
+        if (this.resourceIO) {
+            this.resourceIO.destroy();
+            this.resourceIO = null;
+        }
         if (this.gpuResource) {
             this.gpuResource.destroy();
             this.gpuResource = null;

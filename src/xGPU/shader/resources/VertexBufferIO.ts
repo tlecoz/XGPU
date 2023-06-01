@@ -39,6 +39,14 @@ export class VertexBufferIO {
     public get input(): VertexBuffer { return this.buffers[0] }
     public get output(): VertexBuffer { return this.buffers[1] }
 
+
+    public destroy() {
+        if (this.stagingBuffer) this.stagingBuffer.destroy();
+        this.buffers = undefined;
+        this.onOutputData = undefined;
+
+    }
+
     public async getOutputData() {
 
         //------------------------------------------

@@ -558,7 +558,7 @@ export class Pipeline {
                     if (z !== "bindgroups" && z !== "vertexShader" && z !== "fragmentShader" && z !== "computeShader") {
                         if (!isBuiltIn(obj)) {
                             objs.push({ name, resource: obj });
-                            console.log("######## ", z)
+                            //console.log("######## ", z)
                         }
                     }
                 }

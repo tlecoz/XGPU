@@ -79,6 +79,13 @@ export class ImageTextureIO {
 
     protected outputBuffer: GPUBuffer;
 
+
+    public destroy() {
+        if (this.stagingBuffer) this.stagingBuffer.destroy();
+        this.textures = undefined;
+        this.onOutputData = undefined;
+    }
+
     public async getOutputData() {
 
         if (!this.onOutputData || !this.canCallMapAsync) return;

@@ -4,8 +4,9 @@
 import { XGPU } from "./XGPU";
 import { RenderPipeline } from "./pipelines/RenderPipeline";
 import { Texture } from "./pipelines/resources/textures/Texture";
+import { IRenderer } from "./IRenderer"
 
-export class HeadlessGPURenderer {
+export class HeadlessGPURenderer implements IRenderer {
 
     protected textureObj: Texture
     protected dimension: { width: number, height: number, dimensionChanged: boolean };
@@ -41,7 +42,6 @@ export class HeadlessGPURenderer {
                     sampleCount
                 })
                 this.textureObj.create();
-                console.log("textureObj = ", this.textureObj)
 
                 onResolve(this);
             });
@@ -63,39 +63,56 @@ export class HeadlessGPURenderer {
 
         if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment++;
     }
-
+    public get nbPipeline(): number { return this.renderPipelines.length }
     public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
 
     public resize(w: number, h: number) {
         this.dimension.width = w;
         this.dimension.height = h;
         this.dimension.dimensionChanged = true;
-        this.textureObj.resize(w, h);
+        if (this.textureObj) this.textureObj.resize(w, h);
+    }
+
+    public destroy(): void {
+        for (let i = 0; i < this.renderPipelines.length; i++) {
+            this.renderPipelines[i].destroy();
+        }
+        this.renderPipelines = [];
+        for (let z in this) {
+            this[z] = null;
+        }
     }
 
     public update() {
         if (!XGPU.ready || this.renderPipelines.length === 0) return;
+
 
         const commandEncoder = XGPU.device.createCommandEncoder();
 
         let pipeline: RenderPipeline, renderPass;
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
-            renderPass = pipeline.beginRenderPass(commandEncoder, this.view);
-            pipeline.update();
-            pipeline.draw(renderPass);
-            pipeline.end(commandEncoder, renderPass);
+
+            pipeline.update()
+
+            for (let j = 0; j < pipeline.pipelineCount; j++) {
+                renderPass = pipeline.beginRenderPass(commandEncoder, this.view, j);
+                if (pipeline.onDraw) pipeline.onDraw(j);
+                pipeline.draw(renderPass);
+                pipeline.end(commandEncoder, renderPass);
+
+            }
         }
 
         XGPU.device.queue.submit([commandEncoder.finish()]);
 
-        this.dimension.dimensionChanged = false;
+        this.canvas.dimensionChanged = false;
     }
 
     public get dimensionChanged(): boolean { return this.dimension.dimensionChanged; }
-    public get canvas(): { width: number, height: number } { return this.dimension; }
-    public get width(): number { return this.canvas.width }
-    public get height(): number { return this.canvas.height }
+    public get canvas(): { width: number, height: number, dimensionChanged: boolean } { return this.dimension; }
+    public get width(): number { return this.dimension.width }
+    public get height(): number { return this.dimension.height }
 
     public get texture(): GPUTexture {
         if (!this.textureObj) throw new Error("HeadlessGPURenderer is not initialized yet. You must Use HeadlessGPURenderer.init in order to initialize it")

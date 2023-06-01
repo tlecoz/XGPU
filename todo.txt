@@ -1,4 +1,14 @@
-computeShader : plusieurs IO 
+
+
+
+
+
+
+fix l'histoire du tableau avec le shader décomposé en 2 dans light/shadow 
+
+faire en sorte que GPURenderer extends HeadlessRenderer
+|-> préparer une interface IGPURenderer 
+
 
 
 gérer l'écriture simplifié des unifromGroup / uniformGroupArray 
@@ -7,10 +17,6 @@ si possible gére l'écritue simplifié des autres type de Array
 gérer le fait d'utiliser le même objet plusieurs fois avec des noms de propriétés différentes
 
 
-fix l'histoire du tableau avec le shader décomposé en 2 dans light/shadow 
-
-faire en sorte que GPURenderer extends HeadlessRenderer
-|-> préparer une interface IGPURenderer 
 
 
 quand on créé une classe qui extends PrimitiveType et qui dispose de propriété custom
