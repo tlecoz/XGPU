@@ -6,6 +6,7 @@ import { GPUType } from "../../GPUType";
 import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
 import { VertexAttribute } from "./VertexAttribute";
+import { VertexBufferIO } from "./VertexBufferIO";
 
 export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
@@ -21,6 +22,7 @@ export class VertexBuffer implements IShaderResource {
 
 
     public io: number = 0;
+    public resourceIO: VertexBufferIO = null;
     public mustBeTransfered: boolean = false;
     public vertexArrays: VertexAttribute[] = [];
     public attributes: any = {};

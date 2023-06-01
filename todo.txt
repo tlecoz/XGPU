@@ -1,10 +1,39 @@
-GPUType ligne 224 : probable pbm avec i32 et u32
-        ligne 37
-
-
-
-
 computeShader : plusieurs IO 
+
+
+gérer l'écriture simplifié des unifromGroup / uniformGroupArray 
+si possible gére l'écritue simplifié des autres type de Array
+
+gérer le fait d'utiliser le même objet plusieurs fois avec des noms de propriétés différentes
+
+
+fix l'histoire du tableau avec le shader décomposé en 2 dans light/shadow 
+
+faire en sorte que GPURenderer extends HeadlessRenderer
+|-> préparer une interface IGPURenderer 
+
+
+quand on créé une classe qui extends PrimitiveType et qui dispose de propriété custom
+|-> dans le shader , cela convertit notre PrimtiveType en struct 
+    |-> on ne peut plus utiliser notre variable comme PrimitiveType, ce qui peut etre pénible
+        |-> par exemple , si j'ai une classe Dimension extends Vec2 avec width et height ,
+            dans le shader je ne peux plus faire pos.xy * dimension 
+            ===> je suis obligé de faire vec2(pos.x * dimension.width, pos.y * dimension.height) 
+                 ce qui est super relou 
+
+
+                |-> ajoute un process a la fin du build qui  
+                    - scanne le code ligne par ligne 
+                    - cherche dans chaque ligne la présence d'un nom de struct 
+                     |-> si on en trouve, on vérifie que le caractère d'après est un point 
+                         |-> si ce n'est pas le cas, on créé une nouvelle variable locale qui contient un équivalent de notre struct en primitiveType 
+
+ 
+                ou alors.... et c'est sans aucun doute le mieux  (mais plus difficile)
+                |-> on restructure toutes les données sans aucune struct, ce qui implique de re-aligner les uniform sans struct 
+                   |-> et on reconstruit le code du shader
+
+
 
 
 
@@ -13,7 +42,7 @@ GameOfLife sample
 computeBoids sample 
 deffered rendering sample
 texture setup sample
-
+ribbon sample 
 bitmapFont sample
 SDF Font Sample 
 VectorGraphic Sample
@@ -23,7 +52,6 @@ export to JSON
 buildPipelineFromJSON 
 
 
-uniformBuffer storage si trop gros (ne semble pas fonctionner dans les vertexShader sans layout:"auto")
 
 
 

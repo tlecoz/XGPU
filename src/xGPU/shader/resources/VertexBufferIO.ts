@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { XGPU } from "../../XGPU";
 import { VertexAttribute } from "./VertexAttribute";
 import { VertexBuffer } from "./VertexBuffer";
 
@@ -10,6 +11,10 @@ export class VertexBufferIO {
 
     public buffers: VertexBuffer[] = [];
     public descriptor: any;
+    public onOutputData: (data: ArrayBuffer) => void;
+
+    protected stagingBuffer: GPUBuffer;
+    protected canCallMapAsync: boolean = true;
 
     constructor(attributes: any, descriptor?: any) {
 
@@ -26,7 +31,58 @@ export class VertexBufferIO {
         this.buffers[0].io = 1;
         this.buffers[1].io = 2;
 
+        this.buffers[0].resourceIO = this;
+        this.buffers[1].resourceIO = this;
+
     }
+
+    public get input(): VertexBuffer { return this.buffers[0] }
+    public get output(): VertexBuffer { return this.buffers[1] }
+
+    public async getOutputData() {
+
+        //------------------------------------------
+        // getting this value change the reference of the GPUBuffer and create the "ping pong"
+        // That's why it must be the first line, before the exceptions
+
+        const buffer = this.buffers[0].buffer;
+        //-------------------------------------------
+
+
+        if (!this.onOutputData) return null;
+        if (!this.canCallMapAsync) return;
+
+
+
+        if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
+        const copyEncoder = XGPU.device.createCommandEncoder();
+        const stage = this.stagingBuffer;
+
+        copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
+
+        XGPU.device.queue.submit([copyEncoder.finish()]);
+
+        this.canCallMapAsync = false;
+        await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
+        this.canCallMapAsync = true;
+
+        const copyArray = stage.getMappedRange(0, stage.size);
+        const data = copyArray.slice(0);
+        stage.unmap();
+
+        this.onOutputData(data);
+
+
+
+
+
+    }
+
+
+
+
+
+
 
     public clone(): VertexBufferIO {
         return new VertexBufferIO(this.buffers[0].attributeDescriptor, this.descriptor);
@@ -157,4 +213,8 @@ export class VertexBufferIO {
     }
 
     public get bufferSize(): number { return this.buffers[0].buffer.size; }
+
+    public get nbVertex(): number { return this.buffers[0].nbVertex }
+
+
 }

@@ -3,6 +3,7 @@
 
 import { XGPU } from "../../XGPU";
 import { IShaderResource } from "./IShaderResource";
+import { ImageTextureIO } from "./ImageTextureIO";
 
 export type ImageTextureDescriptor = {
     source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture
@@ -16,6 +17,7 @@ export type ImageTextureDescriptor = {
 
 export class ImageTexture implements IShaderResource {
 
+    public resourceIO: ImageTextureIO;
     public io: number = 0;
     public mustBeTransfered: boolean = false;
     public descriptor: ImageTextureDescriptor
@@ -38,9 +40,9 @@ export class ImageTexture implements IShaderResource {
 
         descriptor = { ...descriptor };
 
-        console.warn("imageTExture descriptor = ", descriptor);
+        //console.warn("imageTExture descriptor = ", descriptor);
         if (undefined === descriptor.sampledType) descriptor.sampledType = "f32";
-        if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
+        if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
         if (undefined === descriptor.size) {
             if (descriptor.source) {
@@ -51,7 +53,8 @@ export class ImageTexture implements IShaderResource {
                     this.gpuResource = descriptor.source;
                     descriptor.format = descriptor.source.format;
                     descriptor.usage = descriptor.source.usage;
-                    console.log("AAAAAAAAAAAAAAAAAA ", this.gpuResource)
+                    //descriptor.usage = GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+                    //console.log("AAAAAAAAAAAAAAAAAA ", this.gpuResource)
                     this._view = this.gpuResource.createView();
                     descriptor.source = undefined;
                     this.useOutsideTexture = true;
@@ -168,7 +171,7 @@ export class ImageTexture implements IShaderResource {
     public createGpuResource(): void {
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
-        console.warn("ImageTexture.createGPUResource descriptor = ", this.descriptor)
+
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
 
@@ -234,7 +237,7 @@ export class ImageTexture implements IShaderResource {
 
 
             if (this.io === 1) {
-                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT;
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC;
 
             } else if (this.io === 2) {
                 this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING;
@@ -245,7 +248,7 @@ export class ImageTexture implements IShaderResource {
 
 
             if (this.io !== 0) {
-                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING;
+                this.descriptor.usage = GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.STORAGE_BINDING;
             }
         }
     }

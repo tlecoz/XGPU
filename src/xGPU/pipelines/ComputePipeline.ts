@@ -18,19 +18,17 @@ export class ComputePipeline extends Pipeline {
     public computeShader: ComputeShader;
     public onReceiveData: (datas: Float32Array) => void;
 
-
     protected gpuComputePipeline: GPUComputePipeline;
     public workgroups: number[];
     protected dispatchWorkgroup: number[];
     protected bufferSize: number;
     protected textureSize: number[];// [width,height]
     protected stagingBuffer: GPUBuffer;
-    protected canCallMapAsync: boolean = true;
+
     protected bufferIOs: VertexBuffer[];
     protected textureIOs: ImageTexture[];
 
-    private checkedBufferIO: boolean = false;
-    private checkedTextureIO: boolean = false;
+
 
     constructor() {
         super()
@@ -143,33 +141,77 @@ export class ComputePipeline extends Pipeline {
     }
 
 
-    protected cleanInputsAndInitBufferIO() {
-        const _inputs = [];
-        const t = this.computeShader.inputs;
-        let o: any;
-        let k = 0;
-        for (let i = 0; i < t.length; i++) {
-            o = t[i];
+    protected vertexBufferIOs: VertexBufferIO[] = [];
+    protected imageTextureIOs: ImageTextureIO[] = [];
+    protected resourceIOs: (VertexBufferIO | ImageTextureIO)[] = [];
+    protected nbVertexMax: number = 0;
+    protected widthMax: number = 0;
+    protected heightMax: number = 0;
 
-            //console.log("cleanInputsAndInitBufferIO ", o)
-            if (o instanceof VertexBufferIO || o instanceof ImageTextureIO) {
-                if (o instanceof VertexBufferIO) {
-                    this.bufferSize = o.bufferSize;
-                    //console.log("this.bufferSize = ", this.bufferSize)
+    protected initResourceIOs() {
+        const resources = this.bindGroups.resources.io;
+        if (!resources) return;
+
+        let res: VertexBuffer | ImageTexture;
+        let io: VertexBufferIO | ImageTextureIO;
+
+        //console.log("IOOOO = ", resources)
+
+        for (let z in resources) {
+            res = resources[z];
+            io = res.resourceIO;
+
+
+
+            if (io instanceof VertexBufferIO) {
+                if (this.vertexBufferIOs.indexOf(io) === -1) {
+                    this.resourceIOs.push(io);
+                    if (io.nbVertex > this.nbVertexMax) this.nbVertexMax = io.nbVertex;
+                    this.vertexBufferIOs.push(io);
                 }
-                //o.init(this);
-                continue;
+            } else if (io instanceof ImageTextureIO) {
+
+                if (this.imageTextureIOs.indexOf(io) === -1) {
+                    this.resourceIOs.push(io);
+                    if (io.width > this.widthMax) this.widthMax = io.width;
+                    if (io.height > this.heightMax) this.heightMax = io.height;
+                    this.imageTextureIOs.push(io);
+                }
+            } else {
+
             }
-            _inputs[k++] = t[i];
         }
-        this.computeShader.inputs = _inputs;
-        return _inputs;
+
+
     }
+
+
+
+
 
 
     public update(): void {
         if (!this.gpuComputePipeline) return;
         this.bindGroups.update();
+    }
+
+
+    protected setupDefaultWorkgroups() {
+
+        if (this.vertexBufferIOs.length) {
+
+            let n = 64;
+            while (this.nbVertexMax / n >= 65536) n *= 2;
+
+            this.setWorkgroups(n);
+            this.setDispatchWorkgroup(Math.ceil(this.nbVertexMax / n));
+
+        } else {
+
+            this.setWorkgroups(1);
+            this.setDispatchWorkgroup(this.widthMax, this.heightMax);
+        }
+
     }
 
 
@@ -185,56 +227,11 @@ export class ComputePipeline extends Pipeline {
         this.createLayouts();
         this.bindGroups.handleComputePipelineResourceIOs();
 
-        this.cleanInputsAndInitBufferIO();
+        this.initResourceIOs();
 
-        if (!this.workgroups) this.setWorkgroups(64);
-
-        let nb = this.workgroups[0];
-        if (!this.dispatchWorkgroup) {
-            //console.log("=> ", this.bindGroups.resources.types)
-
-            if (this.bindGroups.resources.types.vertexBuffers) {
+        if (!this.workgroups) this.setupDefaultWorkgroups();
 
 
-                const nbVertex = this.bindGroups.resources.types.vertexBuffers[0].resource.nbVertex;
-
-                let num = nbVertex / nb;
-                if (num >= 65536) {
-                    this.workgroups[0] *= 2;
-                    nb = this.workgroups[0];
-                    num = nbVertex / nb
-                }
-
-                this.setDispatchWorkgroup(Math.ceil(nbVertex / nb))
-
-            } else if (this.bindGroups.resources.types.imageTextures) {
-                let images = this.bindGroups.resources.types.imageTextures;
-
-                console.log("images = ", images)
-
-                let textureIo: ImageTexture;
-                for (let i = 0; images.length; i++) {
-                    if (images[i].resource.io == 1) {
-                        textureIo = images[i].resource;
-                        break;
-                    }
-                }
-
-
-
-                const w = textureIo.gpuResource.width;
-                const h = textureIo.gpuResource.height;
-
-
-                this.workgroups[0] = this.workgroups[1] = 1;
-                this.setDispatchWorkgroup(w, h);
-            }
-
-
-
-
-
-        }
 
         const outputs = this.computeShader.outputs;
         const inputs = this.computeShader.inputs;
@@ -276,107 +273,24 @@ export class ComputePipeline extends Pipeline {
 
     public async nextFrame() {
 
-
-        const commandEncoder = XGPU.device.createCommandEncoder();
-
         this.update();
 
+        const commandEncoder = XGPU.device.createCommandEncoder();
         const computePass = commandEncoder.beginComputePass();
         computePass.setPipeline(this.buildGpuPipeline());
-
         this.bindGroups.update();
         this.bindGroups.apply(computePass)
-        //console.log("this.dispatchWorkgroup = ", this.dispatchWorkgroup)
         computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);
         computePass.end();
 
-        const vertexBuffers = this.bindGroups.resources.types.vertexBuffers;
-        const imageTextures = this.bindGroups.resources.types.imageTextures;
 
-        if (!this.checkedBufferIO && !this.bufferIOs) {
-            this.checkedBufferIO = true;
-            let inputBuffer;
-            let outputBuffer;
-            if (vertexBuffers) {
-                for (let i = 0; i < vertexBuffers.length; i++) {
-                    if (vertexBuffers[i].resource.io) {
-                        console.log("VB = ", vertexBuffers[i])
-                        inputBuffer = vertexBuffers[i].resource;
-                        outputBuffer = vertexBuffers[i + 1].resource;
-                        break;
-                    }
-                }
-            }
-            if (inputBuffer) {
-                this.bufferIOs = [inputBuffer, outputBuffer];
-                this.bufferSize = inputBuffer.bufferSize;
-            }
-        }
-
-        if (!this.checkedTextureIO && !this.textureIOs) {
-            this.checkedTextureIO = true;
-            let input;
-            let output;
-            if (imageTextures) {
-                for (let i = 0; i < imageTextures.length; i++) {
-                    if (imageTextures[i].resource.io) {
-                        input = imageTextures[i].resource;
-                        output = imageTextures[i + 1].resource;
-                        break;
-                    }
-                }
-            }
-            if (input) {
-                this.textureIOs = [input, output];
-                this.textureSize = [input.gpuResource.width, input.gpuResource.height];
-            }
-
-        }
+        XGPU.device.queue.submit([commandEncoder.finish()]);
 
 
-        //------
+        for (let i = 0; i < this.resourceIOs.length; i++) {
 
-        if (this.bufferIOs) {
+            this.resourceIOs[i].getOutputData();
 
-
-
-            const buffer = this.bufferIOs[0].buffer; // getting this value change the reference of the GPUBuffer and create the "ping pong"
-
-            if (this.onReceiveData) {
-
-                if (!this.canCallMapAsync) return
-
-                console.log(this.bufferSize)
-
-                if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
-                const copyEncoder = XGPU.device.createCommandEncoder();
-                const stage = this.stagingBuffer;
-
-
-                copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
-
-                XGPU.device.queue.submit([copyEncoder.finish(), commandEncoder.finish()]);
-
-                this.canCallMapAsync = false;
-                await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
-                this.canCallMapAsync = true;
-
-                const copyArray = stage.getMappedRange(0, stage.size);
-                const data = copyArray.slice(0);
-                stage.unmap();
-
-                this.onReceiveData(new Float32Array(data));
-
-            } else {
-                XGPU.device.queue.submit([commandEncoder.finish()]);
-            }
-
-        } else {
-            //const texture = this.textureIOs[0].texture;
-
-
-            XGPU.device.queue.submit([commandEncoder.finish()]);
-            // getting this value change the reference of the GPUBuffer and create the "ping pong"
         }
 
     }

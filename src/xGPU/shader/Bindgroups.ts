@@ -51,7 +51,7 @@ export class Bindgroups {
 
         if (autoLayout) description.layout = "auto";
         else {
-            console.log("pipelineLayout = ", layouts)
+            //console.log("pipelineLayout = ", layouts)
             description.layout = XGPU.createPipelineLayout({ bindGroupLayouts: layouts });
         }
 

@@ -218,7 +218,7 @@ export class Bindgroup {
 
 
     public handleComputePipelineResourceIOs() {
-        console.warn("handleComputePipelineResourceIOs ", this.vertexBufferIO)
+        //console.warn("handleComputePipelineResourceIOs ", this.vertexBufferIO)
 
 
 
@@ -433,7 +433,7 @@ export class Bindgroup {
 
         } else if (foundTextureIO) {
 
-            console.log(" textureIOs[0].gpuResource = ", textureIOs[0])
+            //console.log(" textureIOs[0].gpuResource = ", textureIOs[0])
 
             const img = new ImageTexture({ source: textureIOs[0].gpuResource })
             this.elements.push({ name, resource: img })

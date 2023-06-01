@@ -84,7 +84,7 @@ export class UniformBuffer implements IShaderResource {
     public createStruct(uniformName: string): { struct: string, localVariables: string } {
 
 
-        console.warn("RESOURCE NAME = ", this.group.name)
+        //console.warn("RESOURCE NAME = ", this.group.name)
 
         const o = this.group.getStruct(uniformName);
 
@@ -143,7 +143,7 @@ export class UniformBuffer implements IShaderResource {
 
         let type: string = "uniform";
         if (this.bufferType) type = this.bufferType;
-        console.log("bufferType = ", this.bufferType);
+        //console.log("bufferType = ", this.bufferType);
         return {
             binding: bindingId,
             visibility: this.descriptor.visibility,
