@@ -656,54 +656,11 @@ export class RenderPipeline extends Pipeline {
     }
 
 
-    public draw(renderPass: GPURenderPassEncoder, gpuPipeline?: GPURenderPipeline) {
+    public draw(renderPass: GPURenderPassEncoder) {
 
         if (!this.resourceDefined) return;
 
-
-
-        if (gpuPipeline) {
-
-            this.bindGroups.update();
-
-
-        } else {
-
-            renderPass.setPipeline(this.gpuPipeline);
-
-            const resourceByType = this.bindGroups.resources.types;
-            if (resourceByType) {
-
-                const buffers = resourceByType.vertexBuffers;
-
-
-
-                if (this.drawConfig.vertexCount <= 0 && !this.drawConfig.indexBuffer) {
-
-                    if (!buffers) {
-                        throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
-                    }
-                    const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
-                    this.drawConfig.vertexCount = vertexBuffer.nbVertex;
-                }
-
-
-
-                if (buffers) {
-                    let k = 0;
-                    let buf;
-                    for (let i = 0; i < buffers.length; i++) {
-                        buf = buffers[i].resource.getCurrentBuffer();
-                        if (!buf) return;
-                        //console.warn("renderPass.setVertexBuffer ", buffers[i].resource)
-                        renderPass.setVertexBuffer(k++, buf)
-                    }
-                }
-
-            }
-
-
-        }
+        renderPass.setPipeline(this.gpuPipeline);
 
 
 
@@ -711,25 +668,6 @@ export class RenderPipeline extends Pipeline {
 
 
 
-
-        this.drawConfig.draw(renderPass);
-        /*
-        if (this._drawConfig.indexBuffer) {
-
-            const { indexBuffer } = this._drawConfig;
-            if (indexBuffer) indexBuffer.apply(renderPass, this._drawConfig);
-
-
-
-        } else {
-
-            if (this._drawConfig.vertexCount !== -1) {
-                //console.log("drawConfig = ", this.drawConfig)
-                renderPass.draw(this._drawConfig.vertexCount, this._drawConfig.instanceCount, this._drawConfig.firstVertexId, this._drawConfig.firstInstanceId)
-            }
-
-        }
-        */
 
     }
 

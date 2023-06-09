@@ -90,9 +90,14 @@ export class Bindgroups {
 
     public apply(passEncoder: GPURenderPassEncoder | GPUComputePassEncoder): void {
         for (let i = 0; i < this.groups.length; i++) {
-            //console.log("setBindgroup ", i, this.groups[i])
-            passEncoder.setBindGroup(i, this.groups[i].group);
+
+            this.groups[i].apply(passEncoder)
+
         }
+        if (passEncoder instanceof GPURenderPassEncoder) {
+            this.drawConfig.draw(passEncoder);
+        }
+
     }
 
     public update(): void {

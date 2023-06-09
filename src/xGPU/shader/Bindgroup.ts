@@ -248,6 +248,13 @@ export class Bindgroup {
 
 
 
+        const getBufferId = (o) => {
+            for (let i = 0; i < allVertexBuffers.length; i++) {
+                if (allVertexBuffers[i].resource === o) return i;
+            }
+            return -1;
+        }
+
 
 
         this.vertexBuffers = [];
@@ -258,10 +265,16 @@ export class Bindgroup {
         for (let i = 0; i < this.elements.length; i++) {
             element = this.elements[i];
             resource = element.resource;
+            console.log("A ", element.name)
             if (resource instanceof VertexBuffer) {// && 
-
+                console.log("B");
                 if (!(resource as VertexBuffer).io) {
-                    (resource as VertexBuffer).bufferId = allVertexBuffers.indexOf(element);
+
+                    (resource as VertexBuffer).bufferId = getBufferId(resource);//allVertexBuffers.indexOf(element);
+
+                    console.log("C ", (resource as VertexBuffer) == allVertexBuffers[0].resource);
+                    console.log(resource);
+
                     this.elementByName[element.name] = resource
                     this.vertexBufferReferenceByName[element.name] = { bufferId: (resource as VertexBuffer).bufferId, resource };
                     this.vertexBuffers[k++] = resource;
@@ -276,52 +289,66 @@ export class Bindgroup {
 
 
     protected setupDrawCompleted: boolean = false;
-
     protected setupDraw() {
 
-        console.log("setupDraw ", this.parent.resources.types.vertexBuffers[0].resource.nbVertex, this.applyDraw)
-        if (!this.setupDrawCompleted) {
-            this.setupDrawCompleted = true;
-            if (this.applyDraw && this.parent.drawConfig) {
-                this.indexBuffer = this.parent.drawConfig.indexBuffer;
-                if (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
-
-                    if (!this.parent.resources.types.vertexBuffers) {
-                        throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
-                    }
-
-                    this.parent.drawConfig.vertexCount = this.parent.resources.types.vertexBuffers[0].resource.nbVertex;
-                }
-            }
-        }
-    }
-
-
-    public apply(renderPass: GPURenderPassEncoder) {
-        console.log("apply ")
-
-
-
-
-
-
-
-
-
-        renderPass.setBindGroup(this.bindgroupId, this.group);
 
         if (this.vertexBuffers) {
             for (let i = 0; i < this.vertexBuffers.length; i++) {
-                renderPass.setVertexBuffer(this.vertexBuffers[i].bufferId, this.vertexBuffers[i].gpuResource);
+                if (!this.vertexBuffers[i].gpuResource) {
+                    this.vertexBuffers[i].createGpuResource();
+                    console.log("buffer resource = ", this.vertexBuffers[i].gpuResource);
+                }
             }
         }
-        if (this.applyDraw) {
-            if (this.indexBuffer) this.indexBuffer.apply(renderPass, this.parent.drawConfig)
-            else {
-                const { vertexCount, instanceCount, firstVertexId, firstInstanceId } = this.parent.drawConfig;
-                renderPass.draw(vertexCount, instanceCount, firstVertexId, firstInstanceId);
+
+
+        if (this.parent.drawConfig) { //may be undefined with a computePipeline
+
+            this.indexBuffer = this.parent.drawConfig.indexBuffer;
+            if (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
+
+                if (!this.parent.resources.types.vertexBuffers) {
+                    throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
+                }
+
+                this.parent.drawConfig.vertexCount = this.parent.resources.types.vertexBuffers[0].resource.nbVertex;
             }
         }
+
+
+
+
+        this.setupDrawCompleted = true;
+
+    }
+
+
+    public apply(renderPass: GPURenderPassEncoder | GPUComputePassEncoder) {
+
+        if (!this.setupDrawCompleted) {
+            this.setupDraw();
+        }
+
+        this.update();
+
+
+
+
+        const group = this.group;
+
+        //console.log("renderPass.setBindGroup(", this.bindgroupId + "," + group);
+        renderPass.setBindGroup(this.bindgroupId, group);
+
+        if (renderPass instanceof GPUComputePassEncoder) return;
+
+
+        if (this.vertexBuffers) {
+            for (let i = 0; i < this.vertexBuffers.length; i++) {
+                renderPass.setVertexBuffer(this.vertexBuffers[i].bufferId, this.vertexBuffers[i].getCurrentBuffer());
+            }
+        }
+
+
     }
 
     protected instances: any[];
@@ -343,6 +370,7 @@ export class Bindgroup {
 
 
         let indexBuffer: IndexBuffer;
+        let vertexBuffers: VertexBuffer[] = [];
         let result: any = {
             elements: this.elements.concat()
         }
@@ -357,16 +385,31 @@ export class Bindgroup {
 
             for (let i = 0; i < this.elements.length; i++) {
                 if (this.elements[i].name === z) {
+
                     resourcePerInstance[z].descriptor = this.elements[i].resource.descriptor;
                     if (!resourcePerInstance[z].gpuResource) {
 
                         resourcePerInstance[z].createGpuResource();
 
                     }
-                    console.log(z, resourcePerInstance[z]);
 
+                    //console.log("A ", z);
+                    if (this.elements[i].resource instanceof VertexBuffer) {
+                        //console.log("B")
+                        resourcePerInstance[z].bufferId = (this.elements[i].resource as VertexBuffer).bufferId;
+                        vertexBuffers.push(result.elements[i].resource);
+
+                    }
                     result.elements[i] = { name: z, resource: resourcePerInstance[z] };
+
+                } else {
+                    if (this.elements[i].resource instanceof VertexBuffer) {
+                        vertexBuffers.push(result.elements[i].resource);
+                    }
                 }
+
+
+
             }
 
         }
@@ -464,6 +507,8 @@ export class Bindgroup {
             //    this.parent.drawConfig.indexBuffer = indexBuffer;
             //}
             this.elements = result.elements;
+            this.vertexBuffers = vertexBuffers;
+            if (indexBuffer) this.parent.drawConfig.indexBuffer = indexBuffer;
 
             /*
             
