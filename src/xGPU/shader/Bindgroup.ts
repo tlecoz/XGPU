@@ -285,7 +285,12 @@ export class Bindgroup {
             if (this.applyDraw && this.parent.drawConfig) {
                 this.indexBuffer = this.parent.drawConfig.indexBuffer;
                 if (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
-                    //this.parent.drawConfig.vertexCount = allVertexBuffers[0]
+
+                    if (!this.parent.resources.types.vertexBuffers) {
+                        throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
+                    }
+
+                    this.parent.drawConfig.vertexCount = this.parent.resources.types.vertexBuffers[0].resource.nbVertex;
                 }
             }
         }
@@ -311,7 +316,7 @@ export class Bindgroup {
             }
         }
         if (this.applyDraw) {
-            if (this.indexBuffer) this.indexBuffer.apply(renderPass)
+            if (this.indexBuffer) this.indexBuffer.apply(renderPass, this.parent.drawConfig)
             else {
                 const { vertexCount, instanceCount, firstVertexId, firstInstanceId } = this.parent.drawConfig;
                 renderPass.draw(vertexCount, instanceCount, firstVertexId, firstInstanceId);

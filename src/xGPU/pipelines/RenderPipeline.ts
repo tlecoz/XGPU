@@ -21,15 +21,16 @@ import { Bindgroups } from "../shader/Bindgroups";
 import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
 import { UniformGroup } from "../shader/resources/UniformGroup";
 import { IRenderer } from "../IRenderer";
+import { DrawConfig } from "./DrawConfig";
 
 
-export type DrawConfig = { vertexCount: number, instanceCount: number, firstVertexId: number, firstInstanceId: number, indexBuffer?: IndexBuffer };
+
 
 export class RenderPipeline extends Pipeline {
 
 
     public renderer: IRenderer;//GPURenderer | HeadlessGPURenderer;
-
+    public drawConfig: DrawConfig;
     protected _depthStencilTexture: DepthStencilTexture;
     protected multisampleTexture: MultiSampleTexture;
     protected renderPassTexture: RenderPassTexture;
@@ -61,7 +62,7 @@ export class RenderPipeline extends Pipeline {
         }
         this.type = "render";
         this.renderer = renderer;
-
+        this.drawConfig = new DrawConfig(this);
         this.vertexShader = new VertexShader();
         this.fragmentShader = new FragmentShader();
         this.description.primitive = {
@@ -359,35 +360,37 @@ export class RenderPipeline extends Pipeline {
 
 
 
-    //----------- used if there is no indexBuffer ------
-    public get drawConfig(): DrawConfig { return this._drawConfig; }
-    private _drawConfig: DrawConfig = {
-        vertexCount: -1,
-        instanceCount: 1,
-        firstVertexId: 0,
-        firstInstanceId: 0
+    //-----------------
+
+
+
+    public setupDraw(o: { vertexCount: number, instanceCount?: number, firstVertexId?: number, firstInstanceId?: number, indexBuffer?: IndexBuffer, baseVertex?: number }) {
+
+
+
+        if (o.instanceCount !== undefined) this.drawConfig.instanceCount = o.instanceCount;
+        if (o.vertexCount !== undefined) this.drawConfig.vertexCount = o.vertexCount;
+        if (o.firstVertexId !== undefined) this.drawConfig.firstVertexId = o.firstVertexId;
+        if (o.firstInstanceId !== undefined) this.drawConfig.firstInstanceId = o.firstInstanceId;
+        if (o.indexBuffer !== undefined) this.drawConfig.indexBuffer = o.indexBuffer;
+        if (o.baseVertex !== undefined) this.drawConfig.baseVertex = o.baseVertex;
     }
 
-    public setupDraw(o: DrawConfig) {
 
-        if (o.instanceCount !== undefined) this._drawConfig.instanceCount = o.instanceCount;
-        if (o.vertexCount !== undefined) this._drawConfig.vertexCount = o.vertexCount;
-        if (o.firstVertexId !== undefined) this._drawConfig.firstVertexId = o.firstVertexId;
-        if (o.firstInstanceId !== undefined) this._drawConfig.firstInstanceId = o.firstInstanceId;
-        if (o.indexBuffer !== undefined) this._drawConfig.indexBuffer = o.indexBuffer;
-    }
+    public get vertexCount(): number { return this.drawConfig.vertexCount }
+    public set vertexCount(n: number) { this.drawConfig.vertexCount = n; }
 
-    public get vertexCount(): number { return this._drawConfig.vertexCount }
-    public set vertexCount(n: number) { this._drawConfig.vertexCount = n; }
+    public get instanceCount(): number { return this.drawConfig.instanceCount }
+    public set instanceCount(n: number) { this.drawConfig.instanceCount = n; }
 
-    public get instanceCount(): number { return this._drawConfig.instanceCount }
-    public set instanceCount(n: number) { this._drawConfig.instanceCount = n; }
+    public get firstVertexId(): number { return this.drawConfig.firstVertexId }
+    public set firstVertexId(n: number) { this.drawConfig.firstVertexId = n; }
 
-    public get firstVertexId(): number { return this._drawConfig.firstVertexId }
-    public set firstVertexId(n: number) { this._drawConfig.firstVertexId = n; }
+    public get firstInstanceId(): number { return this.drawConfig.firstInstanceId }
+    public set firstInstanceId(n: number) { this.drawConfig.firstInstanceId = n; }
 
-    public get firstInstanceId(): number { return this._drawConfig.firstInstanceId }
-    public set firstInstanceId(n: number) { this._drawConfig.firstInstanceId = n; }
+    public get baseVertex(): number { return this.drawConfig.baseVertex }
+    public set baseVertex(n: number) { this.drawConfig.baseVertex = n; }
 
     //------------------------------------------------
 
@@ -616,26 +619,7 @@ export class RenderPipeline extends Pipeline {
 
         if (!this.gpuPipeline) this.buildGpuPipeline();
 
-        if (this._drawConfig.vertexCount <= 0) {
 
-
-            if (this.bindGroups.resources.types) {
-
-                const vertexBuffers = this.bindGroups.resources.types.vertexBuffers;
-                if (vertexBuffers) {
-                    for (let i = 0; i < vertexBuffers.length; i++) {
-
-                        if (vertexBuffers[i].resource.descriptor.stepMode === "vertex") {
-                            this._drawConfig.vertexCount = vertexBuffers[i].resource.nbVertex; //this.vertexBuffers[0].nbVertex;
-                            break;
-                        }
-                    }
-                }
-            }
-
-
-        }
-        //console.log("drawConfig = ", this.drawConfig)
 
 
 
@@ -694,13 +678,13 @@ export class RenderPipeline extends Pipeline {
 
 
 
-                if (this._drawConfig.vertexCount <= 0 && !this._drawConfig.indexBuffer) {
+                if (this.drawConfig.vertexCount <= 0 && !this.drawConfig.indexBuffer) {
 
                     if (!buffers) {
                         throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
                     }
                     const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
-                    this._drawConfig.vertexCount = vertexBuffer.nbVertex;
+                    this.drawConfig.vertexCount = vertexBuffer.nbVertex;
                 }
 
 
@@ -728,12 +712,12 @@ export class RenderPipeline extends Pipeline {
 
 
 
-
-
+        this.drawConfig.draw(renderPass);
+        /*
         if (this._drawConfig.indexBuffer) {
 
             const { indexBuffer } = this._drawConfig;
-            if (indexBuffer) indexBuffer.apply(renderPass);
+            if (indexBuffer) indexBuffer.apply(renderPass, this._drawConfig);
 
 
 
@@ -745,6 +729,7 @@ export class RenderPipeline extends Pipeline {
             }
 
         }
+        */
 
     }
 
@@ -807,7 +792,7 @@ export class RenderPipeline extends Pipeline {
         const bool = !!this.bindGroups.resources.all
         if (!bool) {
             //some very basic shader can run without any resource
-            if (this._drawConfig.vertexCount > 0) {
+            if (this.drawConfig.vertexCount > 0) {
                 if (this.vertexShader.main.text != "" && this.fragmentShader.main.text != "") {
                     return true;
                 }

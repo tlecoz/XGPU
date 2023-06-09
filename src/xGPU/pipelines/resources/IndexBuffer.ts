@@ -2,6 +2,8 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
+import { DrawConfig } from "../DrawConfig";
+
 
 export type IndexBufferDescriptor = {
     nbPoint?: number,
@@ -145,10 +147,10 @@ export class IndexBuffer {
         }
     }
 
-    public apply(renderPass: GPURenderPassEncoder): void {
+    public apply(renderPass: GPURenderPassEncoder, drawConfig: DrawConfig): void {
         if (!this.gpuResource) this.createGpuResource();
         renderPass.setIndexBuffer(this.gpuResource, this.dataType, this.offset, this.getBufferSize());
-        renderPass.drawIndexed(this.nbPoint);
+        renderPass.drawIndexed(this.nbPoint, drawConfig.instanceCount, drawConfig.firstVertexId, drawConfig.baseVertex, drawConfig.firstInstanceId);
     }
 
 }
