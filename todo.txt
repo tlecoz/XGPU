@@ -1,3 +1,34 @@
+bindgroup roadmap : 
+
+1- dans RenderPipeline : passe "indexBuffer" dans "drawConfig" 
+2- dans Bindgroup : ajoute une propriété applyDraw:boolean = false 
+   
+
+
+4- dans bindgroup, ajoute une fonction apply et une fonction createApplyConfig
+   |-> si "parent.drawConfig && applyDraw" , on termine la fonction par draw/drawIndexed  
+
+
+
+
+   - ajoute une fonction 'createInstance' ===> passe applyDraw à true  
+   
+5 - dans renderPipeline.draw , boucle sur les bindgroups et apply 
+
+6 - dans tout les IShaderResource (et dans l'interface) , ajoute une fonction "set gpuResource" 
+    afin de pouvoir assigner une nouvelle ressource dans un objet sans avoir a se soucier de son index 
+
+=============================> utilise et ajuste la fonction createInstanceArray 
+                               garde la logique du "set gpuResource" pour mettre a jour les donnée en conservant le même objet structuré
+                               ne clone pas les resource autre que les primitiveType et swap les ressources à la place 
+
+
+---------------------------------------------------------------------------
+
+gérer toutes les routes de initFromObject dans Bindgroup ...
+
+
+
 
 
 
@@ -6,8 +37,7 @@
 
 fix l'histoire du tableau avec le shader décomposé en 2 dans light/shadow 
 
-faire en sorte que GPURenderer extends HeadlessRenderer
-|-> préparer une interface IGPURenderer 
+
 
 
 

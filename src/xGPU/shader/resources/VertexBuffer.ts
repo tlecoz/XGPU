@@ -19,7 +19,7 @@ export type VertexBufferDescriptor = {
 export class VertexBuffer implements IShaderResource {
 
 
-
+    public bufferId: number //the id used in renderPass.setVertexBuffer
 
     public io: number = 0;
     public resourceIO: VertexBufferIO = null;
@@ -440,13 +440,16 @@ export class VertexBuffer implements IShaderResource {
     }
 
 
-
+    protected layout: any;
 
     public createVertexBufferLayout(builtinOffset: number = 0): any {
+
+
 
         if (this.gpuBufferIOs) {
             return this.stackAttributes(builtinOffset);
         }
+
 
 
         let nb = this._nbComponent;
@@ -483,7 +486,7 @@ export class VertexBuffer implements IShaderResource {
 
 
         obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
-
+        this.layout = obj;
         return obj;
     }
 
@@ -497,7 +500,7 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.gpuResource) this.gpuResource.destroy();
 
-        //console.log("VB.createGPUResource ", this.datas, this.datas.byteLength)
+        //console.log("VB.createGPUResource ", this.datas, this.datas.byteLength, this.descriptor.usage)
 
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({
@@ -545,12 +548,24 @@ export class VertexBuffer implements IShaderResource {
         let attribute: VertexAttribute;
         attribute = this.vertexArrays[0];
         const nbAttributes = this.vertexArrays.length;
-        const nbVertex = attribute.datas.length;
+
+
+
+        //const nbVertex = attribute.datas.length;// this.nbComponent;
         let offset: number = 0;
-        if (!this._datas) this._datas = new Float32Array(nbVertex * this.nbComponent)
+
+
+        //console.log("this._datas = ", nbVertex, this.nbComponent, this.layout.arrayStride);
+        //console.log("arrayStride = ", this.la)
+
+
 
 
         if (this.vertexArrays[0] && this.vertexArrays[0].useByVertexData) {
+
+
+            const nbVertex = attribute.datas.length;
+            if (!this._datas) this._datas = new Float32Array(nbVertex * this.nbComponent)
 
             for (let i = 0; i < nbVertex; i++) {
                 for (let j = 0; j < nbAttributes; j++) {
@@ -564,6 +579,10 @@ export class VertexBuffer implements IShaderResource {
                 }
             }
         } else {
+
+            const nbVertex = attribute.datas.length / attribute.nbComponent;
+            if (!this._datas) this._datas = new Float32Array(nbVertex * this.nbComponent)
+
 
             for (let j = 0; j < nbAttributes; j++) {
                 attribute = this.vertexArrays[j];

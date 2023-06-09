@@ -145,4 +145,10 @@ export class IndexBuffer {
         }
     }
 
+    public apply(renderPass: GPURenderPassEncoder): void {
+        if (!this.gpuResource) this.createGpuResource();
+        renderPass.setIndexBuffer(this.gpuResource, this.dataType, this.offset, this.getBufferSize());
+        renderPass.drawIndexed(this.nbPoint);
+    }
+
 }

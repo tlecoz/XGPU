@@ -18,14 +18,15 @@ export class Sample {
 
 
         const renderer = new GPURenderer()
-        renderer.init(canvas, "premultiplied").then(async () => {
+        renderer.initCanvas(canvas, "premultiplied").then(async () => {
 
             this.medias = await this.loadMedias();
             this.start(renderer);
             document.body.appendChild(canvas);
         })
 
-        /*renderer.initCanvas(w, h, true).then(async (canvas) => {
+        /*
+        renderer.initCanvas(w, h, true).then(async (canvas) => {
             document.body.appendChild(canvas);
             this.medias = await this.loadMedias();
             this.start(renderer);

@@ -1,8 +1,9 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
-import { XGPU } from "../XGPU";
 
+import { IndexBuffer } from "../pipelines/resources/IndexBuffer";
+import { XGPU } from "../XGPU";
 import { Bindgroups } from "./Bindgroups";
 import { ImageTexture } from "./resources/ImageTexture";
 import { ImageTextureIO } from "./resources/ImageTextureIO";
@@ -14,14 +15,19 @@ import { VideoTexture } from "./resources/VideoTexture";
 
 export class Bindgroup {
 
+    public bindgroupId: number //the id used in renderPass.setBindgroup
+
     public parent: Bindgroups;
     public entries: any[] = [];
     public elements: { name: string, resource: IShaderResource }[] = [];
 
     public mustRefreshBindgroup: boolean = false;
+    public applyDraw: boolean = false;
+
+
     protected _layout: GPUBindGroupLayout;
     protected _group: GPUBindGroup;
-    protected _name: string;
+    public name: string = "";
 
     protected _pingPongBindgroup: Bindgroup = null; //used in ComputePipeline and VertexBufferIO
     public vertexBufferIO: VertexBufferIO;
@@ -31,12 +37,11 @@ export class Bindgroup {
     public resourcesIOs: (VertexBufferIO | ImageTextureIO)[] = [];
 
 
-    constructor(name: string) {
-        this._name = name;
+    constructor() {
 
     }
 
-    public get name(): string { return this._name; }
+
 
     public add(name: string, resource: IShaderResource): IShaderResource {
         if (resource instanceof VideoTexture) this.mustRefreshBindgroup = true;
@@ -45,7 +50,11 @@ export class Bindgroup {
 
         }
 
-
+        if (resource instanceof IndexBuffer) {
+            this.indexBuffer = resource;
+            this.elementByName[name] = resource;
+            return resource;
+        }
 
 
         //console.log("bindgroup.add ", resource)
@@ -96,23 +105,7 @@ export class Bindgroup {
         return resource;
     }
 
-    private getSwappedElements(resource1: IShaderResource, resource2: IShaderResource): { name: string, resource: IShaderResource }[] {
 
-        let id1, id2;
-        let element: IShaderResource;
-        for (let i = 0; i < this.elements.length; i++) {
-            element = this.elements[i].resource;
-            if (element === resource1) id1 = i;
-            else if (element === resource2) id2 = i;
-        }
-
-        const result = this.elements.concat();
-        const temp = result[id1];
-        result[id1] = result[id2];
-        result[id2] = temp;
-
-        return result;
-    }
 
 
     public set(name: string, resource: IShaderResource) {
@@ -168,7 +161,7 @@ export class Bindgroup {
         for (let z in object) {
             o = object[z];
             if (!o) continue;
-            //console.log(z + " : " + object[z])
+            //console.log(z + " : " + o.create)
             if (o.createGpuResource || o instanceof VertexBufferIO || o instanceof ImageTextureIO) { //if it's a shader resource 
                 result[k++] = this.add(z, o);
             }
@@ -196,14 +189,17 @@ export class Bindgroup {
         this._layout = XGPU.device.createBindGroupLayout(layout);
     }
 
+    private setupApplyCompleted: boolean = false;
     public build(): void {
 
         if (!this._layout) this.buildLayout();
 
         let entries = [];
         let bindingId: number = 0;
-
         let resource: IShaderResource;
+
+
+
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
@@ -214,7 +210,264 @@ export class Bindgroup {
         }
 
         this._group = XGPU.device.createBindGroup({ layout: this._layout, entries })
+
+
+
+        if (!this.setupApplyCompleted && this.parent && this.parent.pipeline.type !== "compute") {
+
+            this.setupApplyCompleted = true;
+            this.setupApply();
+
+
+            if (this.instanceResourcesArray) {
+                for (let i = 0; i < this.instanceResourcesArray.length; i++) {
+                    this._createInstance(this.instanceResourcesArray[i]);
+                }
+                this.instanceResourcesArray = undefined;
+            }
+
+        }
     }
+
+
+    protected indexBuffer: IndexBuffer;
+    protected vertexBuffers: VertexBuffer[];
+    protected vertexBufferReferenceByName: any;
+    protected elementByName: any = {};
+
+    private setupApply() {
+        //console.log("SETUP APPLY")
+        this.bindgroupId = this.parent.groups.indexOf(this);
+
+        this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
+
+        const allVertexBuffers = this.parent.resources.types.vertexBuffers;
+        if (!allVertexBuffers) return;
+
+
+        this.vertexBuffers = [];
+        this.vertexBufferReferenceByName = {};
+        let k = 0;
+        let element: { name: string, resource: IShaderResource };
+        let resource: IShaderResource;
+        for (let i = 0; i < this.elements.length; i++) {
+            element = this.elements[i];
+            resource = element.resource;
+            if (resource instanceof VertexBuffer) {// && 
+
+                if (!(resource as VertexBuffer).io) {
+                    (resource as VertexBuffer).bufferId = allVertexBuffers.indexOf(element);
+                    this.elementByName[element.name] = resource
+                    this.vertexBufferReferenceByName[element.name] = { bufferId: (resource as VertexBuffer).bufferId, resource };
+                    this.vertexBuffers[k++] = resource;
+
+                    continue;
+                }
+            } else {
+                this.elementByName[element.name] = resource;
+            }
+        }
+    }
+
+    public apply(renderPass: GPURenderPassEncoder) {
+        //console.log("apply")
+        renderPass.setBindGroup(this.bindgroupId, this.group);
+
+        if (this.vertexBuffers) {
+            for (let i = 0; i < this.vertexBuffers.length; i++) {
+                renderPass.setVertexBuffer(this.vertexBuffers[i].bufferId, this.vertexBuffers[i].gpuResource);
+            }
+        }
+        if (this.applyDraw) {
+            if (this.indexBuffer) this.indexBuffer.apply(renderPass)
+            else {
+                const { vertexCount, instanceCount, firstVertexId, firstInstanceId } = this.parent.drawConfig;
+                renderPass.draw(vertexCount, instanceCount, firstVertexId, firstInstanceId);
+            }
+        }
+    }
+
+    protected instances: any[];
+    protected instanceResourcesArray: any[];
+
+    public createInstance(instanceResources: any) {
+        if (!this.instanceResourcesArray) this.instanceResourcesArray = [];
+        this.instanceResourcesArray.push(instanceResources)
+    }
+
+    protected _createInstance(resourcePerInstance: any) {
+
+
+
+        if (!this.instances) this.instances = [];
+
+        this.mustRefreshBindgroup = true;
+        this.applyDraw = true;
+
+
+        let indexBuffer: IndexBuffer;
+        let result: any = {
+            elements: this.elements.concat()
+        }
+
+
+        for (let z in resourcePerInstance) {
+
+            if (resourcePerInstance[z] instanceof IndexBuffer) {
+                indexBuffer = resourcePerInstance[z];
+                continue;
+            }
+
+            for (let i = 0; i < this.elements.length; i++) {
+                if (this.elements[i].name === z) {
+                    resourcePerInstance[z].descriptor = this.elements[i].resource.descriptor;
+                    if (!resourcePerInstance[z].gpuResource) {
+
+                        resourcePerInstance[z].createGpuResource();
+
+                    }
+                    console.log(z, resourcePerInstance[z]);
+
+                    result.elements[i] = { name: z, resource: resourcePerInstance[z] };
+                }
+            }
+
+        }
+
+
+
+
+        /*
+        result.shaderResources = [];
+
+        let resource: IShaderResource;
+        let k: number = 0;
+        let resourceUniformBuffers: any;
+        let resourceUniformBufferPropertiess: any;
+        let uniformBufferName: string;
+        
+
+        console.log("elements = " + this.elements)
+
+        for (let z in resourcePerInstance) {
+            if (!this.elementByName[z]) throw new Error("The resource '" + z + "' doesn't exist in the bindgroup '" + this.name + "'.")
+
+            resource = resourcePerInstance[z];
+
+
+
+            if (resource instanceof VertexBuffer) {
+                if (!result.vertexBuffers) result.vertexBuffers = [];
+                result.vertexBuffers[k++] = { bufferId: this.vertexBufferReferenceByName[z].bufferId, resource }
+
+            } else if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
+
+                if (!resourceUniformBuffers) resourceUniformBuffers = {};
+
+                uniformBufferName = this.getResourceName(resource.uniformBuffer)
+                resourceUniformBuffers[uniformBufferName] = this.get(uniformBufferName);
+
+                if (!resourceUniformBufferPropertiess[uniformBufferName]) resourceUniformBufferPropertiess[uniformBufferName] = {};
+
+                let propeties = resourceUniformBufferPropertiess[uniformBufferName];
+                propeties[z] = resourcePerInstance[z];
+            } else {
+
+                if (resource instanceof IndexBuffer) {
+                    indexBuffer = resource as IndexBuffer;
+                }
+
+                if (!resource.gpuResource) resource.createGpuResource();
+                result.shaderResources.push(resource);
+            }
+        }
+
+
+        //-----
+
+        if (resourceUniformBuffers) {
+            result.uniforms = {};
+
+            let cloneBuffer: UniformBuffer;
+            for (let z in resourceUniformBuffers) {
+                cloneBuffer = (resourceUniformBuffers[z] as UniformBuffer).clone();
+                (cloneBuffer as any).bindgroup = this;
+                (cloneBuffer as any).name = z;
+                cloneBuffer.createGpuResource();
+
+                result.shaderResources.push(cloneBuffer);
+
+                let properties = resourceUniformBufferPropertiess[z];
+
+                for (let k in properties) {
+                    result.uniforms[k] = cloneBuffer.getUniformByName(k);
+                }
+
+            }
+        }
+
+
+        if (result.vertexBuffers) {
+
+            //if the instance change some vertexBuffers but not all of them , I add the missing buffers to the instance object
+            for (let z in this.vertexBufferReferenceByName) {
+                if (!resourcePerInstance[z]) {
+                    result.vertexBuffers.push(this.vertexBufferReferenceByName[z]);
+                }
+            }
+        }
+        */
+
+
+
+        result.apply = () => {
+            console.log("IB = ", this.parent.drawConfig.indexBuffer)
+            if (indexBuffer && this.parent.drawConfig) {
+                this.parent.drawConfig.indexBuffer = indexBuffer;
+            }
+            this.elements = result.elements;
+
+            /*
+            
+
+            if (result.vertexBuffers) this.vertexBuffers = result.vertexBuffers;
+
+            let o: any;
+            for (let i = 0; i < result.shaderResources.length; i++) {
+                o = result.shaderResources[i];
+                console.log(i, o)
+                o.update();
+                this.set(o.name, o);
+            }
+            */
+        }
+
+        resourcePerInstance._object = result;
+
+        this.instances.push(result);
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public handleComputePipelineResourceIOs() {
@@ -253,7 +506,8 @@ export class Bindgroup {
     }
 
     public createPingPongBindgroup(resource1: IShaderResource[], resource2: IShaderResource[]): Bindgroup {
-        const group = new Bindgroup(this.name);
+        const group = new Bindgroup();
+        group.name = this.name;
         group.mustRefreshBindgroup = this.mustRefreshBindgroup = true;
         group._layout = this.layout;
 

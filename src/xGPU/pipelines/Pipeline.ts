@@ -38,10 +38,11 @@ export class Pipeline {
     protected gpuBindgroups: GPUBindGroup[] = [];
     protected gpuBindGroupLayouts: GPUBindGroupLayout[] = [];
     protected gpuPipelineLayout: GPUPipelineLayout;
-    protected type: "compute" | "compute_mixed" | "render" = null;
+    public type: "compute" | "compute_mixed" | "render" = null;
 
     constructor() {
-        this.bindGroups = new Bindgroups("pipeline");
+        this.bindGroups = new Bindgroups(this, "pipeline");
+
     }
     public get isComputePipeline(): boolean { return this.type === "compute" || this.type === "compute_mixed"; }
     public get isRenderPipeline(): boolean { return this.type === "render"; }
@@ -552,7 +553,9 @@ export class Pipeline {
             let obj;
             let objs: any[] = [];
             for (let z in o) {
+                console.log("=> ", z, o[z])
                 obj = o[z];
+                if (!obj) continue;
                 name = obj.constructor.name;
                 if (name === "Object") {
                     if (z !== "bindgroups" && z !== "vertexShader" && z !== "fragmentShader" && z !== "computeShader") {
@@ -840,6 +843,7 @@ export class Pipeline {
 
     protected initPipelineResources(pipeline: Pipeline) {
         const resources: IShaderResource[] = this.bindGroups.resources.all;
+        //console.log("all = ", resources)
         if (!resources) return;
         for (let i = 0; i < resources.length; i++) resources[i].setPipelineType(pipeline.type);
     }

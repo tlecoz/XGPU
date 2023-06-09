@@ -40,7 +40,7 @@ export class Texture {
     }
     public create(): void {
         if (this.gpuResource) this.gpuResource.destroy();
-        //console.log("createTexture ", this.descriptor)
+        //console.warn("createTexture ", this.descriptor)
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this.createView();
     }

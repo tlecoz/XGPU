@@ -23,6 +23,8 @@ import { UniformGroup } from "../shader/resources/UniformGroup";
 import { IRenderer } from "../IRenderer";
 
 
+export type DrawConfig = { vertexCount: number, instanceCount: number, firstVertexId: number, firstInstanceId: number, indexBuffer?: IndexBuffer };
+
 export class RenderPipeline extends Pipeline {
 
 
@@ -38,7 +40,7 @@ export class RenderPipeline extends Pipeline {
     */
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
-    public indexBuffer: IndexBuffer = null;
+    //public indexBuffer: IndexBuffer = null;
     //public pipelineCount: number = 1;
 
 
@@ -174,12 +176,12 @@ export class RenderPipeline extends Pipeline {
         this.fragmentShader = null;
 
         this.bindGroups.destroy();
-        this.bindGroups = new Bindgroups("pipeline");
+        this.bindGroups = new Bindgroups(this, "pipeline");
 
         //--------
 
 
-
+        //console.log("#0 ", JSON.stringify(descriptor));
         descriptor = this.highLevelParse(descriptor);
 
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
@@ -207,7 +209,11 @@ export class RenderPipeline extends Pipeline {
         else this.description.primitive.frontFace = descriptor.frontFace;
 
 
-        if (descriptor.indexBuffer) this.indexBuffer = descriptor.indexBuffer;
+        if (descriptor.indexBuffer) {
+
+            this.drawConfig.indexBuffer = descriptor.indexBuffer;
+            //this.indexBuffer = descriptor.indexBuffer;
+        }
 
         if (this.outputColor) {
             if (descriptor.clearColor) this.outputColor.clearValue = descriptor.clearColor;
@@ -236,10 +242,30 @@ export class RenderPipeline extends Pipeline {
             let resourcesGroups: IShaderResource[][] = [];
             let k = 0;
             for (let z in descriptor.bindgroups) {
-                group = new Bindgroup(z);
-                //console.log("=> ", z, descriptor.bindgroups[z])
-                resourcesGroups[k++] = group.initFromObject(descriptor.bindgroups[z]);
-                this.bindGroups.add(group);
+
+                if (descriptor.bindgroups[z] instanceof Bindgroup) {
+
+                    const elements = descriptor.bindgroups[z].elements;
+                    const resources: IShaderResource[] = [];
+                    for (let i = 0; i < elements; i++) {
+                        resources[i] = elements[i].resource;
+                    }
+
+                    resourcesGroups[k++] = resources;
+                    descriptor.bindgroups[z].name = z;
+                    this.bindGroups.add(descriptor.bindgroups[z]);
+
+                } else {
+
+                    group = new Bindgroup();
+                    group.name = z;
+                    const g = group.initFromObject(descriptor.bindgroups[z]);
+                    resourcesGroups[k++] = g;
+                    //console.log("=> ", z, g)
+                    this.bindGroups.add(group);
+                }
+
+
             }
 
 
@@ -334,32 +360,34 @@ export class RenderPipeline extends Pipeline {
 
 
     //----------- used if there is no indexBuffer ------
-    private drawConfig: { vertexCount: number, instanceCount: number, firstVertexId: number, firstInstanceId: number } = {
+    public get drawConfig(): DrawConfig { return this._drawConfig; }
+    private _drawConfig: DrawConfig = {
         vertexCount: -1,
         instanceCount: 1,
         firstVertexId: 0,
         firstInstanceId: 0
     }
 
-    public setupDraw(o: { instanceCount?: number, vertexCount?: number, firstVertexId?: number, firstInstanceId?: number }) {
+    public setupDraw(o: DrawConfig) {
 
-        if (o.instanceCount !== undefined) this.drawConfig.instanceCount = o.instanceCount;
-        if (o.vertexCount !== undefined) this.drawConfig.vertexCount = o.vertexCount;
-        if (o.firstVertexId !== undefined) this.drawConfig.firstVertexId = o.firstVertexId;
-        if (o.firstInstanceId !== undefined) this.drawConfig.firstInstanceId = o.firstInstanceId;
+        if (o.instanceCount !== undefined) this._drawConfig.instanceCount = o.instanceCount;
+        if (o.vertexCount !== undefined) this._drawConfig.vertexCount = o.vertexCount;
+        if (o.firstVertexId !== undefined) this._drawConfig.firstVertexId = o.firstVertexId;
+        if (o.firstInstanceId !== undefined) this._drawConfig.firstInstanceId = o.firstInstanceId;
+        if (o.indexBuffer !== undefined) this._drawConfig.indexBuffer = o.indexBuffer;
     }
 
-    public get vertexCount(): number { return this.drawConfig.vertexCount }
-    public set vertexCount(n: number) { this.drawConfig.vertexCount = n; }
+    public get vertexCount(): number { return this._drawConfig.vertexCount }
+    public set vertexCount(n: number) { this._drawConfig.vertexCount = n; }
 
-    public get instanceCount(): number { return this.drawConfig.instanceCount }
-    public set instanceCount(n: number) { this.drawConfig.instanceCount = n; }
+    public get instanceCount(): number { return this._drawConfig.instanceCount }
+    public set instanceCount(n: number) { this._drawConfig.instanceCount = n; }
 
-    public get firstVertexId(): number { return this.drawConfig.firstVertexId }
-    public set firstVertexId(n: number) { this.drawConfig.firstVertexId = n; }
+    public get firstVertexId(): number { return this._drawConfig.firstVertexId }
+    public set firstVertexId(n: number) { this._drawConfig.firstVertexId = n; }
 
-    public get firstInstanceId(): number { return this.drawConfig.firstInstanceId }
-    public set firstInstanceId(n: number) { this.drawConfig.firstInstanceId = n; }
+    public get firstInstanceId(): number { return this._drawConfig.firstInstanceId }
+    public set firstInstanceId(n: number) { this._drawConfig.firstInstanceId = n; }
 
     //------------------------------------------------
 
@@ -588,7 +616,7 @@ export class RenderPipeline extends Pipeline {
 
         if (!this.gpuPipeline) this.buildGpuPipeline();
 
-        if (this.drawConfig.vertexCount <= 0) {
+        if (this._drawConfig.vertexCount <= 0) {
 
 
             if (this.bindGroups.resources.types) {
@@ -598,7 +626,7 @@ export class RenderPipeline extends Pipeline {
                     for (let i = 0; i < vertexBuffers.length; i++) {
 
                         if (vertexBuffers[i].resource.descriptor.stepMode === "vertex") {
-                            this.drawConfig.vertexCount = vertexBuffers[i].resource.nbVertex; //this.vertexBuffers[0].nbVertex;
+                            this._drawConfig.vertexCount = vertexBuffers[i].resource.nbVertex; //this.vertexBuffers[0].nbVertex;
                             break;
                         }
                     }
@@ -664,14 +692,18 @@ export class RenderPipeline extends Pipeline {
 
                 const buffers = resourceByType.vertexBuffers;
 
-                if (this.drawConfig.vertexCount <= 0) {
+
+
+                if (this._drawConfig.vertexCount <= 0 && !this._drawConfig.indexBuffer) {
 
                     if (!buffers) {
                         throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
                     }
                     const vertexBuffer: VertexBuffer = buffers[0].resource as VertexBuffer;
-                    this.drawConfig.vertexCount = vertexBuffer.nbVertex;
+                    this._drawConfig.vertexCount = vertexBuffer.nbVertex;
                 }
+
+
 
                 if (buffers) {
                     let k = 0;
@@ -683,10 +715,13 @@ export class RenderPipeline extends Pipeline {
                         renderPass.setVertexBuffer(k++, buf)
                     }
                 }
+
             }
 
 
         }
+
+
 
         this.bindGroups.apply(renderPass);
 
@@ -695,20 +730,18 @@ export class RenderPipeline extends Pipeline {
 
 
 
-        if (this.indexBuffer) {
+        if (this._drawConfig.indexBuffer) {
 
-            if (!this.indexBuffer.gpuResource) this.indexBuffer.createGpuResource();
+            const { indexBuffer } = this._drawConfig;
+            if (indexBuffer) indexBuffer.apply(renderPass);
 
-
-            renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize());
-            renderPass.drawIndexed(this.indexBuffer.nbPoint);
 
 
         } else {
 
-            if (this.drawConfig.vertexCount !== -1) {
+            if (this._drawConfig.vertexCount !== -1) {
                 //console.log("drawConfig = ", this.drawConfig)
-                renderPass.draw(this.drawConfig.vertexCount, this.drawConfig.instanceCount, this.drawConfig.firstVertexId, this.drawConfig.firstInstanceId)
+                renderPass.draw(this._drawConfig.vertexCount, this._drawConfig.instanceCount, this._drawConfig.firstVertexId, this._drawConfig.firstInstanceId)
             }
 
         }
@@ -774,7 +807,7 @@ export class RenderPipeline extends Pipeline {
         const bool = !!this.bindGroups.resources.all
         if (!bool) {
             //some very basic shader can run without any resource
-            if (this.drawConfig.vertexCount > 0) {
+            if (this._drawConfig.vertexCount > 0) {
                 if (this.vertexShader.main.text != "" && this.fragmentShader.main.text != "") {
                     return true;
                 }

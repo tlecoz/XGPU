@@ -15,19 +15,22 @@ import { VideoTexture } from "./resources/VideoTexture";
 import { ImageTextureArray } from "./resources/ImageTextureArray";
 import { CubeMapTextureArray } from "./resources/CubeMapTextureArray";
 import { DepthTextureArray } from "../pipelines/resources/textures/DepthTextureArray";
+import { Pipeline } from "../pipelines/Pipeline";
+import { DrawConfig } from "../pipelines/RenderPipeline";
 
 export class Bindgroups {
 
 
-
+    public pipeline: Pipeline;
     public parent: Bindgroups;
     public groups: Bindgroup[] = [];
     private _name: string;
 
 
 
-    constructor(name: string) {
+    constructor(pipeline: Pipeline, name: string) {
         this._name = name;
+        this.pipeline = pipeline;
 
     }
 
@@ -97,7 +100,11 @@ export class Bindgroups {
         }
     }
 
-    public getVertexShaderDeclaration(): { result: string, variables: string } {
+
+    protected temp: { result: string, variables: string };
+
+    public getVertexShaderDeclaration(fromFragmentShader: boolean = false): { result: string, variables: string } {
+        if (fromFragmentShader) return this.temp;
         //console.log("getVertexShaderDeclaration")
         let result: string = "";
         let group: Bindgroup;
@@ -151,6 +158,9 @@ export class Bindgroups {
             resources = group.elements;
             k = 0;
             for (let j = 0; j < resources.length; j++) {
+
+                //console.log(i, j, resources[j]);
+
                 resource = resources[j].resource;
                 if (resource instanceof VertexBuffer) continue;
                 name = resources[j].name;
@@ -179,6 +189,7 @@ export class Bindgroups {
 
         }
         obj.result = result;
+        this.temp = obj;
         return obj;
     }
 
@@ -326,11 +337,11 @@ export class Bindgroups {
 
         const types = this._resources.types;
 
-
+        //console.warn("add bindgroup ", bindgroup)
 
 
         const addResources = (res: any, elements: { name: string, resource: IShaderResource }[]) => {
-            //console.log("call addResource ", elements)
+            //console.warn("call addResource ", elements)
             let element: { name: string, resource: IShaderResource };
             let r: IShaderResource;
             for (let i = 0; i < elements.length; i++) {
@@ -398,6 +409,7 @@ export class Bindgroups {
                 addResources(resource[bindgroup.name], bindgroup.elements)
             }
         } else {
+            bindgroup.pipeline = this.pipeline;
             resource = resource[bindgroup.name] = {};
             let o;
             for (let i = 0; i < bindgroup.groups.length; i++) {
@@ -410,7 +422,7 @@ export class Bindgroups {
     }
 
     public copy(options?: { oldGroups: Bindgroup[], replacedGroup: Bindgroup[] }): Bindgroups {
-        const obj = new Bindgroups(this._name);
+        const obj = new Bindgroups(this.pipeline, this._name);
         const groups = this.groups.concat();
         if (options) {
             for (let i = 0; i < options.oldGroups.length; i++) {
@@ -476,6 +488,11 @@ export class Bindgroups {
 
 
         return null;
+    }
+
+    public get drawConfig(): DrawConfig {
+
+        return (this.pipeline as any).drawConfig || null
     }
 
     public get current(): Bindgroup {

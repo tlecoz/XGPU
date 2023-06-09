@@ -58,7 +58,9 @@ export class ComputePipeline extends Pipeline {
         this.fragmentShader = null;
 
         this.bindGroups.destroy();
-        this.bindGroups = new Bindgroups("pipeline");
+        this.bindGroups = new Bindgroups(this, "pipeline");
+
+        console.log("bg = ", this.bindGroups)
 
         descriptor = this.highLevelParse(descriptor);
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
@@ -72,7 +74,8 @@ export class ComputePipeline extends Pipeline {
         if (descriptor.bindgroups) {
             let group: Bindgroup;
             for (let z in descriptor.bindgroups) {
-                group = new Bindgroup(z);
+                group = new Bindgroup();
+                group.name = z;
                 group.initFromObject(descriptor.bindgroups[z]);
                 this.bindGroups.add(group);
             }
