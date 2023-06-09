@@ -553,9 +553,9 @@ export class Pipeline {
             let obj;
             let objs: any[] = [];
             for (let z in o) {
-                console.log("=> ", z, o[z])
+                //console.log("=> ", z, o[z])
                 obj = o[z];
-                if (!obj) continue;
+                //if (!obj) continue;
                 name = obj.constructor.name;
                 if (name === "Object") {
                     if (z !== "bindgroups" && z !== "vertexShader" && z !== "fragmentShader" && z !== "computeShader") {

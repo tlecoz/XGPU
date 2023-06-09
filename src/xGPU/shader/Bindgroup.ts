@@ -213,7 +213,7 @@ export class Bindgroup {
 
 
 
-        if (!this.setupApplyCompleted && this.parent && this.parent.pipeline.type !== "compute") {
+        if (!this.setupApplyCompleted && this.parent) {
 
             this.setupApplyCompleted = true;
             this.setupApply();
@@ -236,13 +236,18 @@ export class Bindgroup {
     protected elementByName: any = {};
 
     private setupApply() {
-        //console.log("SETUP APPLY")
+        console.log("SETUP APPLY")
         this.bindgroupId = this.parent.groups.indexOf(this);
 
-        this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
+
+
+        //this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
 
         const allVertexBuffers = this.parent.resources.types.vertexBuffers;
         if (!allVertexBuffers) return;
+
+
+
 
 
         this.vertexBuffers = [];
@@ -269,8 +274,35 @@ export class Bindgroup {
         }
     }
 
+
+    protected setupDrawCompleted: boolean = false;
+
+    protected setupDraw() {
+
+        console.log("setupDraw ", this.parent.resources.types.vertexBuffers[0].resource.nbVertex, this.applyDraw)
+        if (!this.setupDrawCompleted) {
+            this.setupDrawCompleted = true;
+            if (this.applyDraw && this.parent.drawConfig) {
+                this.indexBuffer = this.parent.drawConfig.indexBuffer;
+                if (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
+                    //this.parent.drawConfig.vertexCount = allVertexBuffers[0]
+                }
+            }
+        }
+    }
+
+
     public apply(renderPass: GPURenderPassEncoder) {
-        //console.log("apply")
+        console.log("apply ")
+
+
+
+
+
+
+
+
+
         renderPass.setBindGroup(this.bindgroupId, this.group);
 
         if (this.vertexBuffers) {
@@ -421,10 +453,11 @@ export class Bindgroup {
 
 
         result.apply = () => {
-            console.log("IB = ", this.parent.drawConfig.indexBuffer)
-            if (indexBuffer && this.parent.drawConfig) {
-                this.parent.drawConfig.indexBuffer = indexBuffer;
-            }
+            this.setupDraw();
+            //console.log("IB = ", this.parent.drawConfig.indexBuffer)
+            //if (indexBuffer && this.parent.drawConfig) {
+            //    this.parent.drawConfig.indexBuffer = indexBuffer;
+            //}
             this.elements = result.elements;
 
             /*
