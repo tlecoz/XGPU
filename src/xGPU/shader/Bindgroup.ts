@@ -411,7 +411,7 @@ export class Bindgroup {
                         //keep source descriptor (the "source" option in the descriptor refeer to the media, we)
                     } else {
                         //use "model" descriptor (some config options are applyed on VertexBuffer/UniformBuffer/...  and we want to keep it for all the instances)
-                        //(whzt I call "model" is the first instance)
+                        //(whzt I call "model" is the source bindgroup used to call 'createInstance')
                         resourcePerInstance[z].descriptor = this.elements[i].resource.descriptor;
                     }
 

@@ -536,7 +536,7 @@ export class Pipeline {
 
 
 
-    private static DEFAULT_VERTEX_BUFFER_ID: number = 2;
+
     private parseHighLevelObj(descriptor: any) {
 
         const isBuiltIn = (obj) => {
@@ -605,15 +605,7 @@ export class Pipeline {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
             if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
 
-            const { primitives, vertexAttributes, shaderResources } = analyseObjects(objects);
-
-            if (primitives.length) {
-
-
-
-
-            }
-            //descriptor.bindgroup.default[]
+            analyseObjects(objects);
 
         }
 

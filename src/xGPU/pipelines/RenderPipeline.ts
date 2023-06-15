@@ -2,8 +2,6 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../XGPU";
-import { GPURenderer } from "../GPURenderer";
-import { HeadlessGPURenderer } from "../HeadlessGPURenderer";
 import { Bindgroup } from "../shader/Bindgroup";
 import { FragmentShader } from "../shader/FragmentShader";
 import { VertexAttribute } from "../shader/resources/VertexAttribute";
@@ -19,7 +17,6 @@ import { IndexBuffer } from "./resources/IndexBuffer";
 import { IShaderResource } from "../shader/resources/IShaderResource";
 import { Bindgroups } from "../shader/Bindgroups";
 import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
-import { UniformGroup } from "../shader/resources/UniformGroup";
 import { IRenderer } from "../IRenderer";
 import { DrawConfig } from "./DrawConfig";
 
