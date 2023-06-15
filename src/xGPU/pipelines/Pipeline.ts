@@ -948,7 +948,7 @@ export class Pipeline {
                     (instance[uniformBufferName] as any).bindgroup = bindgroup;
                     instance[name] = clonedUniformBuffers[uniformBufferName].getUniformByName(name);
                     instance[name].debug = "azerty";
-                    console.log("instance[name] = ", instance[name])
+                    //console.log("instance[name] = ", instance[name])
 
                 } else {
                     instance[name] = resource.clone();

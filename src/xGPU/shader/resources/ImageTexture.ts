@@ -20,8 +20,17 @@ export class ImageTexture implements IShaderResource {
     public resourceIO: ImageTextureIO;
     public io: number = 0;
     public mustBeTransfered: boolean = false;
-    public descriptor: ImageTextureDescriptor
+    public _descriptor: ImageTextureDescriptor
     public gpuResource: GPUTexture;
+
+
+    public get descriptor() { return this._descriptor }
+    public set descriptor(d: any) {
+        if (this._descriptor) {
+            console.warn("old: ", this.descriptor.debug, " ; new : ", d.debug);
+        }
+        this._descriptor = d
+    }
 
 
     protected _view: GPUTextureView;
@@ -67,6 +76,8 @@ export class ImageTexture implements IShaderResource {
 
 
         if (descriptor.source) this.mustBeTransfered = true;
+
+        console.log("ImageTexture.constructor ; descriptor.debug = ", (descriptor as any).debug)
 
         this.descriptor = descriptor as any;
         //this.createGpuResource()
@@ -155,7 +166,7 @@ export class ImageTexture implements IShaderResource {
 
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
-            //console.log("descriptor.source = ", this.descriptor.source)
+            console.log("copyExternalImageToTexture = ", (this as any).debug)
             XGPU.device.queue.copyExternalImageToTexture(
                 { source: this.descriptor.source as any, flipY: true },
                 { texture: this.gpuResource },
@@ -174,6 +185,8 @@ export class ImageTexture implements IShaderResource {
 
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
+
+        console.log("VIEW = ", this._view + " : " + (this.descriptor as any).debug + " llll " + (this as any).debug)
 
     }
 
@@ -224,6 +237,7 @@ export class ImageTexture implements IShaderResource {
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUTextureView } {
         if (!this.gpuResource) this.createGpuResource();
 
+        //console.log((this as any).debug, this._view)
         return {
             binding: bindingId,
             resource: this._view

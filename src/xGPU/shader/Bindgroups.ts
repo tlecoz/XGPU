@@ -46,9 +46,17 @@ export class Bindgroups {
         const bindgroups: GPUBindGroup[] = [];
 
 
+        this.groups = this.groups.sort((a: Bindgroup, b: Bindgroup) => {
+            if (a.useInstances && !b.useInstances) return 1;
+            if (!a.useInstances && b.useInstances) return -1;
+            return 0;
+        })
+        //console.log("groups = ", this.groups);
+        this.groups[this.groups.length - 1].applyDraw = true;
+
 
         for (let i = 0; i < this.groups.length; i++) {
-
+            //console.log(i, " useInstances = ", this.groups[i].useInstances)
             if (!autoLayout) layouts[i] = this.groups[i].layout;
             bindgroups[i] = this.groups[i].group;
         }
@@ -90,13 +98,11 @@ export class Bindgroups {
 
     public apply(passEncoder: GPURenderPassEncoder | GPUComputePassEncoder): void {
         for (let i = 0; i < this.groups.length; i++) {
-
             this.groups[i].apply(passEncoder)
-
         }
-        if (passEncoder instanceof GPURenderPassEncoder) {
+        /*if (passEncoder instanceof GPURenderPassEncoder) {
             this.drawConfig.draw(passEncoder);
-        }
+        }*/
 
     }
 

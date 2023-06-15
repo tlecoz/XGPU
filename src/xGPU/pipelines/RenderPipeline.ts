@@ -662,13 +662,7 @@ export class RenderPipeline extends Pipeline {
 
         renderPass.setPipeline(this.gpuPipeline);
 
-
-
         this.bindGroups.apply(renderPass);
-
-
-
-
     }
 
 

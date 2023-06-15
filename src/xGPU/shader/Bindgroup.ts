@@ -166,6 +166,7 @@ export class Bindgroup {
                 result[k++] = this.add(z, o);
             }
         }
+        //console.warn("bindgroup.initFromObject result = ", result)
         return result;
     }
     //---------------------------------------------------------------------------
@@ -202,7 +203,10 @@ export class Bindgroup {
 
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
+
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
+
+
 
             let entry = resource.createBindGroupEntry(bindingId++)
             //console.log("bindgroup entry ", (bindingId - 1), entry);
@@ -236,10 +240,10 @@ export class Bindgroup {
     protected elementByName: any = {};
 
     private setupApply() {
-        console.log("SETUP APPLY")
+
         this.bindgroupId = this.parent.groups.indexOf(this);
 
-
+        //console.log("SETUP APPLY  id = ", this.bindgroupId)
 
         //this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
 
@@ -265,15 +269,15 @@ export class Bindgroup {
         for (let i = 0; i < this.elements.length; i++) {
             element = this.elements[i];
             resource = element.resource;
-            console.log("A ", element.name)
-            if (resource instanceof VertexBuffer) {// && 
-                console.log("B");
+            //console.log("A ", element.name)
+            if (resource instanceof VertexBuffer) {
+                //console.log("B");
                 if (!(resource as VertexBuffer).io) {
 
                     (resource as VertexBuffer).bufferId = getBufferId(resource);//allVertexBuffers.indexOf(element);
 
-                    console.log("C ", (resource as VertexBuffer) == allVertexBuffers[0].resource);
-                    console.log(resource);
+                    //console.log("C ", (resource as VertexBuffer) == allVertexBuffers[0].resource);
+                    //console.log(resource);
 
                     this.elementByName[element.name] = resource
                     this.vertexBufferReferenceByName[element.name] = { bufferId: (resource as VertexBuffer).bufferId, resource };
@@ -318,41 +322,58 @@ export class Bindgroup {
 
 
 
-        this.setupDrawCompleted = true;
+
 
     }
 
 
     public apply(renderPass: GPURenderPassEncoder | GPUComputePassEncoder) {
 
+
         if (!this.setupDrawCompleted) {
+            this.setupDrawCompleted = true;
+            if (undefined === this.bindgroupId) {
+                this.bindgroupId = this.parent.groups.indexOf(this);
+            }
             this.setupDraw();
         }
 
-        this.update();
 
 
-
-
-        const group = this.group;
-
-        //console.log("renderPass.setBindGroup(", this.bindgroupId + "," + group);
-        renderPass.setBindGroup(this.bindgroupId, group);
-
-        if (renderPass instanceof GPUComputePassEncoder) return;
-
-
-        if (this.vertexBuffers) {
-            for (let i = 0; i < this.vertexBuffers.length; i++) {
-                renderPass.setVertexBuffer(this.vertexBuffers[i].bufferId, this.vertexBuffers[i].getCurrentBuffer());
-            }
+        if (renderPass instanceof GPUComputePassEncoder) {
+            this.update();
+            renderPass.setBindGroup(this.bindgroupId, this.group);
+            return;
         }
 
+
+        const instances = this.instances ? this.instances : [{ apply: () => { } }]
+        const applyDraw = this.applyDraw;
+
+
+        for (let i = 0; i < instances.length; i++) {
+            instances[i].apply();
+            this.update();
+            renderPass.setBindGroup(this.bindgroupId, this.group);
+
+            if (this.vertexBuffers) {
+                for (let i = 0; i < this.vertexBuffers.length; i++) {
+                    renderPass.setVertexBuffer(this.vertexBuffers[i].bufferId, this.vertexBuffers[i].getCurrentBuffer());
+                }
+            }
+
+            if (applyDraw) {
+                this.parent.drawConfig.draw(renderPass);
+            }
+
+        }
 
     }
 
     protected instances: any[];
     protected instanceResourcesArray: any[];
+
+    public get useInstances(): boolean { return !!this.instances || !!this.instanceResourcesArray };
 
     public createInstance(instanceResources: any) {
         if (!this.instanceResourcesArray) this.instanceResourcesArray = [];
@@ -366,7 +387,7 @@ export class Bindgroup {
         if (!this.instances) this.instances = [];
 
         this.mustRefreshBindgroup = true;
-        this.applyDraw = true;
+        //this.applyDraw = true;
 
 
         let indexBuffer: IndexBuffer;
@@ -386,14 +407,22 @@ export class Bindgroup {
             for (let i = 0; i < this.elements.length; i++) {
                 if (this.elements[i].name === z) {
 
-                    resourcePerInstance[z].descriptor = this.elements[i].resource.descriptor;
+                    if (resourcePerInstance[z] instanceof VideoTexture || resourcePerInstance[z] instanceof ImageTexture) {
+                        //keep source descriptor (the "source" option in the descriptor refeer to the media, we)
+                    } else {
+                        //use "model" descriptor (some config options are applyed on VertexBuffer/UniformBuffer/...  and we want to keep it for all the instances)
+                        //(whzt I call "model" is the first instance)
+                        resourcePerInstance[z].descriptor = this.elements[i].resource.descriptor;
+                    }
+
+                    //console.log("debug = ", resourcePerInstance[z].debug)
                     if (!resourcePerInstance[z].gpuResource) {
 
                         resourcePerInstance[z].createGpuResource();
 
                     }
 
-                    //console.log("A ", z);
+                    //console.log("A ", z, resourcePerInstance[z]);
                     if (this.elements[i].resource instanceof VertexBuffer) {
                         //console.log("B")
                         resourcePerInstance[z].bufferId = (this.elements[i].resource as VertexBuffer).bufferId;
@@ -407,9 +436,6 @@ export class Bindgroup {
                         vertexBuffers.push(result.elements[i].resource);
                     }
                 }
-
-
-
             }
 
         }
@@ -417,112 +443,14 @@ export class Bindgroup {
 
 
 
-        /*
-        result.shaderResources = [];
 
-        let resource: IShaderResource;
-        let k: number = 0;
-        let resourceUniformBuffers: any;
-        let resourceUniformBufferPropertiess: any;
-        let uniformBufferName: string;
-        
-
-        console.log("elements = " + this.elements)
-
-        for (let z in resourcePerInstance) {
-            if (!this.elementByName[z]) throw new Error("The resource '" + z + "' doesn't exist in the bindgroup '" + this.name + "'.")
-
-            resource = resourcePerInstance[z];
-
-
-
-            if (resource instanceof VertexBuffer) {
-                if (!result.vertexBuffers) result.vertexBuffers = [];
-                result.vertexBuffers[k++] = { bufferId: this.vertexBufferReferenceByName[z].bufferId, resource }
-
-            } else if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
-
-                if (!resourceUniformBuffers) resourceUniformBuffers = {};
-
-                uniformBufferName = this.getResourceName(resource.uniformBuffer)
-                resourceUniformBuffers[uniformBufferName] = this.get(uniformBufferName);
-
-                if (!resourceUniformBufferPropertiess[uniformBufferName]) resourceUniformBufferPropertiess[uniformBufferName] = {};
-
-                let propeties = resourceUniformBufferPropertiess[uniformBufferName];
-                propeties[z] = resourcePerInstance[z];
-            } else {
-
-                if (resource instanceof IndexBuffer) {
-                    indexBuffer = resource as IndexBuffer;
-                }
-
-                if (!resource.gpuResource) resource.createGpuResource();
-                result.shaderResources.push(resource);
-            }
-        }
-
-
-        //-----
-
-        if (resourceUniformBuffers) {
-            result.uniforms = {};
-
-            let cloneBuffer: UniformBuffer;
-            for (let z in resourceUniformBuffers) {
-                cloneBuffer = (resourceUniformBuffers[z] as UniformBuffer).clone();
-                (cloneBuffer as any).bindgroup = this;
-                (cloneBuffer as any).name = z;
-                cloneBuffer.createGpuResource();
-
-                result.shaderResources.push(cloneBuffer);
-
-                let properties = resourceUniformBufferPropertiess[z];
-
-                for (let k in properties) {
-                    result.uniforms[k] = cloneBuffer.getUniformByName(k);
-                }
-
-            }
-        }
-
-
-        if (result.vertexBuffers) {
-
-            //if the instance change some vertexBuffers but not all of them , I add the missing buffers to the instance object
-            for (let z in this.vertexBufferReferenceByName) {
-                if (!resourcePerInstance[z]) {
-                    result.vertexBuffers.push(this.vertexBufferReferenceByName[z]);
-                }
-            }
-        }
-        */
 
 
 
         result.apply = () => {
-            this.setupDraw();
-            //console.log("IB = ", this.parent.drawConfig.indexBuffer)
-            //if (indexBuffer && this.parent.drawConfig) {
-            //    this.parent.drawConfig.indexBuffer = indexBuffer;
-            //}
             this.elements = result.elements;
             this.vertexBuffers = vertexBuffers;
             if (indexBuffer) this.parent.drawConfig.indexBuffer = indexBuffer;
-
-            /*
-            
-
-            if (result.vertexBuffers) this.vertexBuffers = result.vertexBuffers;
-
-            let o: any;
-            for (let i = 0; i < result.shaderResources.length; i++) {
-                o = result.shaderResources[i];
-                console.log(i, o)
-                o.update();
-                this.set(o.name, o);
-            }
-            */
         }
 
         resourcePerInstance._object = result;
