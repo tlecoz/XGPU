@@ -538,10 +538,24 @@ export class HighLevelParser {
         return descriptor;
     }
 
+    protected parseBindgroup(descriptor: any): any {
+        for (let z in descriptor) {
+            if (descriptor[z] instanceof Bindgroup) {
+                if (!descriptor.bindgroups) descriptor.bindgroups = {};
+                descriptor.bindgroups[z] = descriptor[z];
+                delete descriptor[z];
+            }
+        }
+
+        return descriptor;
+
+    }
+
+
     protected firstPass(descriptor: any, target: "render" | "compute" | "bindgroup", drawConfig?: DrawConfig): any {
 
 
-
+        descriptor = this.parseBindgroup(descriptor);
         descriptor = this.parseVertexBuffers(descriptor);
         descriptor = this.parseVertexAttributes(descriptor);
         descriptor = this.parseUniformBuffers(descriptor);
