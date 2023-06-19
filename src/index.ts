@@ -48,3 +48,5 @@ export * from "./xGPU/shader/resources/VertexBuffer"
 export * from "./xGPU/shader/resources/VertexBufferIO"
 export * from "./xGPU/shader/resources/VideoTexture"
 
+export * from "./xGPU/HighLevelParser"
+

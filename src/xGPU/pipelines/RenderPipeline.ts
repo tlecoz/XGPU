@@ -19,6 +19,7 @@ import { Bindgroups } from "../shader/Bindgroups";
 import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
 import { IRenderer } from "../IRenderer";
 import { DrawConfig } from "./DrawConfig";
+import { HighLevelParser } from "../HighLevelParser";
 
 
 
@@ -32,15 +33,8 @@ export class RenderPipeline extends Pipeline {
     protected multisampleTexture: MultiSampleTexture;
     protected renderPassTexture: RenderPassTexture;
 
-    /*
-    protected shadow: Shadow = null;
-    protected _light: Light = null;
-    */
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
-    //public indexBuffer: IndexBuffer = null;
-    //public pipelineCount: number = 1;
-
 
 
 
@@ -79,40 +73,6 @@ export class RenderPipeline extends Pipeline {
     public get canvas(): any { return this.renderer.canvas; }
     public get depthStencilTexture(): DepthStencilTexture { return this._depthStencilTexture; }
 
-    //=============================== HIGH LEVEL PARSING ================================================================
-
-
-    protected parseDrawConfig(descriptor: any) {
-        // vertexCount: number, instanceCount: number, firstVertexId: number, firstInstanceId: number
-        if (descriptor.vertexCount) {
-            if (isNaN(descriptor.vertexCount)) throw new Error("descriptor.vertexCount is a reserved keyword and must be a number");
-            this.drawConfig.vertexCount = descriptor.vertexCount;
-        }
-        if (descriptor.instanceCount) {
-            if (isNaN(descriptor.instanceCount)) throw new Error("descriptor.instanceCount is a reserved keyword and must be a number");
-            this.drawConfig.instanceCount = descriptor.instanceCount;
-        }
-        if (descriptor.firstVertexId) {
-            if (isNaN(descriptor.firstVertexId)) throw new Error("descriptor.firstVertexId is a reserved keyword and must be a number");
-            this.drawConfig.firstVertexId = descriptor.firstVertexId;
-        }
-        if (descriptor.firstInstanceId) {
-            if (isNaN(descriptor.firstInstanceId)) throw new Error("descriptor.firstInstanceId is a reserved keyword and must be a number");
-            this.drawConfig.firstInstanceId = descriptor.firstInstanceId;
-        }
-        return descriptor;
-    }
-
-    protected highLevelParse(descriptor: any) {
-
-        descriptor = super.highLevelParse(descriptor);
-        descriptor = this.parseDrawConfig(descriptor);
-
-        return descriptor;
-    }
-
-
-    //=====================================================================================================================
 
     public destroy() {
         this.bindGroups.destroy();
@@ -180,9 +140,14 @@ export class RenderPipeline extends Pipeline {
 
 
         //console.log("#0 ", JSON.stringify(descriptor));
-        descriptor = this.highLevelParse(descriptor);
 
+
+        /*
+        descriptor = this.highLevelParse(descriptor);
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
+        */
+        descriptor = HighLevelParser.parse(descriptor, this);
+
 
         //console.log("DESCRIPTOR ", descriptor)
 

@@ -11,6 +11,7 @@ import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { Pipeline } from "./Pipeline";
 import { ImageTexture } from "../shader/resources/ImageTexture";
 import { Bindgroups } from "../shader/Bindgroups";
+import { HighLevelParser } from "../HighLevelParser";
 
 
 export class ComputePipeline extends Pipeline {
@@ -62,8 +63,11 @@ export class ComputePipeline extends Pipeline {
 
         console.log("bg = ", this.bindGroups)
 
+        /*
         descriptor = this.highLevelParse(descriptor);
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
+        */
+        descriptor = HighLevelParser.parse(descriptor, this);
 
         super.initFromObject(descriptor);
 
