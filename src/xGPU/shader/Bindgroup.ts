@@ -39,8 +39,8 @@ export class Bindgroup {
 
 
 
-    constructor() {
-
+    constructor(descriptor?: any | any[]) {
+        if (descriptor) this.initFromObject(descriptor);
     }
 
 
@@ -155,8 +155,16 @@ export class Bindgroup {
     }
 
 
-    public initFromObject(object: any): IShaderResource[] {
+    public initFromObject(descriptor: any | any[]): IShaderResource[] {
         //console.log("group.initFromObject ", object)
+
+        let object: any = descriptor;
+        let isArray = false;
+        if (descriptor instanceof Array) {
+            isArray = true;
+            object = descriptor[0];
+        }
+
 
         HighLevelParser.parse(object, "bindgroup");
 
@@ -171,6 +179,16 @@ export class Bindgroup {
                 result[k++] = this.add(z, o);
             }
         }
+
+
+        if (isArray) {
+            for (let i = 0; i < descriptor.length; i++) {
+                this.createInstance(descriptor[i]);
+            }
+        }
+
+
+
         //console.warn("bindgroup.initFromObject result = ", result)
         return result;
     }
