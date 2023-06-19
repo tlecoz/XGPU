@@ -3,7 +3,13 @@ import { IndexBuffer } from "./resources/IndexBuffer";
 
 export class DrawConfig {
 
-    public vertexCount: number = -1;
+    public _vertexCount: number = -1;
+    public get vertexCount(): number { return this._vertexCount }
+    public set vertexCount(n: number) {
+        console.warn("set vertexCount = ", n);
+        this._vertexCount = n;
+    }
+
     public instanceCount: number = 1;
     public firstVertexId: number = 0;
     public firstInstanceId: number = 0;
@@ -22,6 +28,7 @@ export class DrawConfig {
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize())
             renderPass.drawIndexed(this.indexBuffer.nbPoint, this.instanceCount, this.firstVertexId, this.baseVertex, this.firstInstanceId);
         } else {
+
             renderPass.draw(this.vertexCount, this.instanceCount, this.firstVertexId, this.firstInstanceId);
         }
     }

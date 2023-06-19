@@ -51,7 +51,8 @@ export class Bindgroups {
             if (!a.useInstances && b.useInstances) return -1;
             return 0;
         })
-        //console.log("groups = ", this.groups);
+        console.log("groups = ", this.groups);
+
         this.groups[this.groups.length - 1].applyDraw = true;
 
 

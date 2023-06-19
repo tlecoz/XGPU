@@ -79,6 +79,7 @@ export class UniformBuffer implements IShaderResource {
         if (!this.gpuResource) this.createGpuResource();
 
         this.group.update(this.gpuResource, true);
+        this.mustBeTransfered = false;
     }
 
     public createStruct(uniformName: string): { struct: string, localVariables: string } {

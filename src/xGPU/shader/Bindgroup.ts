@@ -191,7 +191,7 @@ export class Bindgroup {
     }
 
     private setupApplyCompleted: boolean = false;
-    public build(): void {
+    public build(): GPUBindGroup {
 
         if (!this._layout) this.buildLayout();
 
@@ -231,6 +231,8 @@ export class Bindgroup {
             }
 
         }
+
+        return this._group;
     }
 
 
@@ -315,7 +317,17 @@ export class Bindgroup {
                     throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
                 }
 
-                this.parent.drawConfig.vertexCount = this.parent.resources.types.vertexBuffers[0].resource.nbVertex;
+                const buffers = this.parent.resources.types.vertexBuffers;
+                let buf: VertexBuffer;
+                for (let i = 0; i < buffers.length; i++) {
+                    buf = buffers[i].resource as VertexBuffer;
+                    if (buf.descriptor.stepMode === "vertex") {
+                        this.parent.drawConfig.vertexCount = this.parent.resources.types.vertexBuffers[i].resource.nbVertex;
+                        break;
+                    }
+                }
+
+
             }
         }
 
@@ -347,14 +359,18 @@ export class Bindgroup {
         }
 
 
-        const instances = this.instances ? this.instances : [{ apply: () => { } }]
+        const instances = this.instances ? this.instances : [{ group: this.group, update: () => { } }]
         const applyDraw = this.applyDraw;
 
 
         for (let i = 0; i < instances.length; i++) {
-            instances[i].apply();
+
+            instances[i].update();
             this.update();
-            renderPass.setBindGroup(this.bindgroupId, this.group);
+
+            renderPass.setBindGroup(this.bindgroupId, instances[i].group);
+            //renderPass.setBindGroup(this.bindgroupId, this.group);
+
 
             if (this.vertexBuffers) {
                 for (let i = 0; i < this.vertexBuffers.length; i++) {
@@ -386,7 +402,7 @@ export class Bindgroup {
 
         if (!this.instances) this.instances = [];
 
-        this.mustRefreshBindgroup = true;
+        //this.mustRefreshBindgroup = true;
         //this.applyDraw = true;
 
 
@@ -442,16 +458,31 @@ export class Bindgroup {
 
 
 
+        let id = this.instances.length;
+
+        result.update = () => {
+            let bool = false;
+            for (let i = 0; i < this.elements.length; i++) {
+
+                if (this.elements[i].resource.mustBeTransfered) {
+                    this.elements[i].resource.update();
+                    bool = true;
+                    break;
+                }
+            }
 
 
-
-
-
-        result.apply = () => {
             this.elements = result.elements;
             this.vertexBuffers = vertexBuffers;
+
+            if (bool || !result.group) {
+                result.group = this.build();
+            }
             if (indexBuffer) this.parent.drawConfig.indexBuffer = indexBuffer;
         }
+
+
+
 
         resourcePerInstance._object = result;
 
