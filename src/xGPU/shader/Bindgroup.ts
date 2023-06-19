@@ -2,6 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 
+import { HighLevelParser } from "../HighLevelParser";
 import { IndexBuffer } from "../pipelines/resources/IndexBuffer";
 import { XGPU } from "../XGPU";
 import { Bindgroups } from "./Bindgroups";
@@ -35,6 +36,7 @@ export class Bindgroup {
 
 
     public resourcesIOs: (VertexBufferIO | ImageTextureIO)[] = [];
+
 
 
     constructor() {
@@ -155,6 +157,9 @@ export class Bindgroup {
 
     public initFromObject(object: any): IShaderResource[] {
         //console.log("group.initFromObject ", object)
+
+        HighLevelParser.parse(object, "bindgroup");
+
         const result: IShaderResource[] = [];
         let k = 0;
         let o;
@@ -398,12 +403,10 @@ export class Bindgroup {
 
     protected _createInstance(resourcePerInstance: any) {
 
-
+        resourcePerInstance = HighLevelParser.parse(resourcePerInstance, "bindgroup");
 
         if (!this.instances) this.instances = [];
 
-        //this.mustRefreshBindgroup = true;
-        //this.applyDraw = true;
 
 
         let indexBuffer: IndexBuffer;

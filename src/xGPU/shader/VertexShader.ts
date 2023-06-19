@@ -57,8 +57,8 @@ export class VertexShader extends ShaderStage {
 
         result = this.formatWGSLCode(result)
 
-        //console.log("------------- VERTEX SHADER --------------")
-        //console.log(result);
+        console.log("------------- VERTEX SHADER --------------")
+        console.log(result);
         //console.log("------------------------------------------")
         return { code: result, output: output };
     }

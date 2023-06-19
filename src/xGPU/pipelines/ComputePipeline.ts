@@ -67,7 +67,7 @@ export class ComputePipeline extends Pipeline {
         descriptor = this.highLevelParse(descriptor);
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
         */
-        descriptor = HighLevelParser.parse(descriptor, this);
+        descriptor = HighLevelParser.parse(descriptor, "compute");
 
         super.initFromObject(descriptor);
 

@@ -1,7 +1,6 @@
 import { BuiltIns } from "./BuiltIns";
-import { ComputePipeline } from "./pipelines/ComputePipeline";
-import { Pipeline } from "./pipelines/Pipeline";
-import { RenderPipeline } from "./pipelines/RenderPipeline";
+import { DrawConfig } from "./pipelines/DrawConfig";
+
 import { Bindgroup } from "./shader/Bindgroup";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "./shader/PrimitiveType";
 import { CubeMapTexture } from "./shader/resources/CubeMapTexture";
@@ -19,7 +18,7 @@ import { VertexBufferIO } from "./shader/resources/VertexBufferIO";
 import { VideoTexture } from "./shader/resources/VideoTexture";
 
 
-export type HighLevelParserTarget = RenderPipeline | ComputePipeline | Bindgroup;
+///export type HighLevelParserTarget = RenderPipeline | ComputePipeline | Bindgroup;
 
 export class HighLevelParser {
 
@@ -173,6 +172,8 @@ export class HighLevelParser {
 
     protected parseVertexBufferIOs(descriptor: any) {
 
+        if (this.targetIsBindgroup) return descriptor;
+
         const addVertexBufferIO = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
             if (!descriptor.bindgroups.io) descriptor.bindgroups.io = {};
@@ -196,6 +197,8 @@ export class HighLevelParser {
     }
 
     protected parseImageTextureIOs(descriptor: any) {
+
+        if (this.targetIsBindgroup) return descriptor;
 
         const addTextureIO = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -222,6 +225,7 @@ export class HighLevelParser {
 
 
     protected parseVertexBuffers(descriptor: any) {
+        if (this.targetIsBindgroup) return descriptor;
 
         const addVertexBuffer = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -250,24 +254,38 @@ export class HighLevelParser {
 
         const addVertexAttribute = (name: string, o: any) => {
 
+            let bindgroup: any = descriptor;
+
+            if (!this.targetIsBindgroup) {
+                if (!descriptor.bindgroups) descriptor.bindgroups = {};
+                if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
+                bindgroup = descriptor.bindgroups.default;
+            }
 
 
-            if (!descriptor.bindgroups) descriptor.bindgroups = {};
-            if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
 
 
-            if (!descriptor.bindgroups.default.buffer) {
+
+            if (!bindgroup.buffer) {
+
 
                 const attributes: any = {};
                 attributes[name] = o;
-                descriptor.bindgroups.default.buffer = new VertexBuffer(attributes);
+
+                console.log(attributes)
+
+                bindgroup.buffer = new VertexBuffer(attributes);
+
+
+
+
 
             } else {
-                const attribute = (descriptor.bindgroups.default.buffer as VertexBuffer).createArray(name, o.type, o.offset);
+                const attribute = (bindgroup.buffer as VertexBuffer).createArray(name, o.type, o.offset);
                 if (o.datas) attribute.datas = o.datas;
             }
 
-            //console.log("addVertexAttribute ", name, "buffer = ", descriptor.bindgroups.default.buffer)
+            console.log("addVertexAttribute ", name, "buffer = ", bindgroup)
         }
 
         const checkVertexAttribute = (name: string, o: any) => {
@@ -298,6 +316,7 @@ export class HighLevelParser {
 
 
     protected parseUniformBuffers(descriptor: any) {
+        if (this.targetIsBindgroup) return descriptor;
 
         const addUniformBuffer = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -321,21 +340,35 @@ export class HighLevelParser {
         return descriptor;
     }
 
+
+
     protected parseUniform(descriptor: any) {
 
         const addUniform = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
             if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
 
+            let bindgroup: any = descriptor.bindgroups.default;
+            let uniformBufferName: string = "uniforms";
+
+            if (this.targetIsBindgroup) {
+                bindgroup = descriptor;
+                uniformBufferName = descriptor.uniformBufferName ? descriptor.uniformBufferName : "bindgroupUniforms";
+            }
 
 
-            if (!descriptor.bindgroups.default.uniforms) {
+
+
+            if (!bindgroup[uniformBufferName]) {
                 const uniforms: any = {};
                 uniforms[name] = o;
-                descriptor.bindgroups.default.uniforms = new UniformBuffer(uniforms, { useLocalVariable: true });
+                bindgroup[uniformBufferName] = new UniformBuffer(uniforms, { useLocalVariable: true });
+
             } else {
-                (descriptor.bindgroups.default.uniforms as UniformBuffer).add(name, o);
+                (bindgroup[uniformBufferName] as UniformBuffer).add(name, o);
             }
+
+
 
             //console.log("addUniform ", name, " vertexBuffer = ", descriptor.bindgroups.default.buffer)
         }
@@ -362,6 +395,7 @@ export class HighLevelParser {
 
 
     protected parseImageTextureArray(descriptor: any) {
+        if (this.targetIsBindgroup) return descriptor;
 
         const addImageTextureArray = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -385,6 +419,7 @@ export class HighLevelParser {
     }
 
     protected parseImageTexture(descriptor: any) {
+        if (this.targetIsBindgroup) return descriptor;
 
         const addImageTexture = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -409,6 +444,7 @@ export class HighLevelParser {
 
 
     protected parseTextureSampler(descriptor: any) {
+        if (this.targetIsBindgroup) return descriptor;
 
         const addTextureSampler = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -432,6 +468,7 @@ export class HighLevelParser {
     }
 
     protected parseVideoTexture(descriptor: any) {
+        if (this.targetIsBindgroup) return descriptor;
 
         const addVideoTexture = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -455,6 +492,7 @@ export class HighLevelParser {
     }
 
     protected parseCubeMapTexture(descriptor: any) {
+        if (this.targetIsBindgroup) return descriptor;
 
         const addCubeMapTexture = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
@@ -479,32 +517,30 @@ export class HighLevelParser {
 
 
 
-    protected parseDrawConfig(descriptor: any, target: RenderPipeline) {
+    protected parseDrawConfig(descriptor: any, drawConfig: DrawConfig) {
         // vertexCount: number, instanceCount: number, firstVertexId: number, firstInstanceId: number
         if (descriptor.vertexCount) {
             if (isNaN(descriptor.vertexCount)) throw new Error("descriptor.vertexCount is a reserved keyword and must be a number");
-            target.drawConfig.vertexCount = descriptor.vertexCount;
+            drawConfig.vertexCount = descriptor.vertexCount;
         }
         if (descriptor.instanceCount) {
             if (isNaN(descriptor.instanceCount)) throw new Error("descriptor.instanceCount is a reserved keyword and must be a number");
-            target.drawConfig.instanceCount = descriptor.instanceCount;
+            drawConfig.instanceCount = descriptor.instanceCount;
         }
         if (descriptor.firstVertexId) {
             if (isNaN(descriptor.firstVertexId)) throw new Error("descriptor.firstVertexId is a reserved keyword and must be a number");
-            target.drawConfig.firstVertexId = descriptor.firstVertexId;
+            drawConfig.firstVertexId = descriptor.firstVertexId;
         }
         if (descriptor.firstInstanceId) {
             if (isNaN(descriptor.firstInstanceId)) throw new Error("descriptor.firstInstanceId is a reserved keyword and must be a number");
-            target.drawConfig.firstInstanceId = descriptor.firstInstanceId;
+            drawConfig.firstInstanceId = descriptor.firstInstanceId;
         }
         return descriptor;
     }
 
-    protected firstPass(descriptor: any, target: HighLevelParserTarget): any {
+    protected firstPass(descriptor: any, target: "render" | "compute" | "bindgroup", drawConfig?: DrawConfig): any {
 
-        if (target instanceof RenderPipeline || target instanceof ComputePipeline) {
-            descriptor = this.parseShaderBuiltins(descriptor);
-        }
+
 
         descriptor = this.parseVertexBuffers(descriptor);
         descriptor = this.parseVertexAttributes(descriptor);
@@ -518,9 +554,18 @@ export class HighLevelParser {
         descriptor = this.parseVertexBufferIOs(descriptor);
         descriptor = this.parseImageTextureIOs(descriptor);
 
-        if (target instanceof RenderPipeline) {
-            descriptor = this.parseDrawConfig(descriptor, target);
+        if (target === "render" || target === "compute") {
+
+            console.log("target.type = ", target)
+
+            descriptor = this.parseShaderBuiltins(descriptor);
+
+
+            if (target === "render") {
+                descriptor = this.parseDrawConfig(descriptor, drawConfig);
+            }
         }
+
 
         return descriptor;
 
@@ -543,10 +588,12 @@ export class HighLevelParser {
             let name: string;
             let obj;
             let objs: any[] = [];
+
             for (let z in o) {
                 //console.log("=> ", z, o[z])
                 obj = o[z];
-                //if (!obj) continue;
+                if (!obj) continue;
+                //console.log("OBJ = ", z, obj)
                 name = obj.constructor.name;
                 if (name === "Object") {
                     if (z !== "bindgroups" && z !== "vertexShader" && z !== "fragmentShader" && z !== "computeShader") {
@@ -589,6 +636,8 @@ export class HighLevelParser {
 
             return { primitives, vertexAttributes, shaderResources };
         }
+
+        //console.log("descriptor = ", descriptor)
 
         let objects: any = searchComplexObject(descriptor);
         if (objects.length) {
@@ -662,22 +711,85 @@ export class HighLevelParser {
     }
 
 
+    protected targetIsBindgroup: boolean;
+
+    protected parseBindgroupEntries(descriptor: any): any {
 
 
-    public parse(descriptor: any, target: HighLevelParserTarget) {
+        let result: any = {};
 
-        descriptor = this.firstPass(descriptor, target);
-        descriptor = this.parseHighLevelObj(descriptor);
-        descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
+        const uniformBufferName: string = descriptor.uniformBufferName ? descriptor.uniformBufferName : "bindgroupUniforms";
+        const addUniform = (name: string, resource: PrimitiveType) => {
+
+            if (!descriptor[uniformBufferName]) {
+
+                const uniforms = {};
+                uniforms[name] = resource;
+                descriptor[uniformBufferName] = new UniformBuffer(uniforms, { useLocalVariable: true });
+            } else {
+                (descriptor[uniformBufferName] as UniformBuffer).add(name, resource);
+            }
+
+        }
+
+        const vertexBufferName: string = descriptor.vertexBufferName ? descriptor.vertexBufferName : "bindgroupVertexBuffer";
+        const addVertexAttribute = (name: string, resource: any) => {
+
+
+
+            if (!descriptor[vertexBufferName]) {
+                const attributes = {};
+                attributes[name] = resource;
+                descriptor[vertexBufferName] = new VertexBuffer(attributes)
+            } else {
+                const attribute: VertexAttribute = (descriptor[vertexBufferName] as VertexBuffer).createArray(name, resource.type, resource.dataOffset)
+                if (resource.datas) attribute.datas = resource.datas;
+            }
+        }
+
+
+
+
+
+        let resource;
+        for (let z in descriptor) {
+            resource = descriptor[z];
+            if (!resource) continue
+            if (resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform) {
+                addUniform(z, resource);
+            } else if (VertexAttribute.types[resource.type]) {
+                addVertexAttribute(z, resource)
+            }
+        }
+
+
+
+        return descriptor;
+    }
+
+
+
+
+    public parse(descriptor: any, target: "render" | "compute" | "bindgroup", drawConfig?: DrawConfig) {
+
+        this.targetIsBindgroup = target === "bindgroup";
+
+        if (target === "bindgroup") {
+            descriptor = this.parseBindgroupEntries(descriptor);
+        } else {
+            descriptor = this.firstPass(descriptor, target, drawConfig);
+            descriptor = this.parseHighLevelObj(descriptor);
+            descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
+        }
 
         return descriptor;
     }
 
     private static instance: HighLevelParser = null;
-    public static parse(descriptor: any, target: HighLevelParserTarget) {
+    public static parse(descriptor: any, target: "render" | "compute" | "bindgroup", drawConfig?: DrawConfig) {
         if (!this.instance) this.instance = new HighLevelParser();
-        console.log("highLevelParser = ", this.instance)
-        return this.instance.parse(descriptor, target);
+        //console.log("highLevelParser = ", this.instance)
+        return this.instance.parse(descriptor, target, drawConfig);
     }
 
 }

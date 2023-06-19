@@ -146,7 +146,7 @@ export class RenderPipeline extends Pipeline {
         descriptor = this.highLevelParse(descriptor);
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
         */
-        descriptor = HighLevelParser.parse(descriptor, this);
+        descriptor = HighLevelParser.parse(descriptor, "render", this.drawConfig);
 
 
         //console.log("DESCRIPTOR ", descriptor)
