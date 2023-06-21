@@ -469,6 +469,7 @@ export class Bindgroup {
 
 
 
+
         let element, resource;
         //console.log("---- ", vertexBuffers.length)
         for (let i = 0; i < this.elements.length; i++) {
