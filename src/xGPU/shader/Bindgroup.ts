@@ -168,6 +168,7 @@ export class Bindgroup {
 
         HighLevelParser.parse(object, "bindgroup");
 
+
         const result: IShaderResource[] = [];
         let k = 0;
         let o;
@@ -179,7 +180,7 @@ export class Bindgroup {
                 result[k++] = this.add(z, o);
             }
         }
-
+        //console.log("object = ", object)
 
         if (isArray) {
             for (let i = 0; i < descriptor.length; i++) {
@@ -193,6 +194,32 @@ export class Bindgroup {
         return result;
     }
     //---------------------------------------------------------------------------
+
+    public clearAfterDeviceLost(): void {
+        this._layout = null
+        this._group = null;
+        this.setupApplyCompleted = false;
+        for (let i = 0; i < this.elements.length; i++) {
+            this.elements[i].resource.destroyGpuResource();
+        }
+
+        if (this.instances) {
+            let elements: any, resource: IShaderResource;
+
+            for (let i = 0; i < this.instances.length; i++) {
+                this.instances[i].group = undefined;
+                elements = this.instances[i].elements;
+                for (let j = 0; j < elements.length; j++) {
+                    resource = elements[j].resource;
+                    //console.log(j, resource)
+                    if (resource.gpuResource) {
+
+                        resource.destroyGpuResource();
+                    }
+                }
+            }
+        }
+    };
 
     protected buildLayout(): void {
 
@@ -226,13 +253,17 @@ export class Bindgroup {
 
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
+            if (!resource.gpuResource) {
+
+                resource.update();
+            }
 
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
 
 
 
             let entry = resource.createBindGroupEntry(bindingId++)
-            //console.log("bindgroup entry ", (bindingId - 1), entry);
+            //console.log("bindgroup entry ", this.elements[i].name, (bindingId - 1), entry);
             entries.push(entry);
         }
 
@@ -396,8 +427,10 @@ export class Bindgroup {
 
 
             if (this.vertexBuffers) {
-                for (let i = 0; i < this.vertexBuffers.length; i++) {
-                    renderPass.setVertexBuffer(this.vertexBuffers[i].bufferId, this.vertexBuffers[i].getCurrentBuffer());
+                //console.log("vertexBuffers.length = ", this.vertexBuffers)
+                for (let j = 0; j < this.vertexBuffers.length; j++) {
+                    //console.log(j, "setVertexBuffer ", this.vertexBuffers[j].bufferId)
+                    renderPass.setVertexBuffer(this.vertexBuffers[j].bufferId, this.vertexBuffers[j].getCurrentBuffer());
                 }
             }
 
@@ -423,6 +456,7 @@ export class Bindgroup {
 
         resourcePerInstance = HighLevelParser.parse(resourcePerInstance, "bindgroup");
 
+
         if (!this.instances) this.instances = [];
 
 
@@ -434,49 +468,52 @@ export class Bindgroup {
         }
 
 
-        for (let z in resourcePerInstance) {
 
-            if (resourcePerInstance[z] instanceof IndexBuffer) {
-                indexBuffer = resourcePerInstance[z];
-                continue;
-            }
+        let element, resource;
+        //console.log("---- ", vertexBuffers.length)
+        for (let i = 0; i < this.elements.length; i++) {
+            element = this.elements[i];
 
-            for (let i = 0; i < this.elements.length; i++) {
-                if (this.elements[i].name === z) {
+            for (let z in resourcePerInstance) {
 
-                    if (resourcePerInstance[z] instanceof VideoTexture || resourcePerInstance[z] instanceof ImageTexture) {
+                resource = resourcePerInstance[z];
+
+                if (resource instanceof IndexBuffer) {
+                    indexBuffer = resourcePerInstance[z];
+                    continue;
+                }
+
+                if (element.name === z) {
+
+                    if (resource instanceof VideoTexture || resource instanceof ImageTexture) {
                         //keep source descriptor (the "source" option in the descriptor refeer to the media, we)
                     } else {
                         //use "model" descriptor (some config options are applyed on VertexBuffer/UniformBuffer/...  and we want to keep it for all the instances)
                         //(whzt I call "model" is the source bindgroup used to call 'createInstance')
-                        resourcePerInstance[z].descriptor = this.elements[i].resource.descriptor;
+                        resource.descriptor = element.resource.descriptor;
                     }
 
-                    //console.log("debug = ", resourcePerInstance[z].debug)
-                    if (!resourcePerInstance[z].gpuResource) {
 
-                        resourcePerInstance[z].createGpuResource();
-
+                    if (!resource.gpuResource) {
+                        resource.createGpuResource();
                     }
 
-                    //console.log("A ", z, resourcePerInstance[z]);
-                    if (this.elements[i].resource instanceof VertexBuffer) {
-                        //console.log("B")
-                        resourcePerInstance[z].bufferId = (this.elements[i].resource as VertexBuffer).bufferId;
-                        vertexBuffers.push(result.elements[i].resource);
+                    if (element.resource instanceof VertexBuffer) {
 
+                        resource.bufferId = (element.resource as VertexBuffer).bufferId;
+                        if (vertexBuffers.indexOf(resource) === -1) {
+                            vertexBuffers.push(resource);
+                        }
                     }
-                    result.elements[i] = { name: z, resource: resourcePerInstance[z] };
 
-                } else {
-                    if (this.elements[i].resource instanceof VertexBuffer) {
-                        vertexBuffers.push(result.elements[i].resource);
-                    }
+                    result.elements[i] = { name: z, resource: resource };
+
                 }
+
             }
 
-        }
 
+        }
 
 
         let id = this.instances.length;

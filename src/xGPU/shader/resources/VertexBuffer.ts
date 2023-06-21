@@ -105,6 +105,7 @@ export class VertexBuffer implements IShaderResource {
     public getCurrentBuffer() {
 
         if (this.gpuBufferIOs) return this.gpuBufferIOs[(this.gpuBufferIO_index + 1) % 2]
+        if (!this.gpuResource) this.createGpuResource();
         return this.gpuResource;
     }
 

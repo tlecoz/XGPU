@@ -117,6 +117,7 @@ export class TextureSampler implements IShaderResource {
         }
     }
     public destroyGpuResource() {
+        this.gpuResource = null;
         /*
         GPUSampler doesn't seem to have a destroy function
         */

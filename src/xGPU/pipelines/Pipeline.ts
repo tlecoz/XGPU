@@ -53,7 +53,17 @@ export class Pipeline {
     public get resources(): any { return this._resources; }
 
 
+    public clearAfterDeviceLostAndRebuild() {
 
+        this.bindGroups.clearAfterDeviceLost()
+        this.vertexBufferLayouts = undefined;
+        this.gpuPipelineLayout = undefined;
+        this.gpuBindGroupLayouts = [];
+        this.gpuBindgroups = [];
+
+        //this.build();
+
+    }
 
 
 

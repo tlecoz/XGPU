@@ -18,12 +18,15 @@ export class HeadlessGPURenderer implements IRenderer {
         this.useTextureInComputeShader = useTextureInComputeShader;
     }
 
+    protected deviceId: number;
+
     public init(w: number, h: number, usage?: number, sampleCount?: number) {
         this.dimension = { width: w, height: h, dimensionChanged: true };
         return new Promise((onResolve: (val: any) => void) => {
 
             XGPU.init().then(() => {
 
+                this.deviceId = XGPU.deviceId;
 
                 if (!usage) usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC;
 
@@ -84,7 +87,14 @@ export class HeadlessGPURenderer implements IRenderer {
     }
 
     public update() {
-        if (!XGPU.ready || this.renderPipelines.length === 0) return;
+
+        if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === undefined) return;
+        //console.log(XGPU.deviceId + " VS " + this.deviceId);
+        let deviceChanged: boolean = XGPU.deviceId != this.deviceId;
+        if (deviceChanged) {
+            if (this.textureObj) this.textureObj.create();
+            this.deviceId = XGPU.deviceId;
+        }
 
 
         const commandEncoder = XGPU.device.createCommandEncoder();
@@ -92,6 +102,10 @@ export class HeadlessGPURenderer implements IRenderer {
         let pipeline: RenderPipeline, renderPass;
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
+            if (deviceChanged) {
+
+                pipeline.clearAfterDeviceLostAndRebuild();
+            }
 
             pipeline.update()
 

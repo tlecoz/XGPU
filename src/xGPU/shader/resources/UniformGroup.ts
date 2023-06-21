@@ -41,6 +41,7 @@ export class UniformGroup {
     }
 
     public destroy() {
+        console.warn("uniformGroup.destroy")
         this.unstackedItems = {};
         this.items = [];
         this.itemNames = [];

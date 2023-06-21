@@ -36,7 +36,17 @@ export class Bindgroups {
     }
 
 
+
     public get name(): string { return this._name; }
+
+    public clearAfterDeviceLost() {
+        for (let i = 0; i < this.groups.length; i++) {
+            this.groups[i].clearAfterDeviceLost();
+        }
+
+
+    }
+
 
 
     public build(autoLayout: boolean = false) {
@@ -51,7 +61,7 @@ export class Bindgroups {
             if (!a.useInstances && b.useInstances) return -1;
             return 0;
         })
-        console.log("groups = ", this.groups);
+
 
         this.groups[this.groups.length - 1].applyDraw = true;
 

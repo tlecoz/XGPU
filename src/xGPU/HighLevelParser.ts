@@ -570,7 +570,7 @@ export class HighLevelParser {
 
         if (target === "render" || target === "compute") {
 
-            console.log("target.type = ", target)
+            //console.log("target.type = ", target)
 
             descriptor = this.parseShaderBuiltins(descriptor);
 

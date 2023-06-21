@@ -455,6 +455,15 @@ export class RenderPipeline extends Pipeline {
         return o;
     }
 
+    public clearAfterDeviceLostAndRebuild() {
+
+        this.gpuPipeline = null;
+
+        super.clearAfterDeviceLostAndRebuild();
+        this.buildGpuPipeline();
+    }
+
+
 
     public buildGpuPipeline(): GPURenderPipeline {
         if (this.gpuPipeline) return this.gpuPipeline;

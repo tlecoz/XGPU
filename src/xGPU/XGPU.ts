@@ -36,7 +36,22 @@ export class XGPU {
         throw new Error("GPU is static and can't be instanciated")
     }
 
-    public static init(): Promise<void> {
+    private static requestAdapterOptions: GPURequestAdapterOptions;
+    private static losingDevice: boolean = false;
+    private static deviceLost: boolean = false;
+    public static deviceId: number = -1;
+
+    public static loseDevice() {
+        this.losingDevice = true;
+        this.gpuDevice.destroy();
+    }
+    public static clear() {
+        this.gpuDevice.destroy();
+    }
+
+    public static init(options?: { powerPreference?: "low-power" | "high-performance", forceFallbackAdaoter?: boolean }): Promise<void> {
+        this.requestAdapterOptions = options;
+
         return new Promise(async (resolve: (val: any) => void, error: () => void) => {
 
             if (this.gpuDevice) {
@@ -44,12 +59,23 @@ export class XGPU {
                 return;
             }
 
-            const adapter = await navigator.gpu.requestAdapter({
-                powerPreference: "high-performance",
-                forceFallbackAdapter: false
-            })
+            const adapter = await navigator.gpu.requestAdapter(options)
             if (adapter) {
-                this.gpuDevice = await adapter.requestDevice()
+                this.gpuDevice = await adapter.requestDevice();
+                this.deviceId++;
+
+                this.gpuDevice.lost.then((info) => {
+                    console.error(`WebGPU device was lost: ${info.message}`);
+                    this.gpuDevice = null;
+                    this._ready = false;
+                    this.deviceLost = true;
+
+                    if (this.losingDevice || info.reason != 'destroyed') {
+
+                        this.losingDevice = false;
+                        XGPU.init(this.requestAdapterOptions);
+                    }
+                })
                 this._ready = true;
                 resolve(this);
             } else {

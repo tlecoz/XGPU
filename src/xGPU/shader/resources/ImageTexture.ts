@@ -119,6 +119,7 @@ export class ImageTexture implements IShaderResource {
 
     public get view(): GPUTextureView {
         //console.log("aaa")
+        if (!this._view) this.createGpuResource();
         return this._view;
 
     }
@@ -180,6 +181,8 @@ export class ImageTexture implements IShaderResource {
         if (this.resourceIO) this.resourceIO.destroy();
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
+
+        this._view = null;
         this.gpuResource = null;
         this.resourceIO = null;
     }
