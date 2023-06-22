@@ -54,8 +54,8 @@ export class IndexBuffer {
         this.gpuResource = null;
     }
     public createGpuResource(): void {
-        if (!this._datas)
-            console.warn("create index resource ", this.getBufferSize())
+        if (!this._datas) console.warn("create index resource ", this.getBufferSize())
+
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = XGPU.device.createBuffer({
             size: this.getBufferSize(),
@@ -64,6 +64,12 @@ export class IndexBuffer {
         });
         (this.gpuResource as any).dataType = this.dataType;
         (this.gpuResource as any).nbPoint = this.nbPoint;
+
+        if (this._datas) {
+            this.mustUpdateData = true;
+            this.update();
+        }
+
     }
 
     public getBufferSize(): number {
@@ -143,6 +149,7 @@ export class IndexBuffer {
     public update(): void {
         if (this.mustUpdateData) {
             this.mustUpdateData = false;
+            //console.log("write indexBuffer")
             XGPU.device.queue.writeBuffer(this.gpuResource, 0, this._datas.buffer)
         }
     }

@@ -205,10 +205,14 @@ export class Bindgroup {
 
         if (this.instances) {
             let elements: any, resource: IShaderResource;
-
+            let instance: any;
             for (let i = 0; i < this.instances.length; i++) {
-                this.instances[i].group = undefined;
-                elements = this.instances[i].elements;
+                instance = this.instances[i];
+                instance.group = undefined;
+                elements = instance.elements;
+
+                if (instance.indexBuffer) (instance.indexBuffer as IndexBuffer).createGpuResource();
+
                 for (let j = 0; j < elements.length; j++) {
                     resource = elements[j].resource;
                     //console.log(j, resource)
@@ -299,18 +303,18 @@ export class Bindgroup {
 
         this.bindgroupId = this.parent.groups.indexOf(this);
 
-        //console.log("SETUP APPLY  id = ", this.bindgroupId)
+
 
         //this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
 
         const allVertexBuffers = this.parent.resources.types.vertexBuffers;
         if (!allVertexBuffers) return;
 
-
+        //console.log("SETUP APPLY  id = ", this.bindgroupId, allVertexBuffers, this.elements)
 
         const getBufferId = (o) => {
             for (let i = 0; i < allVertexBuffers.length; i++) {
-                if (allVertexBuffers[i].resource === o) return i;
+                if (allVertexBuffers[i].resource.nane === o.name) return i;
             }
             return -1;
         }
@@ -330,10 +334,7 @@ export class Bindgroup {
                 //console.log("B");
                 if (!(resource as VertexBuffer).io) {
 
-                    (resource as VertexBuffer).bufferId = getBufferId(resource);//allVertexBuffers.indexOf(element);
-
-                    //console.log("C ", (resource as VertexBuffer) == allVertexBuffers[0].resource);
-                    //console.log(resource);
+                    (resource as VertexBuffer).bufferId = getBufferId(resource);
 
                     this.elementByName[element.name] = resource
                     this.vertexBufferReferenceByName[element.name] = { bufferId: (resource as VertexBuffer).bufferId, resource };
@@ -518,7 +519,7 @@ export class Bindgroup {
 
 
         let id = this.instances.length;
-
+        if (indexBuffer) result.indexBuffer = indexBuffer;
         result.update = () => {
             let bool = false;
             for (let i = 0; i < this.elements.length; i++) {
@@ -537,7 +538,7 @@ export class Bindgroup {
             if (bool || !result.group) {
                 result.group = this.build();
             }
-            if (indexBuffer) this.parent.drawConfig.indexBuffer = indexBuffer;
+            if (result.indexBuffer) this.parent.drawConfig.indexBuffer = result.indexBuffer;
         }
 
 

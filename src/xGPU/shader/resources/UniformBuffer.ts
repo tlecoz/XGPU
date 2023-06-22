@@ -134,7 +134,10 @@ export class UniformBuffer implements IShaderResource {
     }
 
     public destroyGpuResource() {
-        if (this.gpuResource) this.gpuResource.destroy();
+        if (this.gpuResource) {
+            this.group.forceUpdate();
+            this.gpuResource.destroy();
+        }
         //this.group.destroy();
         this.gpuResource = null;
     }

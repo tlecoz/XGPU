@@ -19,8 +19,8 @@ export class GPURenderer extends HeadlessGPURenderer {
 
         let div = document.createElement("div");
         div.style.backgroundColor = "#f0f";
-        div.style.width = "100px";
-        div.style.height = "100px";
+        div.style.width = "30px";
+        div.style.height = "30px";
         div.style.zIndex = "999999999999";
         div.style.position = "absolute";
         div.style.top = "0px";
@@ -93,6 +93,8 @@ export class GPURenderer extends HeadlessGPURenderer {
 
 
         if (XGPU.deviceId != this.deviceId) {
+
+
             this.ctx.configure({ ...this.gpuCtxConfiguration, device: XGPU.device })
 
         }

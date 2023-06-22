@@ -188,6 +188,12 @@ export class UniformGroup {
     }
 
 
+    public forceUpdate(): void {
+        for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i] instanceof UniformGroup || this.items[i] instanceof UniformGroupArray) (this.items[i] as any).forceUpdate()
+            this.items[i].mustBeTransfered = true;
+        }
+    }
 
 
 
@@ -223,7 +229,6 @@ export class UniformGroup {
 
 
                     this.datas.set(item, item.startId);
-                    //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.byteLength, item);
 
                     XGPU.device.queue.writeBuffer(
                         gpuResource,

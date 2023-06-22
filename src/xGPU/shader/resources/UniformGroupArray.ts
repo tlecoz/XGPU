@@ -63,6 +63,12 @@ export class UniformGroupArray {
         }
     }
 
+    public forceUpdate(): void {
+        for (let i = 0; i < this.groups.length; i++) {
+            this.groups[i].forceUpdate()
+        }
+    }
+
     public getElementById(id: number): UniformGroup { return this.groups[id] };
 
     public get length(): number { return this.groups.length };

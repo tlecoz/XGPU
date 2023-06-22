@@ -510,6 +510,7 @@ export class VertexBuffer implements IShaderResource {
             mappedAtCreation: false,
         })
 
+        this.mustBeTransfered = true;
 
     }
 

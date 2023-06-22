@@ -25,10 +25,11 @@ export class DrawConfig {
 
     public draw(renderPass: GPURenderPassEncoder) {
         if (this.indexBuffer) {
+            //console.log(this.indexBuffer.nbPoint, this.instanceCount, this.firstVertexId, this.baseVertex, this.firstInstanceId)
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize())
             renderPass.drawIndexed(this.indexBuffer.nbPoint, this.instanceCount, this.firstVertexId, this.baseVertex, this.firstInstanceId);
         } else {
-
+            console.log(this.vertexCount, this.instanceCount)
             renderPass.draw(this.vertexCount, this.instanceCount, this.firstVertexId, this.firstInstanceId);
         }
     }

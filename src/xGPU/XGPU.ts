@@ -121,6 +121,7 @@ export class XGPU {
     }
 
     public static createRenderPipeline(o: any): GPURenderPipeline {
+        console.log("createRenderPipeline ", o)
         return this.device.createRenderPipeline(o);
     }
     public static createComputePipeline(o: any): GPUComputePipeline {

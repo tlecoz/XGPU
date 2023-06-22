@@ -156,7 +156,7 @@ export class ImageTexture implements IShaderResource {
 
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
-
+            console.log("updateTexture")
             XGPU.device.queue.copyExternalImageToTexture(
                 { source: this.descriptor.source as any, flipY: true },
                 { texture: this.gpuResource },
@@ -175,6 +175,7 @@ export class ImageTexture implements IShaderResource {
 
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
+        if (this.descriptor.source) this.mustBeTransfered = true;
     }
 
     public destroyGpuResource() {

@@ -455,10 +455,11 @@ export class RenderPipeline extends Pipeline {
         return o;
     }
 
+    protected rebuildingAfterDeviceLost: boolean = false;
     public clearAfterDeviceLostAndRebuild() {
 
         this.gpuPipeline = null;
-
+        this.rebuildingAfterDeviceLost = true;
         super.clearAfterDeviceLostAndRebuild();
         this.buildGpuPipeline();
     }
@@ -475,67 +476,76 @@ export class RenderPipeline extends Pipeline {
 
 
         const o = this.bindGroups.build();
-        const buffers: VertexBuffer[] = o.buffers;
-        this.description.vertex = o.description.vertex;
 
         if (o.description.layout) this.description.layout = o.description.layout;
         else this.description.layout = "auto";
 
 
-        //setup vertexShader inputs ------
-        const vertexInput: ShaderStruct = new ShaderStruct("Input", this.cleanInputs());;
+        if (!this.rebuildingAfterDeviceLost) {
 
-        if (buffers.length) {
-            let buffer: VertexBuffer;
-            let arrays: VertexAttribute[];
-            let builtin: number = 0;
-            for (let i = 0; i < buffers.length; i++) {
-                buffer = buffers[i];
-                arrays = buffer.vertexArrays;
-                for (let j = 0; j < arrays.length; j++) {
-                    vertexInput.addProperty({ name: arrays[j].name, type: arrays[j].varType, builtin: "@location(" + builtin + ")" })
-                    builtin++;
+            const buffers: VertexBuffer[] = o.buffers;
+            this.description.vertex = o.description.vertex;
+
+
+
+
+            //setup vertexShader inputs ------
+            const vertexInput: ShaderStruct = new ShaderStruct("Input", this.cleanInputs());;
+
+            if (buffers.length) {
+                let buffer: VertexBuffer;
+                let arrays: VertexAttribute[];
+                let builtin: number = 0;
+                for (let i = 0; i < buffers.length; i++) {
+                    buffer = buffers[i];
+                    arrays = buffer.vertexArrays;
+                    for (let j = 0; j < arrays.length; j++) {
+                        vertexInput.addProperty({ name: arrays[j].name, type: arrays[j].varType, builtin: "@location(" + builtin + ")" })
+                        builtin++;
+                    }
                 }
             }
-        }
 
-        //---------------------------------
-
-
-        const vertexShader: { code: string, output: ShaderStruct } = this.vertexShader.build(this, vertexInput);
+            //---------------------------------
 
 
-        let fragmentShader: { code: string, output: ShaderStruct };
-        if (this.fragmentShader) {
-            fragmentShader = this.fragmentShader.build(this, vertexShader.output.getInputFromOutput());
-        }
+            const vertexShader: { code: string, output: ShaderStruct } = this.vertexShader.build(this, vertexInput);
 
 
-        this.description.vertex = {
-            module: XGPU.device.createShaderModule({
-                code: vertexShader.code
-            }),
-            entryPoint: "main",
-            buffers: o.description.vertex.buffers//this.createVertexBufferLayout()
-        }
-
-        if (this.fragmentShader) {
-
-            this.description.fragment = {
-                module: XGPU.device.createShaderModule({
-                    code: fragmentShader.code
-                }),
-                entryPoint: "main",
-                targets: [
-                    this.getFragmentShaderColorOptions()
-                ]
-
+            let fragmentShader: { code: string, output: ShaderStruct };
+            if (this.fragmentShader) {
+                fragmentShader = this.fragmentShader.build(this, vertexShader.output.getInputFromOutput());
             }
+
+
+            this.description.vertex = {
+                code: vertexShader.code,
+                /*module: XGPU.device.createShaderModule({
+                    code: vertexShader.code
+                }),*/
+                entryPoint: "main",
+                buffers: o.description.vertex.buffers//this.createVertexBufferLayout()
+            }
+
+            if (this.fragmentShader) {
+
+                this.description.fragment = {
+                    code: fragmentShader.code,
+                    /*module: XGPU.device.createShaderModule({
+                        code: fragmentShader.code
+                    }),*/
+                    entryPoint: "main",
+                    targets: [
+                        this.getFragmentShaderColorOptions()
+                    ]
+
+                }
+            }
+
         }
 
-
-
-
+        this.description.vertex.module = XGPU.device.createShaderModule({ code: this.description.vertex.code })
+        this.description.fragment.module = XGPU.device.createShaderModule({ code: this.description.fragment.code })
 
         //this.description.layout = this.gpuPipelineLayout;
 
