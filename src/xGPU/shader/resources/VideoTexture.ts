@@ -24,9 +24,14 @@ export class VideoTexture implements IShaderResource {
 
     public mustBeTransfered: boolean = true;
     public descriptor: VideoTextureDescriptor;
-    public gpuResource: HTMLVideoElement
     public useWebcodec: boolean = false; //still in beta 
 
+    public _gpuResource: HTMLVideoElement
+    public get gpuResource(): HTMLVideoElement { return this._gpuResource }
+    public set gpuResource(v: HTMLVideoElement) {
+        console.warn("VideoTexture.set gpuResource = ", v);
+        this._gpuResource = v;
+    }
     /*
     bindgroups: an array of bindgroup that contains the VideoTexture 
     => I need it to call its "build" function onVideoFrameCallback
@@ -75,7 +80,10 @@ export class VideoTexture implements IShaderResource {
         this.descriptor.size = [video.width, video.height];
 
         const frame = () => {
-            this.bindgroups.forEach(b => b.build())
+            if (XGPU.device) {
+                this.bindgroups.forEach(b => b.build())
+            }
+
             video.requestVideoFrameCallback(frame);
         }
 
@@ -114,10 +122,13 @@ export class VideoTexture implements IShaderResource {
     }
 
     public destroyGpuResource() {
-        if (this.gpuResource) {
+
+        console.log("destroyGpuResource deviceLost = ")
+        /*
+        if (this.gpuResource ) {
             this.gpuResource.src = undefined;
             this.gpuResource = null;
-        }
+        }*/
         if (this.videoFrame) {
             this.videoFrame.close();
             this.videoFrame = null;

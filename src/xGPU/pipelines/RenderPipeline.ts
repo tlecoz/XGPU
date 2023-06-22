@@ -459,9 +459,16 @@ export class RenderPipeline extends Pipeline {
     public clearAfterDeviceLostAndRebuild() {
 
         this.gpuPipeline = null;
+        if (this.drawConfig.indexBuffer) this.drawConfig.indexBuffer.createGpuResource();
+        if (this.multisampleTexture) this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
+        if (this.depthStencilTexture) this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
+        if (this.renderPassTexture) this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
         this.rebuildingAfterDeviceLost = true;
         super.clearAfterDeviceLostAndRebuild();
         this.buildGpuPipeline();
+
+
+
     }
 
 
@@ -545,7 +552,11 @@ export class RenderPipeline extends Pipeline {
         }
 
         this.description.vertex.module = XGPU.device.createShaderModule({ code: this.description.vertex.code })
-        this.description.fragment.module = XGPU.device.createShaderModule({ code: this.description.fragment.code })
+
+        if (this.description.fragment) {
+            this.description.fragment.module = XGPU.device.createShaderModule({ code: this.description.fragment.code })
+        }
+
 
         //this.description.layout = this.gpuPipelineLayout;
 
@@ -633,6 +644,7 @@ export class RenderPipeline extends Pipeline {
 
     public update(): void {
         if (!this.gpuPipeline) return;
+        if (this.renderPassTexture) this.renderPassTexture.update();
         this.bindGroups.update();
     }
 

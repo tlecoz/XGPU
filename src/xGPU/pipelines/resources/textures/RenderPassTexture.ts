@@ -35,7 +35,23 @@ export class RenderPassTexture extends ImageTexture {
 
         super(descriptor)
 
+
+
         this.createGpuResource();
+        //this.useOutsideTexture = true;
+    }
+
+
+
+
+
+    public createBindGroupEntry(bindingId: number): { binding: number; resource: GPUTextureView; } {
+        if (this.deviceId !== XGPU.deviceId) {
+            this.deviceId = XGPU.deviceId;
+            this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
+            this._view = this.gpuResource.createView();
+        }
+        return super.createBindGroupEntry(bindingId)
     }
 
     public get width(): number { return this.descriptor.size[0] }
@@ -43,6 +59,8 @@ export class RenderPassTexture extends ImageTexture {
 
     public update(): void {
         //nothing here
+
+        //console.log(this.deviceId === XGPU.deviceId, this.gpuResource)
     }
 
     public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture { return null }

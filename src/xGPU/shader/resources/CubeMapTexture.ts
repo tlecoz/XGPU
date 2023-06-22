@@ -86,9 +86,13 @@ export class CubeMapTexture extends ImageTextureArray implements IShaderResource
 
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
-        //console.log("cubemap createtexture ", this.descriptor)
+
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this._view = this.gpuResource.createView({ dimension: 'cube' });
+
+        for (let i = 0; i < this.mustUpdate.length; i++) this.mustUpdate[i] = true;
+        this.mustBeTransfered = true;
+
     }
 
 

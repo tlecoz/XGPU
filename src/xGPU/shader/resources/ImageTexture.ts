@@ -124,9 +124,14 @@ export class ImageTexture implements IShaderResource {
 
     }
 
+
+
     public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture { return this.descriptor.source }
     public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
         this.useOutsideTexture = bmp instanceof GPUTexture;
+
+
+
         if (this.useOutsideTexture) {
             this.gpuResource = bmp as GPUTexture;
             this._view = (bmp as GPUTexture).createView();
@@ -168,11 +173,14 @@ export class ImageTexture implements IShaderResource {
 
     }
 
+    protected deviceId: number;
 
     public createGpuResource(): void {
+
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
-
+        console.log("imageTexture.createGpuResource ", this.deviceId, XGPU.deviceId)
+        this.deviceId = XGPU.deviceId;
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
         if (this.descriptor.source) this.mustBeTransfered = true;
@@ -227,7 +235,8 @@ export class ImageTexture implements IShaderResource {
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUTextureView } {
         if (!this.gpuResource) this.createGpuResource();
 
-        //console.log((this as any).debug, this._view)
+
+
         return {
             binding: bindingId,
             resource: this._view

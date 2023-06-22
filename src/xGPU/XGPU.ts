@@ -38,7 +38,11 @@ export class XGPU {
 
     private static requestAdapterOptions: GPURequestAdapterOptions;
     private static losingDevice: boolean = false;
-    private static deviceLost: boolean = false;
+
+
+    public static deviceLost: boolean = false;
+
+
     public static deviceId: number = -1;
 
     public static loseDevice() {
@@ -48,6 +52,9 @@ export class XGPU {
     public static clear() {
         this.gpuDevice.destroy();
     }
+
+
+
 
     public static init(options?: { powerPreference?: "low-power" | "high-performance", forceFallbackAdaoter?: boolean }): Promise<void> {
         this.requestAdapterOptions = options;
@@ -63,6 +70,8 @@ export class XGPU {
             if (adapter) {
                 this.gpuDevice = await adapter.requestDevice();
                 this.deviceId++;
+
+                this.deviceLost = false;
 
                 this.gpuDevice.lost.then((info) => {
                     console.error(`WebGPU device was lost: ${info.message}`);
@@ -85,6 +94,7 @@ export class XGPU {
     }
 
     public static get device(): GPUDevice {
+        if (this.deviceLost) return null;
         if (!this.gpuDevice && !this.ready) throw new Error("you must use XGPU.init() to get the reference of the gpuDevice")
         return this.gpuDevice;
     }
@@ -121,7 +131,6 @@ export class XGPU {
     }
 
     public static createRenderPipeline(o: any): GPURenderPipeline {
-        console.log("createRenderPipeline ", o)
         return this.device.createRenderPipeline(o);
     }
     public static createComputePipeline(o: any): GPUComputePipeline {

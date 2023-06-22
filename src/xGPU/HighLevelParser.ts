@@ -272,7 +272,7 @@ export class HighLevelParser {
                 const attributes: any = {};
                 attributes[name] = o;
 
-                console.log(attributes)
+                //console.log(attributes)
 
                 bindgroup.buffer = new VertexBuffer(attributes);
 
@@ -285,7 +285,7 @@ export class HighLevelParser {
                 if (o.datas) attribute.datas = o.datas;
             }
 
-            console.log("addVertexAttribute ", name, "buffer = ", bindgroup)
+            //console.log("addVertexAttribute ", name, "buffer = ", bindgroup)
         }
 
         const checkVertexAttribute = (name: string, o: any) => {
