@@ -229,18 +229,18 @@ export class Bindgroup {
 
         const layout = { entries: [] }
         let bindingId = 0;
-        //console.warn(this.elements)
+        console.warn(this.elements)
         let resource: IShaderResource;
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
-
+            console.log(i, resource)
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
             let bgl = resource.createBindGroupLayoutEntry(bindingId++);
             //console.log("bindgroupLayout entry ", (bindingId - 1), bgl);
             layout.entries.push(bgl);
         }
 
-        //console.log("BINDGROUP LAYOUT ENTRIES ", layout)
+        console.log("BINDGROUP LAYOUT ENTRIES ", layout)
         this._layout = XGPU.device.createBindGroupLayout(layout);
     }
 

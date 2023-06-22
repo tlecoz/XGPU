@@ -10,18 +10,7 @@ import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
-import { BuiltIns } from "../BuiltIns";
-import { UniformBuffer } from "../shader/resources/UniformBuffer";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../shader/PrimitiveType";
-import { ImageTexture } from "../shader/resources/ImageTexture";
-import { TextureSampler } from "../shader/resources/TextureSampler";
-import { VideoTexture } from "../shader/resources/VideoTexture";
-import { CubeMapTexture } from "../shader/resources/CubeMapTexture";
-import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
-import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
-import { UniformGroup } from "../shader/resources/UniformGroup";
-import { UniformGroupArray } from "../shader/resources/UniformGroupArray";
-import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
 
 
 export class Pipeline {
@@ -184,6 +173,8 @@ export class Pipeline {
     protected createLayouts(): void {
 
 
+
+
         this.gpuBindGroupLayouts = [];
         this.gpuBindgroups = [];
         this.gpuPipelineLayout = null;
@@ -226,6 +217,7 @@ export class Pipeline {
 
         this.gpuPipelineLayout = XGPU.createPipelineLayout({ bindGroupLayouts: this.gpuBindGroupLayouts })
     }
+
 
     protected initPipelineResources(pipeline: Pipeline) {
         const resources: IShaderResource[] = this.bindGroups.resources.all;
@@ -348,17 +340,31 @@ export class Pipeline {
             for (let z in instance) {
                 resource = instance[z];
                 if (!(resource instanceof PrimitiveFloatUniform || resource instanceof PrimitiveIntUniform || resource instanceof PrimitiveUintUniform)) {
-
+                    resource.setPipelineType(this.type);
                     resource.createGpuResource();
                     shaderResources.push(resource);
                 }
             }
 
+            instance.deviceId = XGPU.deviceId;
+
+
             instance.apply = () => {
+
+                let rebuild: boolean = false;
+                if (XGPU.deviceId != instance.deviceId) {
+                    rebuild = true;
+                    instance.deviceId = XGPU.deviceId;
+                }
+
+
                 let o: any;
                 for (let i = 0; i < shaderResources.length; i++) {
                     o = shaderResources[i];
-
+                    if (rebuild) {
+                        o.destroyGpuResource();
+                        o.createGpuResource();
+                    }
                     o.update();
                     //console.log(i, o.name, o)
                     o.bindgroup.set(o.name, o);

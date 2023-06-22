@@ -67,7 +67,7 @@ export class Bindgroups {
 
 
         for (let i = 0; i < this.groups.length; i++) {
-            //console.log(i, " useInstances = ", this.groups[i].useInstances)
+            console.log(i, " useInstances = ", this.groups[i])
             if (!autoLayout) layouts[i] = this.groups[i].layout;
             bindgroups[i] = this.groups[i].group;
         }

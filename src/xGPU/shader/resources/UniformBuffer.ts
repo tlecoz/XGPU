@@ -22,6 +22,10 @@ export class UniformBuffer implements IShaderResource {
     public gpuResource: GPUBuffer;
     public descriptor: UniformBufferDescriptor;
 
+
+
+
+
     public group: UniformGroup;
 
 
@@ -36,7 +40,7 @@ export class UniformBuffer implements IShaderResource {
         visibility?: GPUShaderStageFlags;
     }) {
 
-
+        console.warn("new UniformBuffer ")
         this.descriptor = descriptor ? { ...descriptor } : {};
         this.group = new UniformGroup(items, this.descriptor.useLocalVariable);
         this.group.uniformBuffer = this;
@@ -44,7 +48,7 @@ export class UniformBuffer implements IShaderResource {
 
     }
 
-
+    public cloned: boolean = false;
     public clone(propertyNames?: string[]): UniformBuffer {
         //if propertyNames exists, it will clone only these properties and copy the others
         //if propertyNames is undefined, it will clone every properties 
@@ -53,7 +57,9 @@ export class UniformBuffer implements IShaderResource {
 
         for (let z in items) items[z] = items[z].clone();
 
+        console.log(this.descriptor, this.shaderVisibility)
         const buffer = new UniformBuffer(items, this.descriptor);
+        buffer.cloned = true;
 
         (buffer as any).name = (this as any).name;
         return buffer;
@@ -116,6 +122,8 @@ export class UniformBuffer implements IShaderResource {
 
     public createGpuResource(): any {
 
+
+
         if (!this.gpuResource) {
 
             const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
@@ -148,6 +156,9 @@ export class UniformBuffer implements IShaderResource {
         let type: string = "uniform";
         if (this.bufferType) type = this.bufferType;
         //console.log("bufferType = ", this.bufferType);
+
+        console.log("UniformBuffer.createBindGroupLayoutEntry ", this.shaderVisibility, this.debug, this.cloned)
+
         return {
             binding: bindingId,
             visibility: this.descriptor.visibility,
@@ -175,12 +186,15 @@ export class UniformBuffer implements IShaderResource {
 
     //public get bufferType(): string { return "uniform"; }
 
+    protected debug: string;
+    protected shaderVisibility: GPUShaderStageFlags;
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
-
+        console.warn("setPipelineType ", pipelineType)
         //use to handle particular cases in descriptor relative to the nature of pipeline
         if (pipelineType === "compute" || pipelineType === "compute_mixed") this.descriptor.visibility = GPUShaderStage.COMPUTE;
         else {
-            this.descriptor.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
+            this.debug = "abc";
+            this.descriptor.visibility = this.shaderVisibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
         }
     }
 }

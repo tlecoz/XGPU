@@ -465,6 +465,7 @@ export class RenderPipeline extends Pipeline {
         if (this.renderPassTexture) this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
         this.rebuildingAfterDeviceLost = true;
         super.clearAfterDeviceLostAndRebuild();
+
         this.buildGpuPipeline();
 
 
