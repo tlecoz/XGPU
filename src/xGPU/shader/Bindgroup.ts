@@ -229,18 +229,18 @@ export class Bindgroup {
 
         const layout = { entries: [] }
         let bindingId = 0;
-        console.warn(this.elements)
+        //console.warn(this.elements)
         let resource: IShaderResource;
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
-            console.log(i, resource)
+            //console.log(i, resource)
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
             let bgl = resource.createBindGroupLayoutEntry(bindingId++);
             //console.log("bindgroupLayout entry ", (bindingId - 1), bgl);
             layout.entries.push(bgl);
         }
 
-        console.log("BINDGROUP LAYOUT ENTRIES ", layout)
+        //console.log("BINDGROUP LAYOUT ENTRIES ", layout)
         this._layout = XGPU.device.createBindGroupLayout(layout);
     }
 
@@ -266,10 +266,12 @@ export class Bindgroup {
 
 
 
+
             let entry = resource.createBindGroupEntry(bindingId++)
             //console.log("bindgroup entry ", this.elements[i].name, (bindingId - 1), entry);
             entries.push(entry);
         }
+
 
         this._group = XGPU.device.createBindGroup({ layout: this._layout, entries })
 
@@ -429,9 +431,12 @@ export class Bindgroup {
 
             if (this.vertexBuffers) {
                 //console.log("vertexBuffers.length = ", this.vertexBuffers)
+                let buf: any;
                 for (let j = 0; j < this.vertexBuffers.length; j++) {
-                    //console.log(j, "setVertexBuffer ", this.vertexBuffers[j].bufferId)
-                    renderPass.setVertexBuffer(this.vertexBuffers[j].bufferId, this.vertexBuffers[j].getCurrentBuffer());
+
+
+                    buf = this.vertexBuffers[j].getCurrentBuffer();
+                    renderPass.setVertexBuffer(this.vertexBuffers[j].bufferId, buf);
                 }
             }
 
@@ -849,6 +854,7 @@ export class Bindgroup {
     }
 
     public update(): void {
+        // console.log(this.elements)
         for (let i = 0; i < this.elements.length; i++) {
 
             this.elements[i].resource.update();

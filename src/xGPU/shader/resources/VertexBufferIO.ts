@@ -16,6 +16,8 @@ export class VertexBufferIO {
     protected stagingBuffer: GPUBuffer;
     protected canCallMapAsync: boolean = true;
 
+    protected deviceId: number;
+
     constructor(attributes: any, descriptor?: any) {
 
         if (!descriptor) descriptor = {};
@@ -24,7 +26,7 @@ export class VertexBufferIO {
         this.descriptor = descriptor;
         if (!descriptor.stepMode) descriptor.stepMode = "instance";
 
-
+        this.deviceId = XGPU.deviceId;
         this.buffers[0] = new VertexBuffer(attributes, descriptor);
         this.buffers[1] = new VertexBuffer(attributes, descriptor);
 
@@ -47,7 +49,25 @@ export class VertexBufferIO {
 
     }
 
+
+    private rebuildAfterDeviceLost() {
+        if (this.deviceId != XGPU.deviceId) {
+            this.deviceId = XGPU.deviceId;
+            this.canCallMapAsync = true;
+            this.stagingBuffer = null;
+
+        }
+    }
+
+
+
+    public currentDatas: ArrayBuffer;
+
     public async getOutputData() {
+
+
+        this.rebuildAfterDeviceLost()
+
 
         //------------------------------------------
         // getting this value change the reference of the GPUBuffer and create the "ping pong"
@@ -56,6 +76,7 @@ export class VertexBufferIO {
         const buffer = this.buffers[0].buffer;
         //-------------------------------------------
 
+        //console.log("getOutputData ", this.onOutputData, this.canCallMapAsync)
 
         if (!this.onOutputData) return null;
         if (!this.canCallMapAsync) return;
@@ -78,11 +99,8 @@ export class VertexBufferIO {
         const data = copyArray.slice(0);
         stage.unmap();
 
+        this.currentDatas = data;
         this.onOutputData(data);
-
-
-
-
 
     }
 
@@ -216,6 +234,10 @@ export class VertexBufferIO {
 
 
     public update() {
+
+        this.rebuildAfterDeviceLost()
+
+
         this.buffers[0].update();
         this.buffers[1].update();
     }

@@ -41,7 +41,7 @@ export class XGPU {
 
 
     public static deviceLost: boolean = false;
-
+    private static deviceLostTime: number;
 
     public static deviceId: number = -1;
 
@@ -53,6 +53,9 @@ export class XGPU {
         this.gpuDevice.destroy();
     }
 
+    public static get loseDeviceRecently(): boolean {
+        return new Date().getTime() - this.deviceLostTime <= 100;
+    }
 
 
 
@@ -74,11 +77,12 @@ export class XGPU {
                 this.deviceLost = false;
 
                 this.gpuDevice.lost.then((info) => {
+                    console.clear();
                     console.error(`WebGPU device was lost: ${info.message}`);
                     this.gpuDevice = null;
                     this._ready = false;
                     this.deviceLost = true;
-
+                    this.deviceLostTime = new Date().getTime();
                     if (this.losingDevice || info.reason != 'destroyed') {
 
                         this.losingDevice = false;

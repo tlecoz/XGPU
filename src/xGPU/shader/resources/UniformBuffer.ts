@@ -40,7 +40,7 @@ export class UniformBuffer implements IShaderResource {
         visibility?: GPUShaderStageFlags;
     }) {
 
-        console.warn("new UniformBuffer ")
+        //console.warn("new UniformBuffer ")
         this.descriptor = descriptor ? { ...descriptor } : {};
         this.group = new UniformGroup(items, this.descriptor.useLocalVariable);
         this.group.uniformBuffer = this;
@@ -138,14 +138,25 @@ export class UniformBuffer implements IShaderResource {
             })
 
             this.update();
+
         }
     }
 
+
+
+
+    public time: number;
     public destroyGpuResource() {
+        if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
+            return;
+        }
+        this.time = new Date().getTime();
+
         if (this.gpuResource) {
             this.group.forceUpdate();
             this.gpuResource.destroy();
         }
+
         //this.group.destroy();
         this.gpuResource = null;
     }
@@ -157,7 +168,7 @@ export class UniformBuffer implements IShaderResource {
         if (this.bufferType) type = this.bufferType;
         //console.log("bufferType = ", this.bufferType);
 
-        console.log("UniformBuffer.createBindGroupLayoutEntry ", this.shaderVisibility, this.debug, this.cloned)
+        //console.log("UniformBuffer.createBindGroupLayoutEntry ", this.shaderVisibility, this.debug, this.cloned)
 
         return {
             binding: bindingId,
@@ -189,7 +200,7 @@ export class UniformBuffer implements IShaderResource {
     protected debug: string;
     protected shaderVisibility: GPUShaderStageFlags;
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
-        console.warn("setPipelineType ", pipelineType)
+        ///console.warn("setPipelineType ", pipelineType)
         //use to handle particular cases in descriptor relative to the nature of pipeline
         if (pipelineType === "compute" || pipelineType === "compute_mixed") this.descriptor.visibility = GPUShaderStage.COMPUTE;
         else {

@@ -61,7 +61,7 @@ export class ComputePipeline extends Pipeline {
         this.bindGroups.destroy();
         this.bindGroups = new Bindgroups(this, "pipeline");
 
-        console.log("bg = ", this.bindGroups)
+
 
         /*
         descriptor = this.highLevelParse(descriptor);
@@ -194,12 +194,23 @@ export class ComputePipeline extends Pipeline {
 
 
 
-
-
+    protected deviceId: number;
+    protected lastFrameTime: number = -1;
 
     public update(): void {
         if (!this.gpuComputePipeline) return;
+
+        if (this.deviceId !== XGPU.deviceId) {
+            this.deviceId = XGPU.deviceId;
+            this.clearAfterDeviceLostAndRebuild();
+            if (new Date().getTime() - this.lastFrameTime < 100) {
+
+                this.nextFrame();
+            }
+        }
+
         this.bindGroups.update();
+        this.lastFrameTime = new Date().getTime();
     }
 
 
@@ -223,8 +234,23 @@ export class ComputePipeline extends Pipeline {
 
 
 
-    public buildGpuPipeline() {
+    protected rebuildingAfterDeviceLost: boolean = false;
+    public clearAfterDeviceLostAndRebuild() {
 
+        this.gpuComputePipeline = null;
+
+        this.rebuildingAfterDeviceLost = true;
+        super.clearAfterDeviceLostAndRebuild();
+
+
+        this.buildGpuPipeline();
+    }
+
+
+
+
+    public buildGpuPipeline() {
+        //console.log("buildGpuPipeline ", this.gpuComputePipeline)
         if (this.gpuComputePipeline) return this.gpuComputePipeline;
 
 
@@ -263,7 +289,7 @@ export class ComputePipeline extends Pipeline {
         this.description.layout = this.gpuPipelineLayout;
 
         //console.log("description = ", this.description)
-
+        this.deviceId = XGPU.deviceId;
         this.gpuComputePipeline = XGPU.createComputePipeline(this.description);
 
 
@@ -280,7 +306,7 @@ export class ComputePipeline extends Pipeline {
 
     public async nextFrame() {
 
-        this.update();
+        //this.update();
 
         const commandEncoder = XGPU.device.createCommandEncoder();
         const computePass = commandEncoder.beginComputePass();
@@ -295,7 +321,7 @@ export class ComputePipeline extends Pipeline {
 
 
         for (let i = 0; i < this.resourceIOs.length; i++) {
-
+            //console.log(i, "getOutputData")
             this.resourceIOs[i].getOutputData();
 
         }

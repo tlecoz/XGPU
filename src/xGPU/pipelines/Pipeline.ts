@@ -42,6 +42,8 @@ export class Pipeline {
     public get resources(): any { return this._resources; }
 
 
+    public debug: string;
+
     public clearAfterDeviceLostAndRebuild() {
 
         this.bindGroups.clearAfterDeviceLost()

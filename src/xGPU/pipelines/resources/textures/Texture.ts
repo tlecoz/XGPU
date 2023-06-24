@@ -32,20 +32,37 @@ export class Texture {
     public get format(): any { return this.descriptor.format }
     public get size(): GPUExtent3D { return this.descriptor.size }
     public get usage(): number { return this.descriptor.usage }
-    public get view(): GPUTextureView { return this._view; }
+    public get view(): GPUTextureView {
+
+        if (!this._view) this.create();
+        return this._view;
+    }
 
     public destroy(): void {
         if (this.gpuResource) this.gpuResource.destroy();
         this.gpuResource = null;
+        this._view = null;
     }
+
+    protected deviceId: number;
+    public time: number;
     public create(): void {
+
+        if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
+            return;
+        }
+        this.time = new Date().getTime();
+
+
         if (this.gpuResource) this.gpuResource.destroy();
         //console.warn("createTexture ", this.descriptor)
+        this.deviceId = XGPU.deviceId;
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this.createView();
     }
 
     private createView(): void {
+        if (!this.gpuResource) this.create();
         this._view = this.gpuResource.createView();
         //(this._view as any).texture = this;
     }

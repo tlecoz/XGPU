@@ -94,20 +94,25 @@ export class HeadlessGPURenderer implements IRenderer {
         if (deviceChanged) {
             if (this.textureObj) this.textureObj.create();
             this.deviceId = XGPU.deviceId;
+            for (let i = 0; i < this.renderPipelines.length; i++) {
+
+                this.renderPipelines[i].clearAfterDeviceLostAndRebuild();
+
+            }
+
         }
 
 
         const commandEncoder = XGPU.device.createCommandEncoder();
-
+        //console.log("nbPipeline = ", this.renderPipelines.length)
         let pipeline: RenderPipeline, renderPass;
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
-            if (deviceChanged) {
 
-                pipeline.clearAfterDeviceLostAndRebuild();
-            }
 
             pipeline.update()
+
+
 
             for (let j = 0; j < pipeline.pipelineCount; j++) {
                 renderPass = pipeline.beginRenderPass(commandEncoder, this.view, j);

@@ -455,6 +455,7 @@ export class RenderPipeline extends Pipeline {
         return o;
     }
 
+
     protected rebuildingAfterDeviceLost: boolean = false;
     public clearAfterDeviceLostAndRebuild() {
 
@@ -466,10 +467,8 @@ export class RenderPipeline extends Pipeline {
         this.rebuildingAfterDeviceLost = true;
         super.clearAfterDeviceLostAndRebuild();
 
+
         this.buildGpuPipeline();
-
-
-
     }
 
 
@@ -560,7 +559,7 @@ export class RenderPipeline extends Pipeline {
 
 
         //this.description.layout = this.gpuPipelineLayout;
-
+        this.rebuildingAfterDeviceLost = false;
         //console.log("buildGPUPipeline description = ", this.description)
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
         //console.log("gpuPipeline = ", this.gpuPipeline)
@@ -657,6 +656,8 @@ export class RenderPipeline extends Pipeline {
         renderPass.setPipeline(this.gpuPipeline);
 
         this.bindGroups.apply(renderPass);
+
+
     }
 
 

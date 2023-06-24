@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { XGPU } from "../../../XGPU";
 import { IShaderResource } from "../../../shader/resources/IShaderResource";
 import { Texture } from "./Texture";
 
@@ -112,19 +113,25 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
     }
 
     public createGpuResource() {
+        console.log("depthTexture create")
         this.create()
     }
 
     public destroyGpuResource() {
         if (this.gpuResource) {
+            console.warn("depthTexture destroy ")
             this._view = null;
             this.gpuResource.destroy();
             this.gpuResource = null;
+            this.create()
         }
     }
 
     public update() {
+        if (this.deviceId !== XGPU.deviceId) {
 
+            this.deviceId = XGPU.deviceId;
+        }
     }
     public resize(width: number, height: number): void {
         super.resize(width, height);

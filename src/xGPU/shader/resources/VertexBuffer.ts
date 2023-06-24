@@ -12,7 +12,7 @@ export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
     accessMode?: "read" | "read_write",
     usage?: GPUBufferUsageFlags,
-    datas?: Float32Array
+    datas?: Float32Array | Int32Array | Uint32Array
 }
 
 
@@ -33,7 +33,7 @@ export class VertexBuffer implements IShaderResource {
 
     private _nbComponent: number = 0;
 
-    private _datas: Float32Array;
+    private _datas: Float32Array | Int32Array | Uint32Array;
     public nbComponentData: number;
     public attributeChanged: boolean = false;
 
@@ -42,7 +42,7 @@ export class VertexBuffer implements IShaderResource {
 
     constructor(attributes: any, descriptor?: {
         stepMode?: "vertex" | "instance",
-        datas?: Float32Array
+        datas?: Float32Array | Int32Array | Uint32Array
     }) {
 
         //console.log("VERTEX BUFFER ", attributes)
@@ -77,9 +77,15 @@ export class VertexBuffer implements IShaderResource {
 
     public clone(): VertexBuffer {
         const vb = new VertexBuffer(this.attributeDescriptor, this.descriptor);
-        const data = new Float32Array(this.datas.length);
-        data.set(this.datas);
-        vb.datas = data;
+        let datas: Float32Array | Int32Array | Uint32Array;
+        if (this.datas instanceof Float32Array) datas = new Float32Array(this.datas.length);
+        else if (this.datas instanceof Int32Array) datas = new Int32Array(this.datas.length);
+        else if (this.datas instanceof Uint32Array) datas = new Uint32Array(this.datas.length);
+
+
+        //const data = new Float32Array(this.datas.length);
+        datas.set(this.datas);
+        vb.datas = datas;
         return vb;
     }
 
@@ -119,14 +125,14 @@ export class VertexBuffer implements IShaderResource {
     }
 
 
-    public get datas(): Float32Array { return this._datas; }
-    public set datas(f: Float32Array) {
+    public get datas(): Float32Array | Int32Array | Uint32Array { return this._datas; }
+    public set datas(f: Float32Array | Int32Array | Uint32Array) {
         this._datas = f;
         this.mustBeTransfered = true;
     }
 
 
-    public setComplexDatas(datas: Float32Array, nbComponentTotal: number) {
+    public setComplexDatas(datas: Float32Array | Int32Array | Uint32Array, nbComponentTotal: number) {
         this._datas = datas;
         this._nbComponent = nbComponentTotal;
         this.mustBeTransfered = true;
@@ -514,7 +520,52 @@ export class VertexBuffer implements IShaderResource {
 
     }
 
+    public time: number;
     public destroyGpuResource() {
+
+        //console.log("destroy vertexbuffer")
+
+        if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
+            return;
+        }
+        this.time = new Date().getTime();
+
+        if (this.io && XGPU.loseDeviceRecently) {
+
+            if (this.io === 1) {
+                const vbio = this.resourceIO;
+                const vbs = vbio.buffers;
+
+                if (vbs[0]._datas instanceof Float32Array) vbs[0]._datas = vbs[1]._datas = new Float32Array(vbio.currentDatas);
+                else if (vbs[0]._datas instanceof Int32Array) vbs[0]._datas = vbs[1]._datas = new Int32Array(vbio.currentDatas);
+                else if (vbs[0]._datas instanceof Uint32Array) vbs[0]._datas = vbs[1]._datas = new Uint32Array(vbio.currentDatas);
+
+                //vbs[0]._datas = 
+                let temp = vbs[0].gpuBufferIOs;
+                vbs[0].gpuBufferIOs = null;
+                vbs[0].createGpuResource();
+                vbs[0].gpuBufferIOs = temp;
+
+                temp = vbs[1].gpuBufferIOs;
+                vbs[1].gpuBufferIOs = null;
+                vbs[1].createGpuResource();
+                vbs[1].gpuBufferIOs = temp;
+
+                vbs[0].gpuBufferIOs[0] = vbs[0].gpuResource;
+                vbs[0].gpuBufferIOs[1] = vbs[1].gpuResource;
+            }
+            return
+            //const temp = this.gpuBufferIOs;
+            //this.gpuBufferIOs = null;
+            //this.createGpuResource();
+        }
+
+
+
+
+
+
+
         if (this.resourceIO) {
             this.resourceIO.destroy();
             this.resourceIO = null;
@@ -536,7 +587,7 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.datas.byteLength != this._bufferSize) this.createGpuResource();
 
-
+        //console.warn("vb gpuResource = ", this.gpuResource)
 
         XGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
 
