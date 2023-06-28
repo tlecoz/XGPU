@@ -149,7 +149,7 @@ export class UniformBuffer implements IShaderResource {
     public destroyGpuResource() {
         if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
             if (this.gpuResource) {
-
+                this.group.updateStack();
                 return;
             }
         }

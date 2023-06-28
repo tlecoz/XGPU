@@ -315,8 +315,12 @@ export class Bindgroup {
         //console.log("SETUP APPLY  id = ", this.bindgroupId, allVertexBuffers, this.elements)
 
         const getBufferId = (o) => {
+
+            const name = this.getResourceName(o);
+
             for (let i = 0; i < allVertexBuffers.length; i++) {
-                if (allVertexBuffers[i].resource.nane === o.name) return i;
+                //console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
+                if (allVertexBuffers[i].resource === o) return i;
             }
             return -1;
         }
@@ -430,12 +434,14 @@ export class Bindgroup {
 
 
             if (this.vertexBuffers) {
-                //console.log("vertexBuffers.length = ", this.vertexBuffers)
+                console.log("vertexBuffers = ", this.vertexBuffers)
                 let buf: any;
                 for (let j = 0; j < this.vertexBuffers.length; j++) {
 
 
                     buf = this.vertexBuffers[j].getCurrentBuffer();
+
+                    //console.log(this.vertexBuffers[j].bufferId, buf)
                     renderPass.setVertexBuffer(this.vertexBuffers[j].bufferId, buf);
                 }
             }
