@@ -130,7 +130,7 @@ export class ImageTexture implements IShaderResource {
     public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
         this.useOutsideTexture = bmp instanceof GPUTexture;
 
-
+        console.warn("SOURCE ==============================================   source = ", bmp)
 
         if (this.useOutsideTexture) {
             this.gpuResource = bmp as GPUTexture;
@@ -161,7 +161,7 @@ export class ImageTexture implements IShaderResource {
 
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
-            console.log("updateTexture")
+            //console.log("updateTexture")
             XGPU.device.queue.copyExternalImageToTexture(
                 { source: this.descriptor.source as any, flipY: true },
                 { texture: this.gpuResource },
@@ -173,20 +173,61 @@ export class ImageTexture implements IShaderResource {
 
     }
 
-    protected deviceId: number;
+    public deviceId: number;
 
     public createGpuResource(): void {
-
+        console.warn("imageTexture.createGpuResource ", this.deviceId, XGPU.deviceId, this.useOutsideTexture, this.descriptor.source)
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
-        console.log("imageTexture.createGpuResource ", this.deviceId, XGPU.deviceId)
+
+
         this.deviceId = XGPU.deviceId;
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
         this._view = this.gpuResource.createView();
         if (this.descriptor.source) this.mustBeTransfered = true;
+
+
     }
 
+
+    public time: number;
     public destroyGpuResource() {
+
+        if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
+            //this.createGpuResource()
+            return;
+        }
+        this.time = new Date().getTime();
+
+
+        if (this.io && XGPU.loseDeviceRecently) {
+
+            if (this.io === 1) {
+                const vbio = this.resourceIO;
+                const vbs = vbio.textures;
+
+                let temp = vbs[0].gpuTextureIOs;
+                vbs[0].gpuTextureIOs = null;
+                vbs[0].createGpuResource();
+                vbs[0].gpuTextureIOs = temp;
+
+                temp = vbs[1].gpuTextureIOs;
+                vbs[1].gpuTextureIOs = null;
+                vbs[1].createGpuResource();
+                vbs[1].gpuTextureIOs = temp;
+
+                vbs[0].gpuTextureIOs[0] = vbs[0].gpuResource;
+                vbs[0].gpuTextureIOs[1] = vbs[1].gpuResource;
+
+
+            }
+            return
+
+        }
+
+
+
+
         if (this.resourceIO) this.resourceIO.destroy();
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
@@ -235,7 +276,7 @@ export class ImageTexture implements IShaderResource {
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUTextureView } {
         if (!this.gpuResource) this.createGpuResource();
 
-
+        //console.log("ImageTexture.createBindgroupEntry ", this.deviceId)
 
         return {
             binding: bindingId,

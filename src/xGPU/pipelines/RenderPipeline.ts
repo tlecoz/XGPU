@@ -457,7 +457,13 @@ export class RenderPipeline extends Pipeline {
 
 
     protected rebuildingAfterDeviceLost: boolean = false;
+    public onRebuildStartAfterDeviceLost: () => void;
     public clearAfterDeviceLostAndRebuild() {
+
+
+        if (this.onRebuildStartAfterDeviceLost) this.onRebuildStartAfterDeviceLost();
+
+        console.log("RenderPipeline.clearAfterDeviceLostAndRebuild debug = " + this.debug)
 
         this.gpuPipeline = null;
         if (this.drawConfig.indexBuffer) this.drawConfig.indexBuffer.createGpuResource();
@@ -477,12 +483,13 @@ export class RenderPipeline extends Pipeline {
         if (this.gpuPipeline) return this.gpuPipeline;
 
 
-
         this.bindGroups.handleRenderPipelineResourceIOs();
+
         this.initPipelineResources(this);
 
 
         const o = this.bindGroups.build();
+
 
         if (o.description.layout) this.description.layout = o.description.layout;
         else this.description.layout = "auto";

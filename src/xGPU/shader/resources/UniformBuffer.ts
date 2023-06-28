@@ -148,11 +148,15 @@ export class UniformBuffer implements IShaderResource {
     public time: number;
     public destroyGpuResource() {
         if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
-            return;
+            if (this.gpuResource) {
+
+                return;
+            }
         }
         this.time = new Date().getTime();
 
         if (this.gpuResource) {
+            this.group.updateStack();
             this.group.forceUpdate();
             this.gpuResource.destroy();
         }
@@ -181,7 +185,11 @@ export class UniformBuffer implements IShaderResource {
 
 
     public createBindGroupEntry(bindingId: number): { binding: number, resource: { buffer: GPUBuffer } } {
+        //console.log("UniformBuffer.createBindgroupEntry ", this.items);
         if (!this.gpuResource) this.createGpuResource();
+
+
+
         return {
             binding: bindingId,
             resource: {
@@ -204,7 +212,7 @@ export class UniformBuffer implements IShaderResource {
         //use to handle particular cases in descriptor relative to the nature of pipeline
         if (pipelineType === "compute" || pipelineType === "compute_mixed") this.descriptor.visibility = GPUShaderStage.COMPUTE;
         else {
-            this.debug = "abc";
+
             this.descriptor.visibility = this.shaderVisibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
         }
     }

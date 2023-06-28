@@ -236,7 +236,7 @@ export class ComputePipeline extends Pipeline {
 
     protected rebuildingAfterDeviceLost: boolean = false;
     public clearAfterDeviceLostAndRebuild() {
-
+        console.warn("ComputePipeline.clearAfterDeviceLostAndRebuild()")
         this.gpuComputePipeline = null;
 
         this.rebuildingAfterDeviceLost = true;
@@ -306,7 +306,7 @@ export class ComputePipeline extends Pipeline {
 
     public async nextFrame() {
 
-        //this.update();
+        this.update();
 
         const commandEncoder = XGPU.device.createCommandEncoder();
         const computePass = commandEncoder.beginComputePass();

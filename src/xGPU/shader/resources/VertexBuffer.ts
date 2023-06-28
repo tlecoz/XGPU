@@ -555,9 +555,7 @@ export class VertexBuffer implements IShaderResource {
                 vbs[0].gpuBufferIOs[1] = vbs[1].gpuResource;
             }
             return
-            //const temp = this.gpuBufferIOs;
-            //this.gpuBufferIOs = null;
-            //this.createGpuResource();
+
         }
 
 

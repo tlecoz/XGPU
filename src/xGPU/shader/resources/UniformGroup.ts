@@ -188,6 +188,10 @@ export class UniformGroup {
     }
 
 
+    public updateStack() {
+        this.items = this.stackItems(this.items);
+    }
+
     public forceUpdate(): void {
         for (let i = 0; i < this.items.length; i++) {
             if (this.items[i] instanceof UniformGroup || this.items[i] instanceof UniformGroupArray) (this.items[i] as any).forceUpdate()
@@ -213,7 +217,7 @@ export class UniformGroup {
             return;
         }
 
-        //console.log(this.datas);
+        //console.log("items.length = ", this.items);
 
         let item: Uniformable;
         for (let i = 0; i < this.items.length; i++) {
@@ -227,7 +231,7 @@ export class UniformGroup {
                 } else {
 
 
-
+                    //console.log(item.name, item.startId, this.datas.length)
                     this.datas.set(item, item.startId);
 
                     XGPU.device.queue.writeBuffer(
@@ -366,7 +370,7 @@ export class UniformGroup {
 
     public stackItems(items: any): Uniformable[] {
 
-
+        console.log("STACK ITEMS")
 
         const result: any[] = []
 

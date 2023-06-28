@@ -226,7 +226,7 @@ export class Bindgroup {
     };
 
     protected buildLayout(): void {
-
+        this.io_index = 0;
         const layout = { entries: [] }
         let bindingId = 0;
         //console.warn(this.elements)
@@ -578,7 +578,7 @@ export class Bindgroup {
 
 
     public handleComputePipelineResourceIOs() {
-        //console.warn("handleComputePipelineResourceIOs ", this.vertexBufferIO)
+        console.warn("handleComputePipelineResourceIOs ", this.resourcesIOs)
 
 
 
@@ -587,11 +587,16 @@ export class Bindgroup {
             let buf1 = [];
             for (let i = 0; i < this.resourcesIOs.length; i++) {
                 if (this.resourcesIOs[i] instanceof VertexBufferIO) {
+
                     buf0[i] = (this.resourcesIOs[i] as VertexBufferIO).buffers[0];
                     buf1[i] = (this.resourcesIOs[i] as VertexBufferIO).buffers[1];
+
                 } else {
                     buf0[i] = (this.resourcesIOs[i] as ImageTextureIO).textures[0];
                     buf1[i] = (this.resourcesIOs[i] as ImageTextureIO).textures[1];
+                    buf0[i].createGpuResource();
+                    buf1[i].createGpuResource();
+
                 }
             }
             this.createPingPongBindgroup(buf0, buf1);
@@ -726,9 +731,21 @@ export class Bindgroup {
     }
     */
 
+
+    protected renderPipelineimageIO: ImageTexture;
+    protected renderPipelineBufferIO: VertexBuffer;
+
     public handleRenderPipelineResourceIOs() {
 
+        console.warn("handleRenderPipelineResourceIOs ", this.elements.length, this.textureIO)
 
+        if (this.renderPipelineimageIO) {
+            (this.renderPipelineimageIO as any).initIO();
+            return
+        } else if (this.renderPipelineBufferIO) {
+            (this.renderPipelineBufferIO as any).initIO();
+            return
+        }
 
         //a vertexBufferIO uses 2 vertexBuffers in a computePipeline 
         //but a single one is required in a renderPipeline (same for textures)   
@@ -742,6 +759,7 @@ export class Bindgroup {
         let foundTextureIO: boolean = false;
 
         for (let i = 0; i < this.elements.length; i++) {
+            console.log(i, this.elements[i], this.parent.pipeline);
             resource = this.elements[i].resource;
             if (resource instanceof VertexBuffer) {
                 if (resource.io === 1) {
@@ -756,11 +774,12 @@ export class Bindgroup {
                     break;
                 }
             } else if (resource instanceof ImageTexture) {
+
                 if (resource.io === 1) {
                     name = this.elements[i].name;
                     parentResources[name] = undefined;
                     parentResources[name + "_out"] = undefined;
-
+                    console.log("this.elements[i + 1] = ", this.elements[i + 1])
                     textureIOs.push(resource);
                     textureIOs.push(this.elements[i + 1].resource as ImageTexture);
                     this.elements.splice(i, 2);
@@ -790,11 +809,16 @@ export class Bindgroup {
             parentResources[name] = vb;
             parentResources.types.vertexBuffers = buffers;
 
-            vb.initBufferIO([bufferIOs[0].buffer, bufferIOs[1].buffer])
+            (vb as any).initIO = () => {
+                vb.initBufferIO([bufferIOs[0].buffer, bufferIOs[1].buffer])
+            }
+            (vb as any).initIO();
+            this.renderPipelineBufferIO = vb;
+
 
         } else if (foundTextureIO) {
 
-            //console.log(" textureIOs[0].gpuResource = ", textureIOs[0])
+
 
             const img = new ImageTexture({ source: textureIOs[0].gpuResource })
             this.elements.push({ name, resource: img })
@@ -811,7 +835,15 @@ export class Bindgroup {
             parentResources[name] = img;
             parentResources.types.imageTextures = images;
 
-            img.initTextureIO([textureIOs[0].texture, textureIOs[1].texture])
+            (img as any).initIO = () => {
+                console.log("initIO ", textureIOs[0].deviceId, textureIOs[1].deviceId)
+                img.source = textureIOs[0].texture;
+                img.initTextureIO([textureIOs[0].texture, textureIOs[1].texture])
+            }
+            (img as any).initIO();
+
+            this.renderPipelineimageIO = img;
+
 
         }
 
