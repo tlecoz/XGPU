@@ -251,7 +251,7 @@ export class Bindgroup {
 
     private setupApplyCompleted: boolean = false;
     public build(): GPUBindGroup {
-        console.log(this.ioGroups)
+        //console.log(this.ioGroups)
         if (!this._layout || (this.deviceId != XGPU.deviceId && this.ioGroups)) this.buildLayout();
         this.deviceId = XGPU.deviceId;
         let entries = [];
@@ -323,10 +323,21 @@ export class Bindgroup {
 
             //const name = this.getResourceName(o);
 
-            for (let i = 0; i < allVertexBuffers.length; i++) {
-                //console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
-                if (allVertexBuffers[i].resource === o) return i;
+            if (!this.instances) {
+                for (let i = 0; i < allVertexBuffers.length; i++) {
+                    console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
+                    //if (allVertexBuffers[i].resource.nane === o.name) return i;
+                    if (allVertexBuffers[i].resource === o) return i;
+                }
+            } else {
+                for (let i = 0; i < allVertexBuffers.length; i++) {
+                    console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
+                    if (allVertexBuffers[i].resource.nane === o.name) return i;
+
+                }
             }
+
+
 
             console.warn("GET BUFFER ID = -1  ", allVertexBuffers.length)
             return -1;
