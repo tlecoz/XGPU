@@ -177,12 +177,36 @@ export class ImageTexture implements IShaderResource {
 
     public createGpuResource(): void {
         console.warn("imageTexture.createGpuResource ", this.deviceId, XGPU.deviceId, this.useOutsideTexture, this.descriptor.source)
-        if (this.useOutsideTexture || this.gpuTextureIOs) return;
-        if (this.gpuResource) this.gpuResource.destroy();
+
+        if (this.useOutsideTexture && this.gpuResource) {
+            if (this.deviceId != XGPU.deviceId) {
+                const o = (this.gpuResource as any).xgpuObject;
+                if (o) {
+                    o.createGpuResource();
+                    console.log("o = ", o)
+                    this.gpuResource = o.gpuResource;
+                    this._view = o.view;
+                }
+
+            }
+        }
+
+
 
 
         this.deviceId = XGPU.deviceId;
-        this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor)
+        if (this.useOutsideTexture || this.gpuTextureIOs) return;
+
+        if (this.gpuResource) {
+            (this.gpuResource as any).xgpuObject = null;
+            this.gpuResource.destroy();
+        }
+
+
+
+        this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
+        (this.gpuResource as any).xgpuObject = this;
+
         this._view = this.gpuResource.createView();
         if (this.descriptor.source) this.mustBeTransfered = true;
 
@@ -230,8 +254,11 @@ export class ImageTexture implements IShaderResource {
 
         if (this.resourceIO) this.resourceIO.destroy();
         if (this.useOutsideTexture || this.gpuTextureIOs) return;
-        if (this.gpuResource) this.gpuResource.destroy();
 
+        if (this.gpuResource) {
+            (this.gpuResource as any).xgpuObject = null;
+            this.gpuResource.destroy();
+        }
         this._view = null;
         this.gpuResource = null;
         this.resourceIO = null;
@@ -274,7 +301,7 @@ export class ImageTexture implements IShaderResource {
 
 
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUTextureView } {
-        if (!this.gpuResource) this.createGpuResource();
+        if (!this.gpuResource || this.deviceId != XGPU.deviceId) this.createGpuResource();
 
         //console.log("ImageTexture.createBindgroupEntry ", this.deviceId)
 

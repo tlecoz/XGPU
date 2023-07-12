@@ -108,13 +108,14 @@ export class TextureSampler implements IShaderResource {
 
     //----------------------------
 
-
+    protected deviceId: number = 0;
 
     public createGpuResource(): void {
 
 
-        //console.log("create sampler : ", this.descriptor)
+        console.log("create sampler : ", this.descriptor)
         this.gpuResource = XGPU.device.createSampler(this.descriptor);
+        this.deviceId = XGPU.deviceId;
 
     }
     public destroyGpuResource() {
@@ -156,7 +157,7 @@ export class TextureSampler implements IShaderResource {
     }
 
     public createBindGroupEntry(bindingId: number): { binding: number, resource: GPUSampler } {
-        if (!this.gpuResource) this.createGpuResource();
+        if (!this.gpuResource || this.deviceId != XGPU.deviceId) this.createGpuResource();
         return {
             binding: bindingId,
             resource: this.gpuResource

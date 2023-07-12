@@ -225,7 +225,12 @@ export class Bindgroup {
         }
     };
 
+    protected deviceId: number = 0;
+
     protected buildLayout(): void {
+
+        this.deviceId = XGPU.deviceId;
+
         this.io_index = 0;
         const layout = { entries: [] }
         let bindingId = 0;
@@ -246,9 +251,9 @@ export class Bindgroup {
 
     private setupApplyCompleted: boolean = false;
     public build(): GPUBindGroup {
-
-        if (!this._layout) this.buildLayout();
-
+        console.log(this.ioGroups)
+        if (!this._layout || (this.deviceId != XGPU.deviceId && this.ioGroups)) this.buildLayout();
+        this.deviceId = XGPU.deviceId;
         let entries = [];
         let bindingId: number = 0;
         let resource: IShaderResource;
@@ -257,10 +262,10 @@ export class Bindgroup {
 
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
-            if (!resource.gpuResource) {
+            //if (!resource.gpuResource) {
 
-                resource.update();
-            }
+            resource.update();
+            //}
 
             if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
 
@@ -316,12 +321,14 @@ export class Bindgroup {
 
         const getBufferId = (o) => {
 
-            const name = this.getResourceName(o);
+            //const name = this.getResourceName(o);
 
             for (let i = 0; i < allVertexBuffers.length; i++) {
                 //console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
                 if (allVertexBuffers[i].resource === o) return i;
             }
+
+            console.warn("GET BUFFER ID = -1  ", allVertexBuffers.length)
             return -1;
         }
 
@@ -403,6 +410,8 @@ export class Bindgroup {
     public apply(renderPass: GPURenderPassEncoder | GPUComputePassEncoder) {
 
 
+
+
         if (!this.setupDrawCompleted) {
             this.setupDrawCompleted = true;
             if (undefined === this.bindgroupId) {
@@ -434,14 +443,16 @@ export class Bindgroup {
 
 
             if (this.vertexBuffers) {
-                console.log("vertexBuffers = ", this.vertexBuffers)
+                //console.log("vertexBuffers = ", this.vertexBuffers)
                 let buf: any;
                 for (let j = 0; j < this.vertexBuffers.length; j++) {
 
 
                     buf = this.vertexBuffers[j].getCurrentBuffer();
 
-                    //console.log(this.vertexBuffers[j].bufferId, buf)
+
+
+                    //console.log(this.vertexBuffers[j], this.vertexBuffers[j].bufferId, buf, this.vertexBuffers.indexOf(buf))
                     renderPass.setVertexBuffer(this.vertexBuffers[j].bufferId, buf);
                 }
             }
@@ -529,7 +540,7 @@ export class Bindgroup {
         }
 
 
-        let id = this.instances.length;
+        //let id = this.instances.length;
         if (indexBuffer) result.indexBuffer = indexBuffer;
         result.update = () => {
             let bool = false;
@@ -797,6 +808,7 @@ export class Bindgroup {
 
 
         if (foundVertexIO) {
+            console.log("foundVertexIO")
             //console.log("bufferIOs = ", bufferIOs)
             const attributes = bufferIOs[0].attributeDescriptor;
             const stepMode = bufferIOs[0].descriptor.stepMode;
@@ -824,7 +836,7 @@ export class Bindgroup {
 
         } else if (foundTextureIO) {
 
-
+            console.log("foundTextureIO")
 
             const img = new ImageTexture({ source: textureIOs[0].gpuResource })
             this.elements.push({ name, resource: img })

@@ -77,6 +77,7 @@ export class VertexBuffer implements IShaderResource {
 
     public clone(): VertexBuffer {
         const vb = new VertexBuffer(this.attributeDescriptor, this.descriptor);
+        vb.bufferId = this.bufferId;
         let datas: Float32Array | Int32Array | Uint32Array;
         if (this.datas instanceof Float32Array) datas = new Float32Array(this.datas.length);
         else if (this.datas instanceof Int32Array) datas = new Int32Array(this.datas.length);

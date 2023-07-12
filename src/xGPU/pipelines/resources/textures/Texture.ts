@@ -39,7 +39,10 @@ export class Texture {
     }
 
     public destroy(): void {
-        if (this.gpuResource) this.gpuResource.destroy();
+        if (this.gpuResource) {
+            (this.gpuResource as any).xgpuObject = null;
+            this.gpuResource.destroy();
+        }
         this.gpuResource = null;
         this._view = null;
     }
@@ -54,12 +57,23 @@ export class Texture {
         this.time = new Date().getTime();
 
 
-        if (this.gpuResource) this.gpuResource.destroy();
+        if (this.gpuResource) {
+            (this.gpuResource as any).xgpuObject = null;
+            this.gpuResource.destroy();
+        }
         //console.warn("createTexture ", this.descriptor)
         this.deviceId = XGPU.deviceId;
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
+        (this.gpuResource as any).xgpuObject = this;
         this.createView();
     }
+
+
+    public createGpuResource(): void {
+        this.create();
+    }
+
+
 
     private createView(): void {
         if (!this.gpuResource) this.create();
