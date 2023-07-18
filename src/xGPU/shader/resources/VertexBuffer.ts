@@ -130,13 +130,14 @@ export class VertexBuffer implements IShaderResource {
     public set datas(f: Float32Array | Int32Array | Uint32Array) {
         this._datas = f;
         this.mustBeTransfered = true;
+        console.warn("VB set datas = ", f);
     }
 
 
     public setComplexDatas(datas: Float32Array | Int32Array | Uint32Array, nbComponentTotal: number) {
-        this._datas = datas;
+
         this._nbComponent = nbComponentTotal;
-        this.mustBeTransfered = true;
+        this.datas = datas;
     }
 
 
@@ -243,7 +244,7 @@ export class VertexBuffer implements IShaderResource {
 
     public createBindGroupEntry(bindingId: number): any {
         if (!this.gpuResource) this.createGpuResource();
-        //console.log("buff = ", this.gpuResource)
+        console.log("VertexBuffer.createBindgroupEntry size = ", this.datas.byteLength)
         return {
             binding: bindingId,
             resource: {
@@ -508,7 +509,7 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.gpuResource) this.gpuResource.destroy();
 
-        //console.log("VB.createGPUResource ", this.datas, this.datas.byteLength, this.descriptor.usage)
+        console.log("VB.createGPUResource ", this.datas, this.datas.byteLength, this.descriptor.usage)
 
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({
@@ -524,7 +525,7 @@ export class VertexBuffer implements IShaderResource {
     public time: number;
     public destroyGpuResource() {
 
-        //console.log("destroy vertexbuffer")
+        console.log("destroy vertexbuffer")
 
         if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
             return;
@@ -534,8 +535,13 @@ export class VertexBuffer implements IShaderResource {
         if (this.io && XGPU.loseDeviceRecently) {
 
             if (this.io === 1) {
+
+
                 const vbio = this.resourceIO;
                 const vbs = vbio.buffers;
+
+                console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", vbio.currentDatas)
+
 
                 if (vbs[0]._datas instanceof Float32Array) vbs[0]._datas = vbs[1]._datas = new Float32Array(vbio.currentDatas);
                 else if (vbs[0]._datas instanceof Int32Array) vbs[0]._datas = vbs[1]._datas = new Int32Array(vbio.currentDatas);
