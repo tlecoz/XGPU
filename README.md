@@ -1,27 +1,29 @@
-# What is XGPU ? 
+# What is XGPU?
 
-XGPU provide a higher level way to use WebGPU.  
-It's purpose-agnostic : it could be perfectly suitable as the fundations of a rendering engine based on WebGPU but it also be used to process numeric data or texture in a computeShader. 
+XGPU provides a higher-level way to use WebGPU. It is purpose-agnostic: it can be perfectly suitable as the foundation of a rendering engine based on WebGPU, but it can also be used to process numeric data or textures in a compute shader.
 
+At its higher level, XGPU could be described as a library because it provides basic classes that allow you to build whatever you want, with the logic and variable names you desire. The higher-level code is minimal and straightforward, resembling Canvas2D code (much shorter than raw WebGPU).
 
-At its higher level, it could be described as a library because it provide basic class that allow to build whatever you want, with the logic you want and the variable name you want. The higher level code is very minimal and straight forward, it feel like Canvas2D code (much shorter than raw webGPU)
+At its lower level, XGPU could be considered as a framework because it automatically drives the data from the highest level to the lower level. Data binding is automatic, variable declaration in the shader is automatic, alignment of data in different kinds of buffers is handled automatically, and the ping-pong structure involved in compute shaders is also managed automatically.
 
-At its lower level, XGPU could be considered as a framework because it drive the data automaticly from highest level to lower level, the data-binding is automatic, the declaration of the variable in the shader is automatic, the alignement of the data in the differents kind of buffer are handled automaticly, the ping-pong structure involved in computeShaders is handled automaticly, ... 
+XGPU is focused solely on WebGPU. It allows you to produce code that is easy to read, write, maintain, and reuse.
 
-XGPU is focus on WebGPU only. 
-It allow you to produce a code easy-to-read, easy-to-write, easy-to-maintain, easy-to-reuse. 
+**Note**: XGPU does not contain higher-level classes used in most rendering engines, such as Camera, Light, etc. However, you can easily build them using it (see the [samples](https://github.com/tlecoz/xgpu-samples) for examples).
 
-It DOES NOT contain higher level class used in most of rendering engine such as Camera, Light, etc.... But you can build it easyly using it ( [show the samples to see how to proceed](https://github.com/tlecoz/xgpu-samples) )
- 
-# Key features : 
+# Why is it called XGPU?
 
-- automatic data-binding : the datas used in your pipelne will be transfered and used during the draw process automaticly 
-- automatic buffer alignment : don't overthink about how to fit your datas in the buffer, it's automatic and optimized , you have nothing to do 
-- automatic declaration of the variable in the shader : because the data-binding is automatic , it would be a shame to write the declaration of the variable by hand. It's a bit complex and verbose, trust me, you don't want to write it. 
-- extendable renderPipeline & computePipeline : because data-binding and variable déclaration in the shader are handled automaticly, it's possible to extends and declinate your renderPipelines and/or your computePipelines
-- pipeline plugin : ability to plug an advanced feature (such as light, shadow, ...) in an existing pipeline 
-- easy-to-read , easy-to-write, easy-to-maintain at its higher level , and very powerfull and flexible at its lower level. 
+The "X" stands for "Extendable". The core idea behind XGPU is the ability to use every kind of data as an extendable component. You can extend everything (uniformBuffer, VertexBuffer, RenderPipeline, ComputePipeline, but also Matrix4x4, Vec4, ...).
 
-# How to use ? 
+# Key features:
 
-I will complete this section soon but you can check some samples that use it [here](https://github.com/tlecoz/xgpu-samples) 
+- Automatic data binding: The data used in your pipeline will be transferred and used during the draw process automatically.
+- Automatic buffer alignment: Don't overthink how to fit your data structure into the different kinds of buffer; it's automatic and optimized, so you have nothing to worry about.
+- Automatic declaration of variables in the shader: Since data binding is automatic, it would be a shame to write variable declarations by hand. XGPU takes care of this complex and verbose process for you.
+- Automatic handling of BindgroupLayout: Your pipeline data structure will be "aligned" to your own data structure automatically.
+- Extendable renderPipeline & computePipeline: Data binding and variable declarations in the shader are handled automatically, allowing you to extend and customize your renderPipelines and/or computePipelines.
+- Pipeline plugins: Ability to plug advanced features (such as light, shadow, etc.) into an existing pipeline.
+- Easy-to-read, easy-to-write, easy-to-maintain at its higher level, and very powerful and flexible at its lower level.
+
+# How to use?
+
+I will complete this section soon, but in the meantime, you can check some samples that use it [here](https://github.com/tlecoz/xgpu-samples).
