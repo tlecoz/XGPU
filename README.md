@@ -10,7 +10,7 @@ XGPU is focused solely on WebGPU. It allows you to produce code that is easy to 
 
 **Note**: XGPU does not contain higher-level classes used in most rendering engines, such as Camera, Light, etc. However, you can easily build them using it (see the [samples](https://github.com/tlecoz/xgpu-samples) for examples).
 
-# Why is it called XGPU?
+# Why "XGPU" ?
 
 The "X" stands for "Extendable". The core idea behind XGPU is the ability to use every kind of data as an extendable component. You can extend everything (uniformBuffer, VertexBuffer, RenderPipeline, ComputePipeline, but also Matrix4x4, Vec4, ...).
 
