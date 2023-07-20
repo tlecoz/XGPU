@@ -26,12 +26,8 @@ export class VideoTexture implements IShaderResource {
     public descriptor: VideoTextureDescriptor;
     public useWebcodec: boolean = false; //still in beta 
 
-    public _gpuResource: HTMLVideoElement
-    public get gpuResource(): HTMLVideoElement { return this._gpuResource }
-    public set gpuResource(v: HTMLVideoElement) {
-        console.warn("VideoTexture.set gpuResource = ", v);
-        this._gpuResource = v;
-    }
+    public gpuResource: HTMLVideoElement
+
     /*
     bindgroups: an array of bindgroup that contains the VideoTexture 
     => I need it to call its "build" function onVideoFrameCallback

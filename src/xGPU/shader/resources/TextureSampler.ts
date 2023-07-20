@@ -113,7 +113,7 @@ export class TextureSampler implements IShaderResource {
     public createGpuResource(): void {
 
 
-        console.log("create sampler : ", this.descriptor)
+        //console.log("create sampler : ", this.descriptor)
         this.gpuResource = XGPU.device.createSampler(this.descriptor);
         this.deviceId = XGPU.deviceId;
 

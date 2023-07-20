@@ -463,7 +463,7 @@ export class RenderPipeline extends Pipeline {
 
         if (this.onRebuildStartAfterDeviceLost) this.onRebuildStartAfterDeviceLost();
 
-        console.log("RenderPipeline.clearAfterDeviceLostAndRebuild debug = " + this.debug)
+        //console.log("RenderPipeline.clearAfterDeviceLostAndRebuild debug = " + this.debug)
 
         this.gpuPipeline = null;
         if (this.drawConfig.indexBuffer) this.drawConfig.indexBuffer.createGpuResource();

@@ -55,7 +55,15 @@ export class UniformBuffer implements IShaderResource {
 
         const items = { ...this.group.unstackedItems };
 
-        for (let z in items) items[z] = items[z].clone();
+        if (propertyNames) {
+            for (let z in items) {
+                if (propertyNames.indexOf(z) !== -1) items[z] = items[z].clone();
+            }
+        } else {
+            for (let z in items) items[z] = items[z].clone();
+        }
+
+
 
         console.log(this.descriptor, this.shaderVisibility)
         const buffer = new UniformBuffer(items, this.descriptor);

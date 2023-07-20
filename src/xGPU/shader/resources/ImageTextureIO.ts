@@ -2,7 +2,6 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
-import { ComputePipeline } from "../../pipelines/ComputePipeline";
 import { ImageTexture } from "./ImageTexture";
 
 export class ImageTextureIO {

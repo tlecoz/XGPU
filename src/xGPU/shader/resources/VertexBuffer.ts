@@ -87,6 +87,9 @@ export class VertexBuffer implements IShaderResource {
         //const data = new Float32Array(this.datas.length);
         datas.set(this.datas);
         vb.datas = datas;
+
+        //console.log("clone")
+
         return vb;
     }
 
@@ -130,7 +133,7 @@ export class VertexBuffer implements IShaderResource {
     public set datas(f: Float32Array | Int32Array | Uint32Array) {
         this._datas = f;
         this.mustBeTransfered = true;
-        console.warn("VB set datas = ", f);
+        //console.warn("VB set datas = ", f);
     }
 
 
@@ -138,6 +141,8 @@ export class VertexBuffer implements IShaderResource {
 
         this._nbComponent = nbComponentTotal;
         this.datas = datas;
+
+
     }
 
 
@@ -230,7 +235,7 @@ export class VertexBuffer implements IShaderResource {
 
     public createBindGroupLayoutEntry(bindingId: number): any {
 
-        //console.warn("VB accessMode = ", this.descriptor.accessMode)
+        console.warn("VB accessMode = ", this.descriptor.accessMode)
         return {
             binding: bindingId,
             visibility: GPUShaderStage.COMPUTE,
@@ -481,16 +486,10 @@ export class VertexBuffer implements IShaderResource {
                 format: this.vertexArrays[i].format
             }
 
-            let type = new GPUType(this.vertexArrays[i].varType);
-            //console.log("type = ", this.vertexArrays[i].varType, type.byteAlign, type.byteSize, type.byteValue);
-            //nb = offset + Math.ceil((1 + this.vertexArrays[i].nbComponent) / 2) * 2;
-            //console.log("nb = ", Math.ceil((1 + this.vertexArrays[i].nbComponent) / 2) * 2)
-            //console.log("=========>>>>>> ", offset, this.vertexArrays[i].nbComponent)
-            //console.log(i, obj.attributes[i])
             componentId += this.vertexArrays[i].nbComponent;
         }
 
-        //console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
+        console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
 
 
 
@@ -509,7 +508,7 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.gpuResource) this.gpuResource.destroy();
 
-        console.log("VB.createGPUResource ", this.datas, this.datas.byteLength, this.descriptor.usage)
+        console.log("VB.createGPUResource ", this.descriptor.usage)
 
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({
@@ -525,7 +524,7 @@ export class VertexBuffer implements IShaderResource {
     public time: number;
     public destroyGpuResource() {
 
-        console.log("destroy vertexbuffer")
+        //console.log("destroy vertexbuffer")
 
         if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
             return;
@@ -540,12 +539,13 @@ export class VertexBuffer implements IShaderResource {
                 const vbio = this.resourceIO;
                 const vbs = vbio.buffers;
 
-                console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", vbio.currentDatas)
+                //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", vbs[0]._datas)
+                this.setPipelineType("compute")
+                const currentDatas = vbio.currentDatas ? vbio.currentDatas : vbs[0]._datas;
 
-
-                if (vbs[0]._datas instanceof Float32Array) vbs[0]._datas = vbs[1]._datas = new Float32Array(vbio.currentDatas);
-                else if (vbs[0]._datas instanceof Int32Array) vbs[0]._datas = vbs[1]._datas = new Int32Array(vbio.currentDatas);
-                else if (vbs[0]._datas instanceof Uint32Array) vbs[0]._datas = vbs[1]._datas = new Uint32Array(vbio.currentDatas);
+                if (vbs[0]._datas instanceof Float32Array) vbs[0]._datas = vbs[1]._datas = new Float32Array(currentDatas);
+                else if (vbs[0]._datas instanceof Int32Array) vbs[0]._datas = vbs[1]._datas = new Int32Array(currentDatas);
+                else if (vbs[0]._datas instanceof Uint32Array) vbs[0]._datas = vbs[1]._datas = new Uint32Array(currentDatas);
 
                 //vbs[0]._datas = 
                 let temp = vbs[0].gpuBufferIOs;
@@ -560,6 +560,8 @@ export class VertexBuffer implements IShaderResource {
 
                 vbs[0].gpuBufferIOs[0] = vbs[0].gpuResource;
                 vbs[0].gpuBufferIOs[1] = vbs[1].gpuResource;
+
+
             }
             return
 

@@ -2,6 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 export * from "./xGPU/XGPU"
+export * from "./xGPU/IRenderer"
 export * from "./xGPU/GPURenderer"
 export * from "./xGPU/HeadlessGPURenderer"
 export * from "./xGPU/GPUType"
@@ -38,6 +39,7 @@ export * from "./xGPU/shader/shaderParts/ShaderStruct"
 export * from "./xGPU/shader/resources/CubeMapTexture"
 export * from "./xGPU/shader/resources/IShaderResource"
 export * from "./xGPU/shader/resources/ImageTexture"
+export * from "./xGPU/shader/resources/ImageTextureArray"
 export * from "./xGPU/shader/resources/ImageTextureIO"
 export * from "./xGPU/shader/resources/TextureSampler"
 export * from "./xGPU/shader/resources/UniformBuffer"

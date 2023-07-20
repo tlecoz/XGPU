@@ -325,13 +325,13 @@ export class Bindgroup {
 
             if (!this.instances) {
                 for (let i = 0; i < allVertexBuffers.length; i++) {
-                    console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
+                    //console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
                     //if (allVertexBuffers[i].resource.nane === o.name) return i;
                     if (allVertexBuffers[i].resource === o) return i;
                 }
             } else {
                 for (let i = 0; i < allVertexBuffers.length; i++) {
-                    console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
+                    //console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
                     if (allVertexBuffers[i].resource.nane === o.name) return i;
 
                 }
@@ -339,7 +339,7 @@ export class Bindgroup {
 
 
 
-            console.warn("GET BUFFER ID = -1  ", allVertexBuffers.length)
+            //console.warn("GET BUFFER ID = -1  ", allVertexBuffers.length)
             return -1;
         }
 
@@ -381,7 +381,7 @@ export class Bindgroup {
             for (let i = 0; i < this.vertexBuffers.length; i++) {
                 if (!this.vertexBuffers[i].gpuResource) {
                     this.vertexBuffers[i].createGpuResource();
-                    console.log("buffer resource = ", this.vertexBuffers[i].gpuResource);
+                    //console.log("buffer resource = ", this.vertexBuffers[i].gpuResource);
                 }
             }
         }
@@ -606,7 +606,7 @@ export class Bindgroup {
 
 
     public handleComputePipelineResourceIOs() {
-        console.warn("handleComputePipelineResourceIOs ", this.resourcesIOs)
+        //console.warn("handleComputePipelineResourceIOs ", this.resourcesIOs)
 
 
 
@@ -765,7 +765,7 @@ export class Bindgroup {
 
     public handleRenderPipelineResourceIOs() {
 
-        console.warn("handleRenderPipelineResourceIOs ", this.elements.length, this.textureIO)
+        //console.warn("handleRenderPipelineResourceIOs ", this.elements.length, this.textureIO)
 
         if (this.renderPipelineimageIO) {
             (this.renderPipelineimageIO as any).initIO();
@@ -787,7 +787,7 @@ export class Bindgroup {
         let foundTextureIO: boolean = false;
 
         for (let i = 0; i < this.elements.length; i++) {
-            console.log(i, this.elements[i], this.parent.pipeline);
+            //console.log(i, this.elements[i], this.parent.pipeline);
             resource = this.elements[i].resource;
             if (resource instanceof VertexBuffer) {
                 if (resource.io === 1) {
@@ -807,7 +807,7 @@ export class Bindgroup {
                     name = this.elements[i].name;
                     parentResources[name] = undefined;
                     parentResources[name + "_out"] = undefined;
-                    console.log("this.elements[i + 1] = ", this.elements[i + 1])
+                    //console.log("this.elements[i + 1] = ", this.elements[i + 1])
                     textureIOs.push(resource);
                     textureIOs.push(this.elements[i + 1].resource as ImageTexture);
                     this.elements.splice(i, 2);

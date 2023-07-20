@@ -12,7 +12,7 @@ XGPU is focused solely on WebGPU. It allows you to produce code that is easy to 
 
 # Why "XGPU" ?
 
-The "X" stands for "Extendable". The core idea behind XGPU is the ability to use every kind of data as an extendable component. You can extend everything (uniformBuffer, VertexBuffer, RenderPipeline, ComputePipeline, but also Matrix4x4, Vec4, ...).
+The "X" stands for "Extendable". The core idea behind XGPU is the ability to use every kind of data as an extendable component. You can extend everything (uniformBuffer, VertexBuffer, RenderPipeline, ComputePipeline, but also Matrix4x4, Vec4, ...). 
 
 # Key features:
 
@@ -22,6 +22,7 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - Automatic handling of BindgroupLayout: Your pipeline data structure will be "aligned" to your own data structure automatically.
 - Extendable renderPipeline & computePipeline: Data binding and variable declarations in the shader are handled automatically, allowing you to extend and customize your renderPipelines and/or computePipelines.
 - Pipeline plugins: Ability to plug advanced features (such as light, shadow, etc.) into an existing pipeline.
+- Declare you variables a single time in javascript with your own keywords and use them directly in the code of your shader
 - Easy-to-read, easy-to-write, easy-to-maintain at its higher level, and very powerful and flexible at its lower level.
 
 # How to use?

@@ -370,7 +370,7 @@ export class UniformGroup {
 
     public stackItems(items: any): Uniformable[] {
 
-        console.log("STACK ITEMS")
+        //console.log("STACK ITEMS")
 
         const result: any[] = []
 
@@ -383,7 +383,7 @@ export class UniformGroup {
 
         let v: any, type: any, nbComponent;
         let offset = 0;
-        let count = 0;
+
         for (let z in items) {
 
 
@@ -461,7 +461,7 @@ export class UniformGroup {
                 }
 
             }
-            count++;
+
         }
 
 

@@ -10,7 +10,6 @@ lerna-debug.log*
 
 assets
 node_modules
-dist
 dist-ssr
 *.local
 

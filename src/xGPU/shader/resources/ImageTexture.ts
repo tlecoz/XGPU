@@ -130,7 +130,7 @@ export class ImageTexture implements IShaderResource {
     public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
         this.useOutsideTexture = bmp instanceof GPUTexture;
 
-        console.warn("SOURCE ==============================================   source = ", bmp)
+        //console.warn("SOURCE ==============================================   source = ", bmp)
 
         if (this.useOutsideTexture) {
             this.gpuResource = bmp as GPUTexture;
@@ -176,14 +176,14 @@ export class ImageTexture implements IShaderResource {
     public deviceId: number;
 
     public createGpuResource(): void {
-        console.warn("imageTexture.createGpuResource ", this.deviceId, XGPU.deviceId, this.useOutsideTexture, this.descriptor.source)
+        //console.warn("imageTexture.createGpuResource ", this.deviceId, XGPU.deviceId, this.useOutsideTexture, this.descriptor.source)
 
         if (this.useOutsideTexture && this.gpuResource) {
             if (this.deviceId != XGPU.deviceId) {
                 const o = (this.gpuResource as any).xgpuObject;
                 if (o) {
                     o.createGpuResource();
-                    console.log("o = ", o)
+                    //console.log("o = ", o)
                     this.gpuResource = o.gpuResource;
                     this._view = o.view;
                 }

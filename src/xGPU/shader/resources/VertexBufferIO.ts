@@ -52,10 +52,11 @@ export class VertexBufferIO {
 
     private rebuildAfterDeviceLost() {
         if (this.deviceId != XGPU.deviceId) {
+            console.log("VertexBufferIO. REBUILD AFTER LOST")
             this.deviceId = XGPU.deviceId;
             this.canCallMapAsync = true;
             this.stagingBuffer = null;
-
+            this.currentDatas = this.buffers[0].datas
         }
     }
 

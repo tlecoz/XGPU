@@ -730,7 +730,7 @@ export class HighLevelParser {
     protected parseBindgroupEntries(descriptor: any): any {
 
 
-        let result: any = {};
+
 
         const uniformBufferName: string = descriptor.uniformBufferName ? descriptor.uniformBufferName : "bindgroupUniforms";
         const addUniform = (name: string, resource: PrimitiveType) => {
