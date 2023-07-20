@@ -22,7 +22,7 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - Automatic handling of BindgroupLayout: Your pipeline data structure will be "aligned" to your own data structure automatically.
 - Extendable renderPipeline & computePipeline: Data binding and variable declarations in the shader are handled automatically, allowing you to extend and customize your renderPipelines and/or computePipelines.
 - Pipeline plugins: Ability to plug advanced features (such as light, shadow, etc.) into an existing pipeline.
-- Declare you variables a single time in javascript with your own keywords and use them directly in the code of your shader
+- Declare you variables a single time in javascript with the name you want and use them directly in the code of your shader (the shader code become the continuity of the javascript code)
 - Easy-to-read, easy-to-write, easy-to-maintain at its higher level, and very powerful and flexible at its lower level.
 
 # How to use?
