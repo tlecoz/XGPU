@@ -71,7 +71,7 @@ I will complete this section soon, but in the meantime, you can check some sampl
 - Until now, I never had the time to translate these samples :
 
   [deferredRendering](https://webgpu.github.io/webgpu-samples/samples/deferredRendering)
-  
+
   [cornell](https://webgpu.github.io/webgpu-samples/samples/cornell) 
 
   I can't be 100% confident that these demos are easily doable with XGPU until I get it working.
@@ -79,13 +79,14 @@ I will complete this section soon, but in the meantime, you can check some sampl
 
 - For now, if you customize a PrimitiveType (Float,Vec2,Vec3,...) and you create custom variable names like that : 
 
+ ```
   class Dimension extends Vec2 {
-
       constructor(x,y){
          super(x,y);
          this.initStruct(["width", "height"]);
       }
   }
+   ```
 
   it will produce a "struct" with the name of the class with the properties "width" and "height". 
   You will be able to use the keywords "width" and "height" in the shader, but there is an issue... 
