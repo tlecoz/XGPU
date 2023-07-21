@@ -111,6 +111,4 @@ I will complete this section soon, but in the meantime, you can check some sampl
 - I'm (very) far from having tested every possibilities allowed by WebGPU. 
   I think I covered most of common usecases but I can't ensure that every data-structure will work as expected. 
 
-- Be aware that I'm new to WebGPU too. 
-  This code is the 4th version of a library I started almost 10 months ago but I never written a computeShader before october 2022.
  
