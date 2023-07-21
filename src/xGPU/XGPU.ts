@@ -54,7 +54,8 @@ export class XGPU {
     }
 
     public static get loseDeviceRecently(): boolean {
-        return new Date().getTime() - this.deviceLostTime <= 100;
+        console.log("delay = ", new Date().getTime() - this.deviceLostTime)
+        return new Date().getTime() - this.deviceLostTime <= 3000;
     }
 
 
@@ -72,8 +73,9 @@ export class XGPU {
             const adapter = await navigator.gpu.requestAdapter(options)
             if (adapter) {
                 this.gpuDevice = await adapter.requestDevice();
-                this.deviceId++;
 
+                this.deviceId++;
+                console.log("get GPU device : ", this.deviceId)
                 this.deviceLost = false;
 
                 this.gpuDevice.lost.then((info) => {

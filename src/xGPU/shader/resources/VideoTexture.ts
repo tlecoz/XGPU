@@ -119,7 +119,7 @@ export class VideoTexture implements IShaderResource {
 
     public destroyGpuResource() {
 
-        console.log("destroyGpuResource deviceLost = ")
+        //console.log("destroyGpuResource deviceLost = ")
         /*
         if (this.gpuResource ) {
             this.gpuResource.src = undefined;

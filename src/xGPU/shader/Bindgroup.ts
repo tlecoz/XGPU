@@ -819,7 +819,7 @@ export class Bindgroup {
 
 
         if (foundVertexIO) {
-            console.log("foundVertexIO")
+            //console.log("foundVertexIO")
             //console.log("bufferIOs = ", bufferIOs)
             const attributes = bufferIOs[0].attributeDescriptor;
             const stepMode = bufferIOs[0].descriptor.stepMode;
@@ -847,7 +847,7 @@ export class Bindgroup {
 
         } else if (foundTextureIO) {
 
-            console.log("foundTextureIO")
+            //console.log("foundTextureIO")
 
             const img = new ImageTexture({ source: textureIOs[0].gpuResource })
             this.elements.push({ name, resource: img })

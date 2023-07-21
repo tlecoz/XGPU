@@ -51,17 +51,24 @@ export class Texture {
     public time: number;
     public create(): void {
 
-        if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
+        /*if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
             return;
-        }
+        }*/
         this.time = new Date().getTime();
 
+
+        console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId)
+
+        if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId) return
 
         if (this.gpuResource) {
             (this.gpuResource as any).xgpuObject = null;
             this.gpuResource.destroy();
         }
-        //console.warn("createTexture ", this.descriptor)
+        console.warn("createTexture ", this.deviceId)
+
+
+
         this.deviceId = XGPU.deviceId;
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         (this.gpuResource as any).xgpuObject = this;
@@ -73,7 +80,13 @@ export class Texture {
         this.create();
     }
 
+    public update() {
+        if (this.deviceId !== XGPU.deviceId) {
 
+            this.create();
+
+        }
+    }
 
     private createView(): void {
         if (!this.gpuResource) this.create();

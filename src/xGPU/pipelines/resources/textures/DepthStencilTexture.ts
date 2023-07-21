@@ -43,7 +43,7 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
 
         super(descriptor as any)
 
-        this.create();
+        this.createGpuResource();
 
         //--------
         if (!depthStencilDescription) {
@@ -127,12 +127,7 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
         }
     }
 
-    public update() {
-        if (this.deviceId !== XGPU.deviceId) {
 
-            this.deviceId = XGPU.deviceId;
-        }
-    }
     public resize(width: number, height: number): void {
         super.resize(width, height);
         this._attachment.view = this._view;

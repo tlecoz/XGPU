@@ -276,7 +276,7 @@ export class VertexBuffer implements IShaderResource {
 
         } else if (pipelineType === "compute_mixed") {
 
-            console.warn("setPipelineType computeMixed")
+            //console.warn("setPipelineType computeMixed")
 
             //i use accessMode = "read_write" for both here because we will apply a ping-pong structure: 
             //the computeShader result will be used as input of the computeShader itself for the next frame. 
@@ -515,7 +515,7 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.gpuResource) this.gpuResource.destroy();
 
-        console.warn("VB.createGPUResource ", this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
+        //console.warn("VB.createGPUResource ", this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
         this.deviceId = XGPU.deviceId;
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({
@@ -547,7 +547,7 @@ export class VertexBuffer implements IShaderResource {
                 const vbs = vbio.buffers;
 
 
-                console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", this.pipelineType)
+                //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", this.pipelineType)
                 this.setPipelineType(this.pipelineType)
                 const currentDatas = vbio.currentDatas ? vbio.currentDatas : vbs[0]._datas;
 

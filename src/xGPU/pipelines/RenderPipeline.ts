@@ -634,6 +634,7 @@ export class RenderPipeline extends Pipeline {
 
             if (this.multisampleTexture) {
                 if (!this.multisampleTexture.view) this.multisampleTexture.create();
+
                 //console.log("MSAA view = ", this.multisampleTexture.view)
                 this.outputColor.view = this.multisampleTexture.view;
 
@@ -717,6 +718,10 @@ export class RenderPipeline extends Pipeline {
                 this.renderPassTexture.resize(this.canvas.width, this.canvas.height)
             }
         }
+
+        if (this.multisampleTexture) this.multisampleTexture.update();
+        if (this.depthStencilTexture) this.depthStencilTexture.update();
+        if (this.renderPassTexture) this.renderPassTexture.update();
 
         if (this.onDrawEnd) this.onDrawEnd();
     }
