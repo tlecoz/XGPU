@@ -235,7 +235,7 @@ export class VertexBuffer implements IShaderResource {
 
     public createBindGroupLayoutEntry(bindingId: number): any {
 
-        console.warn("VB accessMode = ", this.descriptor.accessMode)
+        //console.warn("VB accessMode = ", this.descriptor.accessMode)
         return {
             binding: bindingId,
             visibility: GPUShaderStage.COMPUTE,
@@ -249,7 +249,7 @@ export class VertexBuffer implements IShaderResource {
 
     public createBindGroupEntry(bindingId: number): any {
         if (!this.gpuResource) this.createGpuResource();
-        console.log("VertexBuffer.createBindgroupEntry size = ", this.datas.byteLength)
+        //console.log("VertexBuffer.createBindgroupEntry size = ", this.datas.byteLength)
         return {
             binding: bindingId,
             resource: {
@@ -261,8 +261,12 @@ export class VertexBuffer implements IShaderResource {
     }
 
     protected canRefactorData: boolean = true;
-    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
+    protected pipelineType: "compute" | "render" | "compute_mixed";
 
+    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
+        if (this.pipelineType) return;
+
+        this.pipelineType = pipelineType;
         //use to handle particular cases in descriptor relative to the nature of pipeline
 
         if (pipelineType === "render") {
@@ -271,6 +275,8 @@ export class VertexBuffer implements IShaderResource {
             this.canRefactorData = false;
 
         } else if (pipelineType === "compute_mixed") {
+
+            console.warn("setPipelineType computeMixed")
 
             //i use accessMode = "read_write" for both here because we will apply a ping-pong structure: 
             //the computeShader result will be used as input of the computeShader itself for the next frame. 
@@ -499,6 +505,7 @@ export class VertexBuffer implements IShaderResource {
     }
 
     protected _bufferSize: number;
+    protected deviceId: number;
     public get bufferSize(): number { return this._bufferSize; }
     public createGpuResource() {
         if (this.attributeChanged) this.updateAttributes();
@@ -508,8 +515,8 @@ export class VertexBuffer implements IShaderResource {
 
         if (this.gpuResource) this.gpuResource.destroy();
 
-        console.log("VB.createGPUResource ", this.descriptor.usage)
-
+        console.warn("VB.createGPUResource ", this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
+        this.deviceId = XGPU.deviceId;
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({
             size: this.datas.byteLength,
@@ -539,8 +546,9 @@ export class VertexBuffer implements IShaderResource {
                 const vbio = this.resourceIO;
                 const vbs = vbio.buffers;
 
-                //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", vbs[0]._datas)
-                this.setPipelineType("compute")
+
+                console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", this.pipelineType)
+                this.setPipelineType(this.pipelineType)
                 const currentDatas = vbio.currentDatas ? vbio.currentDatas : vbs[0]._datas;
 
                 if (vbs[0]._datas instanceof Float32Array) vbs[0]._datas = vbs[1]._datas = new Float32Array(currentDatas);

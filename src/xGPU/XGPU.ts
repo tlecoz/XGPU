@@ -19,7 +19,7 @@ export class XGPU {
         else if (usage === 132) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC";
         else if (usage === 40) return "GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST";
         else if (usage === 140) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST";
-        else if (usage === 172) return ""
+        else if (usage === 172) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC"
 
         return ""
     }

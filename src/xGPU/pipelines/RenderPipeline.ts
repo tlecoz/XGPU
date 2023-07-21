@@ -474,7 +474,7 @@ export class RenderPipeline extends Pipeline {
         super.clearAfterDeviceLostAndRebuild();
 
 
-        this.buildGpuPipeline();
+        //this.buildGpuPipeline();
     }
 
 

@@ -243,7 +243,7 @@ export class ComputePipeline extends Pipeline {
         super.clearAfterDeviceLostAndRebuild();
 
 
-        this.buildGpuPipeline();
+        //this.buildGpuPipeline();
     }
 
 
