@@ -52,6 +52,17 @@ I will complete this section soon, but in the meantime, you can check some sampl
      //other properties
   })
   ```
+  or 
+  ```
+  const a = new Vec3(0,1,2);
+  const b = new Vec3(0,1,2);
+  pipeline.initFromObject({
+     a,
+     b,
+     //other properties
+  })
+  ```
+
   This is because I assign the name of the variable to the object and an object can't have two different names.
   This is a bit complex to fix but the problem is well identified, I should be able to fix it in a near future. 
 
