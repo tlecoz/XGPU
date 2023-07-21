@@ -69,7 +69,9 @@ I will complete this section soon, but in the meantime, you can check some sampl
 - RenderBundle feature is still a "work in progress"
 
 - Until now, I never had the time to translate these samples :
+
   [deferredRendering](https://webgpu.github.io/webgpu-samples/samples/deferredRendering)
+  
   [cornell](https://webgpu.github.io/webgpu-samples/samples/cornell) 
 
   I can't be 100% confident that these demos are easily doable with XGPU until I get it working.
