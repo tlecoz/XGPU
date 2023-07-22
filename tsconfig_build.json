@@ -27,11 +27,9 @@
         ]
     },
     "include": [
-        "src/**/*.ts",
-        "typings.d.ts"
+        "src/**/*.ts"
     ],
     "exclude": [
-        "src/samples/**",
         "src/main.ts"
     ]
 }

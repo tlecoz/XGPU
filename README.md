@@ -27,7 +27,13 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - Easy-to-read, easy-to-write, easy-to-maintain at its higher level, and very powerful and flexible at its lower level.
 
 
+
 # How to use?
+
+You can install XGPU by using npm install 
+ ```
+npm install xgpu
+ ```
 
 I will complete this section soon, but in the meantime, you can check some samples that use it [here](https://github.com/tlecoz/xgpu-samples).
 

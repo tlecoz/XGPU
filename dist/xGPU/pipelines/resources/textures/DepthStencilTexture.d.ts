@@ -43,7 +43,6 @@ export declare class DepthStencilTexture extends Texture implements IShaderResou
     createDeclaration(varName: string, bindingId: number, groupId: number): string;
     createGpuResource(): void;
     destroyGpuResource(): void;
-    update(): void;
     resize(width: number, height: number): void;
     clone(): DepthStencilTexture;
 }

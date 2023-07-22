@@ -1,16 +1,33 @@
 {
   "name": "xgpu",
-  "private": true,
-  "version": "0.8.0",
-  "__main": "dist/XGPU.js",
-  "__types": "dist/index.d.ts",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "version": "0.8.5",
+  "description": "XGPU is an extendable library for WebGPU that provides a higher-level, easy-to-use interface for building rendering engines or processing numeric data. It handles automatic data binding, buffer alignment, variable declarations in shaders, and more. XGPU is focused solely on WebGPU, allowing you to produce code that is easy to read, write, maintain, and reuse.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tlecoz/XGPU"
+  },
+  "keywords": [
+    "WebGPU",
+    "GPU",
+    "shader",
+    "computeShader"
+  ],
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "author": "Thomas Le Coz <fanthomas.lecoz@gmail.com>",
+  "licence": "MIT",
+  "homepage": "https://github.com/tlecoz/XGPU#readme",
+  "main": "dist/XGPU.js",
+  "types": "dist/index.d.ts",
+  "__main": "src/index.ts",
+  "__types": "src/index.ts",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build:test": "tsc --project tsconfig_build.json --emitDeclarationOnly",
-    "build:types": "tsc --project tsconfig_build.json --emitDeclarationOnly",
+    "build:types": "tsc --project tsconfig_build.json",
     "build": " vite build && npm run build:types",
     "preview": "vite preview"
   },
@@ -18,6 +35,7 @@
     "@webgpu/types": "^0.1.26",
     "cross-spawn": "^7.0.3",
     "rimraf": "^5.0.0",
+    "typedoc": "^0.24.8",
     "typescript": "^4.6.4",
     "vite": ">=4.3.9",
     "vite-plugin-checker": "^0.5.6",

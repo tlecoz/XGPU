@@ -25,6 +25,7 @@ export declare class Texture {
     time: number;
     create(): void;
     createGpuResource(): void;
+    update(): void;
     private createView;
     resize(width: number, height: number): void;
 }

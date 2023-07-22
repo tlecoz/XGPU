@@ -29,7 +29,7 @@ const _XGPU = class {
     else if (usage === 140)
       return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST";
     else if (usage === 172)
-      return "";
+      return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC";
     return "";
   }
   static debugShaderStage(n) {
@@ -52,7 +52,8 @@ const _XGPU = class {
     this.gpuDevice.destroy();
   }
   static get loseDeviceRecently() {
-    return (/* @__PURE__ */ new Date()).getTime() - this.deviceLostTime <= 100;
+    console.log("delay = ", (/* @__PURE__ */ new Date()).getTime() - this.deviceLostTime);
+    return (/* @__PURE__ */ new Date()).getTime() - this.deviceLostTime <= 3e3;
   }
   static init(options) {
     this.requestAdapterOptions = options;
@@ -65,6 +66,7 @@ const _XGPU = class {
       if (adapter) {
         this.gpuDevice = await adapter.requestDevice();
         this.deviceId++;
+        console.log("get GPU device : ", this.deviceId);
         this.deviceLost = false;
         this.gpuDevice.lost.then((info) => {
           console.clear();
@@ -178,14 +180,15 @@ class Texture {
     this._view = null;
   }
   create() {
-    if (this.time && (/* @__PURE__ */ new Date()).getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
-      return;
-    }
     this.time = (/* @__PURE__ */ new Date()).getTime();
+    console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId);
+    if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId)
+      return;
     if (this.gpuResource) {
       this.gpuResource.xgpuObject = null;
       this.gpuResource.destroy();
     }
+    console.warn("createTexture ", this.deviceId);
     this.deviceId = XGPU.deviceId;
     this.gpuResource = XGPU.device.createTexture(this.descriptor);
     this.gpuResource.xgpuObject = this;
@@ -193,6 +196,11 @@ class Texture {
   }
   createGpuResource() {
     this.create();
+  }
+  update() {
+    if (this.deviceId !== XGPU.deviceId) {
+      this.create();
+    }
   }
   createView() {
     if (!this.gpuResource)
@@ -1475,7 +1483,7 @@ class DepthStencilTexture extends Texture {
     //--------------------------------- IShaderResource ---------------------------------------------------------
     __publicField(this, "mustBeTransfered", false);
     __publicField(this, "_visibility", GPUShaderStage.FRAGMENT);
-    this.create();
+    this.createGpuResource();
     if (!depthStencilDescription) {
       depthStencilDescription = {
         depthWriteEnabled: true,
@@ -1547,11 +1555,6 @@ class DepthStencilTexture extends Texture {
       this.gpuResource.destroy();
       this.gpuResource = null;
       this.create();
-    }
-  }
-  update() {
-    if (this.deviceId !== XGPU.deviceId) {
-      this.deviceId = XGPU.deviceId;
     }
   }
   resize(width, height) {
@@ -1644,7 +1647,6 @@ class ImageTexture {
   }
   set source(bmp) {
     this.useOutsideTexture = bmp instanceof GPUTexture;
-    console.warn("SOURCE ==============================================   source = ", bmp);
     if (this.useOutsideTexture) {
       this.gpuResource = bmp;
       this._view = bmp.createView();
@@ -1674,13 +1676,11 @@ class ImageTexture {
     }
   }
   createGpuResource() {
-    console.warn("imageTexture.createGpuResource ", this.deviceId, XGPU.deviceId, this.useOutsideTexture, this.descriptor.source);
     if (this.useOutsideTexture && this.gpuResource) {
       if (this.deviceId != XGPU.deviceId) {
         const o = this.gpuResource.xgpuObject;
         if (o) {
           o.createGpuResource();
-          console.log("o = ", o);
           this.gpuResource = o.gpuResource;
           this._view = o.view;
         }
@@ -2152,7 +2152,6 @@ class TextureSampler {
     this.descriptor.maxAnisotropy = n;
   }
   createGpuResource() {
-    console.log("create sampler : ", this.descriptor);
     this.gpuResource = XGPU.device.createSampler(this.descriptor);
     this.deviceId = XGPU.deviceId;
   }
@@ -2525,7 +2524,6 @@ class UniformGroup {
     return this.wgsl;
   }
   stackItems(items) {
-    console.log("STACK ITEMS");
     const result = [];
     let bound = 1;
     var floats = [];
@@ -3163,9 +3161,11 @@ class VertexBuffer {
     __publicField(this, "gpuBufferIO_index", 1);
     __publicField(this, "_byteCount", 0);
     __publicField(this, "canRefactorData", true);
+    __publicField(this, "pipelineType");
     __publicField(this, "arrayStride");
     __publicField(this, "layout");
     __publicField(this, "_bufferSize");
+    __publicField(this, "deviceId");
     __publicField(this, "time");
     if (!descriptor)
       descriptor = {};
@@ -3240,7 +3240,6 @@ class VertexBuffer {
   set datas(f) {
     this._datas = f;
     this.mustBeTransfered = true;
-    console.warn("VB set datas = ", f);
   }
   setComplexDatas(datas, nbComponentTotal) {
     this._nbComponent = nbComponentTotal;
@@ -3311,7 +3310,6 @@ class VertexBuffer {
   createBindGroupEntry(bindingId) {
     if (!this.gpuResource)
       this.createGpuResource();
-    console.log("VertexBuffer.createBindgroupEntry size = ", this.datas.byteLength);
     return {
       binding: bindingId,
       resource: {
@@ -3322,6 +3320,9 @@ class VertexBuffer {
     };
   }
   setPipelineType(pipelineType) {
+    if (this.pipelineType)
+      return;
+    this.pipelineType = pipelineType;
     if (pipelineType === "render") {
       this.descriptor.accessMode = "read";
       this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
@@ -3481,7 +3482,7 @@ class VertexBuffer {
       return;
     if (this.gpuResource)
       this.gpuResource.destroy();
-    console.log("VB.createGPUResource ", this.datas, this.datas.byteLength, this.descriptor.usage);
+    this.deviceId = XGPU.deviceId;
     this._bufferSize = this.datas.byteLength;
     this.gpuResource = XGPU.device.createBuffer({
       size: this.datas.byteLength,
@@ -3491,7 +3492,6 @@ class VertexBuffer {
     this.mustBeTransfered = true;
   }
   destroyGpuResource() {
-    console.log("destroy vertexbuffer");
     if (this.time && (/* @__PURE__ */ new Date()).getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
       return;
     }
@@ -3500,13 +3500,14 @@ class VertexBuffer {
       if (this.io === 1) {
         const vbio = this.resourceIO;
         const vbs = vbio.buffers;
-        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", this);
+        this.setPipelineType(this.pipelineType);
+        const currentDatas = vbio.currentDatas ? vbio.currentDatas : vbs[0]._datas;
         if (vbs[0]._datas instanceof Float32Array)
-          vbs[0]._datas = vbs[1]._datas = new Float32Array(vbio.currentDatas);
+          vbs[0]._datas = vbs[1]._datas = new Float32Array(currentDatas);
         else if (vbs[0]._datas instanceof Int32Array)
-          vbs[0]._datas = vbs[1]._datas = new Int32Array(vbio.currentDatas);
+          vbs[0]._datas = vbs[1]._datas = new Int32Array(currentDatas);
         else if (vbs[0]._datas instanceof Uint32Array)
-          vbs[0]._datas = vbs[1]._datas = new Uint32Array(vbio.currentDatas);
+          vbs[0]._datas = vbs[1]._datas = new Uint32Array(currentDatas);
         let temp = vbs[0].gpuBufferIOs;
         vbs[0].gpuBufferIOs = null;
         vbs[0].createGpuResource();
@@ -3632,6 +3633,7 @@ class VertexBufferIO {
       this.deviceId = XGPU.deviceId;
       this.canCallMapAsync = true;
       this.stagingBuffer = null;
+      this.currentDatas = this.buffers[0].datas;
     }
   }
   async getOutputData() {
@@ -3765,7 +3767,7 @@ class VideoTexture {
     __publicField(this, "descriptor");
     __publicField(this, "useWebcodec", false);
     //still in beta 
-    __publicField(this, "_gpuResource");
+    __publicField(this, "gpuResource");
     /*
     bindgroups: an array of bindgroup that contains the VideoTexture 
     => I need it to call its "build" function onVideoFrameCallback
@@ -3788,13 +3790,6 @@ class VideoTexture {
     this.descriptor = descriptor;
     if (descriptor.source)
       this.source = descriptor.source;
-  }
-  get gpuResource() {
-    return this._gpuResource;
-  }
-  set gpuResource(v) {
-    console.warn("VideoTexture.set gpuResource = ", v);
-    this._gpuResource = v;
   }
   addBindgroup(bindgroup) {
     if (this.bindgroups.indexOf(bindgroup) === -1) {
@@ -3831,7 +3826,6 @@ class VideoTexture {
   update() {
   }
   destroyGpuResource() {
-    console.log("destroyGpuResource deviceLost = ");
     if (this.videoFrame) {
       this.videoFrame.close();
       this.videoFrame = null;
@@ -4877,18 +4871,15 @@ class Bindgroup {
     const getBufferId = (o) => {
       if (!this.instances) {
         for (let i = 0; i < allVertexBuffers.length; i++) {
-          console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane);
           if (allVertexBuffers[i].resource === o)
             return i;
         }
       } else {
         for (let i = 0; i < allVertexBuffers.length; i++) {
-          console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane);
           if (allVertexBuffers[i].resource.nane === o.name)
             return i;
         }
       }
-      console.warn("GET BUFFER ID = -1  ", allVertexBuffers.length);
       return -1;
     };
     this.vertexBuffers = [];
@@ -4917,7 +4908,6 @@ class Bindgroup {
       for (let i = 0; i < this.vertexBuffers.length; i++) {
         if (!this.vertexBuffers[i].gpuResource) {
           this.vertexBuffers[i].createGpuResource();
-          console.log("buffer resource = ", this.vertexBuffers[i].gpuResource);
         }
       }
     }
@@ -5039,7 +5029,6 @@ class Bindgroup {
     this.instances.push(result);
   }
   handleComputePipelineResourceIOs() {
-    console.warn("handleComputePipelineResourceIOs ", this.resourcesIOs);
     if (this.resourcesIOs.length) {
       let buf0 = [];
       let buf1 = [];
@@ -5102,7 +5091,6 @@ class Bindgroup {
     return group;
   }
   handleRenderPipelineResourceIOs() {
-    console.warn("handleRenderPipelineResourceIOs ", this.elements.length, this.textureIO);
     if (this.renderPipelineimageIO) {
       this.renderPipelineimageIO.initIO();
       return;
@@ -5118,7 +5106,6 @@ class Bindgroup {
     let foundVertexIO = false;
     let foundTextureIO = false;
     for (let i = 0; i < this.elements.length; i++) {
-      console.log(i, this.elements[i], this.parent.pipeline);
       resource = this.elements[i].resource;
       if (resource instanceof VertexBuffer) {
         if (resource.io === 1) {
@@ -5136,7 +5123,6 @@ class Bindgroup {
           name = this.elements[i].name;
           parentResources[name] = void 0;
           parentResources[name + "_out"] = void 0;
-          console.log("this.elements[i + 1] = ", this.elements[i + 1]);
           textureIOs.push(resource);
           textureIOs.push(this.elements[i + 1].resource);
           this.elements.splice(i, 2);
@@ -5146,7 +5132,6 @@ class Bindgroup {
       }
     }
     if (foundVertexIO) {
-      console.log("foundVertexIO");
       const attributes = bufferIOs[0].attributeDescriptor;
       const stepMode = bufferIOs[0].descriptor.stepMode;
       const vb = new VertexBuffer(attributes, { stepMode });
@@ -5167,7 +5152,6 @@ class Bindgroup {
       vb.initIO();
       this.renderPipelineBufferIO = vb;
     } else if (foundTextureIO) {
-      console.log("foundTextureIO");
       const img = new ImageTexture({ source: textureIOs[0].gpuResource });
       this.elements.push({ name, resource: img });
       let images = parentResources.types.imageTextures;
@@ -6562,7 +6546,6 @@ class RenderPipeline extends Pipeline {
   clearAfterDeviceLostAndRebuild() {
     if (this.onRebuildStartAfterDeviceLost)
       this.onRebuildStartAfterDeviceLost();
-    console.log("RenderPipeline.clearAfterDeviceLostAndRebuild debug = " + this.debug);
     this.gpuPipeline = null;
     if (this.drawConfig.indexBuffer)
       this.drawConfig.indexBuffer.createGpuResource();
@@ -6574,7 +6557,6 @@ class RenderPipeline extends Pipeline {
       this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
     this.rebuildingAfterDeviceLost = true;
     super.clearAfterDeviceLostAndRebuild();
-    this.buildGpuPipeline();
   }
   buildGpuPipeline() {
     if (this.gpuPipeline)
@@ -6737,6 +6719,12 @@ class RenderPipeline extends Pipeline {
         this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
       }
     }
+    if (this.multisampleTexture)
+      this.multisampleTexture.update();
+    if (this.depthStencilTexture)
+      this.depthStencilTexture.update();
+    if (this.renderPassTexture)
+      this.renderPassTexture.update();
     if (this.onDrawEnd)
       this.onDrawEnd();
   }
@@ -6944,7 +6932,6 @@ class ComputePipeline extends Pipeline {
     this.gpuComputePipeline = null;
     this.rebuildingAfterDeviceLost = true;
     super.clearAfterDeviceLostAndRebuild();
-    this.buildGpuPipeline();
   }
   buildGpuPipeline() {
     if (this.gpuComputePipeline)

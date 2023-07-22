@@ -46,6 +46,7 @@ export declare class VertexBuffer implements IShaderResource {
     createBindGroupLayoutEntry(bindingId: number): any;
     createBindGroupEntry(bindingId: number): any;
     protected canRefactorData: boolean;
+    protected pipelineType: "compute" | "render" | "compute_mixed";
     setPipelineType(pipelineType: "compute" | "render" | "compute_mixed"): void;
     createStruct(name: string): ShaderStruct;
     arrayStride: number;
@@ -58,6 +59,7 @@ export declare class VertexBuffer implements IShaderResource {
     protected layout: any;
     createVertexBufferLayout(builtinOffset?: number): any;
     protected _bufferSize: number;
+    protected deviceId: number;
     get bufferSize(): number;
     createGpuResource(): void;
     time: number;

@@ -16,9 +16,7 @@ export declare class VideoTexture implements IShaderResource {
     mustBeTransfered: boolean;
     descriptor: VideoTextureDescriptor;
     useWebcodec: boolean;
-    _gpuResource: HTMLVideoElement;
-    get gpuResource(): HTMLVideoElement;
-    set gpuResource(v: HTMLVideoElement);
+    gpuResource: HTMLVideoElement;
     protected bindgroups: Bindgroup[];
     addBindgroup(bindgroup: Bindgroup): void;
     constructor(descriptor: {
