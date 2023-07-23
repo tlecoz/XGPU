@@ -8,7 +8,7 @@ At its lower level, XGPU could be considered as a framework because it automatic
 
 XGPU is focused solely on WebGPU. It allows you to produce code that is easy to read, write, maintain, and reuse.
 
-**Note**: XGPU does not contain higher-level classes used in most rendering engines, such as Camera, Light, etc. However, you can easily build them using it (see the [samples](https://github.com/tlecoz/xgpu-samples) for examples).
+**Note**: XGPU does not contain higher-level classes used in most rendering engines, such as Camera, Light, etc. However, you can easily build them using it (see [this page](https://github.com/tlecoz/xgpu-samples) to see some examples).
 
 # Why "XGPU" ?
 
@@ -20,11 +20,11 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - Automatic buffer alignment
 - Automatic declaration of variables in the shaders
 - Automatic handling of BindgroupLayout
-- Extendable renderPipeline & computePipeline
+- Extendable pipelines & resources 
 - Ability to plug advanced features (such as light, shadow, etc.) into an existing pipeline.
 - Pipelines, textures and buffers automaticly rebuilt when device is lost 
 - Declare your variables once for all in javascript with the name you want and use them directly in your shader
-- Easy-to-read, easy-to-write, easy-to-maintain at its higher level, and very powerful and flexible at its lower level.
+- Easy-to-read, easy-to-write, easy-to-maintain
 
 
 # How to use?
@@ -109,11 +109,10 @@ I will complete this section soon, but in the meantime, you can check some sampl
 
 
 - For now, you can't have more than one VertexBufferIO or ImageTextureIO by pipeline
-  (a VertexBufferIO is a vertexBuffer used in a ComputeShader to store data ; it may be used as input of a renderPipeline ; same for ImageTextureIO)
+  A VertexBufferIO/ImageTextureIO is a resource used in a ComputeShader to store data ; it may be used as input of a renderPipeline after being processed by a computeShader. 
+  
  
 
-
 - I'm (very) far from having tested every possibilities allowed by WebGPU. 
-  I think I covered most of common usecases but I can't ensure that every data-structure will work as expected. 
 
  
