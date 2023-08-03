@@ -8,7 +8,7 @@ At its lower level, XGPU could be considered as a framework because it automatic
 
 XGPU is focused solely on WebGPU. It allows you to produce code that is easy to read, write, maintain, and reuse.
 
-**Note**: XGPU does not contain higher-level classes used in most rendering engines, such as Camera, Light, etc. However, you can easily build them using it (see [this page](https://github.com/tlecoz/xgpu-samples) to see some examples).
+**Note**: XGPU does not contain higher-level classes used in most rendering engines, such as Camera, Light, etc. However, you can easily build them using it (check [this page](https://github.com/tlecoz/xgpu-samples) to see some examples).
 
 # Why "XGPU" ?
 

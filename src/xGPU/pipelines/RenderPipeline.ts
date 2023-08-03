@@ -139,17 +139,11 @@ export class RenderPipeline extends Pipeline {
         //--------
 
 
-        //console.log("#0 ", JSON.stringify(descriptor));
 
-
-        /*
-        descriptor = this.highLevelParse(descriptor);
-        descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
-        */
         descriptor = HighLevelParser.parse(descriptor, "render", this.drawConfig);
 
 
-        //console.log("DESCRIPTOR ", descriptor)
+
 
         super.initFromObject(descriptor);
 
@@ -224,7 +218,7 @@ export class RenderPipeline extends Pipeline {
                     group.name = z;
                     const g = group.initFromObject(descriptor.bindgroups[z]);
                     resourcesGroups[k++] = g;
-                    //console.log("=> ", z, g)
+
                     this.bindGroups.add(group);
                 }
 
@@ -377,7 +371,7 @@ export class RenderPipeline extends Pipeline {
         }
 
         if (this._depthStencilTexture) {
-            console.log("A")
+
             this.renderPassDescriptor.description.sampleCount = 4;
             this._depthStencilTexture.create();
         }
@@ -417,10 +411,6 @@ export class RenderPipeline extends Pipeline {
         this.renderPassDescriptor.depthStencilAttachment = this.depthStencilTexture.attachment;
         this.description.depthStencil = this.depthStencilTexture.description;
 
-
-
-        //console.log("depthStencilAttachment ", this.depthStencilTexture.attachment)
-        //console.log("this.description.depthStencil ", this.description.depthStencil)
 
     }
     //----------------------------------------
@@ -463,8 +453,6 @@ export class RenderPipeline extends Pipeline {
 
         if (this.onRebuildStartAfterDeviceLost) this.onRebuildStartAfterDeviceLost();
 
-        //console.log("RenderPipeline.clearAfterDeviceLostAndRebuild debug = " + this.debug)
-
         this.gpuPipeline = null;
         if (this.drawConfig.indexBuffer) this.drawConfig.indexBuffer.createGpuResource();
         if (this.multisampleTexture) this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
@@ -474,7 +462,6 @@ export class RenderPipeline extends Pipeline {
         super.clearAfterDeviceLostAndRebuild();
 
 
-        //this.buildGpuPipeline();
     }
 
 
@@ -565,11 +552,10 @@ export class RenderPipeline extends Pipeline {
         }
 
 
-        //this.description.layout = this.gpuPipelineLayout;
+
         this.rebuildingAfterDeviceLost = false;
-        //console.log("buildGPUPipeline description = ", this.description)
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
-        //console.log("gpuPipeline = ", this.gpuPipeline)
+
 
 
         return this.gpuPipeline;
@@ -635,7 +621,7 @@ export class RenderPipeline extends Pipeline {
             if (this.multisampleTexture) {
                 if (!this.multisampleTexture.view) this.multisampleTexture.create();
 
-                //console.log("MSAA view = ", this.multisampleTexture.view)
+
                 this.outputColor.view = this.multisampleTexture.view;
 
                 if (this.multisampleTexture.resolveTarget) this.outputColor.resolveTarget = this.multisampleTexture.resolveTarget;
@@ -706,7 +692,6 @@ export class RenderPipeline extends Pipeline {
 
         if ((this.canvas as any).dimensionChanged) {
 
-            //console.log("RESIZE CANVAS !!!!! ", this.canvas.height)
 
             if (this.multisampleTexture) {
                 this.multisampleTexture.resize(this.canvas.width, this.canvas.height);

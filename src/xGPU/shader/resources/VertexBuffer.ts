@@ -495,7 +495,7 @@ export class VertexBuffer implements IShaderResource {
             componentId += this.vertexArrays[i].nbComponent;
         }
 
-        console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
+        //console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
 
 
 

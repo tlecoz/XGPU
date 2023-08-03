@@ -54,7 +54,7 @@ export class XGPU {
     }
 
     public static get loseDeviceRecently(): boolean {
-        console.log("delay = ", new Date().getTime() - this.deviceLostTime)
+        //console.log("delay = ", new Date().getTime() - this.deviceLostTime)
         return new Date().getTime() - this.deviceLostTime <= 3000;
     }
 

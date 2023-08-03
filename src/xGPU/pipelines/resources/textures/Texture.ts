@@ -57,7 +57,7 @@ export class Texture {
         this.time = new Date().getTime();
 
 
-        console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId)
+        //console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId)
 
         if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId) return
 
@@ -65,7 +65,7 @@ export class Texture {
             (this.gpuResource as any).xgpuObject = null;
             this.gpuResource.destroy();
         }
-        console.warn("createTexture ", this.deviceId)
+        //console.warn("createTexture ", this.deviceId)
 
 
 

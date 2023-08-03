@@ -132,43 +132,7 @@ export class Pipeline {
         return vertexInput;
     }
 
-    protected mergeBindgroupShaders(): void {
-        /*
-        this.vertexShader = new VertexShader();
-        this.fragmentShader = new FragmentShader();
 
-        const groups = this.bindGroups.groups;
-        let group: Bindgroup;
-        let vertex: string = "";
-        let fragment: string = "";
-        let vertexInputs = [];
-        let fragmentInputs = [];
-        let vertexOutputs = [];
-        let fragmentOutputs = [];
-
-
-        for (let i = 0; i < groups.length; i++) {
-            group = groups[i];
-            vertex += group.vertexShader.main.text + "\n";
-            fragment += group.fragmentShader.main.text + "\n";
-
-            vertexInputs = vertexInputs.concat(group.vertexShader.inputs);
-            vertexOutputs = vertexOutputs.concat(group.vertexShader.outputs);
-
-            fragmentInputs = fragmentInputs.concat(group.fragmentShader.inputs);
-            fragmentOutputs = fragmentOutputs.concat(group.fragmentShader.outputs);
-        }
-
-
-        this.vertexShader.main.text = vertex;
-        this.vertexShader.inputs = vertexInputs;
-        this.vertexShader.outputs = vertexOutputs;
-
-        this.fragmentShader.main.text = fragment;
-        this.fragmentShader.inputs = fragmentInputs;
-        this.fragmentShader.outputs = fragmentOutputs;
-        */
-    }
 
 
 
@@ -327,8 +291,7 @@ export class Pipeline {
                     (instance[uniformBufferName] as any).name = clonedUniformBuffers[uniformBufferName].name;
                     (instance[uniformBufferName] as any).bindgroup = bindgroup;
                     instance[name] = clonedUniformBuffers[uniformBufferName].getUniformByName(name);
-                    instance[name].debug = "azerty";
-                    //console.log("instance[name] = ", instance[name])
+
 
                 } else {
                     instance[name] = resource.clone();
@@ -368,7 +331,6 @@ export class Pipeline {
                         o.createGpuResource();
                     }
                     o.update();
-                    //console.log(i, o.name, o)
                     o.bindgroup.set(o.name, o);
                 }
                 this.update();

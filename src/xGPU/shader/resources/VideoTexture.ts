@@ -76,6 +76,7 @@ export class VideoTexture implements IShaderResource {
         this.descriptor.size = [video.width, video.height];
 
         const frame = () => {
+            if (!this.gpuResource) return;
             if (XGPU.device) {
                 this.bindgroups.forEach(b => b.build())
             }

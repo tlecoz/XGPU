@@ -1,7 +1,30 @@
+-fix bug params + add button "lose device" 
+- simplify / normalize file structure 
+  |-> put textures in ShaderResource , implements IShaderResource
+     |-> test demo after each changes
+	 
+	 
+- remove ResizableRenderPipeline from samples 
+  |-> keep the class 
+  
+- load assets directly in the sample , not in the class Sample to expose the complete process 
+
+- create a WebGpuViewer class exteds ResizableRenderPipeline based on a canvas in order to easily integrate demos in tutorials 
 
 
+- write some tutorials 
+
+- renderBundler 
+- fix bugs defined in readme 
+
+- vectorGraphics
+- BitmapText 
+- others demos 
+
+- create a reactComponent containing WebGpuViewer
 
 
+//------------------------------------------
 
 
 
