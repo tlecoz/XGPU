@@ -240,7 +240,6 @@ export class UniformGroup {
                             struct += "    @size(" + (o.type.arrayLength * col * row * 4) + ") " + o.name + ":" + o.type.dataType + ",\n";
                         }
                         else {
-                            console.log("PPPPPPPPPP ", o.name, o.type.dataType);
                             struct += "    @size(" + (o.type.arrayLength * 16) + ") " + o.name + ":" + o.type.dataType + ",\n";
                         }
                     }

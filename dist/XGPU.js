@@ -65,7 +65,6 @@ const _XGPU = class {
       if (adapter) {
         this.gpuDevice = await adapter.requestDevice();
         this.deviceId++;
-        console.log("get GPU device : ", this.deviceId);
         this.deviceLost = false;
         this.gpuDevice.lost.then((info) => {
           console.clear();
@@ -1521,12 +1520,10 @@ class DepthStencilTexture extends Texture {
     return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_depth_2d;\n";
   }
   createGpuResource() {
-    console.log("depthTexture create");
     this.create();
   }
   destroyGpuResource() {
     if (this.gpuResource) {
-      console.warn("depthTexture destroy ");
       this._view = null;
       this.gpuResource.destroy();
       this.gpuResource = null;
@@ -1801,7 +1798,6 @@ class ImageTextureArray extends ImageTexture {
   createGpuResource() {
     if (this.gpuResource)
       this.gpuResource.destroy();
-    console.log("cubemap createtexture ", this.descriptor);
     this.gpuResource = XGPU.device.createTexture(this.descriptor);
     this._view = this.gpuResource.createView({ dimension: "2d-array", arrayLayerCount: this._bitmaps.length });
     for (let i = 0; i < this.mustUpdate.length; i++)
@@ -1819,7 +1815,6 @@ class ImageTextureArray extends ImageTexture {
   }
   update() {
     if (this.mustBeTransfered) {
-      console.log("update textureArray");
       if (!this.gpuResource)
         this.createGpuResource();
       let bmp;
@@ -2480,7 +2475,6 @@ class UniformGroup {
                 row = 2;
               struct += "    @size(" + o2.type.arrayLength * col * row * 4 + ") " + o2.name + ":" + o2.type.dataType + ",\n";
             } else {
-              console.log("PPPPPPPPPP ", o2.name, o2.type.dataType);
               struct += "    @size(" + o2.type.arrayLength * 16 + ") " + o2.name + ":" + o2.type.dataType + ",\n";
             }
           } else {
@@ -2651,7 +2645,6 @@ class UniformBuffer {
       for (let z in items)
         items[z] = items[z].clone();
     }
-    console.log(this.descriptor, this.shaderVisibility);
     const buffer = new UniformBuffer(items, this.descriptor);
     buffer.cloned = true;
     buffer.name = this.name;
@@ -4551,8 +4544,6 @@ class IndexBuffer {
     this.mustUpdateData = true;
     if (!extraBufferSize)
       extraBufferSize = 1e3;
-    if (this.datas)
-      console.log(this.datas.length + " VS " + (offset + len));
     if (!this._datas || this._datas.length < offset + len) {
       if (indices instanceof Uint16Array)
         this.descriptor.dataType = "uint16";
@@ -4565,7 +4556,6 @@ class IndexBuffer {
         this._datas = indices;
         this.createGpuResource();
       } else {
-        console.log("B");
         if (indices instanceof Uint16Array)
           this._datas = new Uint16Array(this._datas.length + extraBufferSize);
         else
@@ -4574,7 +4564,6 @@ class IndexBuffer {
         this.createGpuResource();
       }
     } else {
-      console.log("A ", indices.slice(offset, offset + len));
       if (offset && len)
         this._datas.set(indices.slice(offset, offset + len), offset);
       else
@@ -5152,7 +5141,6 @@ class Bindgroup {
       parentResources[name] = img;
       parentResources.types.imageTextures = images;
       img.initIO = () => {
-        console.log("initIO ", textureIOs[0].deviceId, textureIOs[1].deviceId);
         img.source = textureIOs[0].texture;
         img.initTextureIO([textureIOs[0].texture, textureIOs[1].texture]);
       };

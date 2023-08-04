@@ -80,12 +80,12 @@ export class DepthStencilTexture extends Texture {
         return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_depth_2d;\n";
     }
     createGpuResource() {
-        console.log("depthTexture create");
+        //console.log("depthTexture create")
         this.create();
     }
     destroyGpuResource() {
         if (this.gpuResource) {
-            console.warn("depthTexture destroy ");
+            //console.warn("depthTexture destroy ")
             this._view = null;
             this.gpuResource.destroy();
             this.gpuResource = null;

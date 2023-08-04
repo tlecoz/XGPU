@@ -78,8 +78,7 @@ export class IndexBuffer {
         this.mustUpdateData = true;
         if (!extraBufferSize)
             extraBufferSize = 1000;
-        if (this.datas)
-            console.log(this.datas.length + " VS " + (offset + len));
+        //if (this.datas) console.log(this.datas.length + " VS " + (offset + len))
         if (!this._datas || this._datas.length < offset + len) {
             if (indices instanceof Uint16Array)
                 this.descriptor.dataType = "uint16";
@@ -94,7 +93,7 @@ export class IndexBuffer {
                 this.createGpuResource();
             }
             else {
-                console.log("B");
+                //console.log("B")
                 if (indices instanceof Uint16Array)
                     this._datas = new Uint16Array(this._datas.length + extraBufferSize);
                 else
@@ -104,7 +103,7 @@ export class IndexBuffer {
             }
         }
         else {
-            console.log("A ", indices.slice(offset, offset + len));
+            //console.log("A ", indices.slice(offset, offset + len))
             if (offset && len)
                 this._datas.set(indices.slice(offset, offset + len), offset);
             else

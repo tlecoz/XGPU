@@ -32,7 +32,7 @@ export class UniformBuffer {
             for (let z in items)
                 items[z] = items[z].clone();
         }
-        console.log(this.descriptor, this.shaderVisibility);
+        //console.log(this.descriptor, this.shaderVisibility)
         const buffer = new UniformBuffer(items, this.descriptor);
         buffer.cloned = true;
         buffer.name = this.name;

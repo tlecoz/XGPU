@@ -112,13 +112,13 @@ export class DepthStencilTexture extends Texture implements IShaderResource {
     }
 
     public createGpuResource() {
-        console.log("depthTexture create")
+        //console.log("depthTexture create")
         this.create()
     }
 
     public destroyGpuResource() {
         if (this.gpuResource) {
-            console.warn("depthTexture destroy ")
+            //console.warn("depthTexture destroy ")
             this._view = null;
             this.gpuResource.destroy();
             this.gpuResource = null;

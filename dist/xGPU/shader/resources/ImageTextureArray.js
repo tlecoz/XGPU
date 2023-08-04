@@ -40,7 +40,7 @@ export class ImageTextureArray extends ImageTexture {
     createGpuResource() {
         if (this.gpuResource)
             this.gpuResource.destroy();
-        console.log("cubemap createtexture ", this.descriptor);
+        //console.log("cubemap createtexture ", this.descriptor)
         this.gpuResource = XGPU.device.createTexture(this.descriptor);
         this._view = this.gpuResource.createView({ dimension: '2d-array', arrayLayerCount: this._bitmaps.length });
         for (let i = 0; i < this.mustUpdate.length; i++)
@@ -58,7 +58,7 @@ export class ImageTextureArray extends ImageTexture {
     }
     update() {
         if (this.mustBeTransfered) {
-            console.log("update textureArray");
+            //console.log("update textureArray")
             if (!this.gpuResource)
                 this.createGpuResource();
             let bmp;

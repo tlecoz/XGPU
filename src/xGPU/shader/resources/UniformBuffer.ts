@@ -65,7 +65,7 @@ export class UniformBuffer implements IShaderResource {
 
 
 
-        console.log(this.descriptor, this.shaderVisibility)
+        //console.log(this.descriptor, this.shaderVisibility)
         const buffer = new UniformBuffer(items, this.descriptor);
         buffer.cloned = true;
 

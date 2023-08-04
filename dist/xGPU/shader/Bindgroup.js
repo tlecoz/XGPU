@@ -611,7 +611,7 @@ export class Bindgroup {
             parentResources[name] = img;
             parentResources.types.imageTextures = images;
             img.initIO = () => {
-                console.log("initIO ", textureIOs[0].deviceId, textureIOs[1].deviceId);
+                //console.log("initIO ", textureIOs[0].deviceId, textureIOs[1].deviceId)
                 img.source = textureIOs[0].texture;
                 img.initTextureIO([textureIOs[0].texture, textureIOs[1].texture]);
             };

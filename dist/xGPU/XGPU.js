@@ -66,7 +66,7 @@ export class XGPU {
             if (adapter) {
                 this.gpuDevice = await adapter.requestDevice();
                 this.deviceId++;
-                console.log("get GPU device : ", this.deviceId);
+                //console.log("get GPU device : ", this.deviceId)
                 this.deviceLost = false;
                 this.gpuDevice.lost.then((info) => {
                     console.clear();

@@ -332,21 +332,15 @@ export class UniformGroup {
                             let row = 4;
                             if (o.type.matrixRows === 2) row = 2;
 
-
-
                             struct += "    @size(" + (o.type.arrayLength * col * row * 4) + ") " + o.name + ":" + o.type.dataType + ",\n";
                         } else {
-
-                            console.log("PPPPPPPPPP ", o.name, o.type.dataType)
 
                             struct += "    @size(" + (o.type.arrayLength * 16) + ") " + o.name + ":" + o.type.dataType + ",\n";
                         }
 
-
                     } else {
                         struct += "    " + o.name + ":" + o.type.dataType + ",\n";
                     }
-
 
                 }
 

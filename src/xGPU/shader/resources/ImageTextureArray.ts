@@ -73,7 +73,7 @@ export class ImageTextureArray extends ImageTexture implements IShaderResource {
 
     public createGpuResource(): void {
         if (this.gpuResource) this.gpuResource.destroy();
-        console.log("cubemap createtexture ", this.descriptor)
+        //console.log("cubemap createtexture ", this.descriptor)
 
         this.gpuResource = XGPU.device.createTexture(this.descriptor as GPUTextureDescriptor);
         this._view = this.gpuResource.createView({ dimension: '2d-array', arrayLayerCount: this._bitmaps.length });
@@ -96,7 +96,7 @@ export class ImageTextureArray extends ImageTexture implements IShaderResource {
 
 
         if (this.mustBeTransfered) {
-            console.log("update textureArray")
+            //console.log("update textureArray")
             if (!this.gpuResource) this.createGpuResource();
 
             let bmp: ImageBitmap | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | GPUTexture;
