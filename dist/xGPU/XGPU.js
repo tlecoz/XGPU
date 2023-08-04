@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 export class XGPU {
+    static debugShaders = false;
     static _ready = false;
     static get ready() { return this._ready; }
     static gpuDevice;

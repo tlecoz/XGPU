@@ -2,6 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { BuiltIns } from "../BuiltIns";
+import { XGPU } from "../XGPU";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 import { ShaderStruct } from "./shaderParts/ShaderStruct";
 
@@ -50,9 +51,13 @@ export class FragmentShader extends ShaderStage {
         result += "}\n";
 
         result = this.formatWGSLCode(result)
-        //console.log("------------- FRAGMENT SHADER --------------")
-        //console.log(result)
-        //console.log("--------------------------------------------")
+
+        if (XGPU.debugShaders) {
+            console.log("------------- FRAGMENT SHADER --------------")
+            console.log(result)
+            console.log("--------------------------------------------")
+        }
+
 
         this._shaderInfos = { code: result, output: output };
         return this._shaderInfos;

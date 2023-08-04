@@ -1,5 +1,6 @@
 /// <reference types="dist" />
 export declare class XGPU {
+    static debugShaders: boolean;
     private static _ready;
     static get ready(): boolean;
     protected static gpuDevice: GPUDevice;

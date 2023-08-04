@@ -134,6 +134,7 @@ var __publicField = (obj, key, value) => {
     }
   };
   let XGPU = _XGPU;
+  __publicField(XGPU, "debugShaders", false);
   __publicField(XGPU, "_ready", false);
   __publicField(XGPU, "gpuDevice");
   __publicField(XGPU, "requestAdapterOptions");
@@ -6076,6 +6077,11 @@ var __publicField = (obj, key, value) => {
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
+      if (XGPU.debugShaders) {
+        console.log("------------- FRAGMENT SHADER --------------");
+        console.log(result);
+        console.log("--------------------------------------------");
+      }
       this._shaderInfos = { code: result, output };
       return this._shaderInfos;
     }
@@ -6108,6 +6114,11 @@ var __publicField = (obj, key, value) => {
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
+      if (XGPU.debugShaders) {
+        console.log("------------- VERTEX SHADER --------------");
+        console.log(result);
+        console.log("------------------------------------------");
+      }
       return { code: result, output };
     }
   }

@@ -2,6 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { BuiltIns } from "../BuiltIns";
+import { XGPU } from "../XGPU";
 import { RenderPipeline } from "../pipelines/RenderPipeline";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 import { ShaderStruct } from "./shaderParts/ShaderStruct";
@@ -57,9 +58,12 @@ export class VertexShader extends ShaderStage {
 
         result = this.formatWGSLCode(result)
 
-        //console.log("------------- VERTEX SHADER --------------")
-        //console.log(result);
-        //console.log("------------------------------------------")
+        if (XGPU.debugShaders) {
+            console.log("------------- VERTEX SHADER --------------")
+            console.log(result);
+            console.log("------------------------------------------")
+        }
+
         return { code: result, output: output };
     }
 }

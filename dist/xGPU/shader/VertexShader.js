@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 import { BuiltIns } from "../BuiltIns";
+import { XGPU } from "../XGPU";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 import { ShaderStruct } from "./shaderParts/ShaderStruct";
 export class VertexShader extends ShaderStage {
@@ -38,9 +39,11 @@ export class VertexShader extends ShaderStage {
         result += "   return output;\n";
         result += "}\n";
         result = this.formatWGSLCode(result);
-        //console.log("------------- VERTEX SHADER --------------")
-        //console.log(result);
-        //console.log("------------------------------------------")
+        if (XGPU.debugShaders) {
+            console.log("------------- VERTEX SHADER --------------");
+            console.log(result);
+            console.log("------------------------------------------");
+        }
         return { code: result, output: output };
     }
 }

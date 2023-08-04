@@ -3,6 +3,7 @@
 
 export class XGPU {
 
+    public static debugShaders: boolean = false;
     private static _ready: boolean = false;
     public static get ready(): boolean { return this._ready; }
 
