@@ -6,7 +6,7 @@
 //NEW VERSION------
 
 import { XGPU } from "../../XGPU";
-import { PrimitiveType } from "../PrimitiveType";
+import { PrimitiveType } from "../../PrimitiveType";
 import { IShaderResource } from "./IShaderResource";
 import { UniformGroup, Uniformable } from "./UniformGroup";
 

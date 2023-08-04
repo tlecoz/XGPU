@@ -2,8 +2,8 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { mat2, mat2d, mat3, mat4, vec3 } from "gl-matrix";
-import { GPUType } from "../GPUType";
-import { UniformBuffer } from "./resources/UniformBuffer";
+import { GPUType } from "./GPUType";
+import { UniformBuffer } from "./shader/resources/UniformBuffer";
 
 export type PrimitiveType = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform;
 

@@ -5,7 +5,7 @@ import { BuiltIns } from "./BuiltIns";
 import { DrawConfig } from "./pipelines/resources/DrawConfig";
 
 import { Bindgroup } from "./shader/Bindgroup";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "./shader/PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "./PrimitiveType";
 import { CubeMapTexture } from "./shader/resources/CubeMapTexture";
 import { IShaderResource } from "./shader/resources/IShaderResource";
 import { ImageTexture } from "./shader/resources/ImageTexture";

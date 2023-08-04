@@ -7,8 +7,7 @@ export * from "./xGPU/GPURenderer"
 export * from "./xGPU/HeadlessGPURenderer"
 export * from "./xGPU/GPUType"
 export * from "./xGPU/BuiltIns"
-export * from "./xGPU/WgslUtils"
-
+export * from "./xGPU/PrimitiveType"
 export * from "./xGPU/blendmodes/AlphaBlendMode"
 export * from "./xGPU/blendmodes/BlendMode"
 
@@ -28,7 +27,7 @@ export * from "./xGPU/shader/Bindgroup"
 export * from "./xGPU/shader/Bindgroups"
 export * from "./xGPU/shader/ComputeShader"
 export * from "./xGPU/shader/FragmentShader"
-export * from "./xGPU/shader/PrimitiveType"
+
 export * from "./xGPU/shader/ShaderType"
 export * from "./xGPU/shader/VertexShader"
 
