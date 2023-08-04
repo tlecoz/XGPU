@@ -40,6 +40,7 @@ export declare class VideoTexture implements IShaderResource {
     };
     createGpuResource(): void;
     update(): void;
+    protected deviceId: number;
     destroyGpuResource(): void;
     private videoFrame;
     createBindGroupEntry(bindingId: number): {

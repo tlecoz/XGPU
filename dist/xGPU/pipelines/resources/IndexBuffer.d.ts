@@ -1,5 +1,5 @@
 /// <reference types="dist" />
-import { DrawConfig } from "../DrawConfig";
+import { DrawConfig } from "./DrawConfig";
 export type IndexBufferDescriptor = {
     nbPoint?: number;
     dataType?: "uint16" | "uint32";

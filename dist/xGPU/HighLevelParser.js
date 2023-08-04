@@ -2,7 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 import { BuiltIns } from "./BuiltIns";
 import { Bindgroup } from "./shader/Bindgroup";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "./shader/PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "./PrimitiveType";
 import { CubeMapTexture } from "./shader/resources/CubeMapTexture";
 import { ImageTexture } from "./shader/resources/ImageTexture";
 import { ImageTextureArray } from "./shader/resources/ImageTextureArray";

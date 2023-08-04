@@ -1,5 +1,5 @@
 /// <reference types="dist" />
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
 export type Uniformable = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform | UniformGroup | UniformGroupArray;

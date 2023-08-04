@@ -1,4 +1,4 @@
-import { DrawConfig } from "./pipelines/DrawConfig";
+import { DrawConfig } from "./pipelines/resources/DrawConfig";
 export declare class HighLevelParser {
     constructor();
     protected parseShaderBuiltins(descriptor: any): any;

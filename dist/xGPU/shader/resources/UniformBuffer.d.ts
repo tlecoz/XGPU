@@ -1,5 +1,5 @@
 /// <reference types="dist" />
-import { PrimitiveType } from "../PrimitiveType";
+import { PrimitiveType } from "../../PrimitiveType";
 import { IShaderResource } from "./IShaderResource";
 import { UniformGroup, Uniformable } from "./UniformGroup";
 export type UniformBufferDescriptor = {

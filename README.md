@@ -22,7 +22,6 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - Automatic handling of BindgroupLayout
 - Extendable pipelines & resources 
 - Ability to plug advanced features (such as light, shadow, etc.) into an existing pipeline.
-- Pipelines, textures and buffers automaticly rebuilt when device is lost 
 - Declare your variables once for all in javascript with the name you want and use them directly in your shader
 - Easy-to-read, easy-to-write, easy-to-maintain
 

@@ -1,12 +1,12 @@
 /// <reference types="dist" />
 import { Pipeline } from "./Pipeline";
-import { BlendMode } from "./resources/blendmodes/BlendMode";
+import { BlendMode } from "../blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
 import { IRenderer } from "../IRenderer";
-import { DrawConfig } from "./DrawConfig";
+import { DrawConfig } from "./resources/DrawConfig";
 export declare class RenderPipeline extends Pipeline {
     renderer: IRenderer;
     drawConfig: DrawConfig;

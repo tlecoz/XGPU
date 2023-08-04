@@ -1,5 +1,5 @@
-import { ShaderNode } from "../../shader/shaderParts/ShaderNode";
-import { Pipeline } from "../Pipeline";
+import { ShaderNode } from "../shader/shaderParts/ShaderNode";
+import { Pipeline } from "./Pipeline";
 export declare class PipelinePlugin {
     protected target: Pipeline;
     protected requiredNames: any;

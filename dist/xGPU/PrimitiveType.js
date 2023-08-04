@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 import { mat2, mat2d, mat3, mat4, vec3 } from "gl-matrix";
-import { GPUType } from "../GPUType";
+import { GPUType } from "./GPUType";
 export class PrimitiveFloatUniform extends Float32Array {
     //public uniform: Uniform;
     name;

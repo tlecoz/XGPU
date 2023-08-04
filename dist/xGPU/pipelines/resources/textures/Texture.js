@@ -37,14 +37,14 @@ export class Texture {
             return;
         }*/
         this.time = new Date().getTime();
-        console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId);
+        //console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId)
         if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId)
             return;
         if (this.gpuResource) {
             this.gpuResource.xgpuObject = null;
             this.gpuResource.destroy();
         }
-        console.warn("createTexture ", this.deviceId);
+        //console.warn("createTexture ", this.deviceId)
         this.deviceId = XGPU.deviceId;
         this.gpuResource = XGPU.device.createTexture(this.descriptor);
         this.gpuResource.xgpuObject = this;

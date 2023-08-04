@@ -52,7 +52,6 @@ const _XGPU = class {
     this.gpuDevice.destroy();
   }
   static get loseDeviceRecently() {
-    console.log("delay = ", (/* @__PURE__ */ new Date()).getTime() - this.deviceLostTime);
     return (/* @__PURE__ */ new Date()).getTime() - this.deviceLostTime <= 3e3;
   }
   static init(options) {
@@ -181,14 +180,12 @@ class Texture {
   }
   create() {
     this.time = (/* @__PURE__ */ new Date()).getTime();
-    console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId);
     if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId)
       return;
     if (this.gpuResource) {
       this.gpuResource.xgpuObject = null;
       this.gpuResource.destroy();
     }
-    console.warn("createTexture ", this.deviceId);
     this.deviceId = XGPU.deviceId;
     this.gpuResource = XGPU.device.createTexture(this.descriptor);
     this.gpuResource.xgpuObject = this;
@@ -700,44 +697,6 @@ __publicField(BuiltIns, "computeInputs", {
 __publicField(BuiltIns, "computeOutputs", {
   result: { builtin: "@location(0)", type: "???" }
 });
-class WgslUtils {
-  static get rotationX() {
-    return `
-        fn rotationX( angle:f32 )->mat4x4<f32> {
-            return mat4x4<f32>(	
-                    vec4(1.0,		0,			0,			0),
-                    vec4(0 , 	cos(angle),	-sin(angle),	0),
-                    vec4(0 , 	sin(angle),	 cos(angle),	0),
-                    vec4(0 , 			0,			  0, 	1)
-                    );
-        }
-        `;
-  }
-  static get rotationY() {
-    return `
-        fn rotationY( angle:f32 )->mat4x4<f32> {
-            return mat4x4<f32>(
-                    vec4( cos(angle),   0   ,	sin(angle) ,	0),
-                    vec4(   0       ,	1.0 ,   	 0     ,	0),
-                    vec4(-sin(angle),	0   ,	cos(angle) ,	0),
-                    vec4(   0       , 	0   ,	 	 0     ,	1)
-                );
-        }
-        `;
-  }
-  static get rotationZ() {
-    return `
-        fn rotationZ( angle:f32 )->mat4x4<f32> {
-            return mat4x4<f32>(
-                    vec4(cos(angle) , -sin(angle) ,	0  ,  0 ),
-                    vec4(sin(angle) , cos(angle)  ,	0  ,  0 ),
-                    vec4(    0      ,     0       ,	1  ,  0 ),
-                    vec4(    0      ,	  0       ,	0  ,  1)
-                );
-        }
-        `;
-  }
-}
 class PrimitiveFloatUniform extends Float32Array {
   constructor(type, val, createLocalVariable = false) {
     super(val);
@@ -1463,6 +1422,23 @@ class Matrix4x4Array extends PrimitiveFloatUniform {
       }
     }
     this.mustBeTransfered = mustBeTransfered;
+  }
+}
+class BlendMode {
+  constructor() {
+    __publicField(this, "color", { operation: "add", srcFactor: "one", dstFactor: "zero" });
+    __publicField(this, "alpha", { operation: "add", srcFactor: "one", dstFactor: "zero" });
+  }
+}
+class AlphaBlendMode extends BlendMode {
+  constructor() {
+    super();
+    this.color.operation = "add";
+    this.color.srcFactor = "src-alpha";
+    this.color.dstFactor = "one-minus-src-alpha";
+    this.alpha.operation = "add";
+    this.alpha.srcFactor = "src-alpha";
+    this.alpha.dstFactor = "one-minus-src-alpha";
   }
 }
 class DepthStencilTexture extends Texture {
@@ -3467,7 +3443,6 @@ class VertexBuffer {
       };
       componentId += this.vertexArrays[i].nbComponent;
     }
-    console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + nb * Float32Array.BYTES_PER_ELEMENT);
     obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
     this.layout = obj;
     return obj;
@@ -3774,6 +3749,7 @@ class VideoTexture {
     => a videoTexture can be contained in multiple bindgroups, that's why it's an array
     */
     __publicField(this, "bindgroups", []);
+    __publicField(this, "deviceId");
     __publicField(this, "videoFrame");
     if (void 0 === descriptor.format)
       descriptor.format = "rgba8unorm";
@@ -3803,11 +3779,21 @@ class VideoTexture {
     this.gpuResource = video;
     this.descriptor.source = video;
     this.descriptor.size = [video.width, video.height];
+    let nbError = 0;
     const frame = () => {
-      if (XGPU.device) {
+      if (!this.gpuResource)
+        return;
+      if (XGPU.device && this.deviceId === XGPU.deviceId) {
         this.bindgroups.forEach((b) => b.build());
+        nbError = 0;
+      } else {
+        nbError++;
       }
-      video.requestVideoFrameCallback(frame);
+      if (nbError < 30) {
+        video.requestVideoFrameCallback(frame);
+      } else {
+        video.src = void 0;
+      }
     };
     video.requestVideoFrameCallback(frame);
   }
@@ -3824,6 +3810,7 @@ class VideoTexture {
   createGpuResource() {
   }
   update() {
+    this.deviceId = XGPU.deviceId;
   }
   destroyGpuResource() {
     if (this.videoFrame) {
@@ -5821,8 +5808,6 @@ class Pipeline {
     }
     return vertexInput;
   }
-  mergeBindgroupShaders() {
-  }
   createLayouts() {
     this.gpuBindGroupLayouts = [];
     this.gpuBindgroups = [];
@@ -5922,7 +5907,6 @@ class Pipeline {
           instance[uniformBufferName].name = clonedUniformBuffers[uniformBufferName].name;
           instance[uniformBufferName].bindgroup = bindgroup;
           instance[name] = clonedUniformBuffers[uniformBufferName].getUniformByName(name);
-          instance[name].debug = "azerty";
         } else {
           instance[name] = resource.clone();
           instance[name].bindgroup = bindgroup;
@@ -6494,7 +6478,6 @@ class RenderPipeline extends Pipeline {
       count: this.multisampleTexture.description.count
     };
     if (this._depthStencilTexture) {
-      console.log("A");
       this.renderPassDescriptor.description.sampleCount = 4;
       this._depthStencilTexture.create();
     }
@@ -6976,40 +6959,6 @@ class ComputePipeline extends Pipeline {
     }
   }
 }
-class MixedPipeline extends RenderPipeline {
-  constructor(renderer, bgColor) {
-    super(renderer, bgColor);
-    __publicField(this, "_computePipeline");
-    this._computePipeline = new ComputePipeline();
-    this._computePipeline.useRenderPipeline = true;
-    this.type = "render";
-  }
-  get computePipeline() {
-    return this._computePipeline;
-  }
-  buildPipelines() {
-    this._computePipeline.buildGpuPipeline();
-    this._computePipeline.nextFrame();
-    super.buildGpuPipeline();
-  }
-}
-class BlendMode {
-  constructor() {
-    __publicField(this, "color", { operation: "add", srcFactor: "one", dstFactor: "zero" });
-    __publicField(this, "alpha", { operation: "add", srcFactor: "one", dstFactor: "zero" });
-  }
-}
-class AlphaBlendMode extends BlendMode {
-  constructor() {
-    super();
-    this.color.operation = "add";
-    this.color.srcFactor = "src-alpha";
-    this.color.dstFactor = "one-minus-src-alpha";
-    this.alpha.operation = "add";
-    this.alpha.srcFactor = "src-alpha";
-    this.alpha.dstFactor = "one-minus-src-alpha";
-  }
-}
 class PipelinePlugin {
   constructor(target, required) {
     __publicField(this, "target");
@@ -7135,6 +7084,7 @@ export {
   ComputeShader,
   CubeMapTexture,
   DepthStencilTexture,
+  DepthTextureArray,
   Float,
   FragmentShader,
   GPURenderer,
@@ -7155,7 +7105,6 @@ export {
   Matrix3x3,
   Matrix4x4,
   Matrix4x4Array,
-  MixedPipeline,
   MultiSampleTexture,
   Pipeline,
   PipelinePlugin,
@@ -7187,6 +7136,5 @@ export {
   VertexBufferIO,
   VertexShader,
   VideoTexture,
-  WgslUtils,
   XGPU
 };

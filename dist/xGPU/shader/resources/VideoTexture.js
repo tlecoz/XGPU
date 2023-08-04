@@ -41,11 +41,27 @@ export class VideoTexture {
         this.gpuResource = video;
         this.descriptor.source = video;
         this.descriptor.size = [video.width, video.height];
+        let nbError = 0;
         const frame = () => {
-            if (XGPU.device) {
+            if (!this.gpuResource)
+                return;
+            if (XGPU.device && this.deviceId === XGPU.deviceId) {
                 this.bindgroups.forEach(b => b.build());
+                nbError = 0;
             }
-            video.requestVideoFrameCallback(frame);
+            else {
+                nbError++;
+            }
+            if (nbError < 30) {
+                //i keep the video updating during 30 frame after device loss
+                //because we don't know if we lost the device voluntarily (if we change the page ) 
+                //or because the device was lost for an external reason (in this case, the video must continue to update)
+                video.requestVideoFrameCallback(frame);
+            }
+            else {
+                video.src = undefined;
+                //console.log("KILL VIDEO")
+            }
         };
         video.requestVideoFrameCallback(frame);
     }
@@ -70,7 +86,9 @@ export class VideoTexture {
         np code here :
         the video update itself automaticly
         */
+        this.deviceId = XGPU.deviceId;
     }
+    deviceId;
     destroyGpuResource() {
         //console.log("destroyGpuResource deviceLost = ")
         /*

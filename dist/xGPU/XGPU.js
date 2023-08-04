@@ -52,7 +52,7 @@ export class XGPU {
         this.gpuDevice.destroy();
     }
     static get loseDeviceRecently() {
-        console.log("delay = ", new Date().getTime() - this.deviceLostTime);
+        //console.log("delay = ", new Date().getTime() - this.deviceLostTime)
         return new Date().getTime() - this.deviceLostTime <= 3000;
     }
     static init(options) {

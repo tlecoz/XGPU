@@ -1,6 +1,6 @@
 /// <reference types="dist" />
-import { RenderPipeline } from "./RenderPipeline";
-import { IndexBuffer } from "./resources/IndexBuffer";
+import { RenderPipeline } from "../RenderPipeline";
+import { IndexBuffer } from "./IndexBuffer";
 export declare class DrawConfig {
     vertexCount: number;
     instanceCount: number;

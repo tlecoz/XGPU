@@ -6,7 +6,7 @@ import { IShaderResource } from "../shader/resources/IShaderResource";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
 export declare class Pipeline {
     description: any;
     nbVertex: number;
@@ -33,7 +33,6 @@ export declare class Pipeline {
     addBindgroup(group: Bindgroup): void;
     protected createVertexBufferLayout(): any;
     protected createShaderInput(shader: VertexShader, buffers: VertexBuffer[]): ShaderStruct;
-    protected mergeBindgroupShaders(): void;
     protected createLayouts(): void;
     protected initPipelineResources(pipeline: Pipeline): void;
     protected build(): void;

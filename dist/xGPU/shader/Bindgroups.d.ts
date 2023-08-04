@@ -1,10 +1,10 @@
 /// <reference types="dist" />
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "./PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
 import { Bindgroup } from "./Bindgroup";
 import { IShaderResource } from "./resources/IShaderResource";
 import { VertexBuffer } from "./resources/VertexBuffer";
 import { Pipeline } from "../pipelines/Pipeline";
-import { DrawConfig } from "../pipelines/DrawConfig";
+import { DrawConfig } from "../pipelines/resources/DrawConfig";
 export declare class Bindgroups {
     pipeline: Pipeline;
     parent: Bindgroups;

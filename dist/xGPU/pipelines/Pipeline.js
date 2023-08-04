@@ -5,7 +5,7 @@ import { Bindgroups } from "../shader/Bindgroups";
 import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../shader/PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
 export class Pipeline {
     description = {};
     nbVertex;
@@ -87,43 +87,6 @@ export class Pipeline {
             }
         }
         return vertexInput;
-    }
-    mergeBindgroupShaders() {
-        /*
-        this.vertexShader = new VertexShader();
-        this.fragmentShader = new FragmentShader();
-
-        const groups = this.bindGroups.groups;
-        let group: Bindgroup;
-        let vertex: string = "";
-        let fragment: string = "";
-        let vertexInputs = [];
-        let fragmentInputs = [];
-        let vertexOutputs = [];
-        let fragmentOutputs = [];
-
-
-        for (let i = 0; i < groups.length; i++) {
-            group = groups[i];
-            vertex += group.vertexShader.main.text + "\n";
-            fragment += group.fragmentShader.main.text + "\n";
-
-            vertexInputs = vertexInputs.concat(group.vertexShader.inputs);
-            vertexOutputs = vertexOutputs.concat(group.vertexShader.outputs);
-
-            fragmentInputs = fragmentInputs.concat(group.fragmentShader.inputs);
-            fragmentOutputs = fragmentOutputs.concat(group.fragmentShader.outputs);
-        }
-
-
-        this.vertexShader.main.text = vertex;
-        this.vertexShader.inputs = vertexInputs;
-        this.vertexShader.outputs = vertexOutputs;
-
-        this.fragmentShader.main.text = fragment;
-        this.fragmentShader.inputs = fragmentInputs;
-        this.fragmentShader.outputs = fragmentOutputs;
-        */
     }
     createLayouts() {
         this.gpuBindGroupLayouts = [];
@@ -240,8 +203,6 @@ export class Pipeline {
                     instance[uniformBufferName].name = clonedUniformBuffers[uniformBufferName].name;
                     instance[uniformBufferName].bindgroup = bindgroup;
                     instance[name] = clonedUniformBuffers[uniformBufferName].getUniformByName(name);
-                    instance[name].debug = "azerty";
-                    //console.log("instance[name] = ", instance[name])
                 }
                 else {
                     instance[name] = resource.clone();
@@ -273,7 +234,6 @@ export class Pipeline {
                         o.createGpuResource();
                     }
                     o.update();
-                    //console.log(i, o.name, o)
                     o.bindgroup.set(o.name, o);
                 }
                 this.update();

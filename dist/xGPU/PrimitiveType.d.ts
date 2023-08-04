@@ -1,5 +1,5 @@
-import { GPUType } from "../GPUType";
-import { UniformBuffer } from "./resources/UniformBuffer";
+import { GPUType } from "./GPUType";
+import { UniformBuffer } from "./shader/resources/UniformBuffer";
 export type PrimitiveType = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform;
 export declare class PrimitiveFloatUniform extends Float32Array {
     name: string;

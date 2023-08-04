@@ -369,7 +369,7 @@ export class VertexBuffer {
             };
             componentId += this.vertexArrays[i].nbComponent;
         }
-        console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT));
+        //console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
         obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
         this.layout = obj;
         return obj;
