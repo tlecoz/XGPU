@@ -1,5 +1,5 @@
-import { RenderPipeline } from "./RenderPipeline";
-import { IndexBuffer } from "./resources/IndexBuffer";
+import { RenderPipeline } from "../RenderPipeline";
+import { IndexBuffer } from "./IndexBuffer";
 
 export class DrawConfig {
 

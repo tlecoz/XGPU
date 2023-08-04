@@ -9,20 +9,20 @@ export * from "./xGPU/GPUType"
 export * from "./xGPU/BuiltIns"
 export * from "./xGPU/WgslUtils"
 
+export * from "./xGPU/blendmodes/AlphaBlendMode"
+export * from "./xGPU/blendmodes/BlendMode"
+
 export * from "./xGPU/pipelines/Pipeline"
 export * from "./xGPU/pipelines/RenderPipeline"
 export * from "./xGPU/pipelines/ComputePipeline"
-export * from "./xGPU/pipelines/MixedPipeline"
-
 export * from "./xGPU/pipelines/resources/IndexBuffer"
-export * from "./xGPU/pipelines/resources/blendmodes/AlphaBlendMode"
-export * from "./xGPU/pipelines/resources/blendmodes/BlendMode"
+
 
 export * from "./xGPU/pipelines/resources/textures/Texture"
 export * from "./xGPU/pipelines/resources/textures/DepthStencilTexture"
 export * from "./xGPU/pipelines/resources/textures/MultiSampleTexture"
-export * from "./xGPU/pipelines/resources/textures/RenderPassTexture"
-export * from "./xGPU/pipelines/plugins/PipelinePlugin"
+
+export * from "./xGPU/pipelines/PipelinePlugin"
 
 export * from "./xGPU/shader/Bindgroup"
 export * from "./xGPU/shader/Bindgroups"
@@ -36,10 +36,12 @@ export * from "./xGPU/shader/shaderParts/ShaderNode"
 export * from "./xGPU/shader/shaderParts/ShaderStage"
 export * from "./xGPU/shader/shaderParts/ShaderStruct"
 
-export * from "./xGPU/shader/resources/CubeMapTexture"
 export * from "./xGPU/shader/resources/IShaderResource"
+export * from "./xGPU/shader/resources/CubeMapTexture"
+
 export * from "./xGPU/shader/resources/ImageTexture"
 export * from "./xGPU/shader/resources/ImageTextureArray"
+export * from "./xGPU/pipelines/resources/textures/DepthTextureArray"
 export * from "./xGPU/shader/resources/ImageTextureIO"
 export * from "./xGPU/shader/resources/TextureSampler"
 export * from "./xGPU/shader/resources/UniformBuffer"
@@ -49,6 +51,6 @@ export * from "./xGPU/shader/resources/VertexAttribute"
 export * from "./xGPU/shader/resources/VertexBuffer"
 export * from "./xGPU/shader/resources/VertexBufferIO"
 export * from "./xGPU/shader/resources/VideoTexture"
-
+export * from "./xGPU/pipelines/resources/textures/RenderPassTexture"
 export * from "./xGPU/HighLevelParser"
 

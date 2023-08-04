@@ -9,7 +9,7 @@ import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
 import { Pipeline } from "./Pipeline";
-import { BlendMode } from "./resources/blendmodes/BlendMode";
+import { BlendMode } from "../blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
@@ -18,7 +18,7 @@ import { IShaderResource } from "../shader/resources/IShaderResource";
 import { Bindgroups } from "../shader/Bindgroups";
 import { ImageTextureArray } from "../shader/resources/ImageTextureArray";
 import { IRenderer } from "../IRenderer";
-import { DrawConfig } from "./DrawConfig";
+import { DrawConfig } from "./resources/DrawConfig";
 import { HighLevelParser } from "../HighLevelParser";
 
 

@@ -2,7 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { BuiltIns } from "./BuiltIns";
-import { DrawConfig } from "./pipelines/DrawConfig";
+import { DrawConfig } from "./pipelines/resources/DrawConfig";
 
 import { Bindgroup } from "./shader/Bindgroup";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "./shader/PrimitiveType";

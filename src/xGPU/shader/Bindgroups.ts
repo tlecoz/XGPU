@@ -16,7 +16,7 @@ import { ImageTextureArray } from "./resources/ImageTextureArray";
 import { CubeMapTextureArray } from "./resources/CubeMapTextureArray";
 import { DepthTextureArray } from "../pipelines/resources/textures/DepthTextureArray";
 import { Pipeline } from "../pipelines/Pipeline";
-import { DrawConfig } from "../pipelines/DrawConfig";
+import { DrawConfig } from "../pipelines/resources/DrawConfig";
 
 
 export class Bindgroups {

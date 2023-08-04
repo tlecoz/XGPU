@@ -73,14 +73,7 @@ I will complete this section soon, but in the meantime, you can check some sampl
 
 - RenderBundle feature is still a "work in progress"
 
-- Until now, I never had the time to translate these samples :
 
-  [deferredRendering](https://webgpu.github.io/webgpu-samples/samples/deferredRendering)
-
-  [cornell](https://webgpu.github.io/webgpu-samples/samples/cornell) 
-
-  I can't be 100% confident that these demos are easily doable with XGPU until I get it working.
-  WebGPU contains some small subtilities ; the samples are here to expose them but I didn't studyed these samples (yet!)
 
 - For now, if you customize a PrimitiveType (Float,Vec2,Vec3,...) and you create custom variable names like that : 
 
@@ -111,8 +104,6 @@ I will complete this section soon, but in the meantime, you can check some sampl
 - For now, you can't have more than one VertexBufferIO or ImageTextureIO by pipeline
   A VertexBufferIO/ImageTextureIO is a resource used in a ComputeShader to store data ; it may be used as input of a renderPipeline after being processed by a computeShader. 
   
- 
-
 - I'm (very) far from having tested every possibilities allowed by WebGPU. 
 
  

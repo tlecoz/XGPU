@@ -2,7 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
-import { DrawConfig } from "../DrawConfig";
+import { DrawConfig } from "./DrawConfig";
 
 
 export type IndexBufferDescriptor = {
