@@ -32,7 +32,6 @@ export class VertexShader extends ShaderStage {
 
         //-----
 
-
         let bool = false;
         for (let i = 0; i < this.outputs.length; i++) {
             if (this.outputs[0].builtin === BuiltIns.vertexOutputs.position.builtin) {
@@ -59,6 +58,7 @@ export class VertexShader extends ShaderStage {
         result = this.formatWGSLCode(result)
 
         if (XGPU.debugShaders) {
+            console.log("a")
             console.log("------------- VERTEX SHADER --------------")
             console.log(result);
             console.log("------------------------------------------")

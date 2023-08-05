@@ -92,6 +92,7 @@ export class XGPU {
                         XGPU.init(this.requestAdapterOptions);
                     }
                 })
+
                 this._ready = true;
                 resolve(this);
             } else {
