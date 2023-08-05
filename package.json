@@ -47,6 +47,6 @@
     "@types/dom-webcodecs": "^0.1.7",
     "@webgpu/types": "^0.1.31",
     "gl-matrix": "^3.4.3",
-    "tsjsondoc": "^1.2.5"
+    "tsjsondoc": "^1.2.7"
   }
 }

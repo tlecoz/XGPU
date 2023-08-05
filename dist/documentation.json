@@ -1193,6 +1193,7 @@
             "rawText": "get view(): GPUTextureView;"
           }
         ],
+        "filePath": "xGPU.IRenderer",
         "rawText": "export interface IRenderer {\r\n\r\n    init(w: number, h: number, usage?: number, sampleCount?: number): void;\r\n    addPipeline(pipeline: RenderPipeline, offset?: number): void;\r\n    resize(w: number, h: number);\r\n    destroy(): void;\r\n    update(): void;\r\n\r\n    get firstPipeline(): RenderPipeline;\r\n    get nbPipeline(): number;\r\n    get useSinglePipeline(): boolean;\r\n    get dimensionChanged(): boolean;\r\n    get canvas(): { width: number, height: number, dimensionChanged: boolean };\r\n    get width(): number;\r\n    get height(): number;\r\n    get texture(): GPUTexture;\r\n    get view(): GPUTextureView;\r\n}"
       }
     ],
@@ -6270,6 +6271,7 @@
                 "rawText": "descriptor: any;"
               }
             ],
+            "filePath": "xGPU.shader.resources.IShaderResource",
             "rawText": "export interface IShaderResource {\r\n\r\n    mustBeTransfered: boolean;\r\n    gpuResource: any;\r\n    descriptor: any;\r\n\r\n    setPipelineType(pipelineType: \"compute\" | \"render\" | \"compute_mixed\"); //used to handle particular cases in descriptor relative to the nature of pipeline\r\n\r\n    createDeclaration(varName: string, bindingId: number, groupId: number): string;\r\n    createBindGroupLayoutEntry(bindingId: number): any;\r\n    createBindGroupEntry(bindingId: number): any;\r\n\r\n    createGpuResource();\r\n    destroyGpuResource();\r\n    update();\r\n\r\n    clone(): IShaderResource;\r\n\r\n}"
           }
         ],
