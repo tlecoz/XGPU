@@ -16,7 +16,7 @@ export class BuiltIns {
         Vec3: { type: "vec3<f32>", vsOut: true },
         Vec4: { type: "vec4<f32>", vsOut: true },
 
-        /*
+
         Int: { type: "i32", vsOut: true },
         IVec2: { type: "vec2<i32>", vsOut: true },
         IVec3: { type: "vec3<i32>", vsOut: true },
@@ -26,7 +26,7 @@ export class BuiltIns {
         UVec2: { type: "vec2<u32>", vsOut: true },
         UVec3: { type: "vec3<u32>", vsOut: true },
         UVec4: { type: "vec4<u32>", vsOut: true },
-        */
+
     }
 
     //----
@@ -55,4 +55,54 @@ export class BuiltIns {
     public static computeOutputs = {
         result: { builtin: "@location(0)", type: "???" }
     }
-} 
+
+}
+
+type BuiltIns_vertexInputs = typeof BuiltIns.vertexInputs;
+type BuiltIns_vertexOutputs = typeof BuiltIns.vertexOutputs;
+type BuiltIns_fragmentInputs = typeof BuiltIns.fragmentInputs;
+type BuiltIns_fragmentOutputs = typeof BuiltIns.fragmentOutputs;
+type BuiltIns_computeInputs = typeof BuiltIns.computeInputs;
+type BuiltIns_computeOutputs = typeof BuiltIns.computeOutputs;
+
+
+export type VertexShaderInput = (
+    BuiltIns_vertexInputs["vertexIndex"] |
+    BuiltIns_vertexInputs["instanceIndex"]
+);
+
+export type VertexShaderOutput = (
+    BuiltIns_vertexOutputs["position"] |
+    BuiltIns_vertexOutputs["Float"] |
+    BuiltIns_vertexOutputs["Vec2"] |
+    BuiltIns_vertexOutputs["Vec3"] |
+    BuiltIns_vertexOutputs["Vec4"] |
+    BuiltIns_vertexOutputs["Int"] |
+    BuiltIns_vertexOutputs["IVec2"] |
+    BuiltIns_vertexOutputs["IVec3"] |
+    BuiltIns_vertexOutputs["IVec4"] |
+    BuiltIns_vertexOutputs["Uint"] |
+    BuiltIns_vertexOutputs["UVec2"] |
+    BuiltIns_vertexOutputs["UVec3"] |
+    BuiltIns_vertexOutputs["UVec4"]
+);
+
+export type FragmentShaderInput = (
+    BuiltIns_fragmentInputs["frontFacing"] |
+    BuiltIns_fragmentInputs["fragDepth"] |
+    BuiltIns_fragmentInputs["sampleIndex"] |
+    BuiltIns_fragmentInputs["sampleMask"]
+);
+
+export type FragmentShaderOutputs = BuiltIns_fragmentOutputs["color"];
+
+export type ComputeShaderInput = (
+    BuiltIns_computeInputs["localInvocationId"] |
+    BuiltIns_computeInputs["localInvocationIndex"] |
+    BuiltIns_computeInputs["globalInvocationId"] |
+    BuiltIns_computeInputs["workgroupId"] |
+    BuiltIns_computeInputs["numWorkgroup"]
+);
+
+export type ComputeShaderOutputs = BuiltIns_computeOutputs["result"];
+

@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
-import { BuiltIns } from "./BuiltIns";
+import { BuiltIns, VertexShaderOutput, FragmentShaderInput, FragmentShaderOutputs, VertexShaderInput } from "./BuiltIns";
 import { DrawConfig } from "./pipelines/resources/DrawConfig";
 
 import { Bindgroup } from "./shader/Bindgroup";
@@ -20,6 +20,74 @@ import { VertexBuffer } from "./shader/resources/VertexBuffer";
 import { VertexBufferIO } from "./shader/resources/VertexBufferIO";
 import { VideoTexture } from "./shader/resources/VideoTexture";
 
+
+
+/*
+
+export type VertexShaderDescriptor = {
+    main:string,
+    constants?:string,
+    inputs:{
+        [key:string]:VertexShaderInput
+    },
+    outputs:{
+        [key:string]:VertexShaderOutput
+    }
+} | string;
+
+export type FragmentShaderDescriptor = {
+    main:string,
+    constants?:string,
+    inputs:{
+        [key:string]:FragmentShaderInput
+    },
+    outputs:{
+        [key:string]:FragmentShaderOutputs
+    }
+} | string;
+
+
+export type PipelineResource = (IShaderResource | PrimitiveType | VertexBufferIO | ImageTextureIO| VertexAttribute)
+
+export type DefaultBindgroup = {
+    uniforms?:UniformBuffer
+    buffer?:VertexBuffer,
+    [key:string]:PipelineResource
+}
+export type BindgroupDescriptor = Bindgroup | {
+    [key:string]:PipelineResource
+}
+export type BindgroupsDescriptor = {
+    default?:BindgroupDescriptor,
+    [key:string]:BindgroupDescriptor
+}
+
+
+
+
+export type RenderPipelineDescriptor = {
+    vertexCount?:number,
+    instanceCount?:number,
+    firstVertexId?:number,
+    firstInstanceId?:number,
+    cullMode?: "front" | "back" | "none",
+    topology?: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip",
+    frontFace?: "ccw" | "cw",
+    stripIndexFormat?: "uint16" | "uint32",
+    antiAliasing?: boolean,
+    useDepthTexture?: boolean,
+    depthTextureSize?: number,
+    depthTest?: boolean,
+    clearColor?: { r: number, g: number, b: number, a: number },
+    blendMode?: BlendMode,
+    bindgroups?: BindgroupsDescriptor,
+    indexBuffer?: IndexBuffer,
+    vertexShader:VertexShaderDescriptor,
+    fragmentShader?:FragmentShaderDescriptor,
+    //[key:string]:PipelineResource
+}
+
+*/
 
 ///export type HighLevelParserTarget = RenderPipeline | ComputePipeline | Bindgroup;
 
