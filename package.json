@@ -20,8 +20,6 @@
   "author": "Thomas Le Coz <fanthomas.lecoz@gmail.com>",
   "licence": "MIT",
   "homepage": "https://github.com/tlecoz/XGPU#readme",
-  "__main": "dist/XGPU.js",
-  "__types": "dist/index.d.ts",
   "main": "dist/XGPU.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -31,7 +29,8 @@
     "build:types": "tsc --project tsconfig_build.json",
     "build": "vite build && npm run build:types && npx tsjsondoc ./src ./dist",
     "doc": "npx tsjsondoc ./src ./dist",
-    "push": "node githubPush.js"
+    "push": "node githubPush.js",
+    "publish": "node publish.js"
   },
   "devDependencies": {
     "@webgpu/types": "^0.1.26",

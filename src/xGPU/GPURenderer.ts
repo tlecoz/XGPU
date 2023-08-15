@@ -2,10 +2,11 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { HeadlessGPURenderer } from "./HeadlessGPURenderer";
+import { IRenderer } from "./IRenderer";
 import { XGPU } from "./XGPU";
 
 
-export class GPURenderer extends HeadlessGPURenderer {
+export class GPURenderer extends HeadlessGPURenderer implements IRenderer {
 
     protected domElement: HTMLCanvasElement = null;
     protected ctx: GPUCanvasContext;

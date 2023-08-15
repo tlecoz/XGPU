@@ -10,8 +10,27 @@ import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../PrimitiveType";
+import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
+import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
+import { UniformBuffer } from "../shader/resources/UniformBuffer";
 
+export type HighLevelShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO | PrimitiveType | VertexAttribute)
+
+export type DefaultBindgroup = {
+    uniforms?: UniformBuffer
+    buffer?: VertexBuffer,
+    [key: string]: HighLevelShaderResource
+}
+
+export type BindgroupDescriptor = {
+    [key: string]: HighLevelShaderResource
+}
+
+export type BindgroupsDescriptor = {
+    default?: DefaultBindgroup,
+    [key: string]: (Bindgroup | BindgroupDescriptor)
+}
 
 export class Pipeline {
 

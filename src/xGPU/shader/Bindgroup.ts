@@ -14,6 +14,9 @@ import { VertexBuffer } from "./resources/VertexBuffer";
 import { VertexBufferIO } from "./resources/VertexBufferIO";
 import { VideoTexture } from "./resources/VideoTexture";
 
+
+
+
 export class Bindgroup {
 
     public bindgroupId: number //the id used in renderPass.setBindgroup

@@ -47,7 +47,7 @@ export type FragmentShaderDescriptor = {
 } | string;
 
 
-export type PipelineResource = (IShaderResource | PrimitiveType | VertexBufferIO | ImageTextureIO| VertexAttribute)
+export type ShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO| PrimitiveType | VertexAttribute)
 
 export type DefaultBindgroup = {
     uniforms?:UniformBuffer
