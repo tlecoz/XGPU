@@ -8,7 +8,7 @@ import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
-import { BindgroupsDescriptor, Pipeline, HighLevelShaderResource, BindgroupDescriptor } from "./Pipeline";
+import { Pipeline } from "./Pipeline";
 import { BlendMode } from "../blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
@@ -21,7 +21,28 @@ import { IRenderer } from "../IRenderer";
 import { DrawConfig } from "./resources/DrawConfig";
 import { HighLevelParser } from "../HighLevelParser";
 import { FragmentShaderInput, FragmentShaderOutputs, VertexShaderInput, VertexShaderOutput } from "../BuiltIns";
+import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
+import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
+import { PrimitiveType } from "../PrimitiveType";
+import { UniformBuffer } from "../shader/resources/UniformBuffer";
 
+export type HighLevelShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO | PrimitiveType | VertexAttribute)
+
+
+
+export type BindgroupDescriptor = {
+    [key: string]: HighLevelShaderResource
+}
+
+export type DefaultBindgroup = BindgroupDescriptor & {
+    uniforms?: UniformBuffer
+    buffer?: VertexBuffer
+}
+
+export type BindgroupsDescriptor = {
+    default?: DefaultBindgroup,
+    [key: string]: (Bindgroup | BindgroupDescriptor)
+}
 
 export type VertexShaderDescriptor = {
     main: string,

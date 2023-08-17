@@ -58,6 +58,7 @@ export class XGPU {
     }
     static init(options) {
         this.requestAdapterOptions = options;
+        console.log("INIT");
         return new Promise(async (resolve, error) => {
             if (this.gpuDevice) {
                 resolve(this);

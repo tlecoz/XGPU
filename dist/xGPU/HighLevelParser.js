@@ -15,6 +15,72 @@ import { VertexAttribute } from "./shader/resources/VertexAttribute";
 import { VertexBuffer } from "./shader/resources/VertexBuffer";
 import { VertexBufferIO } from "./shader/resources/VertexBufferIO";
 import { VideoTexture } from "./shader/resources/VideoTexture";
+/*
+
+export type VertexShaderDescriptor = {
+    main:string,
+    constants?:string,
+    inputs:{
+        [key:string]:VertexShaderInput
+    },
+    outputs:{
+        [key:string]:VertexShaderOutput
+    }
+} | string;
+
+export type FragmentShaderDescriptor = {
+    main:string,
+    constants?:string,
+    inputs:{
+        [key:string]:FragmentShaderInput
+    },
+    outputs:{
+        [key:string]:FragmentShaderOutputs
+    }
+} | string;
+
+
+export type ShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO| PrimitiveType | VertexAttribute)
+
+export type DefaultBindgroup = {
+    uniforms?:UniformBuffer
+    buffer?:VertexBuffer,
+    [key:string]:PipelineResource
+}
+export type BindgroupDescriptor = Bindgroup | {
+    [key:string]:PipelineResource
+}
+export type BindgroupsDescriptor = {
+    default?:BindgroupDescriptor,
+    [key:string]:BindgroupDescriptor
+}
+
+
+
+
+export type RenderPipelineDescriptor = {
+    vertexCount?:number,
+    instanceCount?:number,
+    firstVertexId?:number,
+    firstInstanceId?:number,
+    cullMode?: "front" | "back" | "none",
+    topology?: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip",
+    frontFace?: "ccw" | "cw",
+    stripIndexFormat?: "uint16" | "uint32",
+    antiAliasing?: boolean,
+    useDepthTexture?: boolean,
+    depthTextureSize?: number,
+    depthTest?: boolean,
+    clearColor?: { r: number, g: number, b: number, a: number },
+    blendMode?: BlendMode,
+    bindgroups?: BindgroupsDescriptor,
+    indexBuffer?: IndexBuffer,
+    vertexShader:VertexShaderDescriptor,
+    fragmentShader?:FragmentShaderDescriptor,
+    //[key:string]:PipelineResource
+}
+
+*/
 ///export type HighLevelParserTarget = RenderPipeline | ComputePipeline | Bindgroup;
 export class HighLevelParser {
     constructor() {

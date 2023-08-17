@@ -50,7 +50,6 @@ export class BuiltIns {
     public static computeOutputs = {
         result: { builtin: "@location(0)", type: "???" }
     }
-
 }
 
 type BuiltIns_vertexInputs = typeof BuiltIns.vertexInputs;

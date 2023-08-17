@@ -1,12 +1,79 @@
 /// <reference types="dist" />
+import { Bindgroup } from "../shader/Bindgroup";
+import { VertexAttribute } from "../shader/resources/VertexAttribute";
+import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { Pipeline } from "./Pipeline";
 import { BlendMode } from "../blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
 import { MultiSampleTexture } from "./resources/textures/MultiSampleTexture";
 import { RenderPassTexture } from "./resources/textures/RenderPassTexture";
 import { IndexBuffer } from "./resources/IndexBuffer";
+import { IShaderResource } from "../shader/resources/IShaderResource";
 import { IRenderer } from "../IRenderer";
 import { DrawConfig } from "./resources/DrawConfig";
+import { FragmentShaderInput, FragmentShaderOutputs, VertexShaderInput, VertexShaderOutput } from "../BuiltIns";
+import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
+import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
+import { PrimitiveType } from "../PrimitiveType";
+import { UniformBuffer } from "../shader/resources/UniformBuffer";
+export type HighLevelShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO | PrimitiveType | VertexAttribute);
+export type BindgroupDescriptor = {
+    [key: string]: HighLevelShaderResource;
+};
+export type DefaultBindgroup = BindgroupDescriptor & {
+    uniforms?: UniformBuffer;
+    buffer?: VertexBuffer;
+};
+export type BindgroupsDescriptor = {
+    default?: DefaultBindgroup;
+    [key: string]: (Bindgroup | BindgroupDescriptor);
+};
+export type VertexShaderDescriptor = {
+    main: string;
+    constants?: string;
+    inputs: {
+        [key: string]: VertexShaderInput;
+    };
+    outputs: {
+        [key: string]: VertexShaderOutput;
+    };
+} | string;
+export type FragmentShaderDescriptor = {
+    main: string;
+    constants?: string;
+    inputs: {
+        [key: string]: FragmentShaderInput;
+    };
+    outputs: {
+        [key: string]: FragmentShaderOutputs;
+    };
+} | string;
+export type RenderPipelineProperties = {
+    vertexCount?: number;
+    instanceCount?: number;
+    firstVertexId?: number;
+    firstInstanceId?: number;
+    cullMode?: "front" | "back" | "none";
+    topology?: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip";
+    frontFace?: "ccw" | "cw";
+    stripIndexFormat?: "uint16" | "uint32";
+    antiAliasing?: boolean;
+    useDepthTexture?: boolean;
+    depthTextureSize?: number;
+    depthTest?: boolean;
+    clearColor?: {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+    };
+    blendMode?: BlendMode;
+    bindgroups?: BindgroupsDescriptor;
+    indexBuffer?: IndexBuffer;
+    vertexShader: VertexShaderDescriptor;
+    fragmentShader?: FragmentShaderDescriptor;
+};
+export type RenderPipelineDescriptor = RenderPipelineProperties & BindgroupDescriptor;
 export declare class RenderPipeline extends Pipeline {
     renderer: IRenderer;
     drawConfig: DrawConfig;
@@ -61,39 +128,7 @@ export declare class RenderPipeline extends Pipeline {
             constants?: string;
         } | string;
         [key: string]: unknown;
-    }): {
-        [key: string]: unknown;
-        cullMode?: "front" | "back" | "none";
-        topology?: "point-list" | "line-list" | "line-strip" | "triangle-list" | "triangle-strip";
-        frontFace?: "ccw" | "cw";
-        stripIndexFormat?: "uint16" | "uint32";
-        keepRendererAspectRatio?: boolean;
-        antiAliasing?: boolean;
-        useDepthTexture?: boolean;
-        depthTextureSize?: number;
-        depthTest?: boolean;
-        clearColor?: {
-            r: number;
-            g: number;
-            b: number;
-            a: number;
-        };
-        blendMode?: BlendMode;
-        bindgroups?: any;
-        indexBuffer?: IndexBuffer;
-        vertexShader: {
-            main: string;
-            outputs?: any;
-            inputs?: any;
-            constants?: string;
-        } | string;
-        fragmentShader?: {
-            main: string;
-            outputs?: any;
-            inputs?: any;
-            constants?: string;
-        } | string;
-    };
+    }): any;
     get clearValue(): {
         r: number;
         g: number;

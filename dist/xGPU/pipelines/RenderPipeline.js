@@ -134,7 +134,7 @@ export class RenderPipeline extends Pipeline {
                 if (descriptor.bindgroups[z] instanceof Bindgroup) {
                     const elements = descriptor.bindgroups[z].elements;
                     const resources = [];
-                    for (let i = 0; i < elements; i++) {
+                    for (let i = 0; i < elements.length; i++) {
                         resources[i] = elements[i].resource;
                     }
                     resourcesGroups[k++] = resources;

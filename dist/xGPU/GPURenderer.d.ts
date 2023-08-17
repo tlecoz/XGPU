@@ -1,6 +1,7 @@
 /// <reference types="dist" />
 import { HeadlessGPURenderer } from "./HeadlessGPURenderer";
-export declare class GPURenderer extends HeadlessGPURenderer {
+import { IRenderer } from "./IRenderer";
+export declare class GPURenderer extends HeadlessGPURenderer implements IRenderer {
     protected domElement: HTMLCanvasElement;
     protected ctx: GPUCanvasContext;
     protected canvasW: number;

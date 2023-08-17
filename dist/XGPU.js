@@ -56,6 +56,7 @@ const _XGPU = class {
   }
   static init(options) {
     this.requestAdapterOptions = options;
+    console.log("INIT");
     return new Promise(async (resolve, error) => {
       if (this.gpuDevice) {
         resolve(this);
@@ -663,18 +664,15 @@ __publicField(BuiltIns, "vertexOutputs", {
   Float: { type: "f32", vsOut: true },
   Vec2: { type: "vec2<f32>", vsOut: true },
   Vec3: { type: "vec3<f32>", vsOut: true },
-  Vec4: { type: "vec4<f32>", vsOut: true }
-  /*
-          Int: { type: "i32", vsOut: true },
-          IVec2: { type: "vec2<i32>", vsOut: true },
-          IVec3: { type: "vec3<i32>", vsOut: true },
-          IVec4: { type: "vec4<i32>", vsOut: true },
-  
-          Uint: { type: "u32", vsOut: true },
-          UVec2: { type: "vec2<u32>", vsOut: true },
-          UVec3: { type: "vec3<u32>", vsOut: true },
-          UVec4: { type: "vec4<u32>", vsOut: true },
-          */
+  Vec4: { type: "vec4<f32>", vsOut: true },
+  Int: { type: "i32", vsOut: true },
+  IVec2: { type: "vec2<i32>", vsOut: true },
+  IVec3: { type: "vec3<i32>", vsOut: true },
+  IVec4: { type: "vec4<i32>", vsOut: true },
+  Uint: { type: "u32", vsOut: true },
+  UVec2: { type: "vec2<u32>", vsOut: true },
+  UVec3: { type: "vec3<u32>", vsOut: true },
+  UVec4: { type: "vec4<u32>", vsOut: true }
 });
 //----
 __publicField(BuiltIns, "fragmentInputs", {
@@ -6339,7 +6337,7 @@ class RenderPipeline extends Pipeline {
         if (descriptor.bindgroups[z] instanceof Bindgroup) {
           const elements = descriptor.bindgroups[z].elements;
           const resources = [];
-          for (let i = 0; i < elements; i++) {
+          for (let i = 0; i < elements.length; i++) {
             resources[i] = elements[i].resource;
           }
           descriptor.bindgroups[z].name = z;
