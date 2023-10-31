@@ -21,7 +21,9 @@ export class HeadlessGPURenderer implements IRenderer {
     protected deviceId: number;
 
     public init(w: number, h: number, usage?: number, sampleCount?: number) {
+
         this.dimension = { width: w, height: h, dimensionChanged: true };
+
         return new Promise((onResolve: (val: any) => void) => {
 
             XGPU.init().then(() => {

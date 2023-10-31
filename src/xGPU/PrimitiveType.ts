@@ -612,12 +612,31 @@ export class UVec4 extends PrimitiveUintUniform {
 
 export class Vec4Array extends PrimitiveFloatUniform {
 
+    public vec4Array: Vec4[];
+
     constructor(vec4Array: Vec4[]) {
         let buf: Float32Array = new Float32Array(vec4Array.length * 4);
         for (let i = 0; i < vec4Array.length; i++) buf.set(vec4Array[i], i * 4);
         let type: string = "array<vec4<f32>," + vec4Array.length + ">";
         super("array<vec4<f32>," + vec4Array.length + ">", buf)
         this.className = type;
+        this.vec4Array = vec4Array;
+    }
+
+    public update(): void {
+
+        let mustBeTransfered = false;
+        let m: Vec4;
+        for (let i = 0; i < this.vec4Array.length; i++) {
+            m = this.vec4Array[i];
+            m.update();
+            if (m.mustBeTransfered) {
+                mustBeTransfered = true;
+                this.set(m, i * 4);
+                m.mustBeTransfered = false;
+            }
+        }
+        this.mustBeTransfered = mustBeTransfered;
     }
 }
 
@@ -628,12 +647,31 @@ export class Vec4Array extends PrimitiveFloatUniform {
 
 export class IVec4Array extends PrimitiveIntUniform {
 
+    public ivec4Array: IVec4[];
+
     constructor(ivec4Array: IVec4[]) {
         let buf: Int32Array = new Int32Array(ivec4Array.length * 4);
         for (let i = 0; i < ivec4Array.length; i++) buf.set(ivec4Array[i], i * 4);
         let type: string = "array<vec4<i32>," + ivec4Array.length + ">";
         super(type, buf);
         this.className = type;
+        this.ivec4Array = ivec4Array;
+    }
+
+    public update(): void {
+
+        let mustBeTransfered = false;
+        let m: IVec4;
+        for (let i = 0; i < this.ivec4Array.length; i++) {
+            m = this.ivec4Array[i];
+            m.update();
+            if (m.mustBeTransfered) {
+                mustBeTransfered = true;
+                this.set(m, i * 4);
+                m.mustBeTransfered = false;
+            }
+        }
+        this.mustBeTransfered = mustBeTransfered;
     }
 }
 
@@ -643,12 +681,31 @@ export class IVec4Array extends PrimitiveIntUniform {
 
 export class UVec4Array extends PrimitiveUintUniform {
 
+    public uvec4Array: UVec4[];
+
     constructor(uvec4Array: UVec4[]) {
         let buf: Uint32Array = new Uint32Array(uvec4Array.length * 4);
         for (let i = 0; i < uvec4Array.length; i++) buf.set(uvec4Array[i], i * 4);
         let type: string = "array<vec4<u32>," + uvec4Array.length + ">";
         super(type, buf);
         this.className = type;
+        this.uvec4Array = uvec4Array;
+    }
+
+    public update(): void {
+
+        let mustBeTransfered = false;
+        let m: UVec4;
+        for (let i = 0; i < this.uvec4Array.length; i++) {
+            m = this.uvec4Array[i];
+            m.update();
+            if (m.mustBeTransfered) {
+                mustBeTransfered = true;
+                this.set(m, i * 4);
+                m.mustBeTransfered = false;
+            }
+        }
+        this.mustBeTransfered = mustBeTransfered;
     }
 }
 

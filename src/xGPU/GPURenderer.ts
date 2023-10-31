@@ -27,7 +27,7 @@ export class GPURenderer extends HeadlessGPURenderer implements IRenderer {
         this.canvasW = canvas.width;
         this.canvasH = canvas.height;
         this.domElement = canvas;
-
+        this.dimension = { width: canvas.width, height: canvas.height, dimensionChanged: true };
         return new Promise(async (resolve: (e: HTMLCanvasElement) => void, error: (e: unknown) => void) => {
             await XGPU.init()
             this.deviceId = XGPU.deviceId;

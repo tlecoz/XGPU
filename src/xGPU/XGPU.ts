@@ -63,7 +63,7 @@ export class XGPU {
 
     public static init(options?: { powerPreference?: "low-power" | "high-performance", forceFallbackAdaoter?: boolean }): Promise<void> {
         this.requestAdapterOptions = options;
-        console.log("INIT")
+
         return new Promise(async (resolve: (val: any) => void, error: () => void) => {
 
             if (this.gpuDevice) {
