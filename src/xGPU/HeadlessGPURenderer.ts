@@ -88,7 +88,10 @@ export class HeadlessGPURenderer implements IRenderer {
         }
     }
 
-    public update() {
+    private firstUpdate: boolean = false;
+
+
+    public async update() {
 
         if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === undefined) return;
         //console.log(XGPU.deviceId + " VS " + this.deviceId);
@@ -104,6 +107,21 @@ export class HeadlessGPURenderer implements IRenderer {
 
         }
 
+        const wait = (n, message): Promise<void> => {
+            console.log("wait before ", message);
+            return new Promise((resolve) => {
+                const time = new Date().getTime();
+                while (new Date().getTime() - time < n) { }
+                resolve();
+            })
+        }
+
+        const time = new Date().getTime();
+
+        for (let i = 0; i < this.renderPipelines.length; i++) {
+            this.renderPipelines[i].update()
+
+        }
 
         const commandEncoder = XGPU.device.createCommandEncoder();
         //console.log("nbPipeline = ", this.renderPipelines.length)
@@ -112,21 +130,35 @@ export class HeadlessGPURenderer implements IRenderer {
             pipeline = this.renderPipelines[i];
 
 
-            pipeline.update()
-
-
+            //console.log("pipeline.update ", pipeline.pipelineCount)
+            //wait(50, "pipeline.update()")
+            //pipeline.update()
 
             for (let j = 0; j < pipeline.pipelineCount; j++) {
+                //wait(50, "pipeline.beginRenderPass(commandEncoder, this.view, j)")
                 renderPass = pipeline.beginRenderPass(commandEncoder, this.view, j);
                 if (pipeline.onDraw) pipeline.onDraw(j);
+                //wait(50, "pipeline.draw(renderPass)")
                 pipeline.draw(renderPass);
+                //console.log("pipeline.resourceDefined = ", commandEncoder)
+                //wait(50, "pipeline.end(commandEncoder, renderPass)")
                 pipeline.end(commandEncoder, renderPass);
 
             }
         }
+        console.log(XGPU.device.queue)
+        wait(50, "commandEncoder.finish();")
+        const commandBuffer = commandEncoder.finish();
 
-        XGPU.device.queue.submit([commandEncoder.finish()]);
+        wait(50, "XGPU.device.queue.submit([commandBuffer]);")
+        XGPU.device.queue.submit([commandBuffer]);
 
+        await XGPU.device.queue.onSubmittedWorkDone()
+
+        if (!this.firstUpdate && this.renderPipelines.length > 0) {
+            this.firstUpdate = true;
+            console.log("first update time = ", (new Date().getTime() - time))
+        }
         this.canvas.dimensionChanged = false;
     }
 

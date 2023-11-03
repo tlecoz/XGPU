@@ -23,7 +23,7 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - Extendable pipelines & resources 
 - Ability to plug advanced features (such as light, shadow, etc.) into an existing pipeline.
 - Declare your variables once for all in javascript with the name you want and use them directly in your shader
-- Easy-to-read, easy-to-write, easy-to-maintain
+- produce code easy-to-read, easy-to-write, easy-to-maintain
 
 
 # How to use?
@@ -33,7 +33,10 @@ You can install XGPU by using npm install
 npm install xgpu
  ```
 
-I will complete this section soon, but in the meantime, you can check some samples that use it [here](https://github.com/tlecoz/xgpu-samples).
+
+[YOU CAN CHECK SOME SAMPLES HERE](https://xgpu-samples.netlify.app/samples/TonsOfCubes)
+
+The repo containing the samples is [here](https://github.com/tlecoz/xgpu-samples).
 
 
 
@@ -103,6 +106,6 @@ I will complete this section soon, but in the meantime, you can check some sampl
 - For now, you can't have more than one VertexBufferIO or ImageTextureIO by pipeline
   A VertexBufferIO/ImageTextureIO is a resource used in a ComputeShader to store data ; it may be used as input of a renderPipeline after being processed by a computeShader. 
   
-- I'm (very) far from having tested every possibilities allowed by WebGPU. 
+
 
  

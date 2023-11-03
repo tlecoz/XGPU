@@ -194,12 +194,12 @@ export class RenderPipeline extends Pipeline {
         , [key: string]: unknown
     }): any {
 
-
+        const time = new Date().getTime();
 
         this._resources = {};
         this.vertexShader = null;
         this.fragmentShader = null;
-
+        this.gpuPipeline = null;
         this.bindGroups.destroy();
         this.bindGroups = new Bindgroups(this, "pipeline");
 
@@ -346,6 +346,7 @@ export class RenderPipeline extends Pipeline {
 
         }
 
+        //console.log("initFromObject time = ", (new Date().getTime() - time))
 
         return descriptor;
 
@@ -664,9 +665,9 @@ export class RenderPipeline extends Pipeline {
                 }
 
             }
-
-
         }
+
+
 
 
         if (!this.gpuPipeline) this.buildGpuPipeline();
@@ -678,7 +679,9 @@ export class RenderPipeline extends Pipeline {
         if (outputView && this.outputColor) this.handleOutputColor(outputView);
 
 
-        //console.log("renderPassDescriptor = ", this.renderPassDescriptor);
+
+
+        console.log("renderPassDescriptor = ", this.renderPassDescriptor);
         return commandEncoder.beginRenderPass(this.renderPassDescriptor);
     }
 
@@ -704,16 +707,20 @@ export class RenderPipeline extends Pipeline {
     //----------------------------------------------------------------------
 
     public update(): void {
+        //console.log("renderPipeline.update start gpuPipeline = ", this.gpuPipeline)
         if (!this.gpuPipeline) return;
+
+
         if (this.renderPassTexture) this.renderPassTexture.update();
         this.bindGroups.update();
+        //console.log("renderPipeline.update end")
     }
 
 
     public draw(renderPass: GPURenderPassEncoder) {
 
         if (!this.resourceDefined) return;
-
+        //console.log("renderPipeline.draw start ", this.bindGroups.resources.all)
         renderPass.setPipeline(this.gpuPipeline);
 
         this.bindGroups.apply(renderPass);
@@ -728,7 +735,6 @@ export class RenderPipeline extends Pipeline {
         if (!this.resourceDefined) return;
 
         renderPass.end();
-
 
 
         //------ the arrays of textures may contains GPUTexture so I must use commandEncoder.copyTextureToTexture 
@@ -779,7 +785,7 @@ export class RenderPipeline extends Pipeline {
     }
 
 
-    private get resourceDefined(): boolean {
+    public get resourceDefined(): boolean {
         const bool = !!this.bindGroups.resources.all
         if (!bool) {
             //some very basic shader can run without any resource

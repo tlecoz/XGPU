@@ -446,7 +446,7 @@ export class Bindgroup {
         const instances = this.instances ? this.instances : [{ group: this.group, update: () => { } }]
         const applyDraw = this.applyDraw;
 
-
+        console.log("instances.length = ", instances.length)
         for (let i = 0; i < instances.length; i++) {
 
             instances[i].update();
@@ -918,7 +918,7 @@ export class Bindgroup {
     }
 
     public update(): void {
-        // console.log(this.elements)
+        //console.log("bindGroup.update elements.length = ", this.elements.length)
         for (let i = 0; i < this.elements.length; i++) {
 
             this.elements[i].resource.update();

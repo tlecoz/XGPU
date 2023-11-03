@@ -118,6 +118,7 @@ export class Bindgroups {
     }
 
     public update(): void {
+        //console.log("Bindgroups.update groupLen = ", this.groups.length)
         for (let i = 0; i < this.groups.length; i++) {
             this.groups[i].update();
         }
@@ -529,5 +530,6 @@ export class Bindgroups {
             this.groups[i] = undefined;
         }
         this.groups = [];
+        this._resources = {};
     }
 }

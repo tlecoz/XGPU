@@ -126,6 +126,7 @@ export class UniformGroup {
 
     public add(name: string, data: Uniformable, useLocalVariable: boolean = false, stackItems: boolean = true): Uniformable {
 
+        //console.log("add ", name, data)
 
         data.uniformBuffer = this.uniformBuffer;
         data.name = name;
@@ -227,15 +228,15 @@ export class UniformGroup {
             if (!item.type.isUniformGroup) (item as any).update();
 
             if (item.mustBeTransfered) {
-
+                const time = new Date().getTime();
                 if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
                     item.update(gpuResource, false);
                 } else {
 
 
-                    //console.log(item.name, item.startId, this.datas.length)
+                    //console.log(item.name, item.startId, item.buffer.byteLength / 4)
                     this.datas.set(item, item.startId);
-
+                    console.log("item.byteLength = ", item.byteLength)
                     XGPU.device.queue.writeBuffer(
                         gpuResource,
                         item.startId * Float32Array.BYTES_PER_ELEMENT,
@@ -246,9 +247,11 @@ export class UniformGroup {
                 }
 
                 item.mustBeTransfered = false;
-
+                console.log("uniformGroup.update time = ", (new Date().getTime() - time))
             }
         }
+
+
 
     }
 

@@ -134,6 +134,8 @@ export class UniformBuffer implements IShaderResource {
 
         if (!this.gpuResource) {
 
+            console.time("createGpuUniformBuffer")
+
             const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
             let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
 
@@ -141,11 +143,15 @@ export class UniformBuffer implements IShaderResource {
 
             //console.log("uniformBuffer createGouResource size = ", size);
             this.gpuResource = XGPU.device.createBuffer({
+
                 size,
-                usage
+                usage,
+
             })
 
             this.update();
+
+            console.timeEnd("createGpuUniformBuffer")
 
         }
     }
@@ -180,6 +186,7 @@ export class UniformBuffer implements IShaderResource {
         if (this.bufferType) type = this.bufferType;
         //console.log("bufferType = ", this.bufferType);
 
+        console.log("createBindGroupLayoutEntry ", this.descriptor.visibility)
         //console.log("UniformBuffer.createBindGroupLayoutEntry ", this.shaderVisibility, this.debug, this.cloned)
 
         return {
