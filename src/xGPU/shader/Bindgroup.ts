@@ -317,7 +317,9 @@ export class Bindgroup {
 
         //this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
 
-        const allVertexBuffers = this.parent.resources.types.vertexBuffers;
+        const types = this.parent.resources.types;
+        if (!types) return;
+        const allVertexBuffers = types.vertexBuffers;
         if (!allVertexBuffers) return;
 
         //console.log("SETUP APPLY  id = ", this.bindgroupId, allVertexBuffers, this.elements)
@@ -446,7 +448,7 @@ export class Bindgroup {
         const instances = this.instances ? this.instances : [{ group: this.group, update: () => { } }]
         const applyDraw = this.applyDraw;
 
-        console.log("instances.length = ", instances.length)
+        //console.log("instances.length = ", instances.length)
         for (let i = 0; i < instances.length; i++) {
 
             instances[i].update();

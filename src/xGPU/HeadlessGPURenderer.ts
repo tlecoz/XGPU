@@ -106,7 +106,7 @@ export class HeadlessGPURenderer implements IRenderer {
             }
 
         }
-
+        /*
         const wait = (n, message): Promise<void> => {
             console.log("wait before ", message);
             return new Promise((resolve) => {
@@ -115,13 +115,9 @@ export class HeadlessGPURenderer implements IRenderer {
                 resolve();
             })
         }
+        */
 
-        const time = new Date().getTime();
 
-        for (let i = 0; i < this.renderPipelines.length; i++) {
-            this.renderPipelines[i].update()
-
-        }
 
         const commandEncoder = XGPU.device.createCommandEncoder();
         //console.log("nbPipeline = ", this.renderPipelines.length)
@@ -132,7 +128,7 @@ export class HeadlessGPURenderer implements IRenderer {
 
             //console.log("pipeline.update ", pipeline.pipelineCount)
             //wait(50, "pipeline.update()")
-            //pipeline.update()
+            pipeline.update()
 
             for (let j = 0; j < pipeline.pipelineCount; j++) {
                 //wait(50, "pipeline.beginRenderPass(commandEncoder, this.view, j)")
@@ -146,19 +142,16 @@ export class HeadlessGPURenderer implements IRenderer {
 
             }
         }
-        console.log(XGPU.device.queue)
-        wait(50, "commandEncoder.finish();")
+        //console.log(XGPU.device.queue)
+        //wait(50, "commandEncoder.finish();")
         const commandBuffer = commandEncoder.finish();
 
-        wait(50, "XGPU.device.queue.submit([commandBuffer]);")
+        //wait(50, "XGPU.device.queue.submit([commandBuffer]);")
         XGPU.device.queue.submit([commandBuffer]);
 
-        await XGPU.device.queue.onSubmittedWorkDone()
+        //await XGPU.device.queue.onSubmittedWorkDone()
 
-        if (!this.firstUpdate && this.renderPipelines.length > 0) {
-            this.firstUpdate = true;
-            console.log("first update time = ", (new Date().getTime() - time))
-        }
+
         this.canvas.dimensionChanged = false;
     }
 

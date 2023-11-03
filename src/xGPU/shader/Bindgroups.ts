@@ -62,8 +62,15 @@ export class Bindgroups {
             return 0;
         })
 
+        if (this.groups.length) {
+            this.groups[this.groups.length - 1].applyDraw = true;
+        } else {
+            this.groups[0] = new Bindgroup();
+            this.groups[0].parent = this;
+            this.groups[0].applyDraw = true;
+        }
 
-        this.groups[this.groups.length - 1].applyDraw = true;
+
 
 
         for (let i = 0; i < this.groups.length; i++) {

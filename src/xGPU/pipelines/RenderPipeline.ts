@@ -681,7 +681,7 @@ export class RenderPipeline extends Pipeline {
 
 
 
-        console.log("renderPassDescriptor = ", this.renderPassDescriptor);
+        //console.log("renderPassDescriptor = ", this.renderPassDescriptor);
         return commandEncoder.beginRenderPass(this.renderPassDescriptor);
     }
 
@@ -741,17 +741,22 @@ export class RenderPipeline extends Pipeline {
         // to update the content from a GPUTexture to the texture_array_2d 
         const types = this.bindGroups.resources.types;
 
-        if (!types.textureArrays) {
-            let textureArrays = [];
-            if (types.imageTextureArrays) textureArrays = textureArrays.concat(types.imageTextureArrays);
-            if (types.cubeMapTextureArrays) textureArrays = textureArrays.concat(types.cubeMapTextureArrays);
-            if (types.cubeMapTexture) textureArrays = textureArrays.concat(types.cubeMapTexture);
-            types.textureArrays = textureArrays;
+        if (types) {
+
+            if (!types.textureArrays) {
+                let textureArrays = [];
+                if (types.imageTextureArrays) textureArrays = textureArrays.concat(types.imageTextureArrays);
+                if (types.cubeMapTextureArrays) textureArrays = textureArrays.concat(types.cubeMapTextureArrays);
+                if (types.cubeMapTexture) textureArrays = textureArrays.concat(types.cubeMapTexture);
+                types.textureArrays = textureArrays;
+            }
+
+            for (let i = 0; i < types.textureArrays.length; i++) {
+                (types.textureArrays[i].resource as ImageTextureArray).updateInnerGpuTextures(commandEncoder);
+            }
         }
 
-        for (let i = 0; i < types.textureArrays.length; i++) {
-            (types.textureArrays[i].resource as ImageTextureArray).updateInnerGpuTextures(commandEncoder);
-        }
+
         //----------------------------------------------------------------------------------------
 
 
