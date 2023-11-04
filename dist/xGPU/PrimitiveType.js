@@ -1,6 +1,6 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
-import { mat2, mat2d, mat3, mat4, vec3 } from "gl-matrix";
+import { mat3, mat4, vec3 } from "wgpu-matrix";
 import { GPUType } from "./GPUType";
 export class PrimitiveFloatUniform extends Float32Array {
     //public uniform: Uniform;
@@ -560,16 +560,19 @@ export class Matrix3x3 extends PrimitiveFloatUniform {
         super("mat3x3<f32>", mat3.create());
     }
 }
+/*
 export class Matrix2x2 extends PrimitiveFloatUniform {
     constructor() {
         super("mat2x2<f32>", mat2.create());
     }
 }
+
 export class Matrix2x3 extends PrimitiveFloatUniform {
     constructor() {
         super("mat2x3<f32>", mat2d.create());
     }
 }
+*/
 export class Matrix4x4 extends PrimitiveFloatUniform {
     _x = 0;
     _y = 0;
@@ -680,11 +683,20 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
             return;
         if (this.mustBeTransfered) {
             mat4.identity(this);
+            /*
             mat4.rotate(this, this, this._rx, vec3.fromValues(1, 0, 0));
             mat4.rotate(this, this, this._ry, vec3.fromValues(0, 1, 0));
             mat4.rotate(this, this, this._rz, vec3.fromValues(0, 0, 1));
+
             mat4.translate(this, this, vec3.fromValues(this._x, this._y, this._z));
+
             mat4.scale(this, this, vec3.fromValues(this._sx, this._sy, this._sz));
+            */
+            mat4.rotateX(this, this._rx, this);
+            mat4.rotateY(this, this._ry, this);
+            mat4.rotateZ(this, this._rz, this);
+            mat4.translate(this, vec3.fromValues(this._x, this._y, this._z), this);
+            mat4.scale(this, vec3.fromValues(this._sx, this._sy, this._sz), this);
         }
     }
 }

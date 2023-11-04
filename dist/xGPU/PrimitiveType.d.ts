@@ -173,12 +173,6 @@ export declare class UVec4Array extends PrimitiveUintUniform {
 export declare class Matrix3x3 extends PrimitiveFloatUniform {
     constructor();
 }
-export declare class Matrix2x2 extends PrimitiveFloatUniform {
-    constructor();
-}
-export declare class Matrix2x3 extends PrimitiveFloatUniform {
-    constructor();
-}
 export declare class Matrix4x4 extends PrimitiveFloatUniform {
     protected _x: number;
     protected _y: number;

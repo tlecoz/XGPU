@@ -14,14 +14,14 @@ export class BuiltIns {
         Vec2: { type: "vec2<f32>", vsOut: true },
         Vec3: { type: "vec3<f32>", vsOut: true },
         Vec4: { type: "vec4<f32>", vsOut: true },
-        Int: { type: "i32", vsOut: true },
+        /*Int: { type: "i32", vsOut: true },
         IVec2: { type: "vec2<i32>", vsOut: true },
         IVec3: { type: "vec3<i32>", vsOut: true },
         IVec4: { type: "vec4<i32>", vsOut: true },
         Uint: { type: "u32", vsOut: true },
         UVec2: { type: "vec2<u32>", vsOut: true },
         UVec3: { type: "vec3<u32>", vsOut: true },
-        UVec4: { type: "vec4<u32>", vsOut: true },
+        UVec4: { type: "vec4<u32>", vsOut: true },*/
     }
 
     //----
@@ -70,7 +70,7 @@ export type VertexShaderOutput = (
     BuiltIns_vertexOutputs["Float"] |
     BuiltIns_vertexOutputs["Vec2"] |
     BuiltIns_vertexOutputs["Vec3"] |
-    BuiltIns_vertexOutputs["Vec4"] |
+    BuiltIns_vertexOutputs["Vec4"] /*|
     BuiltIns_vertexOutputs["Int"] |
     BuiltIns_vertexOutputs["IVec2"] |
     BuiltIns_vertexOutputs["IVec3"] |
@@ -78,7 +78,7 @@ export type VertexShaderOutput = (
     BuiltIns_vertexOutputs["Uint"] |
     BuiltIns_vertexOutputs["UVec2"] |
     BuiltIns_vertexOutputs["UVec3"] |
-    BuiltIns_vertexOutputs["UVec4"]
+    BuiltIns_vertexOutputs["UVec4"]*/
 );
 
 export type FragmentShaderInput = (

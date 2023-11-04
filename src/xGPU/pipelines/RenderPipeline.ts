@@ -28,8 +28,6 @@ import { UniformBuffer } from "../shader/resources/UniformBuffer";
 
 export type HighLevelShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO | PrimitiveType | VertexAttribute)
 
-
-
 export type BindgroupDescriptor = {
     [key: string]: HighLevelShaderResource
 }
@@ -67,6 +65,9 @@ export type FragmentShaderDescriptor = {
 } | string;
 
 export type RenderPipelineProperties = {
+
+    vertexShader: VertexShaderDescriptor,
+
     vertexCount?: number,
     instanceCount?: number,
     firstVertexId?: number,
@@ -83,7 +84,6 @@ export type RenderPipelineProperties = {
     blendMode?: BlendMode,
     bindgroups?: BindgroupsDescriptor,
     indexBuffer?: IndexBuffer,
-    vertexShader: VertexShaderDescriptor,
     fragmentShader?: FragmentShaderDescriptor,
 }
 
@@ -170,7 +170,8 @@ export class RenderPipeline extends Pipeline {
         frontFace?: "ccw" | "cw",
         stripIndexFormat?: "uint16" | "uint32"
         keepRendererAspectRatio?: boolean,
-
+        vertexCount?: number,
+        instanceCount?: number,
         antiAliasing?: boolean,
         useDepthTexture?: boolean,
         depthTextureSize?: number,
