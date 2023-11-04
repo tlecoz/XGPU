@@ -99,7 +99,7 @@ export class TestSample extends Sample {
 
 The console.log will look like this :
 
-![console_log](https://raw.githubusercontent.com/tlecoz/XGPU/main/assets/xgpu_pipeline_resources.jpg)
+![console_log](https://raw.githubusercontent.com/tlecoz/XGPU/main/public/xgpu_pipeline_resources.jpg)
 
 the bindgroup "properties" expose the true data structure of the buffer.
 Our vertexAttribute called "myVertexPosition" is actually contained in a VertexBuffer called "buffer" in a bindgroup called "default".
