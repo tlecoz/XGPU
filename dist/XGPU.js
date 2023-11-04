@@ -6091,13 +6091,6 @@ class ShaderStage {
         otherName
       });
     }
-    let chatGPTrequest = "";
-    chatGPTrequest += "\n=========== unwrapVariableInMainFunction ============\n";
-    for (let i = 0; i < objs.length; i++)
-      chatGPTrequest += "searchWord:" + objs[i].varName + " , replacement:" + objs[i].otherName + "\n";
-    chatGPTrequest += "-------\n";
-    chatGPTrequest += "originalCode : \n";
-    chatGPTrequest += this.main.value;
     const searchAndReplace = (shaderCode, wordToReplace, replacement) => {
       const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
       return shaderCode.replace(regex, replacement);
@@ -6106,9 +6099,6 @@ class ShaderStage {
     for (let i = 0; i < objs.length; i++) {
       shader = searchAndReplace(shader, objs[i].varName, objs[i].otherName);
     }
-    chatGPTrequest += "rebuilt shader :\n";
-    chatGPTrequest += shader + "\n";
-    console.log("chatGPTRequest = ", chatGPTrequest);
     return shader;
   }
   addOutputVariable(name, shaderType) {

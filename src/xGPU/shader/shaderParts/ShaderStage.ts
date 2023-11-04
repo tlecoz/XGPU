@@ -42,16 +42,14 @@ export class ShaderStage {
             //console.log(varName + " => " + otherName);
         }
 
+        /*
         let chatGPTrequest = "";
-
         chatGPTrequest += "\n=========== unwrapVariableInMainFunction ============\n";
         for (let i = 0; i < objs.length; i++) chatGPTrequest += "searchWord:" + objs[i].varName + " , replacement:" + objs[i].otherName + "\n";
         chatGPTrequest += "-------\n";
         chatGPTrequest += "originalCode : \n";
         chatGPTrequest += this.main.value;
-
-
-
+        */
         const searchAndReplace = (shaderCode: string, wordToReplace: string, replacement: string) => {
             //const regex = new RegExp(`\\b${wordToReplace}\\b`, 'g');
             //const regex = new RegExp(`[^.]\\b${wordToReplace}\\b`, 'g');
@@ -67,9 +65,12 @@ export class ShaderStage {
         for (let i = 0; i < objs.length; i++) {
             shader = searchAndReplace(shader, objs[i].varName, objs[i].otherName);
         }
+
+        /*
         chatGPTrequest += "rebuilt shader :\n"
         chatGPTrequest += shader + "\n";
-        //console.log("chatGPTRequest = ", chatGPTrequest);
+        console.log("chatGPTRequest = ", chatGPTrequest);
+        */
         return shader;
     }
 
