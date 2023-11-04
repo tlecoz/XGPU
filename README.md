@@ -26,6 +26,12 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - produce code easy-to-read, easy-to-write, easy-to-maintain
 
 
+# DEMOS 
+
+check the [samples-page](https://xgpu-samples.netlify.app/samples/TonsOfCubes)
+
+The repo containing the samples is [here](https://github.com/tlecoz/xgpu-samples).
+
 # How to use?
 
 You can install XGPU by using npm install 
@@ -57,8 +63,7 @@ export class HelloTriangle_Sample extends Sample {
 Let's rebuild this sample with an extendable renderPipeline and an interactive color usable outside of the pipeline
 
 
-
-
+ ```
 class Triangle extends RenderPipeline {
     
     constructor(renderer: GPURenderer, options?: any) {
@@ -90,6 +95,7 @@ export class TestSample extends Sample {
         renderer.addPipeline(trianglePipeline);
     }
 }
+  ```
 
 The console.log will look like this :
 
@@ -110,6 +116,7 @@ if you update of value of "myCustomColor" for example, it will be updated in the
 The object used in "initFromObject" describe the pipeline itself and the resource it will use. 
 
 This object follow this type : 
+  ```
 export type RenderPipelineProperties = {
 
     vertexShader: VertexShaderDescriptor,
@@ -131,7 +138,7 @@ export type RenderPipelineProperties = {
     bindgroups?: BindgroupsDescriptor,
     indexBuffer?: IndexBuffer,
 }
-
+  ```
 as you can see, only "vertexShader" is required. 
 There are default properties set everywhere behind the hood.
 "fragmentShader" is not required because a renderPipeline used to create a shadow doesn't use any fragmentShader. 
@@ -241,7 +248,7 @@ Let's focus on every property :
 - depthTextureSize : 1024 by default. 
                      The size of the depthTexture if "useDepthTexture" is set to true
 
-- depthTest: false by default
+- depthTest: false by default.
              Indicate if you want to apply a z-sorting of your triangles during the shader pass
             
 - clearColor: an object with r,g,b,a properties to set the defaut color of the backgound when the renderer render new frame.
@@ -250,24 +257,14 @@ Let's focus on every property :
               you can create a custom BlendMode extending the BlendMode class or use a new AlphaBlendMode 
               in order to handle image with alpha channel
 
-- indexBuffer : undefined by default
+- indexBuffer : undefined by default?
                 you can assign an IndexBuffer to a pipeline to manage your triangles defined in your vertexBuffer (if you have one)
 
-- bindgroups : undefined by default
-               This property is a vestige of the previous version of GPU. If defined, it describe the complete structure of the resources used in a shader with every buffer defined explicitly. 
-
-               Actually, the very first step of Pipeline.initFromObject is to parse the input object to produce an object that fit in "bindgroups" properties. 
-
+- bindgroups : undefined by default?
+               This property is a vestige of the previous version of XGPU. If defined, it describe the complete structure of the resources used in a shader with every buffer defined explicitly. 
+               The very first step of Pipeline.initFromObject is to parse the input object to produce an object that fit in "bindgroups" properties. 
                you should not use this property, except maybe if you work with PipelinePlugin (show the samples Light & Shadow to see an example)
 
-
-
-
-# DEMOS 
-
-check the [samples-page](https://xgpu-samples.netlify.app/samples/TonsOfCubes)
-
-The repo containing the samples is [here](https://github.com/tlecoz/xgpu-samples).
 
 
 
