@@ -76,7 +76,7 @@ export class GPURenderer extends HeadlessGPURenderer implements IRenderer {
         this.ctx.configure(this.gpuCtxConfiguration)
     }
 
-    public update() {
+    public async update() {
         if (!this.ctx) return;
 
 

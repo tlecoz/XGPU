@@ -192,6 +192,7 @@ export class UniformGroup {
 
 
     public updateStack() {
+
         this.items = this.stackItems(this.items);
     }
 
@@ -205,7 +206,7 @@ export class UniformGroup {
 
 
 
-    public update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
+    public async update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
 
         if (fromUniformBuffer === false) {
 
@@ -233,25 +234,26 @@ export class UniformGroup {
                     item.update(gpuResource, false);
                 } else {
 
-
-                    //console.log(item.name, item.startId, item.buffer.byteLength / 4)
+                    //console.log(item);
+                    //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer.byteLength, item.buffer, item.byteOffset)
                     this.datas.set(item, item.startId);
-                    console.log("item.byteLength = ", item.byteLength)
+
+
+
+                    //console.log("item.byteLength = ", item.byteLength)
                     XGPU.device.queue.writeBuffer(
                         gpuResource,
                         item.startId * Float32Array.BYTES_PER_ELEMENT,
                         item.buffer,
-                        0,
+                        item.byteOffset,
                         item.byteLength
                     )
                 }
 
                 item.mustBeTransfered = false;
-                console.log("uniformGroup.update time = ", (new Date().getTime() - time))
+                //console.log("uniformGroup.update time = ", (new Date().getTime() - time))
             }
         }
-
-
 
     }
 
@@ -369,7 +371,8 @@ export class UniformGroup {
 
     public stackItems(items: any): Uniformable[] {
 
-        //console.log("STACK ITEMS")
+        //console.warn("stackItems")
+        //console.time("STACK ITEMS")
 
         const result: any[] = []
 
@@ -516,6 +519,7 @@ export class UniformGroup {
         this.arrayStride = offset;
 
         this.datas = new Float32Array(offset);
+        //console.log("arrayStride = ", this.arrayStride, result.length)
 
         let o: any;
         for (let i = 0; i < result.length; i++) {
@@ -535,7 +539,7 @@ export class UniformGroup {
             }
         }
 
-
+        //console.timeEnd("STACK ITEMS")
         return result
 
     }

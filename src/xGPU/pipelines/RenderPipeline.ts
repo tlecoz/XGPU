@@ -208,7 +208,7 @@ export class RenderPipeline extends Pipeline {
 
 
         descriptor = HighLevelParser.parse(descriptor, "render", this.drawConfig);
-
+        //console.log("descriptor ", descriptor)
 
 
 
@@ -537,7 +537,6 @@ export class RenderPipeline extends Pipeline {
     public buildGpuPipeline(): GPURenderPipeline {
         if (this.gpuPipeline) return this.gpuPipeline;
 
-
         this.bindGroups.handleRenderPipelineResourceIOs();
 
         this.initPipelineResources(this);
@@ -619,9 +618,10 @@ export class RenderPipeline extends Pipeline {
             this.description.fragment.module = XGPU.device.createShaderModule({ code: this.description.fragment.code })
         }
 
-
+        //console.log(this.description)
 
         this.rebuildingAfterDeviceLost = false;
+        //console.log("pipelineDescription : ", this.description)
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
 
 
@@ -720,7 +720,7 @@ export class RenderPipeline extends Pipeline {
     public draw(renderPass: GPURenderPassEncoder) {
 
         if (!this.resourceDefined) return;
-        //console.log("renderPipeline.draw start ", this.bindGroups.resources.all)
+
         renderPass.setPipeline(this.gpuPipeline);
 
         this.bindGroups.apply(renderPass);
@@ -733,7 +733,6 @@ export class RenderPipeline extends Pipeline {
 
     public end(commandEncoder, renderPass) {
         if (!this.resourceDefined) return;
-
         renderPass.end();
 
 

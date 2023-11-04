@@ -14,6 +14,9 @@ export class HeadlessGPURenderer implements IRenderer {
 
     protected useTextureInComputeShader;
 
+    public onDrawEnd: () => void;
+
+
     constructor(useTextureInComputeShader: boolean = false) {
         this.useTextureInComputeShader = useTextureInComputeShader;
     }
@@ -60,13 +63,34 @@ export class HeadlessGPURenderer implements IRenderer {
 
     protected nbColorAttachment: number = 0;
 
-    public addPipeline(pipeline: RenderPipeline, offset: number = null) {
+    public async addPipeline(pipeline: RenderPipeline, offset: number = null) {
+
+        if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment++;
 
         if (offset === null) this.renderPipelines.push(pipeline);
         else this.renderPipelines.splice(offset, 0, pipeline)
 
 
-        if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment++;
+        /*
+        //console.log("pipeline.buildGPUPipeline")
+        pipeline.buildGpuPipeline();
+
+        XGPU.device.queue.submit([]);
+        //console.time("addPipeline onSubmittedWorkDone")
+        await XGPU.device.queue.onSubmittedWorkDone()
+        //console.timeEnd("addPipeline onSubmittedWorkDone")
+        */
+
+
+
+
+        //setTimeout(() => {
+
+
+        //}, 1)
+
+
+
     }
     public get nbPipeline(): number { return this.renderPipelines.length }
     public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
@@ -88,71 +112,50 @@ export class HeadlessGPURenderer implements IRenderer {
         }
     }
 
-    private firstUpdate: boolean = false;
 
 
     public async update() {
 
+
+
+
         if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === undefined) return;
-        //console.log(XGPU.deviceId + " VS " + this.deviceId);
+
         let deviceChanged: boolean = XGPU.deviceId != this.deviceId;
         if (deviceChanged) {
+
             if (this.textureObj) this.textureObj.create();
             this.deviceId = XGPU.deviceId;
             for (let i = 0; i < this.renderPipelines.length; i++) {
-
                 this.renderPipelines[i].clearAfterDeviceLostAndRebuild();
-
             }
-
         }
-        /*
-        const wait = (n, message): Promise<void> => {
-            console.log("wait before ", message);
-            return new Promise((resolve) => {
-                const time = new Date().getTime();
-                while (new Date().getTime() - time < n) { }
-                resolve();
-            })
-        }
-        */
-
-
 
         const commandEncoder = XGPU.device.createCommandEncoder();
-        //console.log("nbPipeline = ", this.renderPipelines.length)
+
+
         let pipeline: RenderPipeline, renderPass;
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
-
-
-            //console.log("pipeline.update ", pipeline.pipelineCount)
-            //wait(50, "pipeline.update()")
-            pipeline.update()
+            pipeline.update();
 
             for (let j = 0; j < pipeline.pipelineCount; j++) {
-                //wait(50, "pipeline.beginRenderPass(commandEncoder, this.view, j)")
+
                 renderPass = pipeline.beginRenderPass(commandEncoder, this.view, j);
                 if (pipeline.onDraw) pipeline.onDraw(j);
-                //wait(50, "pipeline.draw(renderPass)")
                 pipeline.draw(renderPass);
-                //console.log("pipeline.resourceDefined = ", commandEncoder)
-                //wait(50, "pipeline.end(commandEncoder, renderPass)")
                 pipeline.end(commandEncoder, renderPass);
-
             }
         }
-        //console.log(XGPU.device.queue)
-        //wait(50, "commandEncoder.finish();")
+
         const commandBuffer = commandEncoder.finish();
 
-        //wait(50, "XGPU.device.queue.submit([commandBuffer]);")
         XGPU.device.queue.submit([commandBuffer]);
 
-        //await XGPU.device.queue.onSubmittedWorkDone()
-
-
         this.canvas.dimensionChanged = false;
+
+
+        if (this.onDrawEnd) this.onDrawEnd();
     }
 
     public get dimensionChanged(): boolean { return this.dimension.dimensionChanged; }

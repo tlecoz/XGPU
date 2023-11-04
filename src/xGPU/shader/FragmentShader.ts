@@ -42,11 +42,15 @@ export class FragmentShader extends ShaderStage {
 
         //------
 
+        const mainFunc = this.unwrapVariableInMainFunction(obj.variables)//handleVariables();
+
+
         result += "@fragment\n";
         result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
-        result += obj.variables + "\n";
+        //result += obj.variables + "\n";
         result += "   var output:Output;\n";
-        result += this.main.value;
+        //result += this.main.value;
+        result += mainFunc;
         result += "   return output;\n"
         result += "}\n";
 

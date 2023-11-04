@@ -267,6 +267,8 @@ export class Bindgroup {
             resource = this.elements[i].resource;
             //if (!resource.gpuResource) {
 
+            //console.log("Bindgroup.build ", i, resource)
+
             resource.update();
             //}
 
@@ -455,20 +457,13 @@ export class Bindgroup {
             this.update();
 
             renderPass.setBindGroup(this.bindgroupId, instances[i].group);
-            //renderPass.setBindGroup(this.bindgroupId, this.group);
-
 
             if (this.vertexBuffers) {
-                //console.log("vertexBuffers = ", this.vertexBuffers)
+
                 let buf: any;
                 for (let j = 0; j < this.vertexBuffers.length; j++) {
 
-
                     buf = this.vertexBuffers[j].getCurrentBuffer();
-
-
-
-                    //console.log(this.vertexBuffers[j], this.vertexBuffers[j].bufferId, buf, this.vertexBuffers.indexOf(buf))
                     renderPass.setVertexBuffer(this.vertexBuffers[j].bufferId, buf);
                 }
             }

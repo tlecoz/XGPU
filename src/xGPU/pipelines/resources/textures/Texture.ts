@@ -57,8 +57,6 @@ export class Texture {
         this.time = new Date().getTime();
 
 
-        //console.log(XGPU.loseDeviceRecently, this.deviceId, XGPU.deviceId)
-
         if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId) return
 
         if (this.gpuResource) {

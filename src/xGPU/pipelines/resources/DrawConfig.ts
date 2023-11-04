@@ -1,3 +1,4 @@
+import { XGPU } from "../../XGPU";
 import { RenderPipeline } from "../RenderPipeline";
 import { IndexBuffer } from "./IndexBuffer";
 
@@ -24,7 +25,6 @@ export class DrawConfig {
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize())
             renderPass.drawIndexed(this.indexBuffer.nbPoint, this.instanceCount, this.firstVertexId, this.baseVertex, this.firstInstanceId);
         } else {
-
             renderPass.draw(this.vertexCount, this.instanceCount, this.firstVertexId, this.firstInstanceId);
         }
     }
