@@ -156,13 +156,19 @@ export declare class UVec4 extends PrimitiveUintUniform {
     get w(): number;
 }
 export declare class Vec4Array extends PrimitiveFloatUniform {
+    vec4Array: Vec4[];
     constructor(vec4Array: Vec4[]);
+    update(): void;
 }
 export declare class IVec4Array extends PrimitiveIntUniform {
+    ivec4Array: IVec4[];
     constructor(ivec4Array: IVec4[]);
+    update(): void;
 }
 export declare class UVec4Array extends PrimitiveUintUniform {
+    uvec4Array: UVec4[];
     constructor(uvec4Array: UVec4[]);
+    update(): void;
 }
 export declare class Matrix3x3 extends PrimitiveFloatUniform {
     constructor();

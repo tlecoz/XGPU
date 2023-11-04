@@ -194,7 +194,7 @@ export class RenderPipeline extends Pipeline {
         , [key: string]: unknown
     }): any {
 
-        const time = new Date().getTime();
+
 
         this._resources = {};
         this.vertexShader = null;

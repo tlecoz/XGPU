@@ -29,18 +29,17 @@ export class VertexShader extends ShaderStage {
             this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position });
         let output = new ShaderStruct("Output", [...this.outputs]);
         result += output.struct + "\n";
+        const mainFunc = this.unwrapVariableInMainFunction(obj.variables); //handleVariables();
         //------
+        //console.log("VertexShader.variables = ", obj.variables)
         result += "@vertex\n";
         result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
-        result += obj.variables + "\n";
         result += "   var output:Output;\n";
-        result += this.main.value;
-        //if (this.keepRendererAspectRatio) result += `   output.position = vec4(output.position.x /  xgpuRendererAspectRatio , output.position.y   ,output.position.zw);\n`;
+        result += mainFunc;
         result += "   return output;\n";
         result += "}\n";
         result = this.formatWGSLCode(result);
         if (XGPU.debugShaders) {
-            console.log("a");
             console.log("------------- VERTEX SHADER --------------");
             console.log(result);
             console.log("------------------------------------------");

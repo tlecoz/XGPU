@@ -1,4 +1,3 @@
-import { XGPU } from "../../XGPU";
 import { RenderPipeline } from "../RenderPipeline";
 import { IndexBuffer } from "./IndexBuffer";
 

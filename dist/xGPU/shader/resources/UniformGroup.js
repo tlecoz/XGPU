@@ -95,6 +95,7 @@ export class UniformGroup {
         return null;
     }
     add(name, data, useLocalVariable = false, stackItems = true) {
+        //console.log("add ", name, data)
         data.uniformBuffer = this.uniformBuffer;
         data.name = name;
         data.mustBeTransfered = true;
@@ -158,7 +159,7 @@ export class UniformGroup {
             this.items[i].mustBeTransfered = true;
         }
     }
-    update(gpuResource, fromUniformBuffer = false) {
+    async update(gpuResource, fromUniformBuffer = false) {
         if (fromUniformBuffer === false) {
             XGPU.device.queue.writeBuffer(gpuResource, this.startId, this.datas.buffer, 0, this.arrayStride * Float32Array.BYTES_PER_ELEMENT);
             return;
@@ -174,11 +175,14 @@ export class UniformGroup {
                     item.update(gpuResource, false);
                 }
                 else {
-                    //console.log(item.name, item.startId, this.datas.length)
+                    //console.log(item);
+                    //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer.byteLength, item.buffer, item.byteOffset)
                     this.datas.set(item, item.startId);
-                    XGPU.device.queue.writeBuffer(gpuResource, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer, 0, item.byteLength);
+                    //console.log("item.byteLength = ", item.byteLength)
+                    XGPU.device.queue.writeBuffer(gpuResource, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer, item.byteOffset, item.byteLength);
                 }
                 item.mustBeTransfered = false;
+                //console.log("uniformGroup.update time = ", (new Date().getTime() - time))
             }
         }
     }
@@ -261,7 +265,8 @@ export class UniformGroup {
         return this.wgsl;
     }
     stackItems(items) {
-        //console.log("STACK ITEMS")
+        //console.warn("stackItems")
+        //console.time("STACK ITEMS")
         const result = [];
         let bound = 1;
         var floats = [];
@@ -376,6 +381,7 @@ export class UniformGroup {
         //--------------------------
         this.arrayStride = offset;
         this.datas = new Float32Array(offset);
+        //console.log("arrayStride = ", this.arrayStride, result.length)
         let o;
         for (let i = 0; i < result.length; i++) {
             o = result[i];
@@ -395,6 +401,7 @@ export class UniformGroup {
                 this.datas.set(o, o.startId);
             }
         }
+        //console.timeEnd("STACK ITEMS")
         return result;
     }
 }

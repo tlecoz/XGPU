@@ -194,6 +194,7 @@ export class Bindgroup {
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
             //if (!resource.gpuResource) {
+            //console.log("Bindgroup.build ", i, resource)
             resource.update();
             //}
             if (resource instanceof VertexBuffer && !resource.io)
@@ -222,7 +223,10 @@ export class Bindgroup {
     setupApply() {
         this.bindgroupId = this.parent.groups.indexOf(this);
         //this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
-        const allVertexBuffers = this.parent.resources.types.vertexBuffers;
+        const types = this.parent.resources.types;
+        if (!types)
+            return;
+        const allVertexBuffers = types.vertexBuffers;
         if (!allVertexBuffers)
             return;
         //console.log("SETUP APPLY  id = ", this.bindgroupId, allVertexBuffers, this.elements)
@@ -313,17 +317,15 @@ export class Bindgroup {
         }
         const instances = this.instances ? this.instances : [{ group: this.group, update: () => { } }];
         const applyDraw = this.applyDraw;
+        //console.log("instances.length = ", instances.length)
         for (let i = 0; i < instances.length; i++) {
             instances[i].update();
             this.update();
             renderPass.setBindGroup(this.bindgroupId, instances[i].group);
-            //renderPass.setBindGroup(this.bindgroupId, this.group);
             if (this.vertexBuffers) {
-                //console.log("vertexBuffers = ", this.vertexBuffers)
                 let buf;
                 for (let j = 0; j < this.vertexBuffers.length; j++) {
                     buf = this.vertexBuffers[j].getCurrentBuffer();
-                    //console.log(this.vertexBuffers[j], this.vertexBuffers[j].bufferId, buf, this.vertexBuffers.indexOf(buf))
                     renderPass.setVertexBuffer(this.vertexBuffers[j].bufferId, buf);
                 }
             }
@@ -644,7 +646,7 @@ export class Bindgroup {
         return this._group;
     }
     update() {
-        // console.log(this.elements)
+        //console.log("bindGroup.update elements.length = ", this.elements.length)
         for (let i = 0; i < this.elements.length; i++) {
             this.elements[i].resource.update();
         }

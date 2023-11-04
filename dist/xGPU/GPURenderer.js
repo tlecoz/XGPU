@@ -15,6 +15,7 @@ export class GPURenderer extends HeadlessGPURenderer {
         this.canvasW = canvas.width;
         this.canvasH = canvas.height;
         this.domElement = canvas;
+        this.dimension = { width: canvas.width, height: canvas.height, dimensionChanged: true };
         return new Promise(async (resolve, error) => {
             await XGPU.init();
             this.deviceId = XGPU.deviceId;
@@ -53,7 +54,7 @@ export class GPURenderer extends HeadlessGPURenderer {
         };
         this.ctx.configure(this.gpuCtxConfiguration);
     }
-    update() {
+    async update() {
         if (!this.ctx)
             return;
         if (XGPU.deviceId != this.deviceId) {

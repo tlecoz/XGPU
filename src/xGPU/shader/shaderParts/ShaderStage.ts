@@ -69,7 +69,7 @@ export class ShaderStage {
         }
         chatGPTrequest += "rebuilt shader :\n"
         chatGPTrequest += shader + "\n";
-        console.log("chatGPTRequest = ", chatGPTrequest);
+        //console.log("chatGPTRequest = ", chatGPTrequest);
         return shader;
     }
 

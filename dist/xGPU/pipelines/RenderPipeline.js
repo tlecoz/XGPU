@@ -74,10 +74,12 @@ export class RenderPipeline extends Pipeline {
         this._resources = {};
         this.vertexShader = null;
         this.fragmentShader = null;
+        this.gpuPipeline = null;
         this.bindGroups.destroy();
         this.bindGroups = new Bindgroups(this, "pipeline");
         //--------
         descriptor = HighLevelParser.parse(descriptor, "render", this.drawConfig);
+        //console.log("descriptor ", descriptor)
         super.initFromObject(descriptor);
         if (!descriptor.cullMode)
             this.description.primitive.cullMode = "none";
@@ -195,6 +197,7 @@ export class RenderPipeline extends Pipeline {
                 this.fragmentShader.main.text = descriptor.fragmentShader.main;
             }
         }
+        //console.log("initFromObject time = ", (new Date().getTime() - time))
         return descriptor;
     }
     /*
@@ -385,7 +388,9 @@ export class RenderPipeline extends Pipeline {
         if (this.description.fragment) {
             this.description.fragment.module = XGPU.device.createShaderModule({ code: this.description.fragment.code });
         }
+        //console.log(this.description)
         this.rebuildingAfterDeviceLost = false;
+        //console.log("pipelineDescription : ", this.description)
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
         return this.gpuPipeline;
     }
@@ -446,11 +451,13 @@ export class RenderPipeline extends Pipeline {
     }
     //----------------------------------------------------------------------
     update() {
+        //console.log("renderPipeline.update start gpuPipeline = ", this.gpuPipeline)
         if (!this.gpuPipeline)
             return;
         if (this.renderPassTexture)
             this.renderPassTexture.update();
         this.bindGroups.update();
+        //console.log("renderPipeline.update end")
     }
     draw(renderPass) {
         if (!this.resourceDefined)
@@ -466,18 +473,20 @@ export class RenderPipeline extends Pipeline {
         //------ the arrays of textures may contains GPUTexture so I must use commandEncoder.copyTextureToTexture 
         // to update the content from a GPUTexture to the texture_array_2d 
         const types = this.bindGroups.resources.types;
-        if (!types.textureArrays) {
-            let textureArrays = [];
-            if (types.imageTextureArrays)
-                textureArrays = textureArrays.concat(types.imageTextureArrays);
-            if (types.cubeMapTextureArrays)
-                textureArrays = textureArrays.concat(types.cubeMapTextureArrays);
-            if (types.cubeMapTexture)
-                textureArrays = textureArrays.concat(types.cubeMapTexture);
-            types.textureArrays = textureArrays;
-        }
-        for (let i = 0; i < types.textureArrays.length; i++) {
-            types.textureArrays[i].resource.updateInnerGpuTextures(commandEncoder);
+        if (types) {
+            if (!types.textureArrays) {
+                let textureArrays = [];
+                if (types.imageTextureArrays)
+                    textureArrays = textureArrays.concat(types.imageTextureArrays);
+                if (types.cubeMapTextureArrays)
+                    textureArrays = textureArrays.concat(types.cubeMapTextureArrays);
+                if (types.cubeMapTexture)
+                    textureArrays = textureArrays.concat(types.cubeMapTexture);
+                types.textureArrays = textureArrays;
+            }
+            for (let i = 0; i < types.textureArrays.length; i++) {
+                types.textureArrays[i].resource.updateInnerGpuTextures(commandEncoder);
+            }
         }
         //----------------------------------------------------------------------------------------
         if (this.renderPassTexture) {

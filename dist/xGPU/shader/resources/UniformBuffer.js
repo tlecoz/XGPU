@@ -74,16 +74,19 @@ export class UniformBuffer {
     }
     createGpuResource() {
         if (!this.gpuResource) {
+            //console.time("createGpuUniformBuffer")
             const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
             let usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
             if (this.bufferType === "read-only-storage")
                 usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
-            //console.log("uniformBuffer createGouResource size = ", size);
+            //console.log("uniformBuffer createGpuResource size = ", size, this.group.arrayStride);
             this.gpuResource = XGPU.device.createBuffer({
                 size,
-                usage
+                usage,
             });
             this.update();
+            //console.timeEnd("createGpuUniformBuffer")
+            //console.log(this.gpuResource)
         }
     }
     time;
@@ -108,6 +111,7 @@ export class UniformBuffer {
         if (this.bufferType)
             type = this.bufferType;
         //console.log("bufferType = ", this.bufferType);
+        //console.log("createBindGroupLayoutEntry ", this.descriptor.visibility)
         //console.log("UniformBuffer.createBindGroupLayoutEntry ", this.shaderVisibility, this.debug, this.cloned)
         return {
             binding: bindingId,

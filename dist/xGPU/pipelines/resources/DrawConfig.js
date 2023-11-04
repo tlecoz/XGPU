@@ -11,6 +11,7 @@ export class DrawConfig {
         this.pipeline = renderPipeline;
     }
     draw(renderPass) {
+        //console.log("DrawConfig.draw")
         if (this.indexBuffer) {
             //console.log(this.indexBuffer.nbPoint, this.instanceCount, this.firstVertexId, this.baseVertex, this.firstInstanceId)
             renderPass.setIndexBuffer(this.indexBuffer.gpuResource, this.indexBuffer.dataType, this.indexBuffer.offset, this.indexBuffer.getBufferSize());

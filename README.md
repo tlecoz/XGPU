@@ -76,33 +76,6 @@ The repo containing the samples is [here](https://github.com/tlecoz/xgpu-samples
 - RenderBundle feature is still a "work in progress"
 
 
-
-- For now, if you customize a PrimitiveType (Float,Vec2,Vec3,...) and you create custom variable names like that : 
-
- ```
-  class Dimension extends Vec2 {
-      constructor(x,y){
-         super(x,y);
-         this.initStruct(["width", "height"]);
-      }
-  }
-   ```
-
-  it will produce a "struct" with the name of the class with the properties "width" and "height". 
-  You will be able to use the keywords "width" and "height" in the shader, but there is an issue... 
-  Your object, from the shader point of view, is now a struct, not a vec2 , so you can't write something like
-
-   ```
-   pos.xy *= dimension;
-   ``` 
-   you must write
-   ```
-   pos.xy = vec2(pos.x * dimension.width, pos.y * dimension.height);
-   ```
-   
-   I'll try to fix it soon 
-
-
 - For now, you can't have more than one VertexBufferIO or ImageTextureIO by pipeline
   A VertexBufferIO/ImageTextureIO is a resource used in a ComputeShader to store data ; it may be used as input of a renderPipeline after being processed by a computeShader. 
   

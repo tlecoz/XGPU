@@ -59,7 +59,6 @@ var __publicField = (obj, key, value) => {
     }
     static init(options) {
       this.requestAdapterOptions = options;
-      console.log("INIT");
       return new Promise(async (resolve, error) => {
         if (this.gpuDevice) {
           resolve(this);
@@ -219,6 +218,7 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "dimension");
       __publicField(this, "renderPipelines", []);
       __publicField(this, "useTextureInComputeShader");
+      __publicField(this, "onDrawEnd");
       __publicField(this, "deviceId");
       __publicField(this, "nbColorAttachment", 0);
       this.useTextureInComputeShader = useTextureInComputeShader;
@@ -249,13 +249,13 @@ var __publicField = (obj, key, value) => {
     get firstPipeline() {
       return this.renderPipelines[0];
     }
-    addPipeline(pipeline, offset = null) {
+    async addPipeline(pipeline, offset = null) {
+      if (pipeline.renderPassDescriptor.colorAttachments[0])
+        this.nbColorAttachment++;
       if (offset === null)
         this.renderPipelines.push(pipeline);
       else
         this.renderPipelines.splice(offset, 0, pipeline);
-      if (pipeline.renderPassDescriptor.colorAttachments[0])
-        this.nbColorAttachment++;
     }
     get nbPipeline() {
       return this.renderPipelines.length;
@@ -279,7 +279,7 @@ var __publicField = (obj, key, value) => {
         this[z] = null;
       }
     }
-    update() {
+    async update() {
       if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === void 0)
         return;
       let deviceChanged = XGPU.deviceId != this.deviceId;
@@ -304,8 +304,11 @@ var __publicField = (obj, key, value) => {
           pipeline.end(commandEncoder, renderPass);
         }
       }
-      XGPU.device.queue.submit([commandEncoder.finish()]);
+      const commandBuffer = commandEncoder.finish();
+      XGPU.device.queue.submit([commandBuffer]);
       this.canvas.dimensionChanged = false;
+      if (this.onDrawEnd)
+        this.onDrawEnd();
     }
     get dimensionChanged() {
       return this.dimension.dimensionChanged;
@@ -343,6 +346,7 @@ var __publicField = (obj, key, value) => {
       this.canvasW = canvas.width;
       this.canvasH = canvas.height;
       this.domElement = canvas;
+      this.dimension = { width: canvas.width, height: canvas.height, dimensionChanged: true };
       return new Promise(async (resolve, error) => {
         await XGPU.init();
         this.deviceId = XGPU.deviceId;
@@ -392,7 +396,7 @@ var __publicField = (obj, key, value) => {
       };
       this.ctx.configure(this.gpuCtxConfiguration);
     }
-    update() {
+    async update() {
       if (!this.ctx)
         return;
       if (XGPU.deviceId != this.deviceId) {
@@ -1226,7 +1230,23 @@ var __publicField = (obj, key, value) => {
         buf.set(vec4Array[i], i * 4);
       let type = "array<vec4<f32>," + vec4Array.length + ">";
       super("array<vec4<f32>," + vec4Array.length + ">", buf);
+      __publicField(this, "vec4Array");
       this.className = type;
+      this.vec4Array = vec4Array;
+    }
+    update() {
+      let mustBeTransfered = false;
+      let m;
+      for (let i = 0; i < this.vec4Array.length; i++) {
+        m = this.vec4Array[i];
+        m.update();
+        if (m.mustBeTransfered) {
+          mustBeTransfered = true;
+          this.set(m, i * 4);
+          m.mustBeTransfered = false;
+        }
+      }
+      this.mustBeTransfered = mustBeTransfered;
     }
   }
   class IVec4Array extends PrimitiveIntUniform {
@@ -1236,7 +1256,23 @@ var __publicField = (obj, key, value) => {
         buf.set(ivec4Array[i], i * 4);
       let type = "array<vec4<i32>," + ivec4Array.length + ">";
       super(type, buf);
+      __publicField(this, "ivec4Array");
       this.className = type;
+      this.ivec4Array = ivec4Array;
+    }
+    update() {
+      let mustBeTransfered = false;
+      let m;
+      for (let i = 0; i < this.ivec4Array.length; i++) {
+        m = this.ivec4Array[i];
+        m.update();
+        if (m.mustBeTransfered) {
+          mustBeTransfered = true;
+          this.set(m, i * 4);
+          m.mustBeTransfered = false;
+        }
+      }
+      this.mustBeTransfered = mustBeTransfered;
     }
   }
   class UVec4Array extends PrimitiveUintUniform {
@@ -1246,7 +1282,23 @@ var __publicField = (obj, key, value) => {
         buf.set(uvec4Array[i], i * 4);
       let type = "array<vec4<u32>," + uvec4Array.length + ">";
       super(type, buf);
+      __publicField(this, "uvec4Array");
       this.className = type;
+      this.uvec4Array = uvec4Array;
+    }
+    update() {
+      let mustBeTransfered = false;
+      let m;
+      for (let i = 0; i < this.uvec4Array.length; i++) {
+        m = this.uvec4Array[i];
+        m.update();
+        if (m.mustBeTransfered) {
+          mustBeTransfered = true;
+          this.set(m, i * 4);
+          m.mustBeTransfered = false;
+        }
+      }
+      this.mustBeTransfered = mustBeTransfered;
     }
   }
   class Matrix3x3 extends PrimitiveFloatUniform {
@@ -2393,7 +2445,7 @@ var __publicField = (obj, key, value) => {
         this.items[i].mustBeTransfered = true;
       }
     }
-    update(gpuResource, fromUniformBuffer = false) {
+    async update(gpuResource, fromUniformBuffer = false) {
       if (fromUniformBuffer === false) {
         XGPU.device.queue.writeBuffer(
           gpuResource,
@@ -2418,7 +2470,7 @@ var __publicField = (obj, key, value) => {
               gpuResource,
               item.startId * Float32Array.BYTES_PER_ELEMENT,
               item.buffer,
-              0,
+              item.byteOffset,
               item.byteLength
             );
           }
@@ -4843,7 +4895,10 @@ var __publicField = (obj, key, value) => {
     }
     setupApply() {
       this.bindgroupId = this.parent.groups.indexOf(this);
-      const allVertexBuffers = this.parent.resources.types.vertexBuffers;
+      const types = this.parent.resources.types;
+      if (!types)
+        return;
+      const allVertexBuffers = types.vertexBuffers;
       if (!allVertexBuffers)
         return;
       const getBufferId = (o) => {
@@ -5355,7 +5410,13 @@ var __publicField = (obj, key, value) => {
           return -1;
         return 0;
       });
-      this.groups[this.groups.length - 1].applyDraw = true;
+      if (this.groups.length) {
+        this.groups[this.groups.length - 1].applyDraw = true;
+      } else {
+        this.groups[0] = new Bindgroup();
+        this.groups[0].parent = this;
+        this.groups[0].applyDraw = true;
+      }
       for (let i = 0; i < this.groups.length; i++) {
         if (!autoLayout)
           layouts[i] = this.groups[i].layout;
@@ -5708,6 +5769,7 @@ var __publicField = (obj, key, value) => {
         this.groups[i] = void 0;
       }
       this.groups = [];
+      this._resources = {};
     }
   }
   class Pipeline {
@@ -6016,6 +6078,42 @@ var __publicField = (obj, key, value) => {
       this.constants = new ShaderNode();
       this.main = new ShaderNode("", true);
     }
+    unwrapVariableInMainFunction(shaderVariables) {
+      const variables = shaderVariables.split("\n");
+      let s;
+      let objs = [];
+      for (let i = 0; i < variables.length; i++) {
+        variables[i] = s = variables[i].split("	").join("").trim().slice(4);
+        if (!s.length)
+          continue;
+        let t = s.split(" = ");
+        let varName = t[0].split(":")[0];
+        let otherName = t[1].slice(0, t[1].length - 1);
+        objs.push({
+          varName,
+          otherName
+        });
+      }
+      let chatGPTrequest = "";
+      chatGPTrequest += "\n=========== unwrapVariableInMainFunction ============\n";
+      for (let i = 0; i < objs.length; i++)
+        chatGPTrequest += "searchWord:" + objs[i].varName + " , replacement:" + objs[i].otherName + "\n";
+      chatGPTrequest += "-------\n";
+      chatGPTrequest += "originalCode : \n";
+      chatGPTrequest += this.main.value;
+      const searchAndReplace = (shaderCode, wordToReplace, replacement) => {
+        const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
+        return shaderCode.replace(regex, replacement);
+      };
+      let shader = this.main.value + "";
+      for (let i = 0; i < objs.length; i++) {
+        shader = searchAndReplace(shader, objs[i].varName, objs[i].otherName);
+      }
+      chatGPTrequest += "rebuilt shader :\n";
+      chatGPTrequest += shader + "\n";
+      console.log("chatGPTRequest = ", chatGPTrequest);
+      return shader;
+    }
     addOutputVariable(name, shaderType) {
       this.outputs.push({ name, type: shaderType.type });
     }
@@ -6067,11 +6165,11 @@ var __publicField = (obj, key, value) => {
       }
       const output = new ShaderStruct("Output", this.outputs);
       result += output.struct + "\n";
+      const mainFunc = this.unwrapVariableInMainFunction(obj.variables);
       result += "@fragment\n";
       result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
-      result += obj.variables + "\n";
       result += "   var output:Output;\n";
-      result += this.main.value;
+      result += mainFunc;
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
@@ -6104,16 +6202,15 @@ var __publicField = (obj, key, value) => {
         this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position });
       let output = new ShaderStruct("Output", [...this.outputs]);
       result += output.struct + "\n";
+      const mainFunc = this.unwrapVariableInMainFunction(obj.variables);
       result += "@vertex\n";
       result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
-      result += obj.variables + "\n";
       result += "   var output:Output;\n";
-      result += this.main.value;
+      result += mainFunc;
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
       if (XGPU.debugShaders) {
-        console.log("a");
         console.log("------------- VERTEX SHADER --------------");
         console.log(result);
         console.log("------------------------------------------");
@@ -6286,6 +6383,7 @@ var __publicField = (obj, key, value) => {
       this._resources = {};
       this.vertexShader = null;
       this.fragmentShader = null;
+      this.gpuPipeline = null;
       this.bindGroups.destroy();
       this.bindGroups = new Bindgroups(this, "pipeline");
       descriptor = HighLevelParser.parse(descriptor, "render", this.drawConfig);
@@ -6674,18 +6772,20 @@ var __publicField = (obj, key, value) => {
         return;
       renderPass.end();
       const types = this.bindGroups.resources.types;
-      if (!types.textureArrays) {
-        let textureArrays = [];
-        if (types.imageTextureArrays)
-          textureArrays = textureArrays.concat(types.imageTextureArrays);
-        if (types.cubeMapTextureArrays)
-          textureArrays = textureArrays.concat(types.cubeMapTextureArrays);
-        if (types.cubeMapTexture)
-          textureArrays = textureArrays.concat(types.cubeMapTexture);
-        types.textureArrays = textureArrays;
-      }
-      for (let i = 0; i < types.textureArrays.length; i++) {
-        types.textureArrays[i].resource.updateInnerGpuTextures(commandEncoder);
+      if (types) {
+        if (!types.textureArrays) {
+          let textureArrays = [];
+          if (types.imageTextureArrays)
+            textureArrays = textureArrays.concat(types.imageTextureArrays);
+          if (types.cubeMapTextureArrays)
+            textureArrays = textureArrays.concat(types.cubeMapTextureArrays);
+          if (types.cubeMapTexture)
+            textureArrays = textureArrays.concat(types.cubeMapTexture);
+          types.textureArrays = textureArrays;
+        }
+        for (let i = 0; i < types.textureArrays.length; i++) {
+          types.textureArrays[i].resource.updateInnerGpuTextures(commandEncoder);
+        }
       }
       if (this.renderPassTexture) {
         if (!this.renderPassTexture.gpuResource)

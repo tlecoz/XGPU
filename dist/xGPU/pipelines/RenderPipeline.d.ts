@@ -193,7 +193,7 @@ export declare class RenderPipeline extends Pipeline {
     update(): void;
     draw(renderPass: GPURenderPassEncoder): void;
     end(commandEncoder: any, renderPass: any): void;
-    private get resourceDefined();
+    get resourceDefined(): boolean;
     get pipeline(): GPURenderPipeline;
     get cullMode(): "front" | "back" | "none";
     set cullMode(s: "front" | "back" | "none");

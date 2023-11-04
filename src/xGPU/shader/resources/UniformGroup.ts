@@ -229,7 +229,7 @@ export class UniformGroup {
             if (!item.type.isUniformGroup) (item as any).update();
 
             if (item.mustBeTransfered) {
-                const time = new Date().getTime();
+
                 if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
                     item.update(gpuResource, false);
                 } else {

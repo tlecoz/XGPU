@@ -24,6 +24,7 @@ export declare class ShaderStage {
     main: ShaderNode;
     shaderType: "vertex" | "fragment" | "compute";
     constructor(shaderType: "vertex" | "fragment" | "compute");
+    protected unwrapVariableInMainFunction(shaderVariables: string): string;
     addOutputVariable(name: string, shaderType: {
         type: string;
     }): void;

@@ -7,6 +7,7 @@ export class HeadlessGPURenderer {
     dimension;
     renderPipelines = [];
     useTextureInComputeShader;
+    onDrawEnd;
     constructor(useTextureInComputeShader = false) {
         this.useTextureInComputeShader = useTextureInComputeShader;
     }
@@ -36,13 +37,24 @@ export class HeadlessGPURenderer {
     }
     get firstPipeline() { return this.renderPipelines[0]; }
     nbColorAttachment = 0;
-    addPipeline(pipeline, offset = null) {
+    async addPipeline(pipeline, offset = null) {
+        if (pipeline.renderPassDescriptor.colorAttachments[0])
+            this.nbColorAttachment++;
         if (offset === null)
             this.renderPipelines.push(pipeline);
         else
             this.renderPipelines.splice(offset, 0, pipeline);
-        if (pipeline.renderPassDescriptor.colorAttachments[0])
-            this.nbColorAttachment++;
+        /*
+        //console.log("pipeline.buildGPUPipeline")
+        pipeline.buildGpuPipeline();
+
+        XGPU.device.queue.submit([]);
+        //console.time("addPipeline onSubmittedWorkDone")
+        await XGPU.device.queue.onSubmittedWorkDone()
+        //console.timeEnd("addPipeline onSubmittedWorkDone")
+        */
+        //setTimeout(() => {
+        //}, 1)
     }
     get nbPipeline() { return this.renderPipelines.length; }
     get useSinglePipeline() { return this.nbColorAttachment === 1; }
@@ -62,10 +74,9 @@ export class HeadlessGPURenderer {
             this[z] = null;
         }
     }
-    update() {
+    async update() {
         if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === undefined)
             return;
-        //console.log(XGPU.deviceId + " VS " + this.deviceId);
         let deviceChanged = XGPU.deviceId != this.deviceId;
         if (deviceChanged) {
             if (this.textureObj)
@@ -76,7 +87,6 @@ export class HeadlessGPURenderer {
             }
         }
         const commandEncoder = XGPU.device.createCommandEncoder();
-        //console.log("nbPipeline = ", this.renderPipelines.length)
         let pipeline, renderPass;
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
@@ -89,8 +99,11 @@ export class HeadlessGPURenderer {
                 pipeline.end(commandEncoder, renderPass);
             }
         }
-        XGPU.device.queue.submit([commandEncoder.finish()]);
+        const commandBuffer = commandEncoder.finish();
+        XGPU.device.queue.submit([commandBuffer]);
         this.canvas.dimensionChanged = false;
+        if (this.onDrawEnd)
+            this.onDrawEnd();
     }
     get dimensionChanged() { return this.dimension.dimensionChanged; }
     get canvas() { return this.dimension; }

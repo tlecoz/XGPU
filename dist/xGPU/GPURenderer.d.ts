@@ -20,5 +20,5 @@ export declare class GPURenderer extends HeadlessGPURenderer implements IRendere
     get dimensionChanged(): boolean;
     get view(): GPUTextureView;
     configure(textureUsage?: GPUTextureUsageFlags, alphaMode?: "opaque" | "premultiplied"): void;
-    update(): void;
+    update(): Promise<void>;
 }

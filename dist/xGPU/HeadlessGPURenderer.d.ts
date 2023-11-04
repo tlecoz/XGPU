@@ -11,17 +11,18 @@ export declare class HeadlessGPURenderer implements IRenderer {
     };
     protected renderPipelines: RenderPipeline[];
     protected useTextureInComputeShader: any;
+    onDrawEnd: () => void;
     constructor(useTextureInComputeShader?: boolean);
     protected deviceId: number;
     init(w: number, h: number, usage?: number, sampleCount?: number): Promise<any>;
     get firstPipeline(): RenderPipeline;
     protected nbColorAttachment: number;
-    addPipeline(pipeline: RenderPipeline, offset?: number): void;
+    addPipeline(pipeline: RenderPipeline, offset?: number): Promise<void>;
     get nbPipeline(): number;
     get useSinglePipeline(): boolean;
     resize(w: number, h: number): void;
     destroy(): void;
-    update(): void;
+    update(): Promise<void>;
     get dimensionChanged(): boolean;
     get canvas(): {
         width: number;

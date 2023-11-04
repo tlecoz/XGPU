@@ -35,7 +35,7 @@ export declare class UniformGroup {
     createVariable(uniformBufferName: string): string;
     updateStack(): void;
     forceUpdate(): void;
-    update(gpuResource: GPUBuffer, fromUniformBuffer?: boolean): void;
+    update(gpuResource: GPUBuffer, fromUniformBuffer?: boolean): Promise<void>;
     getStruct(name: string): {
         struct: string;
         localVariables: string;

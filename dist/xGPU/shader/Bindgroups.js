@@ -39,7 +39,14 @@ export class Bindgroups {
                 return -1;
             return 0;
         });
-        this.groups[this.groups.length - 1].applyDraw = true;
+        if (this.groups.length) {
+            this.groups[this.groups.length - 1].applyDraw = true;
+        }
+        else {
+            this.groups[0] = new Bindgroup();
+            this.groups[0].parent = this;
+            this.groups[0].applyDraw = true;
+        }
         for (let i = 0; i < this.groups.length; i++) {
             //console.log(i, " useInstances = ", this.groups[i].useInstances)
             if (!autoLayout)
@@ -84,6 +91,7 @@ export class Bindgroups {
         }*/
     }
     update() {
+        //console.log("Bindgroups.update groupLen = ", this.groups.length)
         for (let i = 0; i < this.groups.length; i++) {
             this.groups[i].update();
         }
@@ -459,5 +467,6 @@ export class Bindgroups {
             this.groups[i] = undefined;
         }
         this.groups = [];
+        this._resources = {};
     }
 }
