@@ -289,12 +289,10 @@ export class VertexBuffer implements IShaderResource {
             //that's why I forced to use "read_write" for both in that scenario
 
             //console.log("---compute mixed")
-
+            this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
             if (this.io === 1) {
-                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE;
                 this.descriptor.accessMode = "read";
             } else if (this.io === 2) {
-                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
                 this.descriptor.accessMode = "read_write";
             }
 
