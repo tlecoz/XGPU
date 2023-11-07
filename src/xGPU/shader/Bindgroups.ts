@@ -285,7 +285,7 @@ export class Bindgroups {
 
 
                 } else if (resource instanceof UniformBuffer) {
-                    //console.log(resource)
+                    console.log(resource)
                     let item;
                     for (let z in resource.items) {
                         item = resource.items[z];

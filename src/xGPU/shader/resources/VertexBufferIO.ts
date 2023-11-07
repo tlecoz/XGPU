@@ -64,8 +64,6 @@ export class VertexBufferIO {
 
 
     public currentDatas: ArrayBuffer;
-    private firstFrame: boolean = true;
-
 
 
 
@@ -112,8 +110,7 @@ export class VertexBufferIO {
 
         this.onOutputData(data);
 
-        // if (!this.firstFrame) this.onOutputData(data);
-        // this.firstFrame = false;
+
 
     }
 

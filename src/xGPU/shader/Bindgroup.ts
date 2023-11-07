@@ -243,7 +243,7 @@ export class Bindgroup {
             resource = this.elements[i].resource;
             //console.log(i, resource)
 
-            if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
+            if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io && this.parent.pipeline.type != "compute") continue;
 
             let bgl = resource.createBindGroupLayoutEntry(bindingId++);
             //console.log("bindgroupLayout entry ", (bindingId - 1), bgl);
@@ -268,7 +268,7 @@ export class Bindgroup {
             resource = this.elements[i].resource;
             resource.update();
 
-            if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
+            if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io && this.parent.pipeline.type != "compute") continue;
 
             let entry = resource.createBindGroupEntry(bindingId++)
             //console.warn("BINDGROUP.BUILD ::: bindgroup entry ", this.elements[i].name, (bindingId - 1), entry);
