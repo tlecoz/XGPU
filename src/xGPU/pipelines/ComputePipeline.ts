@@ -109,7 +109,14 @@ export class ComputePipeline extends Pipeline {
         }
 
 
-        this.nextFrame()
+        let vertexBufferReadyToUse: boolean = true;
+        for (let bufferName in this.resources.bindgroups.io) {
+            if (!this.resources.bindgroups.io[bufferName].data) {
+                vertexBufferReadyToUse = false;
+            }
+        }
+
+        if (vertexBufferReadyToUse) this.nextFrame()
 
         return descriptor;
 
@@ -299,6 +306,7 @@ export class ComputePipeline extends Pipeline {
 
         this.update();
 
+
         const commandEncoder = XGPU.device.createCommandEncoder();
         const computePass = commandEncoder.beginComputePass();
         computePass.setPipeline(this.buildGpuPipeline());
@@ -325,8 +333,13 @@ export class ComputePipeline extends Pipeline {
         this.processingFirstFrame = false;
 
         if (this.waitingFrame) {
+
             this.waitingFrame = false;
+
+            //setTimeout(() => {
             this.nextFrame()
+            //}, 50)
+
         }
     }
 

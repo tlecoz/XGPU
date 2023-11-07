@@ -231,6 +231,7 @@ export class VertexBuffer implements IShaderResource {
     }
 
     public createBindGroupEntry(bindingId: number): any {
+
         if (!this.gpuResource) this.createGpuResource();
         //console.log("VertexBuffer.createBindgroupEntry size = ", this.datas.byteLength)
         return {

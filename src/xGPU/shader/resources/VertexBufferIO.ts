@@ -110,12 +110,11 @@ export class VertexBufferIO {
 
         this.currentDatas = data;
 
-
         this.onOutputData(data);
-        /*
-        if (!this.firstFrame) this.onOutputData(data);
-        this.firstFrame = false;
-        */
+
+        // if (!this.firstFrame) this.onOutputData(data);
+        // this.firstFrame = false;
+
     }
 
 
