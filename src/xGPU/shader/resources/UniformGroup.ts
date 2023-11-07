@@ -279,6 +279,8 @@ export class UniformGroup {
         for (let i = 0; i < this.items.length; i++) {
             item = this.items[i];
 
+
+
             if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
                 if (item instanceof UniformGroup) {
                     if (!item.wgsl) {
@@ -293,6 +295,9 @@ export class UniformGroup {
                     }
                     struct += "    " + this.getVarName(item.name) + ":" + item.name + ",\n"
                     localVariables += item.createVariable(this.name);
+
+
+
                 } else {
                     name = item.name;
 
@@ -360,7 +365,7 @@ export class UniformGroup {
 
 
 
-        //console.log("struct = ", struct)
+
         this.wgsl = {
             struct,
             localVariables

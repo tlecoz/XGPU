@@ -1,6 +1,6 @@
 {
   "name": "xgpu",
-  "version": "0.8.93",
+  "version": "0.8.94",
   "description": "XGPU is an extendable library for WebGPU that provides a higher-level, easy-to-use interface for building rendering engines or processing numeric data. It handles automatic data binding, buffer alignment, variable declarations in shaders, and more. XGPU is focused solely on WebGPU, allowing you to produce code that is easy to read, write, maintain, and reuse.",
   "repository": {
     "type": "git",

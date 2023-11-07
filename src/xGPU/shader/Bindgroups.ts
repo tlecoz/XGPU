@@ -74,7 +74,7 @@ export class Bindgroups {
 
 
         for (let i = 0; i < this.groups.length; i++) {
-            //console.log(i, " useInstances = ", this.groups[i].useInstances)
+            //console.log(i, " group = ", this.groups[i])
             if (!autoLayout) layouts[i] = this.groups[i].layout;
             bindgroups[i] = this.groups[i].group;
         }
@@ -269,9 +269,10 @@ export class Bindgroups {
         let k: number = 0;
 
         const obj = { result: "", variables: "" };
-
+        //console.log("#################################################################")
         for (let i = 0; i < this.groups.length; i++) {
             group = this.groups[i];
+            //console.log(group)
             resources = group.elements;
             k = 0;
             for (let j = 0; j < resources.length; j++) {
@@ -284,19 +285,28 @@ export class Bindgroups {
 
 
                 } else if (resource instanceof UniformBuffer) {
-
+                    //console.log(resource)
                     let item;
                     for (let z in resource.items) {
                         item = resource.items[z];
                         let _name = name.substring(0, 1).toLowerCase() + name.slice(1);
-                        if (item.propertyNames) result += item.createStruct() + "\n";
+                        //if (item.propertyNames) result += item.createStruct() + "\n";
                         if (item.createVariableInsideMain) obj.variables += item.createVariable(_name) + "\n"
                     }
-                    result += resource.createStruct(name).struct + "\n";
+
+                    const struct = resource.createStruct(name).struct + "\n";
+                    //console.log(" struct => ", struct)
+                    result += struct;
                 }
-                result += resource.createDeclaration(name, k++, i) + "\n";
+
+                const declaration = resource.createDeclaration(name, k++, i) + "\n"
+                //console.log("declaration = ", declaration)
+                result += declaration;
             }
         }
+
+        //console.log("getComputeShaderDeclaration result = ", result)
+        //console.log("#################################################################")
         obj.result = result;
         return obj;
     }

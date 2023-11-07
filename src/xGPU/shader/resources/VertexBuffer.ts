@@ -119,6 +119,7 @@ export class VertexBuffer implements IShaderResource {
         return this.gpuResource;
     }
 
+    public get stepMode(): "vertex" | "instance" { return this.descriptor.stepMode }
 
     public get length(): number { return this.vertexArrays.length; }
     public get nbComponent(): number { return this._nbComponent; }
@@ -133,19 +134,13 @@ export class VertexBuffer implements IShaderResource {
     public set datas(f: Float32Array | Int32Array | Uint32Array) {
         this._datas = f;
         this.mustBeTransfered = true;
-        //console.warn("VB set datas = ", f);
     }
 
 
     public setComplexDatas(datas: Float32Array | Int32Array | Uint32Array, nbComponentTotal: number) {
-
         this._nbComponent = nbComponentTotal;
         this.datas = datas;
-
-
     }
-
-
 
     public get attributeDescriptor(): any {
         const result = {};
@@ -162,7 +157,6 @@ export class VertexBuffer implements IShaderResource {
 
     private _byteCount: number = 0;
     public createArray(name: string, dataType: string, offset?: number): VertexAttribute {
-        //console.log("new VertexAttribute ", name, dataType, offset)
 
         if (this.attributes[name]) {
 
@@ -178,10 +172,6 @@ export class VertexBuffer implements IShaderResource {
 
         if (v.dataOffset === undefined) this._byteCount += nbCompo * new GPUType(v.varType).byteValue;
         else this._byteCount = Math.max(this._byteCount, (_offset + v.nbComponent) * new GPUType(v.varType).byteValue);
-        //console.log("byteCount = ", v.nbComponent + " * " + new GPUType(v.varType).byteValue)
-        //console.log("createArray ", name, this._byteCount, (_offset + v.nbComponent) * new GPUType(v.varType).byteValue);
-
-
 
         this.vertexArrays.push(v);
         return v;
@@ -203,10 +193,10 @@ export class VertexBuffer implements IShaderResource {
         let structName = vertexBufferName.substring(0, 1).toUpperCase() + vertexBufferName.slice(1);
         const varName = vertexBufferName.substring(0, 1).toLowerCase() + vertexBufferName.slice(1);
 
-
         let result = "";
         let type = "storage, read";
-        if (this.io === 1) {
+        let structType = "array<" + structName + ">"
+        if (this.io === 1 || this.io === 0) {
 
             result += "struct " + structName + "{\n";
             let a: VertexAttribute;
@@ -215,18 +205,14 @@ export class VertexBuffer implements IShaderResource {
                 result += "   " + a.name + ":" + a.varType + ",\n";
             }
             result += "}\n\n";
-
+            structType = "array<" + structName + ">"
         } else {
             type = "storage, read_write"
             structName = structName.slice(0, structName.length - 4);
+            structType = "array<" + structName + ">"
         }
 
-
-
-
-
-
-        result += "@binding(" + bindingId + ") @group(" + groupId + ") var<" + type + "> " + varName + ":array<" + structName + ">;\n";//+ "_Array;\n\n";
+        result += "@binding(" + bindingId + ") @group(" + groupId + ") var<" + type + "> " + varName + ":" + structType + ";\n";
 
         return result;
 
@@ -235,7 +221,6 @@ export class VertexBuffer implements IShaderResource {
 
     public createBindGroupLayoutEntry(bindingId: number): any {
 
-        //console.warn("VB accessMode = ", this.descriptor.accessMode)
         return {
             binding: bindingId,
             visibility: GPUShaderStage.COMPUTE,
@@ -243,8 +228,6 @@ export class VertexBuffer implements IShaderResource {
                 type: this.descriptor.accessMode === "read" ? "read-only-storage" : "storage"
             },
         }
-
-
     }
 
     public createBindGroupEntry(bindingId: number): any {
@@ -260,64 +243,43 @@ export class VertexBuffer implements IShaderResource {
         }
     }
 
-    protected canRefactorData: boolean = true;
+    protected mustRefactorData: boolean = false;
+    protected canRefactorData: boolean = false;
     protected pipelineType: "compute" | "render" | "compute_mixed";
 
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
         if (this.pipelineType) return;
-
+        this.canRefactorData = false;
         this.pipelineType = pipelineType;
         //use to handle particular cases in descriptor relative to the nature of pipeline
 
         if (pipelineType === "render") {
             this.descriptor.accessMode = "read";
             this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
-            this.canRefactorData = false;
+
 
         } else if (pipelineType === "compute_mixed") {
 
-            //console.warn("setPipelineType computeMixed")
-
-            //i use accessMode = "read_write" for both here because we will apply a ping-pong structure: 
-            //the computeShader result will be used as input of the computeShader itself for the next frame. 
-            //=> to render the first frame we will use buffers[0]  
-            // to render the second frame we will use buffers[1]
-            // to render the third frame we will use buffers[0]
-            // ... 
-            //we can swap the bindgroup entry that contains the reference of the buffer , 
-            //but we can't swap bindgroupLayout that define the accessMode
-            //that's why I forced to use "read_write" for both in that scenario
-
-            //console.log("---compute mixed")
-            this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
-            if (this.io === 1) {
+            if (this.io === 0) { //vertexBuffer used as uniform, usable in a computeShader
+                this.canRefactorData = true;
+                this.mustRefactorData = true;
+                this.descriptor.usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
                 this.descriptor.accessMode = "read";
-            } else if (this.io === 2) {
+            } else if (this.io === 1) { //VertexBufferIO output , usable in a renderPipeline
+                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
+                this.descriptor.accessMode = "read";
+            } else if (this.io === 2) { //VertexBufferIO input
+                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read_write";
             }
 
         } else if (pipelineType === "compute") {
 
-            //this case is a bit different because a computePipeline alone must return a result shaped into a Float32Array
-            //
-            //a final step is applyed to get back the gpu buffers into the cpu context 
-            //because we do that, we can use these output-data as input-data of the compute shader 
-            //with no need to alternate the bindgroup.
 
-            //that's why I use one buffer with "read" accessMode and a second one with "read_write"
-
-            //console.log("---compute")
-
-
-
-            this.canRefactorData = true;
-
-
-
-            if (this.io === 1) {
+            if (this.io === 1 || this.io == 0) { //VertexBufferIO output
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read";
-            } else if (this.io === 2) {
+            } else if (this.io === 2) { //VertexBufferIO input
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read_write" as any;
             }
@@ -493,27 +455,24 @@ export class VertexBuffer implements IShaderResource {
             componentId += this.vertexArrays[i].nbComponent;
         }
 
-        //console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
-
-
-
         obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
         this.layout = obj;
         return obj;
     }
+
+
+
+
 
     protected _bufferSize: number;
     protected deviceId: number;
     public get bufferSize(): number { return this._bufferSize; }
     public createGpuResource() {
         if (this.attributeChanged) this.updateAttributes();
-
         if (!this.datas || this.gpuBufferIOs) return;
-
-
         if (this.gpuResource) this.gpuResource.destroy();
 
-        //console.warn("VB.createGPUResource ", this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
+        //console.warn("VB.createGPUResource ", this.io, this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
         this.deviceId = XGPU.deviceId;
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({
@@ -573,12 +532,6 @@ export class VertexBuffer implements IShaderResource {
 
         }
 
-
-
-
-
-
-
         if (this.resourceIO) {
             this.resourceIO.destroy();
             this.resourceIO = null;
@@ -592,15 +545,8 @@ export class VertexBuffer implements IShaderResource {
 
     public updateBuffer(): void {
         if (!this.datas) return;
-        if (!this.gpuResource) {
-            this.createGpuResource();
-
-        }
-        //console.log("updateBuffer ", this.datas.length, this.datas.byteLength + " vs " + this._bufferSize)
-
+        if (!this.gpuResource) this.createGpuResource();
         if (this.datas.byteLength != this._bufferSize) this.createGpuResource();
-
-        //console.warn("vb gpuResource = ", this.gpuResource)
 
         XGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer)
 
@@ -615,17 +561,7 @@ export class VertexBuffer implements IShaderResource {
         attribute = this.vertexArrays[0];
         const nbAttributes = this.vertexArrays.length;
 
-
-
-        //const nbVertex = attribute.datas.length;// this.nbComponent;
         let offset: number = 0;
-
-
-        //console.log("this._datas = ", nbVertex, this.nbComponent, this.layout.arrayStride);
-        //console.log("arrayStride = ", this.la)
-
-
-
 
         if (this.vertexArrays[0] && this.vertexArrays[0].useByVertexData) {
 
@@ -675,26 +611,12 @@ export class VertexBuffer implements IShaderResource {
 
     public update(): boolean {
         if (this.vertexArrays.length === 0) return false;
-
-
         if (this.attributeChanged) this.updateAttributes();
-
-
-
-
-
-
-
-
-
 
         if (this.mustBeTransfered) {
             this.mustBeTransfered = false;
             this.updateBuffer();
         }
-
-
-
 
         return true;
     }

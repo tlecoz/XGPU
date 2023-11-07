@@ -242,7 +242,7 @@ export class Bindgroup {
         for (let i = 0; i < this.elements.length; i++) {
             resource = this.elements[i].resource;
             //console.log(i, resource)
-            if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
+            //if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
             let bgl = resource.createBindGroupLayoutEntry(bindingId++);
             //console.log("bindgroupLayout entry ", (bindingId - 1), bgl);
             layout.entries.push(bgl);
@@ -254,44 +254,30 @@ export class Bindgroup {
 
     private setupApplyCompleted: boolean = false;
     public build(): GPUBindGroup {
-        //console.log(this.ioGroups)
+
         if (!this._layout || (this.deviceId != XGPU.deviceId && this.ioGroups)) this.buildLayout();
         this.deviceId = XGPU.deviceId;
         let entries = [];
         let bindingId: number = 0;
         let resource: IShaderResource;
 
-
-
         for (let i = 0; i < this.elements.length; i++) {
+            if (!this.elements[i]) continue
             resource = this.elements[i].resource;
-            //if (!resource.gpuResource) {
-
-            //console.log("Bindgroup.build ", i, resource)
-
             resource.update();
-            //}
-
-            if (resource instanceof VertexBuffer && !(resource as VertexBuffer).io) continue;
-
-
-
 
             let entry = resource.createBindGroupEntry(bindingId++)
-            //console.log("bindgroup entry ", this.elements[i].name, (bindingId - 1), entry);
+            //console.warn("BINDGROUP.BUILD ::: bindgroup entry ", this.elements[i].name, (bindingId - 1), entry);
             entries.push(entry);
         }
 
-
         this._group = XGPU.device.createBindGroup({ layout: this._layout, entries })
-
 
 
         if (!this.setupApplyCompleted && this.parent) {
 
             this.setupApplyCompleted = true;
             this.setupApply();
-
 
             if (this.instanceResourcesArray) {
                 for (let i = 0; i < this.instanceResourcesArray.length; i++) {
@@ -315,41 +301,25 @@ export class Bindgroup {
 
         this.bindgroupId = this.parent.groups.indexOf(this);
 
-
-
-        //this.indexBuffer = this.parent.drawConfig ? this.parent.drawConfig.indexBuffer : undefined;
-
         const types = this.parent.resources.types;
         if (!types) return;
         const allVertexBuffers = types.vertexBuffers;
         if (!allVertexBuffers) return;
 
-        //console.log("SETUP APPLY  id = ", this.bindgroupId, allVertexBuffers, this.elements)
-
         const getBufferId = (o) => {
-
-            //const name = this.getResourceName(o);
 
             if (!this.instances) {
                 for (let i = 0; i < allVertexBuffers.length; i++) {
-                    //console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
-                    //if (allVertexBuffers[i].resource.nane === o.name) return i;
                     if (allVertexBuffers[i].resource === o) return i;
                 }
             } else {
                 for (let i = 0; i < allVertexBuffers.length; i++) {
-                    //console.log("allVertexBuffers[i].resource.nane = ", allVertexBuffers[i].resource.nane)
                     if (allVertexBuffers[i].resource.nane === o.name) return i;
-
                 }
             }
 
-
-
-            //console.warn("GET BUFFER ID = -1  ", allVertexBuffers.length)
             return -1;
         }
-
 
 
         this.vertexBuffers = [];
@@ -360,17 +330,14 @@ export class Bindgroup {
         for (let i = 0; i < this.elements.length; i++) {
             element = this.elements[i];
             resource = element.resource;
-            //console.log("A ", element.name)
             if (resource instanceof VertexBuffer) {
-                //console.log("B");
-                if (!(resource as VertexBuffer).io) {
 
+                if (!(resource as VertexBuffer).io) {
                     (resource as VertexBuffer).bufferId = getBufferId(resource);
 
                     this.elementByName[element.name] = resource
                     this.vertexBufferReferenceByName[element.name] = { bufferId: (resource as VertexBuffer).bufferId, resource };
                     this.vertexBuffers[k++] = resource;
-
                     continue;
                 }
             } else {
@@ -383,12 +350,10 @@ export class Bindgroup {
     protected setupDrawCompleted: boolean = false;
     protected setupDraw() {
 
-
         if (this.vertexBuffers) {
             for (let i = 0; i < this.vertexBuffers.length; i++) {
                 if (!this.vertexBuffers[i].gpuResource) {
                     this.vertexBuffers[i].createGpuResource();
-                    //console.log("buffer resource = ", this.vertexBuffers[i].gpuResource);
                 }
             }
         }
@@ -412,23 +377,13 @@ export class Bindgroup {
                         break;
                     }
                 }
-
-
             }
         }
-
-
-
-
-
 
     }
 
 
     public apply(renderPass: GPURenderPassEncoder | GPUComputePassEncoder) {
-
-
-
 
         if (!this.setupDrawCompleted) {
             this.setupDrawCompleted = true;
@@ -438,10 +393,9 @@ export class Bindgroup {
             this.setupDraw();
         }
 
-
-
         if (renderPass instanceof GPUComputePassEncoder) {
             this.update();
+
             renderPass.setBindGroup(this.bindgroupId, this.group);
             return;
         }
@@ -490,19 +444,13 @@ export class Bindgroup {
 
         resourcePerInstance = HighLevelParser.parse(resourcePerInstance, "bindgroup");
 
-
         if (!this.instances) this.instances = [];
-
-
 
         let indexBuffer: IndexBuffer;
         let vertexBuffers: VertexBuffer[] = [];
         let result: any = {
             elements: this.elements.concat()
         }
-
-
-
 
         let element, resource;
         //console.log("---- ", vertexBuffers.length)
@@ -544,14 +492,9 @@ export class Bindgroup {
                     result.elements[i] = { name: z, resource: resource };
 
                 }
-
             }
-
-
         }
 
-
-        //let id = this.instances.length;
         if (indexBuffer) result.indexBuffer = indexBuffer;
         result.update = () => {
             let bool = false;
@@ -574,41 +517,12 @@ export class Bindgroup {
             if (result.indexBuffer) this.parent.drawConfig.indexBuffer = result.indexBuffer;
         }
 
-
-
-
         resourcePerInstance._object = result;
-
         this.instances.push(result);
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public handleComputePipelineResourceIOs() {
-        //console.warn("handleComputePipelineResourceIOs ", this.resourcesIOs)
-
-
 
         if (this.resourcesIOs.length) {
             let buf0 = [];
@@ -622,15 +536,16 @@ export class Bindgroup {
                 } else {
                     buf0[i] = (this.resourcesIOs[i] as ImageTextureIO).textures[0];
                     buf1[i] = (this.resourcesIOs[i] as ImageTextureIO).textures[1];
-                    buf0[i].createGpuResource();
-                    buf1[i].createGpuResource();
+
 
                 }
+
+                buf0[i].createGpuResource();
+                buf1[i].createGpuResource();
             }
+
             this.createPingPongBindgroup(buf0, buf1);
         }
-
-
     }
 
 
@@ -651,19 +566,13 @@ export class Bindgroup {
         group.mustRefreshBindgroup = this.mustRefreshBindgroup = true;
         group._layout = this.layout;
 
-
+        //console.log("createPingPong")
         group.elements = this.swapElements();
 
         let res1, res2;
         for (let i = 0; i < resource1.length; i++) {
             res1 = resource1[i];
             res2 = resource2[i];
-
-
-            //group.elements = this.getSwappedElements(res1, res2);
-            //console.log("=> group.elements ", group.elements[0].name, group.elements[1].name, group.elements[2].name, group.elements[3].name)
-
-
 
             if (res1 instanceof VertexBuffer) {
 
@@ -677,9 +586,6 @@ export class Bindgroup {
                 if (!res1.gpuResource) res1.createGpuResource();
                 if (!res2.gpuResource) res2.createGpuResource();
 
-
-                //console.log(resource1.gpuResource === resource2.gpuResource)
-
                 const textures = [res1.gpuResource, res2.gpuResource];
                 try {
                     (textures[0] as any).debug = 1;
@@ -688,18 +594,12 @@ export class Bindgroup {
 
                 }
 
-
-
                 res1.initTextureIO(textures);
             }
         }
 
-
-
-
-
-        this.ioGroups = [this, group];
-        //console.log(this.ioGroups)
+        this.ioGroups = [group, this];
+        //this.ioGroups = [this, group];
         this.debug = 1;
         group.debug = 2;
 
@@ -898,14 +798,12 @@ export class Bindgroup {
     public get group(): GPUBindGroup {
 
         if (!this._group || this.mustRefreshBindgroup) {
-
             this.build();
         }
 
         if (this.ioGroups) {
             const group = this.ioGroups[this.io_index++ % 2];
             if (!group._group) group.build();
-            //console.warn("group ", group.debug);
             return group._group;
         }
 
@@ -915,9 +813,7 @@ export class Bindgroup {
     }
 
     public update(): void {
-        //console.log("bindGroup.update elements.length = ", this.elements.length)
         for (let i = 0; i < this.elements.length; i++) {
-
             this.elements[i].resource.update();
         }
     }

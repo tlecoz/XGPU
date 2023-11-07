@@ -61,18 +61,9 @@ export class ComputePipeline extends Pipeline {
         this.bindGroups.destroy();
         this.bindGroups = new Bindgroups(this, "pipeline");
 
-
-
-        /*
-        descriptor = this.highLevelParse(descriptor);
-        descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
-        */
         descriptor = HighLevelParser.parse(descriptor, "compute");
 
         super.initFromObject(descriptor);
-
-
-
 
 
         if (descriptor.bindgroups) {
@@ -94,18 +85,6 @@ export class ComputePipeline extends Pipeline {
             }
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
 
         const createArrayOfObjects = (obj: any) => {
             const result = [];
@@ -130,7 +109,7 @@ export class ComputePipeline extends Pipeline {
         }
 
 
-
+        this.nextFrame()
 
         return descriptor;
 
@@ -264,6 +243,7 @@ export class ComputePipeline extends Pipeline {
 
         if (!this.workgroups) this.setupDefaultWorkgroups();
 
+        const o = this.bindGroups.build();
 
 
         const outputs = this.computeShader.outputs;
@@ -303,8 +283,19 @@ export class ComputePipeline extends Pipeline {
 
 
 
-
+    private firstFrame: boolean = true;
+    private processingFirstFrame: boolean = false;
+    private waitingFrame: boolean = false;
     public async nextFrame() {
+
+        if (this.processingFirstFrame) {
+            this.waitingFrame = true;
+            return;
+        }
+
+        this.processingFirstFrame = this.firstFrame;
+
+
 
         this.update();
 
@@ -319,13 +310,24 @@ export class ComputePipeline extends Pipeline {
 
         XGPU.device.queue.submit([commandEncoder.finish()]);
 
+        if (this.firstFrame) {
 
-        for (let i = 0; i < this.resourceIOs.length; i++) {
-            //console.log(i, "getOutputData")
-            this.resourceIOs[i].getOutputData();
+            await XGPU.device.queue.onSubmittedWorkDone()
 
         }
 
+        for (let i = 0; i < this.resourceIOs.length; i++) {
+            this.resourceIOs[i].getOutputData();
+        }
+
+
+        this.firstFrame = false;
+        this.processingFirstFrame = false;
+
+        if (this.waitingFrame) {
+            this.waitingFrame = false;
+            this.nextFrame()
+        }
     }
 
 }

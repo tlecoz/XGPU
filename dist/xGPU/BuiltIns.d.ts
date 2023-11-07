@@ -30,38 +30,6 @@ export declare class BuiltIns {
             type: string;
             vsOut: boolean;
         };
-        Int: {
-            type: string;
-            vsOut: boolean;
-        };
-        IVec2: {
-            type: string;
-            vsOut: boolean;
-        };
-        IVec3: {
-            type: string;
-            vsOut: boolean;
-        };
-        IVec4: {
-            type: string;
-            vsOut: boolean;
-        };
-        Uint: {
-            type: string;
-            vsOut: boolean;
-        };
-        UVec2: {
-            type: string;
-            vsOut: boolean;
-        };
-        UVec3: {
-            type: string;
-            vsOut: boolean;
-        };
-        UVec4: {
-            type: string;
-            vsOut: boolean;
-        };
     };
     static fragmentInputs: {
         frontFacing: {
@@ -123,7 +91,7 @@ type BuiltIns_fragmentOutputs = typeof BuiltIns.fragmentOutputs;
 type BuiltIns_computeInputs = typeof BuiltIns.computeInputs;
 type BuiltIns_computeOutputs = typeof BuiltIns.computeOutputs;
 export type VertexShaderInput = (BuiltIns_vertexInputs["vertexIndex"] | BuiltIns_vertexInputs["instanceIndex"]);
-export type VertexShaderOutput = (BuiltIns_vertexOutputs["position"] | BuiltIns_vertexOutputs["Float"] | BuiltIns_vertexOutputs["Vec2"] | BuiltIns_vertexOutputs["Vec3"] | BuiltIns_vertexOutputs["Vec4"] | BuiltIns_vertexOutputs["Int"] | BuiltIns_vertexOutputs["IVec2"] | BuiltIns_vertexOutputs["IVec3"] | BuiltIns_vertexOutputs["IVec4"] | BuiltIns_vertexOutputs["Uint"] | BuiltIns_vertexOutputs["UVec2"] | BuiltIns_vertexOutputs["UVec3"] | BuiltIns_vertexOutputs["UVec4"]);
+export type VertexShaderOutput = (BuiltIns_vertexOutputs["position"] | BuiltIns_vertexOutputs["Float"] | BuiltIns_vertexOutputs["Vec2"] | BuiltIns_vertexOutputs["Vec3"] | BuiltIns_vertexOutputs["Vec4"]);
 export type FragmentShaderInput = (BuiltIns_fragmentInputs["frontFacing"] | BuiltIns_fragmentInputs["fragDepth"] | BuiltIns_fragmentInputs["sampleIndex"] | BuiltIns_fragmentInputs["sampleMask"]);
 export type FragmentShaderOutputs = BuiltIns_fragmentOutputs["color"];
 export type ComputeShaderInput = (BuiltIns_computeInputs["localInvocationId"] | BuiltIns_computeInputs["localInvocationIndex"] | BuiltIns_computeInputs["globalInvocationId"] | BuiltIns_computeInputs["workgroupId"] | BuiltIns_computeInputs["numWorkgroup"]);

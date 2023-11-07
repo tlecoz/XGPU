@@ -43,6 +43,8 @@ export class PrimitiveFloatUniform extends Float32Array {
     public clone(): PrimitiveFloatUniform {
         const o = new PrimitiveFloatUniform(this.type.rawType, this as Float32Array, this.createVariableInsideMain);
         o.propertyNames = this.propertyNames;
+        //o.className = this.className;
+        //for (let z in this) o[z] = this[z];
         return o;
     }
 

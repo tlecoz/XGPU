@@ -6,7 +6,12 @@ export class XGPU {
 
 
 
-    public static debugShaders: boolean = false;
+    //public static debugShaders: boolean = true;
+
+    public static debugVertexShader: boolean = false;
+    public static debugFragmentShader: boolean = false;
+    public static debugComputeShader: boolean = false;
+
     private static _ready: boolean = false;
     public static get ready(): boolean { return this._ready; }
 
@@ -14,7 +19,10 @@ export class XGPU {
 
     public static debugUsage(usage: number) {
 
-        if (usage === 128) return "GPUBufferUsage.STORAGE";
+        if (usage === 72) return "GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM"
+        else if (usage === 76) return "GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.UNIFORM"
+        else if (usage === 200) return "GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM"
+        else if (usage === 128) return "GPUBufferUsage.STORAGE";
         else if (usage === 8) return "GPUBufferUsage.COPY_DST";
         else if (usage === 32) return "GPUBufferUsage.VERTEX";
         else if (usage == 136) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST";

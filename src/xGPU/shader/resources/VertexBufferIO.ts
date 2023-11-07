@@ -64,6 +64,10 @@ export class VertexBufferIO {
 
 
     public currentDatas: ArrayBuffer;
+    private firstFrame: boolean = true;
+
+
+
 
     public async getOutputData() {
 
@@ -81,6 +85,9 @@ export class VertexBufferIO {
         //console.log("getOutputData ", this.onOutputData, this.canCallMapAsync)
 
         if (!this.onOutputData) return null;
+
+
+
         if (!this.canCallMapAsync) return;
 
 
@@ -102,8 +109,13 @@ export class VertexBufferIO {
         stage.unmap();
 
         this.currentDatas = data;
-        this.onOutputData(data);
 
+
+        this.onOutputData(data);
+        /*
+        if (!this.firstFrame) this.onOutputData(data);
+        this.firstFrame = false;
+        */
     }
 
 

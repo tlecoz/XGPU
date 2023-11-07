@@ -667,15 +667,15 @@ __publicField(BuiltIns, "vertexOutputs", {
   Float: { type: "f32", vsOut: true },
   Vec2: { type: "vec2<f32>", vsOut: true },
   Vec3: { type: "vec3<f32>", vsOut: true },
-  Vec4: { type: "vec4<f32>", vsOut: true },
-  Int: { type: "i32", vsOut: true },
+  Vec4: { type: "vec4<f32>", vsOut: true }
+  /*Int: { type: "i32", vsOut: true },
   IVec2: { type: "vec2<i32>", vsOut: true },
   IVec3: { type: "vec3<i32>", vsOut: true },
   IVec4: { type: "vec4<i32>", vsOut: true },
   Uint: { type: "u32", vsOut: true },
   UVec2: { type: "vec2<u32>", vsOut: true },
   UVec3: { type: "vec3<u32>", vsOut: true },
-  UVec4: { type: "vec4<u32>", vsOut: true }
+  UVec4: { type: "vec4<u32>", vsOut: true },*/
 });
 //----
 __publicField(BuiltIns, "fragmentInputs", {
@@ -5287,11 +5287,10 @@ class VertexBuffer {
       this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
       this.canRefactorData = false;
     } else if (pipelineType === "compute_mixed") {
+      this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
       if (this.io === 1) {
-        this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE;
         this.descriptor.accessMode = "read";
       } else if (this.io === 2) {
-        this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
         this.descriptor.accessMode = "read_write";
       }
     } else if (pipelineType === "compute") {

@@ -54,9 +54,16 @@ export class ShaderNode {
 
     public replaceValues(values: { old: string, new: string }[]) {
         for (let i = 0; i < values.length; i++) {
-            this._text = this._text.replace(values[i].old, values[i].new);
+            this.replaceKeyWord(values[i].old, values[i].new);
+            //this._text = this._text.replace(values[i].old, values[i].new);
         }
     }
+
+    public replaceKeyWord(wordToReplace: string, replacement: string) {
+        const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, 'g');
+        this._text = this._text.replace(regex, replacement);
+    }
+
 
 
     public get value(): string {
