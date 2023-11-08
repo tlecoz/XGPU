@@ -29,7 +29,8 @@ export class ComputePipeline extends Pipeline {
     protected bufferIOs: VertexBuffer[];
     protected textureIOs: ImageTexture[];
 
-
+    public onComputeBegin: () => void;
+    public onComputeEnd: () => void;
 
     constructor() {
         super()
@@ -194,7 +195,7 @@ export class ComputePipeline extends Pipeline {
                 this.nextFrame();
             }
         }
-
+        //console.log("update ", this.bindGroups)
         this.bindGroups.update();
         this.lastFrameTime = new Date().getTime();
     }
@@ -300,6 +301,8 @@ export class ComputePipeline extends Pipeline {
             return;
         }
 
+        if (this.onComputeBegin) this.onComputeBegin();
+
         this.processingFirstFrame = this.firstFrame;
 
 
@@ -319,9 +322,7 @@ export class ComputePipeline extends Pipeline {
         XGPU.device.queue.submit([commandEncoder.finish()]);
 
         if (this.firstFrame) {
-
             await XGPU.device.queue.onSubmittedWorkDone()
-
         }
 
         for (let i = 0; i < this.resourceIOs.length; i++) {
@@ -331,16 +332,15 @@ export class ComputePipeline extends Pipeline {
 
         this.firstFrame = false;
         this.processingFirstFrame = false;
+        if (this.onComputeEnd) this.onComputeEnd();
+
 
         if (this.waitingFrame) {
-
             this.waitingFrame = false;
-
-            //setTimeout(() => {
             this.nextFrame()
-            //}, 50)
-
         }
+
+
     }
 
 }

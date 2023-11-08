@@ -25,7 +25,7 @@ export class VertexBufferIO {
 
         this.descriptor = descriptor;
         if (!descriptor.stepMode) descriptor.stepMode = "instance";
-
+        console.log(descriptor.stepMode)
 
         this.deviceId = XGPU.deviceId;
         this.buffers[0] = new VertexBuffer(attributes, descriptor);
@@ -45,6 +45,8 @@ export class VertexBufferIO {
 
     public destroy() {
         if (this.stagingBuffer) this.stagingBuffer.destroy();
+        this.buffers[0].destroyGpuResource();
+        this.buffers[1].destroyGpuResource();
         this.buffers = undefined;
         this.onOutputData = undefined;
 

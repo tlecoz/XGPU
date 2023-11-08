@@ -31,7 +31,7 @@ export class PrimitiveFloatUniform extends Float32Array {
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;
 
-    protected className: string;
+    public className: string;
 
     constructor(type: string, val: number[] | Float32Array, createLocalVariable: boolean = false) {
         super(val);
@@ -43,7 +43,10 @@ export class PrimitiveFloatUniform extends Float32Array {
     public clone(): PrimitiveFloatUniform {
         const o = new PrimitiveFloatUniform(this.type.rawType, this as Float32Array, this.createVariableInsideMain);
         o.propertyNames = this.propertyNames;
-        //o.className = this.className;
+        o.className = this.className;
+        o.name = this.name;
+        o.startId = this.startId;
+
         //for (let z in this) o[z] = this[z];
         return o;
     }
@@ -56,7 +59,8 @@ export class PrimitiveFloatUniform extends Float32Array {
 
     public createStruct(): string {
 
-        let result = "struct " + this.constructor.name + " {\n";
+        //let result = "struct " + this.constructor.name + " {\n";
+        let result = "struct " + this.className + " {\n";
         for (let i = 0; i < this.propertyNames.length; i++) {
             result += "   " + this.propertyNames[i] + ":f32,\n";
         }
@@ -133,7 +137,7 @@ export class PrimitiveIntUniform extends Int32Array {
 
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
-    protected className: string;
+    public className: string;
 
     constructor(type: string, val: number[] | Int32Array, createLocalVariable: boolean = false) {
         super(val);
@@ -220,7 +224,8 @@ export class PrimitiveUintUniform extends Uint32Array {
 
     public propertyNames: string[];
     public createVariableInsideMain: boolean = false;;
-    protected className: string;
+    public className: string;
+
     constructor(type: string, val: number[] | Uint32Array, createLocalVariable: boolean = false) {
         super(val);
         this.type = new GPUType(type);

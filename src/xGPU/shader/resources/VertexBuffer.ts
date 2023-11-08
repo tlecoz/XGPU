@@ -244,13 +244,12 @@ export class VertexBuffer implements IShaderResource {
         }
     }
 
-    protected mustRefactorData: boolean = false;
-    protected canRefactorData: boolean = false;
+
     protected pipelineType: "compute" | "render" | "compute_mixed";
 
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
         if (this.pipelineType) return;
-        this.canRefactorData = false;
+
         this.pipelineType = pipelineType;
         //use to handle particular cases in descriptor relative to the nature of pipeline
 
@@ -261,28 +260,21 @@ export class VertexBuffer implements IShaderResource {
 
         } else if (pipelineType === "compute_mixed") {
 
-            if (this.io === 0) { //vertexBuffer used as uniform, usable in a computeShader
-                this.canRefactorData = true;
-                this.mustRefactorData = true;
-                this.descriptor.usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
-                this.descriptor.accessMode = "read";
-            } else if (this.io === 1) { //VertexBufferIO output , usable in a renderPipeline
-                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
+            if (this.io === 1 || this.io === 0) { //VertexBufferIO output , usable in a renderPipeline
+                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read";
             } else if (this.io === 2) { //VertexBufferIO input
-                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
+                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read_write";
             }
 
         } else if (pipelineType === "compute") {
-
-
             if (this.io === 1 || this.io == 0) { //VertexBufferIO output
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read";
             } else if (this.io === 2) { //VertexBufferIO input
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-                this.descriptor.accessMode = "read_write" as any;
+                this.descriptor.accessMode = "read_write";
             }
         }
     }
@@ -308,7 +300,7 @@ export class VertexBuffer implements IShaderResource {
     public stackAttributes(builtinOffset: number = 0) {
 
         //console.log("---------- STACK ATTRIBUTES ------------");
-
+        //console.log(this.descriptor.stepMode)
         const result: VertexAttribute[] = []
 
         let bound = 1;
@@ -398,6 +390,7 @@ export class VertexBuffer implements IShaderResource {
         this.arrayStride = offset;
 
         //console.log("this.arrayStride = ", offset);
+        //console.log(this.descriptor.stepMode)
         return {
             stepMode: this.descriptor.stepMode,
             arrayStride: Float32Array.BYTES_PER_ELEMENT * this.arrayStride,
@@ -426,8 +419,9 @@ export class VertexBuffer implements IShaderResource {
     public createVertexBufferLayout(builtinOffset: number = 0): any {
 
 
-
+        console.log(this.io, this.descriptor.stepMode)
         if (this.gpuBufferIOs) {
+
             return this.stackAttributes(builtinOffset);
         }
 

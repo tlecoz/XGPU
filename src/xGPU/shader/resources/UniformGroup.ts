@@ -328,8 +328,8 @@ export class UniformGroup {
                         primitiveStructs += s + "\n";
                     }
 
-
-                    struct += "     @size(16) " + o.name + ":" + o.constructor.name + ",\n";
+                    struct += "     @size(16) " + o.name + ":" + o.className + ",\n";
+                    //struct += "     @size(16) " + o.name + ":" + o.constructor.name + ",\n";
 
                 } else {
 

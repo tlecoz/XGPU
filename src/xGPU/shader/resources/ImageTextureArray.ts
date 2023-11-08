@@ -151,9 +151,5 @@ export class ImageTextureArray extends ImageTexture implements IShaderResource {
         }
     }
 
-    public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
-        if (pipelineType) { }
 
-        //use to handle particular cases in descriptor relative to the nature of pipeline
-    }
 }
