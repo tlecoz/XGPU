@@ -676,6 +676,7 @@ export class RenderPipeline extends Pipeline {
         if (!this.resourceDefined) return null;
 
 
+        if (this.vertexDebuggerPipeline) this.vertexDebuggerPipeline.nextFrame();
 
         if (this.onDrawBegin) this.onDrawBegin();
 
