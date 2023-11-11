@@ -214,7 +214,7 @@ export class RenderPipeline extends Pipeline {
 
         //--------
 
-        if (descriptor.vertexShaderDebugger) {
+        if (descriptor.vertexShaderDebugger || true) {
             this.vertexDebuggerConfig = {
                 startVertexId: 0,
                 instanceId: 0,
@@ -652,12 +652,27 @@ export class RenderPipeline extends Pipeline {
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
 
 
+        let started: boolean = false;
+        let name: string;
 
         if (this.vertexDebuggerConfig && this.type == "render") {
 
+
             this.vertexDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexDebuggerPipeline.init(this, this.vertexDebuggerConfig);
-            this.vertexDebuggerPipeline.onLog = this._onLog;
+
+            this.vertexDebuggerPipeline.onLog = (o) => {
+                if (!started) {
+                    started = true;
+                    for (let z in o.results[0]) {
+                        name = z;
+                        break;
+                    }
+                }
+                //console.log(o.results[0][name]);
+
+                this._onLog(o);
+            }
         }
 
 

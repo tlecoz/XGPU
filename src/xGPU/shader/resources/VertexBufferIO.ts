@@ -90,7 +90,7 @@ export class VertexBufferIO {
 
         if (!this.canCallMapAsync) return;
 
-
+        this.canCallMapAsync = false;
 
         if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
         const copyEncoder = XGPU.device.createCommandEncoder();
@@ -100,7 +100,7 @@ export class VertexBufferIO {
 
         XGPU.device.queue.submit([copyEncoder.finish()]);
 
-        this.canCallMapAsync = false;
+
         await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
         this.canCallMapAsync = true;
 

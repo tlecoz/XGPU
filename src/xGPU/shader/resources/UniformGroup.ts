@@ -29,6 +29,11 @@ export class UniformGroup {
 
     public datas: Float32Array;
 
+    public set(datas: Float32Array) { //to follow the structure of an ArrayBuffer like other uniforms
+        this.datas = datas;
+        this.mustBeTransfered = true;
+    }
+
     protected buffer: UniformBuffer = null;
     public get uniformBuffer(): UniformBuffer { return this.buffer };
     public set uniformBuffer(buffer: UniformBuffer) {

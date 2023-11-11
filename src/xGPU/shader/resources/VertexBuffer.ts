@@ -483,7 +483,7 @@ export class VertexBuffer implements IShaderResource {
     public time: number;
     public destroyGpuResource() {
 
-        //console.log("destroy vertexbuffer")
+        console.warn("destroy vertexbuffer")
 
         if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
             return;

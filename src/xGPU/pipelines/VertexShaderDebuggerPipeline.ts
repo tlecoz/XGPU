@@ -169,13 +169,18 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
             return new UniformBuffer(result, { useLocalVariable: buf.descriptor.useLocalVariable })
         }
 
-        for (let i = 0; i < renderUniformBuffers.length; i++) {
-            ub = renderUniformBuffers[i];
-            computeShaderObj[ub.name] = cloneUniformBuffer(ub.resource);
+        if (renderUniformBuffers) {
+            for (let i = 0; i < renderUniformBuffers.length; i++) {
+                ub = renderUniformBuffers[i];
+                computeShaderObj[ub.name] = cloneUniformBuffer(ub.resource);
+            }
         }
 
 
+
         this.onComputeBegin = () => {
+            if (!renderUniformBuffers) return;
+
             let items: any, itemNames: string[];
             for (let i = 0; i < renderUniformBuffers.length; i++) {
                 ub = renderUniformBuffers[i];
@@ -200,26 +205,30 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
         const renderVertexBuffers: { name: string, resource: VertexBuffer }[] = resourceByType.vertexBuffers;
         let vb: { name: string, resource: VertexBuffer };
         let vBuffer: VertexBuffer;
-
         let bufferNameByAttributeName: string[] = [];
 
+        if (renderVertexBuffers) {
 
-        for (let i = 0; i < renderVertexBuffers.length; i++) {
-            vb = renderVertexBuffers[i];
-            vBuffer = vb.resource;
 
-            let attributes = vBuffer.attributeDescriptor;
-            for (let z in attributes) {
-                bufferNameByAttributeName[z] = vb.name;
+
+            for (let i = 0; i < renderVertexBuffers.length; i++) {
+                vb = renderVertexBuffers[i];
+                vBuffer = vb.resource;
+
+                let attributes = vBuffer.attributeDescriptor;
+                for (let z in attributes) {
+                    bufferNameByAttributeName[z] = vb.name;
+                }
+
+
+                computeShaderObj[vb.name] = new VertexBuffer(vBuffer.attributeDescriptor, {
+                    stepMode: vBuffer.stepMode,
+                    datas: vBuffer.datas
+                })
+
             }
-
-
-            computeShaderObj[vb.name] = new VertexBuffer(vBuffer.attributeDescriptor, {
-                stepMode: vBuffer.stepMode,
-                datas: vBuffer.datas
-            })
-
         }
+
 
 
 
@@ -314,6 +323,27 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
         /*
         we also need to update the code that involve the keyword 'output' in order to target our result buffer instead
         */
+
+
+        const lines = vertexShaderText.split("\n");
+        const chars = "abcdefghijklmnopqrstuvwxyz/"
+        const isChars = {};
+        for (let i = 0; i < chars.length; i++) {
+            isChars[chars[i]] = true;
+            isChars[chars[i].toUpperCase()] = true;
+        }
+
+        const getFirstCharId = (line: string) => {
+            for (let i = 0; i < line.length; i++) {
+                if (isChars[line[i]]) return i;
+            }
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            lines[i] = " " + lines[i].slice(getFirstCharId(lines[i]));
+        }
+
+        vertexShaderText = lines.join("\n");
 
 
         vertexShaderText = searchAndReplace(vertexShaderText, "output", "computeResult");
