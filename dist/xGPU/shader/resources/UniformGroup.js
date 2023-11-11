@@ -232,7 +232,8 @@ export class UniformGroup {
                     if (primitiveStructs.indexOf(s) === -1 && otherStructs.indexOf(s) === -1 && struct.indexOf(s) === -1) {
                         primitiveStructs += s + "\n";
                     }
-                    struct += "     @size(16) " + o.name + ":" + o.constructor.name + ",\n";
+                    struct += "     @size(16) " + o.name + ":" + o.className + ",\n";
+                    //struct += "     @size(16) " + o.name + ":" + o.constructor.name + ",\n";
                 }
                 else {
                     if (o.type.isArray) {
@@ -257,7 +258,6 @@ export class UniformGroup {
         }
         struct += "}\n\n";
         struct = primitiveStructs + otherStructs + struct;
-        //console.log("struct = ", struct)
         this.wgsl = {
             struct,
             localVariables

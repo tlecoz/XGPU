@@ -123,6 +123,22 @@ export class ComputePipeline extends Pipeline {
 
     }
 
+    public destroy() {
+        this.bindGroups.destroy();
+        for (let z in this.description) this.description[z] = null;
+        for (let z in this) {
+            try {
+                (this[z] as any).destroy();
+            } catch (e) {
+                try {
+                    (this[z] as any).destroyGpuResource();
+                } catch (e) {
+
+                }
+            }
+            this[z] = null;
+        }
+    }
 
 
     public setWorkgroups(x: number, y: number = 1, z: number = 1) {
@@ -251,7 +267,7 @@ export class ComputePipeline extends Pipeline {
 
         if (!this.workgroups) this.setupDefaultWorkgroups();
 
-        const o = this.bindGroups.build();
+        this.bindGroups.build();
 
 
         const outputs = this.computeShader.outputs;

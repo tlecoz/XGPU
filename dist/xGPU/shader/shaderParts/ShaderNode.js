@@ -41,8 +41,13 @@ export class ShaderNode {
     }
     replaceValues(values) {
         for (let i = 0; i < values.length; i++) {
-            this._text = this._text.replace(values[i].old, values[i].new);
+            this.replaceKeyWord(values[i].old, values[i].new);
+            //this._text = this._text.replace(values[i].old, values[i].new);
         }
+    }
+    replaceKeyWord(wordToReplace, replacement) {
+        const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, 'g');
+        this._text = this._text.replace(regex, replacement);
     }
     get value() {
         let result = "";

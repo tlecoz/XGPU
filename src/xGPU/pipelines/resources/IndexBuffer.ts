@@ -91,6 +91,7 @@ export class IndexBuffer {
     public set offset(n: number) { this.descriptor.offset = n; }
 
     private _datas: Uint32Array | Uint16Array;
+
     public set datas(indices: Uint32Array | Uint16Array) {
         this.mustUpdateData = true;
 

@@ -351,8 +351,8 @@ export class Bindgroup {
     }
 
 
-    protected setupDrawCompleted: boolean = false;
-    protected setupDraw() {
+    public setupDrawCompleted: boolean = false;
+    public setupDraw(force: boolean = false) {
 
         if (this.vertexBuffers) {
             for (let i = 0; i < this.vertexBuffers.length; i++) {
@@ -366,9 +366,9 @@ export class Bindgroup {
         if (this.parent.drawConfig) { //may be undefined with a computePipeline
 
             this.indexBuffer = this.parent.drawConfig.indexBuffer;
-            if (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
+            if (force || (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0)) {
 
-                if (!this.parent.resources.types.vertexBuffers) {
+                if (!force && !this.parent.resources.types.vertexBuffers) {
                     throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw")
                 }
 
@@ -383,8 +383,9 @@ export class Bindgroup {
                 }
             }
         }
-
     }
+
+
 
 
     public apply(renderPass: GPURenderPassEncoder | GPUComputePassEncoder) {

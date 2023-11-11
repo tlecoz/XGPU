@@ -100,8 +100,4 @@ export class ImageTextureArray extends ImageTexture {
             resource: this._view,
         };
     }
-    setPipelineType(pipelineType) {
-        if (pipelineType) { }
-        //use to handle particular cases in descriptor relative to the nature of pipeline
-    }
 }

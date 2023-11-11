@@ -1,46 +1,35 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { WebGPUProperties } from "./WebGPUProperties";
+
+
+
+
 export class XGPU {
 
 
-
-
-    //public static debugShaders: boolean = true;
-
     public static debugVertexShader: boolean = false;
     public static debugFragmentShader: boolean = false;
-    public static debugComputeShader: boolean = true;
+    public static debugComputeShader: boolean = false;
 
     private static _ready: boolean = false;
     public static get ready(): boolean { return this._ready; }
 
     protected static gpuDevice: GPUDevice;
 
+
+
     public static debugUsage(usage: number) {
+        return WebGPUProperties.getBufferUsageById(usage);
+    }
 
-        if (usage === 72) return "GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM"
-        else if (usage === 76) return "GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.UNIFORM"
-        else if (usage === 200) return "GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM"
-        else if (usage === 128) return "GPUBufferUsage.STORAGE";
-        else if (usage === 8) return "GPUBufferUsage.COPY_DST";
-        else if (usage === 32) return "GPUBufferUsage.VERTEX";
-        else if (usage == 136) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST";
-        else if (usage === 168) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX";
-        else if (usage === 4) return "GPUBufferUsage.COPY_SRC";
-        else if (usage === 132) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC";
-        else if (usage === 40) return "GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST";
-        else if (usage === 140) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST";
-        else if (usage === 172) return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC"
-
-        return ""
+    public static debugTextureUsage(usage: number): string {
+        return WebGPUProperties.getTextureUsageById(usage);
     }
 
     public static debugShaderStage(n: number) {
-        if (n === GPUShaderStage.COMPUTE) return "GPUShaderStage.COMPUTE"
-        else if (n === GPUShaderStage.VERTEX) return "GPUShaderStage.VERTEX"
-        else if (n === GPUShaderStage.FRAGMENT) return "GPUShaderStage.FRAGMENT"
-        return ""
+        return WebGPUProperties.getShaderStageById(n)
     }
 
 
@@ -50,7 +39,6 @@ export class XGPU {
 
     private static requestAdapterOptions: GPURequestAdapterOptions;
     private static losingDevice: boolean = false;
-
 
     public static deviceLost: boolean = false;
     private static deviceLostTime: number;
@@ -106,6 +94,8 @@ export class XGPU {
                     }
                 })
 
+                await WebGPUProperties.init();
+                this.debugUsage(172)
                 this._ready = true;
                 resolve(this);
             } else {

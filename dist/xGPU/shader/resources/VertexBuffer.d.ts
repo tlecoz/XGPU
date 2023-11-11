@@ -32,6 +32,7 @@ export declare class VertexBuffer implements IShaderResource {
     initBufferIO(buffers: GPUBuffer[]): void;
     get buffer(): GPUBuffer;
     getCurrentBuffer(): GPUBuffer;
+    get stepMode(): "vertex" | "instance";
     get length(): number;
     get nbComponent(): number;
     get nbVertex(): number;
@@ -45,7 +46,6 @@ export declare class VertexBuffer implements IShaderResource {
     createDeclaration(vertexBufferName: string, bindingId: number, groupId?: number, isInput?: boolean): string;
     createBindGroupLayoutEntry(bindingId: number): any;
     createBindGroupEntry(bindingId: number): any;
-    protected canRefactorData: boolean;
     protected pipelineType: "compute" | "render" | "compute_mixed";
     setPipelineType(pipelineType: "compute" | "render" | "compute_mixed"): void;
     createStruct(name: string): ShaderStruct;

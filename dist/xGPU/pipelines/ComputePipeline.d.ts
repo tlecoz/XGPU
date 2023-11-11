@@ -16,6 +16,8 @@ export declare class ComputePipeline extends Pipeline {
     protected stagingBuffer: GPUBuffer;
     protected bufferIOs: VertexBuffer[];
     protected textureIOs: ImageTexture[];
+    onComputeBegin: () => void;
+    onComputeEnd: () => void;
     constructor();
     set useRenderPipeline(b: boolean);
     initFromObject(descriptor: {
@@ -53,5 +55,8 @@ export declare class ComputePipeline extends Pipeline {
     protected rebuildingAfterDeviceLost: boolean;
     clearAfterDeviceLostAndRebuild(): void;
     buildGpuPipeline(): GPUComputePipeline;
+    private firstFrame;
+    private processingFirstFrame;
+    private waitingFrame;
     nextFrame(): Promise<void>;
 }

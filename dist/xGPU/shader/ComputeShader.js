@@ -1,5 +1,6 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
+import { XGPU } from "../XGPU";
 import { ShaderStage } from "./shaderParts/ShaderStage";
 export class ComputeShader extends ShaderStage {
     constructor() {
@@ -18,9 +19,11 @@ export class ComputeShader extends ShaderStage {
         result += obj.variables + "\n";
         result += this.main.value;
         result += "}\n";
-        //console.log("------------- COMPUTE SHADER --------------")
-        //console.log(result)
-        //console.log("-------------------------------------------")
+        if (XGPU.debugComputeShader) {
+            console.log("------------- COMPUTE SHADER --------------");
+            console.log(result);
+            console.log("-------------------------------------------");
+        }
         this._shaderInfos = { code: result, output: null };
         return this._shaderInfos;
     }

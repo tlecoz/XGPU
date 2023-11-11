@@ -30,6 +30,10 @@ export class PrimitiveFloatUniform extends Float32Array {
     clone() {
         const o = new PrimitiveFloatUniform(this.type.rawType, this, this.createVariableInsideMain);
         o.propertyNames = this.propertyNames;
+        o.className = this.className;
+        o.name = this.name;
+        o.startId = this.startId;
+        //for (let z in this) o[z] = this[z];
         return o;
     }
     initStruct(propertyNames, createVariableInsideMain = false) {
@@ -39,7 +43,8 @@ export class PrimitiveFloatUniform extends Float32Array {
         this.createVariableInsideMain = createVariableInsideMain;
     }
     createStruct() {
-        let result = "struct " + this.constructor.name + " {\n";
+        //let result = "struct " + this.constructor.name + " {\n";
+        let result = "struct " + this.className + " {\n";
         for (let i = 0; i < this.propertyNames.length; i++) {
             result += "   " + this.propertyNames[i] + ":f32,\n";
         }

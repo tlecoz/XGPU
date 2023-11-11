@@ -45,6 +45,13 @@ export declare class ImageTexture implements IShaderResource {
     time: number;
     destroyGpuResource(): void;
     createDeclaration(varName: string, bindingId: number, groupId?: number): string;
+    protected _textureType: {
+        texture: any;
+    } | {
+        storageTexture: any;
+    };
+    get textureType(): any;
+    set textureType(o: any);
     createBindGroupLayoutEntry(bindingId: number): {
         binding: number;
         visibility: number;

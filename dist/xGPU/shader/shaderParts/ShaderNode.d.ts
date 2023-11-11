@@ -11,6 +11,7 @@ export declare class ShaderNode {
         old: string;
         new: string;
     }[]): void;
+    replaceKeyWord(wordToReplace: string, replacement: string): void;
     get value(): string;
     createNode(code?: string): ShaderNode;
 }

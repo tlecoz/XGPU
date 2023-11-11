@@ -38,5 +38,4 @@ export declare class ImageTextureArray extends ImageTexture implements IShaderRe
         binding: number;
         resource: GPUTextureView;
     };
-    setPipelineType(pipelineType: "compute" | "render" | "compute_mixed"): void;
 }

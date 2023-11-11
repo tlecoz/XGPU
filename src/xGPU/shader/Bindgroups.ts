@@ -531,6 +531,15 @@ export class Bindgroups {
         return null;
     }
 
+    public setupDraw(force: boolean = false) {
+
+        for (let i = 0; i < this.groups.length; i++) {
+            if (!this.groups[i].setupDrawCompleted) {
+                this.groups[i].setupDraw(force);
+            }
+        }
+    }
+
     public get drawConfig(): DrawConfig {
 
         return (this.pipeline as any).drawConfig || null

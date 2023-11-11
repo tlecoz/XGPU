@@ -20,6 +20,8 @@ export class ComputePipeline extends Pipeline {
     stagingBuffer;
     bufferIOs;
     textureIOs;
+    onComputeBegin;
+    onComputeEnd;
     constructor() {
         super();
         this.computeShader = new ComputeShader();
@@ -37,10 +39,6 @@ export class ComputePipeline extends Pipeline {
         this.fragmentShader = null;
         this.bindGroups.destroy();
         this.bindGroups = new Bindgroups(this, "pipeline");
-        /*
-        descriptor = this.highLevelParse(descriptor);
-        descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
-        */
         descriptor = HighLevelParser.parse(descriptor, "compute");
         super.initFromObject(descriptor);
         if (descriptor.bindgroups) {
@@ -81,6 +79,14 @@ export class ComputePipeline extends Pipeline {
                 this.computeShader.constants.text = descriptor.computeShader.constants;
             this.computeShader.main.text = descriptor.computeShader.main;
         }
+        let vertexBufferReadyToUse = true;
+        for (let bufferName in this.resources.bindgroups.io) {
+            if (!this.resources.bindgroups.io[bufferName].data) {
+                vertexBufferReadyToUse = false;
+            }
+        }
+        if (vertexBufferReadyToUse)
+            this.nextFrame();
         return descriptor;
     }
     setWorkgroups(x, y = 1, z = 1) {
@@ -139,6 +145,7 @@ export class ComputePipeline extends Pipeline {
                 this.nextFrame();
             }
         }
+        //console.log("update ", this.bindGroups)
         this.bindGroups.update();
         this.lastFrameTime = new Date().getTime();
     }
@@ -173,6 +180,7 @@ export class ComputePipeline extends Pipeline {
         this.initResourceIOs();
         if (!this.workgroups)
             this.setupDefaultWorkgroups();
+        this.bindGroups.build();
         const outputs = this.computeShader.outputs;
         const inputs = this.computeShader.inputs;
         for (let i = 0; i < outputs.length; i++) {
@@ -194,7 +202,17 @@ export class ComputePipeline extends Pipeline {
         this.gpuComputePipeline = XGPU.createComputePipeline(this.description);
         return this.gpuComputePipeline;
     }
+    firstFrame = true;
+    processingFirstFrame = false;
+    waitingFrame = false;
     async nextFrame() {
+        if (this.processingFirstFrame) {
+            this.waitingFrame = true;
+            return;
+        }
+        if (this.onComputeBegin)
+            this.onComputeBegin();
+        this.processingFirstFrame = this.firstFrame;
         this.update();
         const commandEncoder = XGPU.device.createCommandEncoder();
         const computePass = commandEncoder.beginComputePass();
@@ -204,9 +222,19 @@ export class ComputePipeline extends Pipeline {
         computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);
         computePass.end();
         XGPU.device.queue.submit([commandEncoder.finish()]);
+        if (this.firstFrame) {
+            await XGPU.device.queue.onSubmittedWorkDone();
+        }
         for (let i = 0; i < this.resourceIOs.length; i++) {
-            //console.log(i, "getOutputData")
             this.resourceIOs[i].getOutputData();
+        }
+        this.firstFrame = false;
+        this.processingFirstFrame = false;
+        if (this.onComputeEnd)
+            this.onComputeEnd();
+        if (this.waitingFrame) {
+            this.waitingFrame = false;
+            this.nextFrame();
         }
     }
 }

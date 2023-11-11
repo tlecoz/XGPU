@@ -39,7 +39,7 @@ export class VertexShader extends ShaderStage {
         result += "   return output;\n";
         result += "}\n";
         result = this.formatWGSLCode(result);
-        if (XGPU.debugShaders) {
+        if (XGPU.debugVertexShader) {
             console.log("------------- VERTEX SHADER --------------");
             console.log(result);
             console.log("------------------------------------------");

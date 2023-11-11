@@ -12,7 +12,7 @@ export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
     accessMode?: "read" | "read_write",
     usage?: GPUBufferUsageFlags,
-    datas?: Float32Array | Int32Array | Uint32Array
+    datas?: Float32Array | Int32Array | Uint32Array | Uint16Array
 }
 
 
@@ -33,7 +33,7 @@ export class VertexBuffer implements IShaderResource {
 
     private _nbComponent: number = 0;
 
-    private _datas: Float32Array | Int32Array | Uint32Array;
+    private _datas: Float32Array | Int32Array | Uint32Array | Uint16Array;
     public nbComponentData: number;
     public attributeChanged: boolean = false;
 
@@ -42,7 +42,7 @@ export class VertexBuffer implements IShaderResource {
 
     constructor(attributes: any, descriptor?: {
         stepMode?: "vertex" | "instance",
-        datas?: Float32Array | Int32Array | Uint32Array
+        datas?: Float32Array | Int32Array | Uint32Array | Uint16Array
     }) {
 
         //console.log("VERTEX BUFFER ", attributes)
@@ -130,8 +130,8 @@ export class VertexBuffer implements IShaderResource {
     }
 
 
-    public get datas(): Float32Array | Int32Array | Uint32Array { return this._datas; }
-    public set datas(f: Float32Array | Int32Array | Uint32Array) {
+    public get datas(): Float32Array | Int32Array | Uint32Array | Uint16Array { return this._datas; }
+    public set datas(f: Float32Array | Int32Array | Uint32Array | Uint16Array) {
         this._datas = f;
         this.mustBeTransfered = true;
     }
@@ -419,7 +419,7 @@ export class VertexBuffer implements IShaderResource {
     public createVertexBufferLayout(builtinOffset: number = 0): any {
 
 
-        console.log(this.io, this.descriptor.stepMode)
+        //console.log(this.io, this.descriptor.stepMode)
         if (this.gpuBufferIOs) {
 
             return this.stackAttributes(builtinOffset);

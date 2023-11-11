@@ -13,7 +13,13 @@ var __publicField = (obj, key, value) => {
       return this._ready;
     }
     static debugUsage(usage) {
-      if (usage === 128)
+      if (usage === 72)
+        return "GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM";
+      else if (usage === 76)
+        return "GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.UNIFORM";
+      else if (usage === 200)
+        return "GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM";
+      else if (usage === 128)
         return "GPUBufferUsage.STORAGE";
       else if (usage === 8)
         return "GPUBufferUsage.COPY_DST";
@@ -134,7 +140,10 @@ var __publicField = (obj, key, value) => {
     }
   };
   let XGPU = _XGPU;
-  __publicField(XGPU, "debugShaders", false);
+  //public static debugShaders: boolean = true;
+  __publicField(XGPU, "debugVertexShader", false);
+  __publicField(XGPU, "debugFragmentShader", false);
+  __publicField(XGPU, "debugComputeShader", true);
   __publicField(XGPU, "_ready", false);
   __publicField(XGPU, "gpuDevice");
   __publicField(XGPU, "requestAdapterOptions");
@@ -2682,6 +2691,9 @@ var __publicField = (obj, key, value) => {
     clone() {
       const o = new PrimitiveFloatUniform(this.type.rawType, this, this.createVariableInsideMain);
       o.propertyNames = this.propertyNames;
+      o.className = this.className;
+      o.name = this.name;
+      o.startId = this.startId;
       return o;
     }
     initStruct(propertyNames, createVariableInsideMain = false) {
@@ -2691,7 +2703,7 @@ var __publicField = (obj, key, value) => {
       this.createVariableInsideMain = createVariableInsideMain;
     }
     createStruct() {
-      let result = "struct " + this.constructor.name + " {\n";
+      let result = "struct " + this.className + " {\n";
       for (let i = 0; i < this.propertyNames.length; i++) {
         result += "   " + this.propertyNames[i] + ":f32,\n";
       }
@@ -3546,6 +3558,7 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "gpuTextureIO_index", 1);
       __publicField(this, "deviceId");
       __publicField(this, "time");
+      __publicField(this, "_textureType");
       descriptor = { ...descriptor };
       if (void 0 === descriptor.sampledType)
         descriptor.sampledType = "f32";
@@ -3705,16 +3718,25 @@ var __publicField = (obj, key, value) => {
         return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d<" + this.sampledType + ">;\n";
       return " @binding(" + bindingId + ") @group(" + groupId + ") var " + varName + " : texture_storage_2d<rgba8unorm, write>;\n";
     }
+    get textureType() {
+      return this._textureType;
+    }
+    set textureType(o) {
+      console.log("set textureType ", o);
+      this._textureType = o;
+    }
     createBindGroupLayoutEntry(bindingId) {
       let sampleType = "float";
       if (this.sampledType === "i32")
         sampleType = "sint";
       else if (this.sampledType === "u32")
         sampleType = "uint";
+      console.warn("createBindGroupLayoutEntry ", this.io);
       if (this.io != 2)
         return {
           binding: bindingId,
           visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+          ...this.textureType,
           texture: {
             sampleType,
             viewDimension: "2d",
@@ -3739,9 +3761,11 @@ var __publicField = (obj, key, value) => {
       };
     }
     setPipelineType(pipelineType) {
-      if (pipelineType === "compute_mixed") {
+      if (pipelineType === "render") {
+        this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT;
+      } else if (pipelineType === "compute_mixed") {
         if (this.io === 1) {
-          this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC;
+          this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST;
         } else if (this.io === 2) {
           this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING;
         }
@@ -3853,8 +3877,6 @@ var __publicField = (obj, key, value) => {
         binding: bindingId,
         resource: this._view
       };
-    }
-    setPipelineType(pipelineType) {
     }
   }
   class CubeMapTexture extends ImageTextureArray {
@@ -4459,7 +4481,7 @@ var __publicField = (obj, key, value) => {
             if (primitiveStructs.indexOf(s) === -1 && otherStructs.indexOf(s) === -1 && struct.indexOf(s) === -1) {
               primitiveStructs += s + "\n";
             }
-            struct += "     @size(16) " + o2.name + ":" + o2.constructor.name + ",\n";
+            struct += "     @size(16) " + o2.name + ":" + o2.className + ",\n";
           } else {
             if (o2.type.isArray) {
               if (o2.type.isArrayOfMatrixs) {
@@ -5123,7 +5145,6 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "gpuBufferIOs");
       __publicField(this, "gpuBufferIO_index", 1);
       __publicField(this, "_byteCount", 0);
-      __publicField(this, "canRefactorData", true);
       __publicField(this, "pipelineType");
       __publicField(this, "arrayStride");
       __publicField(this, "layout");
@@ -5183,6 +5204,9 @@ var __publicField = (obj, key, value) => {
       if (!this.gpuResource)
         this.createGpuResource();
       return this.gpuResource;
+    }
+    get stepMode() {
+      return this.descriptor.stepMode;
     }
     get length() {
       return this.vertexArrays.length;
@@ -5246,7 +5270,8 @@ var __publicField = (obj, key, value) => {
       const varName = vertexBufferName.substring(0, 1).toLowerCase() + vertexBufferName.slice(1);
       let result = "";
       let type = "storage, read";
-      if (this.io === 1) {
+      let structType = "array<" + structName + ">";
+      if (this.io === 1 || this.io === 0) {
         result += "struct " + structName + "{\n";
         let a;
         for (let i = 0; i < this.vertexArrays.length; i++) {
@@ -5254,11 +5279,13 @@ var __publicField = (obj, key, value) => {
           result += "   " + a.name + ":" + a.varType + ",\n";
         }
         result += "}\n\n";
+        structType = "array<" + structName + ">";
       } else {
         type = "storage, read_write";
         structName = structName.slice(0, structName.length - 4);
+        structType = "array<" + structName + ">";
       }
-      result += "@binding(" + bindingId + ") @group(" + groupId + ") var<" + type + "> " + varName + ":array<" + structName + ">;\n";
+      result += "@binding(" + bindingId + ") @group(" + groupId + ") var<" + type + "> " + varName + ":" + structType + ";\n";
       return result;
     }
     createBindGroupLayoutEntry(bindingId) {
@@ -5289,17 +5316,16 @@ var __publicField = (obj, key, value) => {
       if (pipelineType === "render") {
         this.descriptor.accessMode = "read";
         this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
-        this.canRefactorData = false;
       } else if (pipelineType === "compute_mixed") {
-        this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
-        if (this.io === 1) {
+        if (this.io === 1 || this.io === 0) {
+          this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
           this.descriptor.accessMode = "read";
         } else if (this.io === 2) {
+          this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
           this.descriptor.accessMode = "read_write";
         }
       } else if (pipelineType === "compute") {
-        this.canRefactorData = true;
-        if (this.io === 1) {
+        if (this.io === 1 || this.io == 0) {
           this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
           this.descriptor.accessMode = "read";
         } else if (this.io === 2) {
@@ -5405,6 +5431,7 @@ var __publicField = (obj, key, value) => {
       }
     }
     createVertexBufferLayout(builtinOffset = 0) {
+      console.log(this.io, this.descriptor.stepMode);
       if (this.gpuBufferIOs) {
         return this.stackAttributes(builtinOffset);
       }
@@ -5494,9 +5521,8 @@ var __publicField = (obj, key, value) => {
     updateBuffer() {
       if (!this.datas)
         return;
-      if (!this.gpuResource) {
+      if (!this.gpuResource)
         this.createGpuResource();
-      }
       if (this.datas.byteLength != this._bufferSize)
         this.createGpuResource();
       XGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer);
@@ -5569,6 +5595,7 @@ var __publicField = (obj, key, value) => {
       this.descriptor = descriptor;
       if (!descriptor.stepMode)
         descriptor.stepMode = "instance";
+      console.log(descriptor.stepMode);
       this.deviceId = XGPU.deviceId;
       this.buffers[0] = new VertexBuffer(attributes, descriptor);
       this.buffers[1] = new VertexBuffer(attributes, descriptor);
@@ -5586,6 +5613,8 @@ var __publicField = (obj, key, value) => {
     destroy() {
       if (this.stagingBuffer)
         this.stagingBuffer.destroy();
+      this.buffers[0].destroyGpuResource();
+      this.buffers[1].destroyGpuResource();
       this.buffers = void 0;
       this.onOutputData = void 0;
     }
@@ -6797,7 +6826,7 @@ var __publicField = (obj, key, value) => {
       let resource;
       for (let i = 0; i < this.elements.length; i++) {
         resource = this.elements[i].resource;
-        if (resource instanceof VertexBuffer && !resource.io)
+        if (resource instanceof VertexBuffer && !resource.io && this.parent.pipeline.type != "compute")
           continue;
         let bgl = resource.createBindGroupLayoutEntry(bindingId++);
         layout.entries.push(bgl);
@@ -6812,9 +6841,11 @@ var __publicField = (obj, key, value) => {
       let bindingId = 0;
       let resource;
       for (let i = 0; i < this.elements.length; i++) {
+        if (!this.elements[i])
+          continue;
         resource = this.elements[i].resource;
         resource.update();
-        if (resource instanceof VertexBuffer && !resource.io)
+        if (resource instanceof VertexBuffer && !resource.io && this.parent.pipeline.type != "compute")
           continue;
         let entry = resource.createBindGroupEntry(bindingId++);
         entries.push(entry);
@@ -7011,9 +7042,9 @@ var __publicField = (obj, key, value) => {
           } else {
             buf0[i] = this.resourcesIOs[i].textures[0];
             buf1[i] = this.resourcesIOs[i].textures[1];
-            buf0[i].createGpuResource();
-            buf1[i].createGpuResource();
           }
+          buf0[i].createGpuResource();
+          buf1[i].createGpuResource();
         }
         this.createPingPongBindgroup(buf0, buf1);
       }
@@ -7057,7 +7088,7 @@ var __publicField = (obj, key, value) => {
           res1.initTextureIO(textures);
         }
       }
-      this.ioGroups = [this, group];
+      this.ioGroups = [group, this];
       this.debug = 1;
       group.debug = 2;
       return group;
@@ -7483,18 +7514,19 @@ var __publicField = (obj, key, value) => {
           if (resource instanceof VertexBuffer)
             ;
           else if (resource instanceof UniformBuffer) {
+            console.log(resource);
             let item;
             for (let z in resource.items) {
               item = resource.items[z];
               let _name = name.substring(0, 1).toLowerCase() + name.slice(1);
-              if (item.propertyNames)
-                result += item.createStruct() + "\n";
               if (item.createVariableInsideMain)
                 obj.variables += item.createVariable(_name) + "\n";
             }
-            result += resource.createStruct(name).struct + "\n";
+            const struct = resource.createStruct(name).struct + "\n";
+            result += struct;
           }
-          result += resource.createDeclaration(name, k++, i) + "\n";
+          const declaration = resource.createDeclaration(name, k++, i) + "\n";
+          result += declaration;
         }
       }
       obj.result = result;
@@ -7977,8 +8009,12 @@ var __publicField = (obj, key, value) => {
     }
     replaceValues(values) {
       for (let i = 0; i < values.length; i++) {
-        this._text = this._text.replace(values[i].old, values[i].new);
+        this.replaceKeyWord(values[i].old, values[i].new);
       }
+    }
+    replaceKeyWord(wordToReplace, replacement) {
+      const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
+      this._text = this._text.replace(regex, replacement);
     }
     get value() {
       let result = "";
@@ -8102,7 +8138,7 @@ var __publicField = (obj, key, value) => {
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
-      if (XGPU.debugShaders) {
+      if (XGPU.debugFragmentShader) {
         console.log("------------- FRAGMENT SHADER --------------");
         console.log(result);
         console.log("--------------------------------------------");
@@ -8139,7 +8175,7 @@ var __publicField = (obj, key, value) => {
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
-      if (XGPU.debugShaders) {
+      if (XGPU.debugVertexShader) {
         console.log("------------- VERTEX SHADER --------------");
         console.log(result);
         console.log("------------------------------------------");
@@ -8797,6 +8833,11 @@ var __publicField = (obj, key, value) => {
       result += obj.variables + "\n";
       result += this.main.value;
       result += "}\n";
+      if (XGPU.debugComputeShader) {
+        console.log("------------- COMPUTE SHADER --------------");
+        console.log(result);
+        console.log("-------------------------------------------");
+      }
       this._shaderInfos = { code: result, output: null };
       return this._shaderInfos;
     }
@@ -8815,6 +8856,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "stagingBuffer");
       __publicField(this, "bufferIOs");
       __publicField(this, "textureIOs");
+      __publicField(this, "onComputeBegin");
+      __publicField(this, "onComputeEnd");
       __publicField(this, "vertexBufferIOs", []);
       __publicField(this, "imageTextureIOs", []);
       __publicField(this, "resourceIOs", []);
@@ -8824,6 +8867,9 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "deviceId");
       __publicField(this, "lastFrameTime", -1);
       __publicField(this, "rebuildingAfterDeviceLost", false);
+      __publicField(this, "firstFrame", true);
+      __publicField(this, "processingFirstFrame", false);
+      __publicField(this, "waitingFrame", false);
       this.computeShader = new ComputeShader();
       this.type = "compute";
     }
@@ -8878,6 +8924,14 @@ var __publicField = (obj, key, value) => {
           this.computeShader.constants.text = descriptor.computeShader.constants;
         this.computeShader.main.text = descriptor.computeShader.main;
       }
+      let vertexBufferReadyToUse = true;
+      for (let bufferName in this.resources.bindgroups.io) {
+        if (!this.resources.bindgroups.io[bufferName].data) {
+          vertexBufferReadyToUse = false;
+        }
+      }
+      if (vertexBufferReadyToUse)
+        this.nextFrame();
       return descriptor;
     }
     setWorkgroups(x, y = 1, z = 1) {
@@ -8955,6 +9009,7 @@ var __publicField = (obj, key, value) => {
       this.initResourceIOs();
       if (!this.workgroups)
         this.setupDefaultWorkgroups();
+      this.bindGroups.build();
       const outputs = this.computeShader.outputs;
       const inputs = this.computeShader.inputs;
       for (let i = 0; i < outputs.length; i++) {
@@ -8975,6 +9030,13 @@ var __publicField = (obj, key, value) => {
       return this.gpuComputePipeline;
     }
     async nextFrame() {
+      if (this.processingFirstFrame) {
+        this.waitingFrame = true;
+        return;
+      }
+      if (this.onComputeBegin)
+        this.onComputeBegin();
+      this.processingFirstFrame = this.firstFrame;
       this.update();
       const commandEncoder = XGPU.device.createCommandEncoder();
       const computePass = commandEncoder.beginComputePass();
@@ -8984,8 +9046,19 @@ var __publicField = (obj, key, value) => {
       computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);
       computePass.end();
       XGPU.device.queue.submit([commandEncoder.finish()]);
+      if (this.firstFrame) {
+        await XGPU.device.queue.onSubmittedWorkDone();
+      }
       for (let i = 0; i < this.resourceIOs.length; i++) {
         this.resourceIOs[i].getOutputData();
+      }
+      this.firstFrame = false;
+      this.processingFirstFrame = false;
+      if (this.onComputeEnd)
+        this.onComputeEnd();
+      if (this.waitingFrame) {
+        this.waitingFrame = false;
+        this.nextFrame();
       }
     }
   }

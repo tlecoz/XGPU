@@ -12,7 +12,7 @@ export declare class PrimitiveFloatUniform extends Float32Array {
     uniformBuffer: UniformBuffer;
     propertyNames: string[];
     createVariableInsideMain: boolean;
-    protected className: string;
+    className: string;
     constructor(type: string, val: number[] | Float32Array, createLocalVariable?: boolean);
     clone(): PrimitiveFloatUniform;
     initStruct(propertyNames: string[], createVariableInsideMain?: boolean): void;
@@ -32,7 +32,7 @@ export declare class PrimitiveIntUniform extends Int32Array {
     uniformBuffer: UniformBuffer;
     propertyNames: string[];
     createVariableInsideMain: boolean;
-    protected className: string;
+    className: string;
     constructor(type: string, val: number[] | Int32Array, createLocalVariable?: boolean);
     clone(): PrimitiveIntUniform;
     initStruct(propertyNames: string[], createVariableInsideMain?: boolean): void;
@@ -51,7 +51,7 @@ export declare class PrimitiveUintUniform extends Uint32Array {
     set mustBeTransfered(b: boolean);
     propertyNames: string[];
     createVariableInsideMain: boolean;
-    protected className: string;
+    className: string;
     constructor(type: string, val: number[] | Uint32Array, createLocalVariable?: boolean);
     clone(): PrimitiveUintUniform;
     initStruct(propertyNames: string[], createVariableInsideMain?: boolean): void;

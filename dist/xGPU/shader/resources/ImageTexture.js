@@ -179,16 +179,24 @@ export class ImageTexture {
             return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_2d<" + this.sampledType + ">;\n";
         return " @binding(" + (bindingId) + ") @group(" + groupId + ") var " + varName + " : texture_storage_2d<rgba8unorm, write>;\n";
     }
+    _textureType;
+    get textureType() { return this._textureType; }
+    set textureType(o) {
+        console.log("set textureType ", o);
+        this._textureType = o;
+    }
     createBindGroupLayoutEntry(bindingId) {
         let sampleType = "float";
         if (this.sampledType === "i32")
             sampleType = "sint";
         else if (this.sampledType === "u32")
             sampleType = "uint";
+        console.warn("createBindGroupLayoutEntry ", this.io);
         if (this.io != 2)
             return {
                 binding: bindingId,
                 visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+                ...this.textureType,
                 texture: {
                     sampleType,
                     viewDimension: "2d",
@@ -215,11 +223,14 @@ export class ImageTexture {
     }
     setPipelineType(pipelineType) {
         //use to handle particular cases in descriptor relative to the nature of pipeline
-        if (pipelineType === "compute_mixed") {
-            if (this.io === 1) {
-                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC;
+        if (pipelineType === "render") {
+            this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT;
+        }
+        else if (pipelineType === "compute_mixed") { //the image is processed from a ComputePipeline and use inside a RenderPipeline
+            if (this.io === 1) { //read buffer
+                this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST;
             }
-            else if (this.io === 2) {
+            else if (this.io === 2) { //write buffer
                 this.descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING;
             }
         }

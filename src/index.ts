@@ -14,6 +14,7 @@ export * from "./xGPU/blendmodes/BlendMode"
 export * from "./xGPU/pipelines/Pipeline"
 export * from "./xGPU/pipelines/RenderPipeline"
 export * from "./xGPU/pipelines/ComputePipeline"
+export * from "./xGPU/pipelines/VertexShaderDebuggerPipeline"
 export * from "./xGPU/pipelines/resources/IndexBuffer"
 
 
@@ -52,4 +53,5 @@ export * from "./xGPU/shader/resources/VertexBufferIO"
 export * from "./xGPU/shader/resources/VideoTexture"
 export * from "./xGPU/pipelines/resources/textures/RenderPassTexture"
 export * from "./xGPU/HighLevelParser"
+
 

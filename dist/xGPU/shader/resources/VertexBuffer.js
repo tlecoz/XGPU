@@ -82,6 +82,7 @@ export class VertexBuffer {
             this.createGpuResource();
         return this.gpuResource;
     }
+    get stepMode() { return this.descriptor.stepMode; }
     get length() { return this.vertexArrays.length; }
     get nbComponent() { return this._nbComponent; }
     get nbVertex() {
@@ -95,7 +96,6 @@ export class VertexBuffer {
     set datas(f) {
         this._datas = f;
         this.mustBeTransfered = true;
-        //console.warn("VB set datas = ", f);
     }
     setComplexDatas(datas, nbComponentTotal) {
         this._nbComponent = nbComponentTotal;
@@ -115,7 +115,6 @@ export class VertexBuffer {
     }
     _byteCount = 0;
     createArray(name, dataType, offset) {
-        //console.log("new VertexAttribute ", name, dataType, offset)
         if (this.attributes[name]) {
             return this.attributes[name];
         }
@@ -128,8 +127,6 @@ export class VertexBuffer {
             this._byteCount += nbCompo * new GPUType(v.varType).byteValue;
         else
             this._byteCount = Math.max(this._byteCount, (_offset + v.nbComponent) * new GPUType(v.varType).byteValue);
-        //console.log("byteCount = ", v.nbComponent + " * " + new GPUType(v.varType).byteValue)
-        //console.log("createArray ", name, this._byteCount, (_offset + v.nbComponent) * new GPUType(v.varType).byteValue);
         this.vertexArrays.push(v);
         return v;
     }
@@ -145,7 +142,8 @@ export class VertexBuffer {
         const varName = vertexBufferName.substring(0, 1).toLowerCase() + vertexBufferName.slice(1);
         let result = "";
         let type = "storage, read";
-        if (this.io === 1) {
+        let structType = "array<" + structName + ">";
+        if (this.io === 1 || this.io === 0) {
             result += "struct " + structName + "{\n";
             let a;
             for (let i = 0; i < this.vertexArrays.length; i++) {
@@ -153,16 +151,17 @@ export class VertexBuffer {
                 result += "   " + a.name + ":" + a.varType + ",\n";
             }
             result += "}\n\n";
+            structType = "array<" + structName + ">";
         }
         else {
             type = "storage, read_write";
             structName = structName.slice(0, structName.length - 4);
+            structType = "array<" + structName + ">";
         }
-        result += "@binding(" + bindingId + ") @group(" + groupId + ") var<" + type + "> " + varName + ":array<" + structName + ">;\n"; //+ "_Array;\n\n";
+        result += "@binding(" + bindingId + ") @group(" + groupId + ") var<" + type + "> " + varName + ":" + structType + ";\n";
         return result;
     }
     createBindGroupLayoutEntry(bindingId) {
-        //console.warn("VB accessMode = ", this.descriptor.accessMode)
         return {
             binding: bindingId,
             visibility: GPUShaderStage.COMPUTE,
@@ -184,7 +183,6 @@ export class VertexBuffer {
             }
         };
     }
-    canRefactorData = true;
     pipelineType;
     setPipelineType(pipelineType) {
         if (this.pipelineType)
@@ -194,42 +192,23 @@ export class VertexBuffer {
         if (pipelineType === "render") {
             this.descriptor.accessMode = "read";
             this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
-            this.canRefactorData = false;
         }
         else if (pipelineType === "compute_mixed") {
-            //console.warn("setPipelineType computeMixed")
-            //i use accessMode = "read_write" for both here because we will apply a ping-pong structure: 
-            //the computeShader result will be used as input of the computeShader itself for the next frame. 
-            //=> to render the first frame we will use buffers[0]  
-            // to render the second frame we will use buffers[1]
-            // to render the third frame we will use buffers[0]
-            // ... 
-            //we can swap the bindgroup entry that contains the reference of the buffer , 
-            //but we can't swap bindgroupLayout that define the accessMode
-            //that's why I forced to use "read_write" for both in that scenario
-            //console.log("---compute mixed")
-            this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC;
-            if (this.io === 1) {
+            if (this.io === 1 || this.io === 0) { //VertexBufferIO output , usable in a renderPipeline
+                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read";
             }
-            else if (this.io === 2) {
+            else if (this.io === 2) { //VertexBufferIO input
+                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read_write";
             }
         }
         else if (pipelineType === "compute") {
-            //this case is a bit different because a computePipeline alone must return a result shaped into a Float32Array
-            //
-            //a final step is applyed to get back the gpu buffers into the cpu context 
-            //because we do that, we can use these output-data as input-data of the compute shader 
-            //with no need to alternate the bindgroup.
-            //that's why I use one buffer with "read" accessMode and a second one with "read_write"
-            //console.log("---compute")
-            this.canRefactorData = true;
-            if (this.io === 1) {
+            if (this.io === 1 || this.io == 0) { //VertexBufferIO output
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read";
             }
-            else if (this.io === 2) {
+            else if (this.io === 2) { //VertexBufferIO input
                 this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 this.descriptor.accessMode = "read_write";
             }
@@ -249,6 +228,7 @@ export class VertexBuffer {
     arrayStride;
     stackAttributes(builtinOffset = 0) {
         //console.log("---------- STACK ATTRIBUTES ------------");
+        //console.log(this.descriptor.stepMode)
         const result = [];
         let bound = 1;
         var floats = [];
@@ -325,6 +305,7 @@ export class VertexBuffer {
         //-----------------
         this.arrayStride = offset;
         //console.log("this.arrayStride = ", offset);
+        //console.log(this.descriptor.stepMode)
         return {
             stepMode: this.descriptor.stepMode,
             arrayStride: Float32Array.BYTES_PER_ELEMENT * this.arrayStride,
@@ -344,6 +325,7 @@ export class VertexBuffer {
     }
     layout;
     createVertexBufferLayout(builtinOffset = 0) {
+        console.log(this.io, this.descriptor.stepMode);
         if (this.gpuBufferIOs) {
             return this.stackAttributes(builtinOffset);
         }
@@ -368,7 +350,6 @@ export class VertexBuffer {
             };
             componentId += this.vertexArrays[i].nbComponent;
         }
-        //console.log("IO:", this.gpuBufferIOs, " | ", this._byteCount + " VS " + (nb * Float32Array.BYTES_PER_ELEMENT))
         obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
         this.layout = obj;
         return obj;
@@ -383,7 +364,7 @@ export class VertexBuffer {
             return;
         if (this.gpuResource)
             this.gpuResource.destroy();
-        //console.warn("VB.createGPUResource ", this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
+        //console.warn("VB.createGPUResource ", this.io, this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
         this.deviceId = XGPU.deviceId;
         this._bufferSize = this.datas.byteLength;
         this.gpuResource = XGPU.device.createBuffer({
@@ -439,13 +420,10 @@ export class VertexBuffer {
     updateBuffer() {
         if (!this.datas)
             return;
-        if (!this.gpuResource) {
+        if (!this.gpuResource)
             this.createGpuResource();
-        }
-        //console.log("updateBuffer ", this.datas.length, this.datas.byteLength + " vs " + this._bufferSize)
         if (this.datas.byteLength != this._bufferSize)
             this.createGpuResource();
-        //console.warn("vb gpuResource = ", this.gpuResource)
         XGPU.device.queue.writeBuffer(this.gpuResource, 0, this.datas.buffer);
     }
     getVertexArrayById(id) { return this.vertexArrays[id]; }
@@ -453,10 +431,7 @@ export class VertexBuffer {
         let attribute;
         attribute = this.vertexArrays[0];
         const nbAttributes = this.vertexArrays.length;
-        //const nbVertex = attribute.datas.length;// this.nbComponent;
         let offset = 0;
-        //console.log("this._datas = ", nbVertex, this.nbComponent, this.layout.arrayStride);
-        //console.log("arrayStride = ", this.la)
         if (this.vertexArrays[0] && this.vertexArrays[0].useByVertexData) {
             const nbVertex = attribute.datas.length;
             if (!this._datas)

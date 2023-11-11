@@ -1,12 +1,21 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 export class XGPU {
-    static debugShaders = false;
+    //public static debugShaders: boolean = true;
+    static debugVertexShader = false;
+    static debugFragmentShader = false;
+    static debugComputeShader = true;
     static _ready = false;
     static get ready() { return this._ready; }
     static gpuDevice;
     static debugUsage(usage) {
-        if (usage === 128)
+        if (usage === 72)
+            return "GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM";
+        else if (usage === 76)
+            return "GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.UNIFORM";
+        else if (usage === 200)
+            return "GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM";
+        else if (usage === 128)
             return "GPUBufferUsage.STORAGE";
         else if (usage === 8)
             return "GPUBufferUsage.COPY_DST";
