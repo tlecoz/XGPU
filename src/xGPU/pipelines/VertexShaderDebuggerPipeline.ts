@@ -279,7 +279,7 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
         let computeShader: string = ``;
         if (indexBuffer) computeShader += `let index:u32 = indexBuffer[global_id.x].id;`;
-        else computeShader += `let index = global_id.x`;
+        else computeShader += `let index = global_id.x;`;
         computeShader += `
         let nbResult = arrayLength(&result);
         if(index >= nbResult){
@@ -375,7 +375,10 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
         computeShaderObj.computeUniforms = new UniformBuffer(computeUniforms)
         computeShaderObj.result = vertexBufferIO;
         computeShaderObj.global_id = BuiltIns.computeInputs.globalInvocationId;
-        computeShaderObj.computeShader = computeShader;
+        computeShaderObj.computeShader = {
+            constants: renderPipeline.vertexShader.constants.text,
+            main: computeShader,
+        }
 
         this.initFromObject(computeShaderObj)
 
