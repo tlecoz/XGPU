@@ -18,7 +18,10 @@ export class VertexShader extends ShaderStage {
 
 
 
+
     public build(pipeline: RenderPipeline, input: ShaderStruct): { code: string, output: ShaderStruct } {
+
+        //this.main.text = this.extractDebugInfo(this.main.text);
 
         let result = this.constants.value + "\n\n";
         //if (this.keepRendererAspectRatio) result += "const xgpuRendererAspectRatio = " + (pipeline.renderer.width / pipeline.renderer.height).toFixed(4) + ";\n\n";
@@ -34,11 +37,15 @@ export class VertexShader extends ShaderStage {
 
         let bool = false;
         for (let i = 0; i < this.outputs.length; i++) {
-            if (this.outputs[0].builtin === BuiltIns.vertexOutputs.position.builtin) {
+            if (this.outputs[i].builtin === BuiltIns.vertexOutputs.position.builtin) {
                 bool = true;
             }
         }
-        if (!bool) this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position })
+        if (!bool) {
+
+
+            this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position });
+        }
 
 
         let output: ShaderStruct = new ShaderStruct("Output", [...this.outputs]);
@@ -46,7 +53,9 @@ export class VertexShader extends ShaderStage {
 
 
 
-        const mainFunc = this.unwrapVariableInMainFunction(obj.variables)//handleVariables();
+        let mainFunc = this.unwrapVariableInMainFunction(obj.variables)//handleVariables();
+
+
 
         //------
         //console.log("VertexShader.variables = ", obj.variables)

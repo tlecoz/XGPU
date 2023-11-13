@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { BuiltIns } from "./BuiltIns";
 import { WebGPUProperties } from "./WebGPUProperties";
 
 
@@ -62,7 +63,7 @@ export class XGPU {
 
     public static init(options?: { powerPreference?: "low-power" | "high-performance", forceFallbackAdaoter?: boolean }): Promise<void> {
         this.requestAdapterOptions = options;
-
+        BuiltIns.__initDebug();
         return new Promise(async (resolve: (val: any) => void, error: () => void) => {
 
             if (this.gpuDevice) {

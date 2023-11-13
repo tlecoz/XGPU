@@ -31,10 +31,15 @@ export class ComputeShader extends ShaderStage {
 
         const w = shaderPipeline.workgroups;
 
+        let mainFunc = this.unwrapVariableInMainFunction(obj.variables)//handleVariables();
+
+
+
         result += "@compute @workgroup_size(" + w[0] + "," + w[1] + "," + w[2] + ")\n";
         result += "fn main(" + inputs.getFunctionParams() + ") {\n";
-        result += obj.variables + "\n";
-        result += this.main.value;
+        //result += obj.variables + "\n";
+        //result += this.main.value;
+        result += mainFunc;
         result += "}\n";
 
         if (XGPU.debugComputeShader) {

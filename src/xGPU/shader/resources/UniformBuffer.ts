@@ -157,7 +157,11 @@ export class UniformBuffer implements IShaderResource {
         }
     }
 
-
+    public getItemsAsArray(): any[] {
+        const result = [];
+        for (let i = 0; i < this.itemNames.length; i++) result[i] = this.items[this.itemNames[i]];
+        return result;
+    }
 
 
     public time: number;

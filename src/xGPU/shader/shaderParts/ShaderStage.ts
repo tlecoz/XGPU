@@ -25,6 +25,90 @@ export class ShaderStage {
 
     }
 
+
+    public debugLogs: { label: string, val: string }[] = [];
+    public debugRenders: { label: string, val: string, color: string }[] = [];
+    /*
+    public extractDebugInfo(shaderCode: string): string {
+        const { code, debugLogs, debugRenders } = ShaderStage.extractDebugInfo(shaderCode);
+        this.debugLogs = debugLogs;
+        this.debugRenders = debugRenders;
+        return code;
+    }
+
+    public static extractDebugInfo(code: string): {
+        code: string,
+        debugLogs: any[],
+        debugRenders: any[]
+    } {
+
+        const result: any = {};
+        result.debugLogs = [];
+        result.debugRenders = [];
+
+        const cut = (s: string) => {
+            let id;
+            for (let i = s.length - 1; i > -1; i--) {
+                if (s[i] === ",") {
+                    id = i;
+                    break;
+                }
+            }
+
+            return {
+                label: s.slice(0, id),
+                val: s.slice(id + 1)
+            }
+
+        }
+
+        const extractDebug = (line: string) => {
+            let s: string = line.split("XGPU.debug(")[1].split(");")[0];
+
+            //const { label, val } = cut(s);
+            //console.log("A = ", label);
+            //console.log("B = ", val);
+            result.debugLogs.push(cut(s));
+        }
+        const extractDebugRender = (line: string) => {
+            //XGPU.renderDebug("testC : ",output.position,vec4(0.0,0.0,1.0,1.0));
+            let s: string = line.split("XGPU.renderDebug(")[1].split(");")[0];
+            let t = s.split(",vec4")
+            let color = "vec4" + t[1];
+            s = t[0];
+
+            //const { label, val } = cut(s);
+            //console.log("A = ", label);
+            //console.log("B = ", val);
+            //console.log("C = ", color);
+
+            result.debugRenders.push({
+                ...cut(s),
+                color
+            })
+
+        }
+
+
+        const lines: string[] = code.split("\n");
+        const newLines: string[] = [];
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes("XGPU.debug")) {
+                extractDebug(lines[i])
+            } else if (lines[i].includes("XGPU.renderDebug")) {
+                extractDebugRender(lines[i]);
+            } else {
+                newLines.push(lines[i]);
+            }
+        }
+
+        result.code = newLines.join("\n");
+
+        return result;
+
+
+    }*/
+
     protected unwrapVariableInMainFunction(shaderVariables: string) {
         const variables: string[] = shaderVariables.split("\n");
         let s: string;

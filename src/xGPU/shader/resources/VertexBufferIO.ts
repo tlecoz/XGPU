@@ -92,6 +92,8 @@ export class VertexBufferIO {
 
         this.canCallMapAsync = false;
 
+
+
         if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
         const copyEncoder = XGPU.device.createCommandEncoder();
         const stage = this.stagingBuffer;

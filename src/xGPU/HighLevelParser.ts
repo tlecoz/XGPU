@@ -5,7 +5,7 @@ import { BuiltIns } from "./BuiltIns";
 import { DrawConfig } from "./pipelines/resources/DrawConfig";
 
 import { Bindgroup } from "./shader/Bindgroup";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "./PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform, Vec4, Vec4Array } from "./PrimitiveType";
 import { CubeMapTexture } from "./shader/resources/CubeMapTexture";
 import { IShaderResource } from "./shader/resources/IShaderResource";
 import { ImageTexture } from "./shader/resources/ImageTexture";
@@ -853,6 +853,317 @@ export class HighLevelParser {
     }
 
 
+    private parseDebugValues = (descriptor: any): any => {
+
+        let debug: any = {};
+        let o: any, temp: any;
+        let bool: boolean = false;
+        let indexs: Vec4[] = [];
+        let objectById: any[] = [];
+        let objectByName: any = {};
+        let nb = 0;
+        for (let name in descriptor) {
+            o = descriptor[name];
+            if (o.__debug == true) {
+                bool = true;
+                if (typeof (o) === "function") {
+                    o = { name, id: nb, ...(o()) };
+                } else {
+                    o.id = nb;
+                    o.name = name;
+                }
+
+                if (name.includes("_")) {
+                    throw new Error(`BUILTINS ERROR :: ${name}  A variable using a BuiltIns.vertexDebug cannot use an underscore in its name.`)
+                }
+
+                descriptor[name] = undefined;
+                indexs[nb] = new Vec4(o.vertexId, o.instanceId, 0, 0);
+                objectByName[name] = o;
+                objectById[nb] = o;
+                nb++;
+            }
+        }
+
+        return {
+            nb,
+            indexs,
+            objectByName,
+            objectById
+        }
+
+    }
+
+    private parseVertexShaderDebug = (descriptor: any) => {
+
+        if (typeof (descriptor.vertexShader) === "string") {
+            descriptor.vertexShader = { main: descriptor.vertexShader };
+        }
+
+        const clearDebug = (shader: string) => {
+            let lines = shader.split("\n");
+            let line: string;
+            let result = "";
+            for (let i = 0; i < lines.length; i++) {
+                line = lines[i];
+                if (line.includes("debug.")) continue;
+                result += line + "\n";
+            }
+            return result;
+        }
+
+        const shader = descriptor.vertexShader.main;
+        descriptor.vertexShader.main = clearDebug(shader);
+
+
+        const debugByName = descriptor.__DEBUG__.objectByName;
+
+
+        const removeEmptySpaceAtStart = (line: string): string => {
+            let abc = "abcdefghijklmnopqrstuvwxyz/";
+            abc += abc.toUpperCase();
+
+            let char: string;
+            for (let i = 0; i < line.length; i++) {
+                char = line[i];
+                if (abc.includes(char)) {
+                    return line.slice(i);
+                }
+            }
+
+            return line;
+        }
+
+        const extractDebugName = (line: string): string => {
+            let abc = "abcdefghijklmnopqrstuvwxyz0123456789";
+            abc += abc.toUpperCase();
+
+            let char: string;
+            let name: string = "";
+            for (let i = 0; i < line.length; i++) {
+                char = line[i];
+                if (abc.includes(char)) {
+                    name += char;
+                    continue;
+                }
+                if (char === " ") continue;
+                if (char != "=") {
+                    console.log("char = ", char)
+                    throw new Error(`VERTEX SHADER ERROR on this line :"debug.${line} ". The keyword "debug" must only be used to store data. It can't be used in computations.`)
+                }
+                return name;
+            }
+            return name;
+        }
+
+        const analyseAndRewriteDebug = (shader: string) => {
+            let lines = shader.split("\n");
+            let line: string;
+            let result: string = ";"
+            let names: string[] = [];
+            let nbUsedByName: any = {};
+            let newName: string;
+            let objById: any[] = [];
+            let count = 0;
+            for (let i = 0; i < lines.length; i++) {
+                line = removeEmptySpaceAtStart(lines[i]);
+                if (line.slice(0, 2) == "//") continue;
+
+
+                if (line.includes("debug.")) {
+                    if (line.slice(0, "debug.".length) === "debug.") {
+
+                        if (line.split("=").length == 2) {
+
+
+                            const dName = extractDebugName(line.slice("debug.".length));
+
+
+                            const o = debugByName[dName];
+                            if (!debugByName[dName]) {
+                                throw new Error(`VERTEX SHADER ERROR on this line :" ${line} ". The value "debug.${dName}" is used in the vertexShader but not defined in RenderPipeline.initFromObject `);
+                            }
+
+                            if (names.includes(dName) === false) names.push(dName);
+
+
+                            if (isNaN(nbUsedByName[dName])) {
+                                //debugByName[dName] = undefined;
+                                //delete debugByName[dName];
+                                nbUsedByName[dName] = 0;
+                            } else nbUsedByName[dName]++;
+
+                            newName = dName + "__" + nbUsedByName[dName];
+                            o.newName = newName;
+                            console.log("o = ", o)
+                            debugByName[newName] = objById[count++] = { ...o };
+
+                            line = line.replace("debug." + dName, "debug." + newName)
+
+                        } else {
+                            throw new Error(`VERTEX SHADER ERROR on this line :" ${line} ".`);
+                        }
+
+                    } else {
+                        console.log(line.slice(0, "debug.".length) + " VS " + "debug.")
+                        throw new Error(`VERTEX SHADER ERROR on this line :" ${line} ". The keyword "debug" must only be used to store data. It can't be used in computations.`)
+                    }
+                }
+
+                result += line + "\n";
+            }
+
+            descriptor.__DEBUG__.objectById = objById;
+
+            for (let i = 0; i < names.length; i++) {
+                debugByName[names[i]] = undefined;
+                delete debugByName[names[i]];
+            }
+
+            return result;
+        }
+
+        descriptor.vertexShader.debugVersion = analyseAndRewriteDebug(shader);
+
+
+        const simplifyComplexData = () => {
+
+            const objById = descriptor.__DEBUG__.objectById;
+            const objByName = descriptor.__DEBUG__.objectByName;
+
+            let o, name, newName, n;
+            let result = [];
+
+
+            for (let i = 0; i < objById.length; i++) {
+                o = { ...objById[i] };
+
+                if (o.type == "mat4x4<f32>") {
+                    name = o.newName;
+                    newName = name + "_m4"
+                    o.isMatrix = true;
+                    o.realType = o.type;
+                    o.type = "vec4<f32>";
+
+                    objByName[name] = undefined;
+                    delete objByName[name];
+
+                    n = newName + "0";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+
+                    n = newName + "1";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+
+                    n = newName + "2";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+
+                    n = newName + "3";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+
+                } else if (o.type == "mat3x3<f32>") {
+                    name = o.newName;
+                    newName = name + "_m3"
+                    o.isMatrix = true;
+                    o.realType = o.type;
+                    o.type = "vec3<f32>";
+
+                    objByName[name] = undefined;
+                    delete objByName[name];
+
+                    n = newName + "0";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+
+                    n = newName + "1";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+
+                    n = newName + "2";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+
+                    n = newName + "3";
+                    objByName[n] = { ...o, newName: n };
+                    result.push(objByName[n])
+                } else if (o.isArray) {
+
+                    const arrayOfMatrix = o.type.includes("mat");
+                    const len = o.len;
+
+                    name = o.newName;
+                    newName = name + "_ar"
+                    o.isMatrix = false;
+                    o.realType = o.type;
+                    o.type = "vec4<f32>";
+                    if (o.realType.includes("i32")) o.type = "vec4<i32>";
+                    else if (o.realType.includes("u32")) o.type = "vec4<u32>";
+
+                    objByName[name] = undefined;
+                    delete objByName[name];
+
+                    if (arrayOfMatrix) {
+
+
+                        objByName[name] = undefined;
+                        delete objByName[name];
+
+                        for (let j = 0; j < len; j++) {
+
+                            n = newName + j + "_m0";
+                            objByName[n] = { ...o, newName: n };
+                            result.push(objByName[n])
+
+                            n = newName + j + "_m1";
+                            objByName[n] = { ...o, newName: n };
+                            result.push(objByName[n])
+
+                            n = newName + j + "_m2";
+                            objByName[n] = { ...o, newName: n };
+                            result.push(objByName[n])
+
+                            n = newName + j + "_m3";
+                            objByName[n] = { ...o, newName: n };
+                            result.push(objByName[n])
+
+
+                        }
+
+
+
+                    } else {
+
+
+
+                        for (let i = 0; i < len; i++) {
+                            n = newName + i;
+                            objByName[n] = { ...o, newName: n };
+                            result.push(objByName[n])
+                        }
+
+
+                    }
+
+
+
+                } else {
+                    result.push(o);
+                }
+            }
+
+            descriptor.__DEBUG__.objectById = result;
+        }
+
+        simplifyComplexData()
+
+
+        return descriptor;
+
+
+    }
 
 
     public parse(descriptor: any, target: "render" | "compute" | "bindgroup", drawConfig?: DrawConfig) {
@@ -862,9 +1173,19 @@ export class HighLevelParser {
         if (target === "bindgroup") {
             descriptor = this.parseBindgroupEntries(descriptor);
         } else {
+
+            const debug = this.parseDebugValues(descriptor);
+
             descriptor = this.firstPass(descriptor, target, drawConfig);
             descriptor = this.parseHighLevelObj(descriptor);
             descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
+
+            if (debug.nb != 0) {
+                descriptor.__DEBUG__ = debug;
+                descriptor = this.parseVertexShaderDebug(descriptor);
+            }
+
+            console.log(descriptor);
         }
 
         return descriptor;

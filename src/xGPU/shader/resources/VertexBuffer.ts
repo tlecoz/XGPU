@@ -42,6 +42,8 @@ export class VertexBuffer implements IShaderResource {
 
     constructor(attributes: any, descriptor?: {
         stepMode?: "vertex" | "instance",
+        accessMode?: "read" | "read_write",
+        usage?: GPUBufferUsageFlags,
         datas?: Float32Array | Int32Array | Uint32Array | Uint16Array
     }) {
 
@@ -234,12 +236,14 @@ export class VertexBuffer implements IShaderResource {
 
         if (!this.gpuResource) this.createGpuResource();
         //console.log("VertexBuffer.createBindgroupEntry size = ", this.datas.byteLength)
+        let size = 0;
+        if (this.datas) size = this.datas.byteLength;
         return {
             binding: bindingId,
             resource: {
                 buffer: this.gpuResource,
                 offset: 0,
-                size: this.datas.byteLength
+                size
             }
         }
     }
@@ -254,27 +258,27 @@ export class VertexBuffer implements IShaderResource {
         //use to handle particular cases in descriptor relative to the nature of pipeline
 
         if (pipelineType === "render") {
-            this.descriptor.accessMode = "read";
-            this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
+            if (!this.descriptor.accessMode) this.descriptor.accessMode = "read";
+            if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
 
 
         } else if (pipelineType === "compute_mixed") {
 
             if (this.io === 1 || this.io === 0) { //VertexBufferIO output , usable in a renderPipeline
-                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-                this.descriptor.accessMode = "read";
+                if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+                if (!this.descriptor.accessMode) this.descriptor.accessMode = "read";
             } else if (this.io === 2) { //VertexBufferIO input
-                this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-                this.descriptor.accessMode = "read_write";
+                if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+                if (!this.descriptor.accessMode) this.descriptor.accessMode = "read_write";
             }
 
         } else if (pipelineType === "compute") {
-            if (this.io === 1 || this.io == 0) { //VertexBufferIO output
-                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-                this.descriptor.accessMode = "read";
+            if (this.io === 1 || this.io == 0) { //VertexBufferIO output || VertexBuffer in computeShader
+                if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+                if (!this.descriptor.accessMode) this.descriptor.accessMode = "read";
             } else if (this.io === 2) { //VertexBufferIO input
-                this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-                this.descriptor.accessMode = "read_write";
+                if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+                if (!this.descriptor.accessMode) this.descriptor.accessMode = "read_write";
             }
         }
     }
@@ -475,15 +479,16 @@ export class VertexBuffer implements IShaderResource {
             usage: this.descriptor.usage,
             mappedAtCreation: false,
         })
-
+        this.destroyed = false;
         this.mustBeTransfered = true;
 
     }
 
     public time: number;
+    protected destroyed: boolean = true;
     public destroyGpuResource() {
+        if (this.destroyed) return;
 
-        console.warn("destroy vertexbuffer")
 
         if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
             return;
@@ -535,6 +540,8 @@ export class VertexBuffer implements IShaderResource {
             this.gpuResource.destroy();
             this.gpuResource = null;
         }
+
+        this.destroyed = true;
     }
 
 

@@ -26,6 +26,9 @@ import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
 import { PrimitiveType } from "../PrimitiveType";
 import { UniformBuffer } from "../shader/resources/UniformBuffer";
 import { VertexShaderDebuggerPipeline } from "./VertexShaderDebuggerPipeline";
+import { ShaderStage } from "../shader/shaderParts/ShaderStage";
+import { VertexShaderFeedbackPipeline } from "./VertexShaderFeedbackPipeline";
+
 
 export type HighLevelShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO | PrimitiveType | VertexAttribute)
 
@@ -107,8 +110,13 @@ export class RenderPipeline extends Pipeline {
     public outputColor: any;
     public renderPassDescriptor: any = { colorAttachments: [] }
 
+
+
     protected vertexDebuggerPipeline: VertexShaderDebuggerPipeline = null;
     protected vertexDebuggerConfig: { startVertexId: number, instanceId: number, nbVertex: number } = null;
+
+    protected vertexFeedbackPipeline: VertexShaderFeedbackPipeline = null;
+
     protected gpuPipeline: GPURenderPipeline;
 
     public debug: string = "renderPipeline";
@@ -188,6 +196,7 @@ export class RenderPipeline extends Pipeline {
             instanceId?: number,
             nbVertex?: number,
         },
+
         vertexShader: {
             main: string
             outputs?: any,
@@ -202,6 +211,7 @@ export class RenderPipeline extends Pipeline {
         } | string
         , [key: string]: unknown
     }): any {
+
 
         this.vertexDebuggerConfig = null;
         this.vertexDebuggerPipeline = null;
@@ -221,12 +231,27 @@ export class RenderPipeline extends Pipeline {
                 nbVertex: 1,
                 ...descriptor.vertexShaderDebugger
             }
+
+            let shader: string;
+            if (typeof (descriptor.vertexShader) === "string") shader = descriptor.vertexShader;
+            else shader = descriptor.vertexShader.main;
+
+
         }
+
+
+
+
+
+
 
 
 
         descriptor = HighLevelParser.parse(descriptor, "render", this.drawConfig);
         //console.log("descriptor ", descriptor)
+
+
+
 
 
 
@@ -555,10 +580,13 @@ export class RenderPipeline extends Pipeline {
 
 
     private _onLog: (o?: any) => void = () => { };
+    public get onLog() { return this._onLog };
     public set onLog(onLog: (o: any) => void) {
         this._onLog = onLog;
         if (this.vertexDebuggerPipeline) this.vertexDebuggerPipeline.onLog = onLog;
     }
+
+
 
 
     public buildGpuPipeline(): GPURenderPipeline {
@@ -655,12 +683,14 @@ export class RenderPipeline extends Pipeline {
         let started: boolean = false;
         let name: string;
 
+
         if (this.vertexDebuggerConfig && this.type == "render") {
 
 
             this.vertexDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexDebuggerPipeline.init(this, this.vertexDebuggerConfig);
 
+            /*
             this.vertexDebuggerPipeline.onLog = (o) => {
                 if (!started) {
                     started = true;
@@ -669,12 +699,34 @@ export class RenderPipeline extends Pipeline {
                         break;
                     }
                 }
-                //console.log(o.results[0][name]);
+                //console.log(name, o.results[0][name]);
 
                 this._onLog(o);
             }
+            */
+
+            console.log("this.vertexDebuggerPipeline = ", this.vertexDebuggerPipeline)
+
         }
 
+
+        if (this.resources.__DEBUG__) {
+
+            this.vertexFeedbackPipeline = new VertexShaderFeedbackPipeline();
+            this.vertexFeedbackPipeline.init(this, this.vertexDebuggerConfig)
+            this.vertexFeedbackPipeline.onLog = (o) => {
+                if (!started) {
+                    started = true;
+                    for (let z in o.results[0]) {
+                        name = z;
+                        break;
+                    }
+                }
+                console.log(name, o.results[0]);
+
+                //this._onLog(o);
+            }
+        }
 
 
 
@@ -692,6 +744,8 @@ export class RenderPipeline extends Pipeline {
 
 
         if (this.vertexDebuggerPipeline) this.vertexDebuggerPipeline.nextFrame();
+        if (this.vertexFeedbackPipeline) this.vertexFeedbackPipeline.nextFrame();
+
 
         if (this.onDrawBegin) this.onDrawBegin();
 

@@ -1,3 +1,117 @@
+
+pouvoir définir une valeur de debug une seule fois via BuiltIns.vertexDebug 
+
+et s'en servir plusieur fois , par exemple : 
+
+debug.test = 123;
+//some code 
+debug.test = 456;
+
+
+doit produire 
+debug.test__ID__1 = 123;
+debug.test__ID__2 = 456;
+
+
+
+
+c'est davantage un computeVertexFeedback qu'un vertexFeedback 
+
+
+
+si on utilise des Vec4Array,Matrix4x4,Matrix4x4Array ,... 
+|-> nbInstance dans le vertexBufferIO = Math.max(Matrix4x4Array.length * 4 * nbVertex,Math.max(Vec4Array.length *  nbVertex,4 * nbVertex))   (4 == matrix4x4)
+
+
+on repartie les données sur 4 VertexBuffer ;
+   - pour les float,vec2,vec3,vec4,...  : 1 Float par buffer , quitte a mettre des 0 
+
+            par exemple pour un vec2()
+            BUF0 : vec2.x, 
+            BUF1 : vec2.y
+            BUF2 : 0 
+            BUF3 : 0
+
+    - pour les array of float/vec : 
+            par exemple pour un vec2()
+            BUF0 : vec2.x x nbInstance, 
+            BUF1 : vec2.y x nbInstance
+            BUF2 : 0      x nbInstance
+            BUF3 : 0      x nbInstance
+
+   - pour les matrixs : 1 Vec4 par buffer 
+
+            BUF0 : m1,m2,m3,m4
+            BUF1 : m5,m6,m7,m8
+            BUF2 : m9,m10,m11,m12
+            BUF3 : m13,m14,m15,m16
+
+   - pour les Matrix4x4Array , 1 vec4 par buffer 
+                      
+            BUF0 : m1,m2,m3,m4  x nbInstance
+            BUF1 : m5,m6,m7,m8  x nbInstance
+            BUF2 : m9,m10,m11,m12 x nbInstance 
+            BUF3 : m13,m14,m15,m16 x nbInstance 
+                   
+                   
+                   
+
+
+(1 float par buffer pour tout, sauf les matrixs (4 float by buffer) )   
+  
+
+
+
+pour ajouter des elements de debug dans la renderPipeline : 
+- ajoute un tableau de point permettant de dessiner un quad dans les constantes du shader de la renderPipeline
+- ajuste le nombre de instanceCount 
+=> dans le shader , verifie si l'instanceId correpond a un element de debug 
+   => si oui , 
+            si le vertexId < 4 , dessine le quad 
+            sinon  output.position = vec4(10000000.0,10000000.0,10000000.0,1.0);
+
+
+
+ ajoute une propriete 'renderDebugShader" dans l'objet de config du debugger
+ |=> si cette propriété est défini , ce sera le code ajouté dans le vertexShader exploitant les renderDebugs 
+
+ajoute une propriété 'computeDebugShader' dans l'objet de config 
+|=> si la propriété est défini , on applique ce code au renderDebug a la fin du traitement
+
+
+
+
+
+
+
+
+
+
+
+ bug de vertexSahderDebugger + pipelinePlugin ? 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -fix bug params + add button "lose device" 
 - simplify / normalize file structure 
   |-> put textures in ShaderResource , implements IShaderResource
