@@ -57,6 +57,7 @@ export declare class Bindgroups {
     getGroupByPropertyName(name: string): Bindgroup;
     getGroupByName(name: string): Bindgroup;
     getNameByResource(resource: IShaderResource | PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform): string;
+    setupDraw(force?: boolean): void;
     get drawConfig(): DrawConfig;
     get current(): Bindgroup;
     destroy(): void;

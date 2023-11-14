@@ -1,0 +1,65 @@
+import { ComputePipeline } from "./ComputePipeline";
+import { RenderPipeline } from "./RenderPipeline";
+import { IndexBuffer } from "./resources/IndexBuffer";
+import { UniformBuffer } from "../shader/resources/UniformBuffer";
+import { VertexBuffer } from "../shader/resources/VertexBuffer";
+import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
+export declare class VertexShaderDebuggerPipeline extends ComputePipeline {
+    onLog: (o: {
+        config: any;
+        results: any[];
+        nbValueByFieldName: any;
+        renderPipeline: RenderPipeline;
+        dataTypeByFieldname: any;
+    }) => void;
+    protected config: any;
+    constructor();
+    protected vertexShaderInputs: any;
+    protected renderPipeline: RenderPipeline;
+    protected computeShaderObj: any;
+    protected resourceByType: any;
+    protected initRenderPipeline(renderPipeline: RenderPipeline): void;
+    protected indexBuffer: IndexBuffer;
+    protected setupIndexBuffer(): void;
+    protected results: any;
+    protected resultBufferStructure: any;
+    protected nbValueByFieldIndex: any;
+    protected nbValueByFieldName: any;
+    protected dataTypeByFieldname: any;
+    protected fieldNames: string[];
+    protected fieldNewNames: string[];
+    protected fieldIndexByName: any;
+    protected attributes: any;
+    protected setupDataStructure(): void;
+    protected vertexIdName: string;
+    protected instanceIdName: string;
+    protected setupVertexShaderBuiltIns(): void;
+    protected renderUniformBuffers: {
+        name: string;
+        resource: UniformBuffer;
+    }[];
+    protected setupUniformBuffers(): void;
+    protected renderVertexBuffers: {
+        name: string;
+        resource: VertexBuffer;
+    }[];
+    protected bufferNameByAttributeName: string[];
+    protected setupVertexBuffers(): void;
+    protected vertexBufferIO: VertexBufferIO;
+    protected setupComputeShaderVertexBufferIO(): void;
+    private convertLetIntoVar;
+    private removeVar;
+    protected writeComputeShader(): string;
+    protected firstPass: boolean;
+    protected writeVertexShader(debugObject: any): string;
+    private writeArrayTemplate;
+    private temporaryIndex;
+    private writeMatrixTemplate;
+    protected buildComputeShader(): void;
+    protected copyUniformsFromRenderToCompute(): void;
+    init(renderPipeline: RenderPipeline, nbVertex: number): void;
+    private createEmptyArray;
+    private getObjectByType;
+    private getNbValueByType;
+    private getNewInstanceByType;
+}

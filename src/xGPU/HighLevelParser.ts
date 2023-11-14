@@ -5,7 +5,7 @@ import { BuiltIns } from "./BuiltIns";
 import { DrawConfig } from "./pipelines/resources/DrawConfig";
 
 import { Bindgroup } from "./shader/Bindgroup";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform, Vec4, Vec4Array } from "./PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform, Vec4 } from "./PrimitiveType";
 import { CubeMapTexture } from "./shader/resources/CubeMapTexture";
 import { IShaderResource } from "./shader/resources/IShaderResource";
 import { ImageTexture } from "./shader/resources/ImageTexture";
@@ -855,9 +855,9 @@ export class HighLevelParser {
 
     private parseDebugValues = (descriptor: any): any => {
 
-        let debug: any = {};
-        let o: any, temp: any;
-        let bool: boolean = false;
+
+        let o: any;
+
         let indexs: Vec4[] = [];
         let objectById: any[] = [];
         let objectByName: any = {};
@@ -865,7 +865,7 @@ export class HighLevelParser {
         for (let name in descriptor) {
             o = descriptor[name];
             if (o.__debug == true) {
-                bool = true;
+
                 if (typeof (o) === "function") {
                     o = { name, id: nb, ...(o()) };
                 } else {
@@ -957,7 +957,7 @@ export class HighLevelParser {
                 }
                 if (char === " ") continue;
                 if (char != "=") {
-                    console.log("char = ", char)
+                    //console.log("char = ", char)
                     throw new Error(`VERTEX SHADER ERROR on this line :"debug.${line} ". The keyword "debug" must only be used to store data. It can't be used in computations.`)
                 }
                 return name;
@@ -1004,7 +1004,7 @@ export class HighLevelParser {
 
                             newName = dName + "__" + nbUsedByName[dName];
                             o.newName = newName;
-                            console.log("o = ", o)
+                            //console.log("o = ", o)
                             debugByName[newName] = objById[count++] = { ...o };
 
                             line = line.replace("debug." + dName, "debug." + newName)
@@ -1014,7 +1014,7 @@ export class HighLevelParser {
                         }
 
                     } else {
-                        console.log(line.slice(0, "debug.".length) + " VS " + "debug.")
+                        //console.log(line.slice(0, "debug.".length) + " VS " + "debug.")
                         throw new Error(`VERTEX SHADER ERROR on this line :" ${line} ". The keyword "debug" must only be used to store data. It can't be used in computations.`)
                     }
                 }

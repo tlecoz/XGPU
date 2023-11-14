@@ -12,6 +12,7 @@ export * from "./xGPU/blendmodes/BlendMode";
 export * from "./xGPU/pipelines/Pipeline";
 export * from "./xGPU/pipelines/RenderPipeline";
 export * from "./xGPU/pipelines/ComputePipeline";
+export * from "./xGPU/pipelines/VertexShaderDebuggerPipeline";
 export * from "./xGPU/pipelines/resources/IndexBuffer";
 export * from "./xGPU/pipelines/resources/textures/Texture";
 export * from "./xGPU/pipelines/resources/textures/DepthStencilTexture";

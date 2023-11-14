@@ -30,6 +30,7 @@ export declare class UniformBuffer implements IShaderResource {
     getUniformByName(name: string): Uniformable;
     get bufferType(): "read-only-storage" | "uniform";
     createGpuResource(): any;
+    getItemsAsArray(): any[];
     time: number;
     destroyGpuResource(): void;
     createBindGroupLayoutEntry(bindingId: number): {

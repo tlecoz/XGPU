@@ -19,6 +19,9 @@ export declare class PrimitiveFloatUniform extends Float32Array {
     createStruct(): string;
     set(m: Float32Array, offset?: number): void;
     createVariable(uniformBufferName: string, name?: string): string;
+    feedbackVertexId: number;
+    feedbackInstanceId: number;
+    setFeedback(vertexId: number, instanceId: number): PrimitiveFloatUniform;
     update(): void;
 }
 export declare class PrimitiveIntUniform extends Int32Array {
@@ -38,6 +41,9 @@ export declare class PrimitiveIntUniform extends Int32Array {
     initStruct(propertyNames: string[], createVariableInsideMain?: boolean): void;
     createStruct(): string;
     createVariable(uniformBufferName: string): string;
+    feedbackVertexId: number;
+    feedbackInstanceId: number;
+    setFeedback(vertexId: number, instanceId: number): PrimitiveIntUniform;
     update(): void;
 }
 export declare class PrimitiveUintUniform extends Uint32Array {
@@ -57,6 +63,9 @@ export declare class PrimitiveUintUniform extends Uint32Array {
     initStruct(propertyNames: string[], createVariableInsideMain?: boolean): void;
     createStruct(): string;
     createVariable(uniformBufferName: string): string;
+    feedbackVertexId: number;
+    feedbackInstanceId: number;
+    setFeedback(vertexId: number, instanceId: number): PrimitiveUintUniform;
     update(): void;
 }
 export declare class Float extends PrimitiveFloatUniform {

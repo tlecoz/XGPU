@@ -40,8 +40,8 @@ export declare class Bindgroup {
     protected vertexBufferReferenceByName: any;
     protected elementByName: any;
     private setupApply;
-    protected setupDrawCompleted: boolean;
-    protected setupDraw(): void;
+    setupDrawCompleted: boolean;
+    setupDraw(force?: boolean): void;
     apply(renderPass: GPURenderPassEncoder | GPUComputePassEncoder): void;
     protected instances: any[];
     protected instanceResourcesArray: any[];

@@ -18,6 +18,7 @@ export declare class UniformGroup {
     };
     wgslStructNames: string[];
     datas: Float32Array;
+    set(datas: Float32Array): void;
     protected buffer: UniformBuffer;
     get uniformBuffer(): UniformBuffer;
     set uniformBuffer(buffer: UniformBuffer);

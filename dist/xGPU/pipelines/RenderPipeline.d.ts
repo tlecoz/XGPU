@@ -16,6 +16,7 @@ import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
 import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
 import { PrimitiveType } from "../PrimitiveType";
 import { UniformBuffer } from "../shader/resources/UniformBuffer";
+import { VertexShaderDebuggerPipeline } from "./VertexShaderDebuggerPipeline";
 export type HighLevelShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO | PrimitiveType | VertexAttribute);
 export type BindgroupDescriptor = {
     [key: string]: HighLevelShaderResource;
@@ -52,6 +53,7 @@ export type RenderPipelineProperties = {
     vertexShader: VertexShaderDescriptor;
     vertexCount?: number;
     instanceCount?: number;
+    debugVertexCount?: number;
     firstVertexId?: number;
     firstInstanceId?: number;
     cullMode?: "front" | "back" | "none";
@@ -82,6 +84,7 @@ export declare class RenderPipeline extends Pipeline {
     protected renderPassTexture: RenderPassTexture;
     outputColor: any;
     renderPassDescriptor: any;
+    protected vertexShaderDebuggerPipeline: VertexShaderDebuggerPipeline;
     protected gpuPipeline: GPURenderPipeline;
     debug: string;
     onDrawBegin: () => void;
@@ -104,6 +107,7 @@ export declare class RenderPipeline extends Pipeline {
         keepRendererAspectRatio?: boolean;
         vertexCount?: number;
         instanceCount?: number;
+        debugVertexCount?: number;
         antiAliasing?: boolean;
         useDepthTexture?: boolean;
         depthTextureSize?: number;
@@ -151,6 +155,11 @@ export declare class RenderPipeline extends Pipeline {
         indexBuffer?: IndexBuffer;
         baseVertex?: number;
     }): void;
+    private _onLog;
+    get onLog(): (o: any) => void;
+    set onLog(onLog: (o: any) => void);
+    get debugVertexCount(): number;
+    set debugVertexCount(n: number);
     get vertexCount(): number;
     set vertexCount(n: number);
     get instanceCount(): number;

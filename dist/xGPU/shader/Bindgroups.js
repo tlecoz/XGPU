@@ -227,7 +227,7 @@ export class Bindgroups {
                 if (resource instanceof VertexBuffer) {
                 }
                 else if (resource instanceof UniformBuffer) {
-                    console.log(resource);
+                    //console.log(resource)
                     let item;
                     for (let z in resource.items) {
                         item = resource.items[z];
@@ -462,6 +462,13 @@ export class Bindgroups {
             }
         }
         return null;
+    }
+    setupDraw(force = false) {
+        for (let i = 0; i < this.groups.length; i++) {
+            if (!this.groups[i].setupDrawCompleted) {
+                this.groups[i].setupDraw(force);
+            }
+        }
     }
     get drawConfig() {
         return this.pipeline.drawConfig || null;

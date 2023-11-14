@@ -89,6 +89,24 @@ export class ComputePipeline extends Pipeline {
             this.nextFrame();
         return descriptor;
     }
+    destroy() {
+        this.bindGroups.destroy();
+        for (let z in this.description)
+            this.description[z] = null;
+        for (let z in this) {
+            try {
+                this[z].destroy();
+            }
+            catch (e) {
+                try {
+                    this[z].destroyGpuResource();
+                }
+                catch (e) {
+                }
+            }
+            this[z] = null;
+        }
+    }
     setWorkgroups(x, y = 1, z = 1) {
         this.workgroups = [x, y, z];
     }

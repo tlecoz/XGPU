@@ -25,7 +25,7 @@ export class VertexBufferIO {
 
         this.descriptor = descriptor;
         if (!descriptor.stepMode) descriptor.stepMode = "instance";
-        console.log(descriptor.stepMode)
+        //console.log(descriptor.stepMode)
 
         this.deviceId = XGPU.deviceId;
         this.buffers[0] = new VertexBuffer(attributes, descriptor);

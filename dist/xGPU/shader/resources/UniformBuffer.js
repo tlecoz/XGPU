@@ -89,6 +89,12 @@ export class UniformBuffer {
             //console.log(this.gpuResource)
         }
     }
+    getItemsAsArray() {
+        const result = [];
+        for (let i = 0; i < this.itemNames.length; i++)
+            result[i] = this.items[this.itemNames[i]];
+        return result;
+    }
     time;
     destroyGpuResource() {
         if (this.time && new Date().getTime() - this.time < 100 && XGPU.loseDeviceRecently) {

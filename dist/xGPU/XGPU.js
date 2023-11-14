@@ -1,50 +1,23 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
+import { BuiltIns } from "./BuiltIns";
+import { WebGPUProperties } from "./WebGPUProperties";
 export class XGPU {
-    //public static debugShaders: boolean = true;
-    static debugVertexShader = false;
-    static debugFragmentShader = false;
-    static debugComputeShader = true;
+    static showVertexShader = false;
+    static showFragmentShader = false;
+    static showComputeShader = false;
+    static showVertexDebuggerShader = false;
     static _ready = false;
     static get ready() { return this._ready; }
     static gpuDevice;
     static debugUsage(usage) {
-        if (usage === 72)
-            return "GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM";
-        else if (usage === 76)
-            return "GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.UNIFORM";
-        else if (usage === 200)
-            return "GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM";
-        else if (usage === 128)
-            return "GPUBufferUsage.STORAGE";
-        else if (usage === 8)
-            return "GPUBufferUsage.COPY_DST";
-        else if (usage === 32)
-            return "GPUBufferUsage.VERTEX";
-        else if (usage == 136)
-            return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST";
-        else if (usage === 168)
-            return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX";
-        else if (usage === 4)
-            return "GPUBufferUsage.COPY_SRC";
-        else if (usage === 132)
-            return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC";
-        else if (usage === 40)
-            return "GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST";
-        else if (usage === 140)
-            return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST";
-        else if (usage === 172)
-            return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC";
-        return "";
+        return WebGPUProperties.getBufferUsageById(usage);
+    }
+    static debugTextureUsage(usage) {
+        return WebGPUProperties.getTextureUsageById(usage);
     }
     static debugShaderStage(n) {
-        if (n === GPUShaderStage.COMPUTE)
-            return "GPUShaderStage.COMPUTE";
-        else if (n === GPUShaderStage.VERTEX)
-            return "GPUShaderStage.VERTEX";
-        else if (n === GPUShaderStage.FRAGMENT)
-            return "GPUShaderStage.FRAGMENT";
-        return "";
+        return WebGPUProperties.getShaderStageById(n);
     }
     constructor() {
         throw new Error("GPU is static and can't be instanciated");
@@ -67,6 +40,7 @@ export class XGPU {
     }
     static init(options) {
         this.requestAdapterOptions = options;
+        BuiltIns.__initDebug();
         return new Promise(async (resolve, error) => {
             if (this.gpuDevice) {
                 resolve(this);
@@ -90,6 +64,8 @@ export class XGPU {
                         XGPU.init(this.requestAdapterOptions);
                     }
                 });
+                await WebGPUProperties.init();
+                this.debugUsage(172);
                 this._ready = true;
                 resolve(this);
             }

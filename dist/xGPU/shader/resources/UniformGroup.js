@@ -17,6 +17,10 @@ export class UniformGroup {
                                        so we must store the name we use when we build the 'struct' in order to write a 'struct'
                                        for every properties while being sure we don't have two sames structs*/
     datas;
+    set(datas) {
+        this.datas = datas;
+        this.mustBeTransfered = true;
+    }
     buffer = null;
     get uniformBuffer() { return this.buffer; }
     ;

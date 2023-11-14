@@ -31,6 +31,129 @@ export declare class BuiltIns {
             vsOut: boolean;
         };
     };
+    static vertexDebug: {
+        Float: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Vec2: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Vec3: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Vec4: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Int: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        IVec2: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        IVec3: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        IVec4: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Uint: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        UVec2: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        UVec3: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        UVec4: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Matrix3x3: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Matrix4x4: (instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+        };
+        Vec4Array: (len?: number, instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+            len: number;
+            isArray: boolean;
+            primitiveType: string;
+        };
+        IVec4Array: (len?: number, instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+            len: number;
+            isArray: boolean;
+            primitiveType: string;
+        };
+        UVec4Array: (len?: number, instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+            len: number;
+            isArray: boolean;
+            primitiveType: string;
+        };
+        Matrix4x4Array: (len?: number, instanceId?: number, vertexId?: number) => {
+            vertexId: number;
+            instanceId: number;
+            type: string;
+            __debug: boolean;
+            len: number;
+            isArray: boolean;
+            primitiveType: string;
+        };
+    };
+    static __initDebug(): void;
     static fragmentInputs: {
         frontFacing: {
             builtin: string;

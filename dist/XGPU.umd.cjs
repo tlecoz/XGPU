@@ -1,6 +1,6 @@
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.xGPU = {}));
-})(this, function(exports2) {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("gl-matrix")) : typeof define === "function" && define.amd ? define(["exports", "gl-matrix"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.xGPU = {}, global.glMatrix));
+})(this, function(exports2, glMatrix) {
   "use strict";var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => {
@@ -8,47 +8,195 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 
+  class BuiltIns {
+    static __initDebug() {
+      let o;
+      for (let z in this.vertexDebug) {
+        o = this.vertexDebug[z]();
+        this.vertexDebug[z].isArray = !!o.isArray;
+        this.vertexDebug[z].len = o.len;
+        this.vertexDebug[z].primitiveType = o.primitiveType;
+        this.vertexDebug[z].type = o.type;
+        this.vertexDebug[z].__debug = true;
+      }
+    }
+  }
+  __publicField(BuiltIns, "vertexInputs", {
+    vertexIndex: { builtin: "@builtin(vertex_index)", type: "u32" },
+    instanceIndex: { builtin: "@builtin(instance_index)", type: "u32" }
+  });
+  __publicField(BuiltIns, "vertexOutputs", {
+    position: { builtin: "@builtin(position)", type: "vec4<f32>" },
+    Float: { type: "f32", vsOut: true },
+    Vec2: { type: "vec2<f32>", vsOut: true },
+    Vec3: { type: "vec3<f32>", vsOut: true },
+    Vec4: { type: "vec4<f32>", vsOut: true }
+  });
+  __publicField(BuiltIns, "vertexDebug", {
+    Float: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "f32", __debug: true };
+    },
+    Vec2: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec2<f32>", __debug: true };
+    },
+    Vec3: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec3<f32>", __debug: true };
+    },
+    Vec4: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec4<f32>", __debug: true };
+    },
+    Int: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "i32", __debug: true };
+    },
+    IVec2: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec2<i32>", __debug: true };
+    },
+    IVec3: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec3<i32>", __debug: true };
+    },
+    IVec4: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec4<i32>", __debug: true };
+    },
+    Uint: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "uint", __debug: true };
+    },
+    UVec2: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec2<u32>", __debug: true };
+    },
+    UVec3: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec3<u32>", __debug: true };
+    },
+    UVec4: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "vec4<uf32>", __debug: true };
+    },
+    Matrix3x3: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "mat3x3<f32>", __debug: true };
+    },
+    Matrix4x4: (instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "mat4x4<f32>", __debug: true };
+    },
+    Vec4Array: (len = 1, instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "array<vec4<f32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "f32" };
+    },
+    IVec4Array: (len = 1, instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "array<vec4<i32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "i32" };
+    },
+    UVec4Array: (len = 1, instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "array<vec4<u32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "u32" };
+    },
+    Matrix4x4Array: (len = 1, instanceId = 0, vertexId = 0) => {
+      return { vertexId, instanceId, type: "array<mat4x4<f32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "mat4" };
+    }
+  });
+  //----
+  __publicField(BuiltIns, "fragmentInputs", {
+    frontFacing: { builtin: "@builtin(front_facing)", type: "bool" },
+    fragDepth: { builtin: "@builtin(frag_depth)", type: "f32" },
+    sampleIndex: { builtin: "@builtin(sample_index)", type: "u32" },
+    sampleMask: { builtin: "@builtin(sample_mask)", type: "u32" }
+  });
+  __publicField(BuiltIns, "fragmentOutputs", {
+    color: { builtin: "@location(0)", type: "vec4<f32>" }
+  });
+  //----
+  __publicField(BuiltIns, "computeInputs", {
+    localInvocationId: { builtin: "@builtin(local_invocation_id)", type: "vec3<u32>" },
+    localInvocationIndex: { builtin: "@builtin(local_invocation_index)", type: "u32" },
+    globalInvocationId: { builtin: "@builtin(global_invocation_id)", type: "vec3<u32>" },
+    workgroupId: { builtin: "@builtin(workgroup_id)", type: "vec3<u32>" },
+    numWorkgroup: { builtin: "@builtin(num_workgroup)", type: "vec3<u32>" }
+  });
+  __publicField(BuiltIns, "computeOutputs", {
+    result: { builtin: "@location(0)", type: "???" }
+  });
+  const _WebGPUProperties = class {
+    static build(obj, currentId, currentNames) {
+      let infoById = {};
+      let processedIds = /* @__PURE__ */ new Set();
+      let stack = [{ id: currentId, names: currentNames }];
+      while (stack.length > 0) {
+        let current = stack.pop();
+        let currentId2 = current.id;
+        let currentNames2 = current.names;
+        if (processedIds.has(currentId2))
+          continue;
+        for (let name in obj) {
+          let id = obj[name];
+          let combinedId = currentId2 | id;
+          let combinedNames = [...new Set(currentNames2.concat(name))];
+          if (!(combinedId in infoById)) {
+            infoById[combinedId] = combinedNames;
+            stack.push({ id: combinedId, names: combinedNames });
+          } else {
+            infoById[combinedId] = [...new Set(infoById[combinedId].concat(combinedNames))];
+          }
+        }
+        processedIds.add(currentId2);
+      }
+      return infoById;
+    }
+    static resolve(obj, id) {
+      if (id in obj)
+        return obj[id].join("|");
+      return "undefined";
+    }
+    static async getResult(WebGpuObject) {
+      return new Promise((resolve) => {
+        const result = this.build(WebGpuObject, 0, []);
+        setTimeout(() => {
+          resolve(result);
+        }, 1);
+      });
+    }
+    static async init() {
+      if (!this._instance)
+        new _WebGPUProperties();
+      return new Promise(async (resolve) => {
+        if (this.ready)
+          resolve();
+        else {
+          this.bufferUsage = await this.getResult(GPUBufferUsage);
+          this.shaderStage = await this.getResult(GPUShaderStage);
+          this.textureUsage = await this.getResult(GPUTextureUsage);
+          this.ready = true;
+          resolve();
+        }
+      });
+    }
+    constructor() {
+      if (_WebGPUProperties._instance) {
+        throw new Error("WebGPUProperties is not instanciable");
+      }
+      _WebGPUProperties._instance = this;
+    }
+    static getTextureUsageById(id) {
+      return this.resolve(this.textureUsage, id);
+    }
+    static getBufferUsageById(id) {
+      return this.resolve(this.bufferUsage, id);
+    }
+    static getShaderStageById(id) {
+      return this.resolve(this.shaderStage, id);
+    }
+  };
+  let WebGPUProperties = _WebGPUProperties;
+  __publicField(WebGPUProperties, "ready", false);
+  __publicField(WebGPUProperties, "textureUsage");
+  __publicField(WebGPUProperties, "bufferUsage");
+  __publicField(WebGPUProperties, "shaderStage");
+  __publicField(WebGPUProperties, "_instance");
   const _XGPU = class {
     static get ready() {
       return this._ready;
     }
     static debugUsage(usage) {
-      if (usage === 72)
-        return "GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM";
-      else if (usage === 76)
-        return "GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.UNIFORM";
-      else if (usage === 200)
-        return "GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM";
-      else if (usage === 128)
-        return "GPUBufferUsage.STORAGE";
-      else if (usage === 8)
-        return "GPUBufferUsage.COPY_DST";
-      else if (usage === 32)
-        return "GPUBufferUsage.VERTEX";
-      else if (usage == 136)
-        return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST";
-      else if (usage === 168)
-        return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX";
-      else if (usage === 4)
-        return "GPUBufferUsage.COPY_SRC";
-      else if (usage === 132)
-        return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC";
-      else if (usage === 40)
-        return "GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST";
-      else if (usage === 140)
-        return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST";
-      else if (usage === 172)
-        return "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC";
-      return "";
+      return WebGPUProperties.getBufferUsageById(usage);
+    }
+    static debugTextureUsage(usage) {
+      return WebGPUProperties.getTextureUsageById(usage);
     }
     static debugShaderStage(n) {
-      if (n === GPUShaderStage.COMPUTE)
-        return "GPUShaderStage.COMPUTE";
-      else if (n === GPUShaderStage.VERTEX)
-        return "GPUShaderStage.VERTEX";
-      else if (n === GPUShaderStage.FRAGMENT)
-        return "GPUShaderStage.FRAGMENT";
-      return "";
+      return WebGPUProperties.getShaderStageById(n);
     }
     constructor() {
       throw new Error("GPU is static and can't be instanciated");
@@ -65,6 +213,7 @@ var __publicField = (obj, key, value) => {
     }
     static init(options) {
       this.requestAdapterOptions = options;
+      BuiltIns.__initDebug();
       return new Promise(async (resolve, error) => {
         if (this.gpuDevice) {
           resolve(this);
@@ -87,6 +236,8 @@ var __publicField = (obj, key, value) => {
               _XGPU.init(this.requestAdapterOptions);
             }
           });
+          await WebGPUProperties.init();
+          this.debugUsage(172);
           this._ready = true;
           resolve(this);
         } else {
@@ -140,10 +291,10 @@ var __publicField = (obj, key, value) => {
     }
   };
   let XGPU = _XGPU;
-  //public static debugShaders: boolean = true;
-  __publicField(XGPU, "debugVertexShader", false);
-  __publicField(XGPU, "debugFragmentShader", false);
-  __publicField(XGPU, "debugComputeShader", true);
+  __publicField(XGPU, "showVertexShader", false);
+  __publicField(XGPU, "showFragmentShader", false);
+  __publicField(XGPU, "showComputeShader", false);
+  __publicField(XGPU, "showVertexDebuggerShader", false);
   __publicField(XGPU, "_ready", false);
   __publicField(XGPU, "gpuDevice");
   __publicField(XGPU, "requestAdapterOptions");
@@ -669,1998 +820,6 @@ var __publicField = (obj, key, value) => {
       this._sizeOf = o[1];
     }
   }
-  class BuiltIns {
-  }
-  __publicField(BuiltIns, "vertexInputs", {
-    vertexIndex: { builtin: "@builtin(vertex_index)", type: "u32" },
-    instanceIndex: { builtin: "@builtin(instance_index)", type: "u32" }
-  });
-  __publicField(BuiltIns, "vertexOutputs", {
-    position: { builtin: "@builtin(position)", type: "vec4<f32>" },
-    Float: { type: "f32", vsOut: true },
-    Vec2: { type: "vec2<f32>", vsOut: true },
-    Vec3: { type: "vec3<f32>", vsOut: true },
-    Vec4: { type: "vec4<f32>", vsOut: true }
-    /*Int: { type: "i32", vsOut: true },
-    IVec2: { type: "vec2<i32>", vsOut: true },
-    IVec3: { type: "vec3<i32>", vsOut: true },
-    IVec4: { type: "vec4<i32>", vsOut: true },
-    Uint: { type: "u32", vsOut: true },
-    UVec2: { type: "vec2<u32>", vsOut: true },
-    UVec3: { type: "vec3<u32>", vsOut: true },
-    UVec4: { type: "vec4<u32>", vsOut: true },*/
-  });
-  //----
-  __publicField(BuiltIns, "fragmentInputs", {
-    frontFacing: { builtin: "@builtin(front_facing)", type: "bool" },
-    fragDepth: { builtin: "@builtin(frag_depth)", type: "f32" },
-    sampleIndex: { builtin: "@builtin(sample_index)", type: "u32" },
-    sampleMask: { builtin: "@builtin(sample_mask)", type: "u32" }
-  });
-  __publicField(BuiltIns, "fragmentOutputs", {
-    color: { builtin: "@location(0)", type: "vec4<f32>" }
-  });
-  //----
-  __publicField(BuiltIns, "computeInputs", {
-    localInvocationId: { builtin: "@builtin(local_invocation_id)", type: "vec3<u32>" },
-    localInvocationIndex: { builtin: "@builtin(local_invocation_index)", type: "u32" },
-    globalInvocationId: { builtin: "@builtin(global_invocation_id)", type: "vec3<u32>" },
-    workgroupId: { builtin: "@builtin(workgroup_id)", type: "vec3<u32>" },
-    numWorkgroup: { builtin: "@builtin(num_workgroup)", type: "vec3<u32>" }
-  });
-  __publicField(BuiltIns, "computeOutputs", {
-    result: { builtin: "@location(0)", type: "???" }
-  });
-  let EPSILON = 1e-6;
-  let VecType$2 = Float32Array;
-  function create$5(x = 0, y = 0) {
-    const dst = new VecType$2(2);
-    if (x !== void 0) {
-      dst[0] = x;
-      if (y !== void 0) {
-        dst[1] = y;
-      }
-    }
-    return dst;
-  }
-  let VecType$1 = Float32Array;
-  function setDefaultType$5(ctor) {
-    const oldType = VecType$1;
-    VecType$1 = ctor;
-    return oldType;
-  }
-  function create$4(x, y, z) {
-    const dst = new VecType$1(3);
-    if (x !== void 0) {
-      dst[0] = x;
-      if (y !== void 0) {
-        dst[1] = y;
-        if (z !== void 0) {
-          dst[2] = z;
-        }
-      }
-    }
-    return dst;
-  }
-  let MatType$1 = Float32Array;
-  const ctorMap = /* @__PURE__ */ new Map([
-    [Float32Array, () => new Float32Array(12)],
-    [Float64Array, () => new Float64Array(12)],
-    [Array, () => new Array(12).fill(0)]
-  ]);
-  let newMat3 = ctorMap.get(Float32Array);
-  function setDefaultType$4(ctor) {
-    const oldType = MatType$1;
-    MatType$1 = ctor;
-    newMat3 = ctorMap.get(ctor);
-    return oldType;
-  }
-  function create$3(v0, v1, v2, v3, v4, v5, v6, v7, v8) {
-    const dst = newMat3();
-    dst[3] = 0;
-    dst[7] = 0;
-    dst[11] = 0;
-    if (v0 !== void 0) {
-      dst[0] = v0;
-      if (v1 !== void 0) {
-        dst[1] = v1;
-        if (v2 !== void 0) {
-          dst[2] = v2;
-          if (v3 !== void 0) {
-            dst[4] = v3;
-            if (v4 !== void 0) {
-              dst[5] = v4;
-              if (v5 !== void 0) {
-                dst[6] = v5;
-                if (v6 !== void 0) {
-                  dst[8] = v6;
-                  if (v7 !== void 0) {
-                    dst[9] = v7;
-                    if (v8 !== void 0) {
-                      dst[10] = v8;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return dst;
-  }
-  function set$4(v0, v1, v2, v3, v4, v5, v6, v7, v8, dst) {
-    dst = dst || newMat3();
-    dst[0] = v0;
-    dst[1] = v1;
-    dst[2] = v2;
-    dst[3] = 0;
-    dst[4] = v3;
-    dst[5] = v4;
-    dst[6] = v5;
-    dst[7] = 0;
-    dst[8] = v6;
-    dst[9] = v7;
-    dst[10] = v8;
-    dst[11] = 0;
-    return dst;
-  }
-  function fromMat4(m4, dst) {
-    dst = dst || newMat3();
-    dst[0] = m4[0];
-    dst[1] = m4[1];
-    dst[2] = m4[2];
-    dst[3] = 0;
-    dst[4] = m4[4];
-    dst[5] = m4[5];
-    dst[6] = m4[6];
-    dst[7] = 0;
-    dst[8] = m4[8];
-    dst[9] = m4[9];
-    dst[10] = m4[10];
-    dst[11] = 0;
-    return dst;
-  }
-  function fromQuat$1(q, dst) {
-    dst = dst || newMat3();
-    const x = q[0];
-    const y = q[1];
-    const z = q[2];
-    const w = q[3];
-    const x2 = x + x;
-    const y2 = y + y;
-    const z2 = z + z;
-    const xx = x * x2;
-    const yx = y * x2;
-    const yy = y * y2;
-    const zx = z * x2;
-    const zy = z * y2;
-    const zz = z * z2;
-    const wx = w * x2;
-    const wy = w * y2;
-    const wz = w * z2;
-    dst[0] = 1 - yy - zz;
-    dst[1] = yx + wz;
-    dst[2] = zx - wy;
-    dst[3] = 0;
-    dst[4] = yx - wz;
-    dst[5] = 1 - xx - zz;
-    dst[6] = zy + wx;
-    dst[7] = 0;
-    dst[8] = zx + wy;
-    dst[9] = zy - wx;
-    dst[10] = 1 - xx - yy;
-    dst[11] = 0;
-    return dst;
-  }
-  function negate$3(m, dst) {
-    dst = dst || newMat3();
-    dst[0] = -m[0];
-    dst[1] = -m[1];
-    dst[2] = -m[2];
-    dst[4] = -m[4];
-    dst[5] = -m[5];
-    dst[6] = -m[6];
-    dst[8] = -m[8];
-    dst[9] = -m[9];
-    dst[10] = -m[10];
-    return dst;
-  }
-  function copy$4(m, dst) {
-    dst = dst || newMat3();
-    dst[0] = m[0];
-    dst[1] = m[1];
-    dst[2] = m[2];
-    dst[4] = m[4];
-    dst[5] = m[5];
-    dst[6] = m[6];
-    dst[8] = m[8];
-    dst[9] = m[9];
-    dst[10] = m[10];
-    return dst;
-  }
-  const clone$4 = copy$4;
-  function equalsApproximately$4(a, b) {
-    return Math.abs(a[0] - b[0]) < EPSILON && Math.abs(a[1] - b[1]) < EPSILON && Math.abs(a[2] - b[2]) < EPSILON && Math.abs(a[4] - b[4]) < EPSILON && Math.abs(a[5] - b[5]) < EPSILON && Math.abs(a[6] - b[6]) < EPSILON && Math.abs(a[8] - b[8]) < EPSILON && Math.abs(a[9] - b[9]) < EPSILON && Math.abs(a[10] - b[10]) < EPSILON;
-  }
-  function equals$4(a, b) {
-    return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[4] === b[4] && a[5] === b[5] && a[6] === b[6] && a[8] === b[8] && a[9] === b[9] && a[10] === b[10];
-  }
-  function identity$2(dst) {
-    dst = dst || newMat3();
-    dst[0] = 1;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[4] = 0;
-    dst[5] = 1;
-    dst[6] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1;
-    return dst;
-  }
-  function transpose$1(m, dst) {
-    dst = dst || newMat3();
-    if (dst === m) {
-      let t;
-      t = m[1];
-      m[1] = m[4];
-      m[4] = t;
-      t = m[2];
-      m[2] = m[8];
-      m[8] = t;
-      t = m[6];
-      m[6] = m[9];
-      m[9] = t;
-      return dst;
-    }
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    dst[0] = m00;
-    dst[1] = m10;
-    dst[2] = m20;
-    dst[4] = m01;
-    dst[5] = m11;
-    dst[6] = m21;
-    dst[8] = m02;
-    dst[9] = m12;
-    dst[10] = m22;
-    return dst;
-  }
-  function inverse$4(m, dst) {
-    dst = dst || newMat3();
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    const b01 = m22 * m11 - m12 * m21;
-    const b11 = -m22 * m10 + m12 * m20;
-    const b21 = m21 * m10 - m11 * m20;
-    const invDet = 1 / (m00 * b01 + m01 * b11 + m02 * b21);
-    dst[0] = b01 * invDet;
-    dst[1] = (-m22 * m01 + m02 * m21) * invDet;
-    dst[2] = (m12 * m01 - m02 * m11) * invDet;
-    dst[4] = b11 * invDet;
-    dst[5] = (m22 * m00 - m02 * m20) * invDet;
-    dst[6] = (-m12 * m00 + m02 * m10) * invDet;
-    dst[8] = b21 * invDet;
-    dst[9] = (-m21 * m00 + m01 * m20) * invDet;
-    dst[10] = (m11 * m00 - m01 * m10) * invDet;
-    return dst;
-  }
-  function determinant$1(m) {
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    return m00 * (m11 * m22 - m21 * m12) - m10 * (m01 * m22 - m21 * m02) + m20 * (m01 * m12 - m11 * m02);
-  }
-  const invert$3 = inverse$4;
-  function multiply$4(a, b, dst) {
-    dst = dst || newMat3();
-    const a00 = a[0];
-    const a01 = a[1];
-    const a02 = a[2];
-    const a10 = a[4 + 0];
-    const a11 = a[4 + 1];
-    const a12 = a[4 + 2];
-    const a20 = a[8 + 0];
-    const a21 = a[8 + 1];
-    const a22 = a[8 + 2];
-    const b00 = b[0];
-    const b01 = b[1];
-    const b02 = b[2];
-    const b10 = b[4 + 0];
-    const b11 = b[4 + 1];
-    const b12 = b[4 + 2];
-    const b20 = b[8 + 0];
-    const b21 = b[8 + 1];
-    const b22 = b[8 + 2];
-    dst[0] = a00 * b00 + a10 * b01 + a20 * b02;
-    dst[1] = a01 * b00 + a11 * b01 + a21 * b02;
-    dst[2] = a02 * b00 + a12 * b01 + a22 * b02;
-    dst[4] = a00 * b10 + a10 * b11 + a20 * b12;
-    dst[5] = a01 * b10 + a11 * b11 + a21 * b12;
-    dst[6] = a02 * b10 + a12 * b11 + a22 * b12;
-    dst[8] = a00 * b20 + a10 * b21 + a20 * b22;
-    dst[9] = a01 * b20 + a11 * b21 + a21 * b22;
-    dst[10] = a02 * b20 + a12 * b21 + a22 * b22;
-    return dst;
-  }
-  const mul$4 = multiply$4;
-  function setTranslation$1(a, v, dst) {
-    dst = dst || identity$2();
-    if (a !== dst) {
-      dst[0] = a[0];
-      dst[1] = a[1];
-      dst[2] = a[2];
-      dst[4] = a[4];
-      dst[5] = a[5];
-      dst[6] = a[6];
-    }
-    dst[8] = v[0];
-    dst[9] = v[1];
-    dst[10] = 1;
-    return dst;
-  }
-  function getTranslation$2(m, dst) {
-    dst = dst || create$5();
-    dst[0] = m[8];
-    dst[1] = m[9];
-    return dst;
-  }
-  function getAxis$2(m, axis, dst) {
-    dst = dst || create$5();
-    const off = axis * 4;
-    dst[0] = m[off + 0];
-    dst[1] = m[off + 1];
-    return dst;
-  }
-  function setAxis$1(m, v, axis, dst) {
-    if (dst !== m) {
-      dst = copy$4(m, dst);
-    }
-    const off = axis * 4;
-    dst[off + 0] = v[0];
-    dst[off + 1] = v[1];
-    return dst;
-  }
-  function getScaling$2(m, dst) {
-    dst = dst || create$5();
-    const xx = m[0];
-    const xy = m[1];
-    const yx = m[4];
-    const yy = m[5];
-    dst[0] = Math.sqrt(xx * xx + xy * xy);
-    dst[1] = Math.sqrt(yx * yx + yy * yy);
-    return dst;
-  }
-  function translation$1(v, dst) {
-    dst = dst || newMat3();
-    dst[0] = 1;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[4] = 0;
-    dst[5] = 1;
-    dst[6] = 0;
-    dst[8] = v[0];
-    dst[9] = v[1];
-    dst[10] = 1;
-    return dst;
-  }
-  function translate$1(m, v, dst) {
-    dst = dst || newMat3();
-    const v0 = v[0];
-    const v1 = v[1];
-    const m00 = m[0];
-    const m01 = m[1];
-    const m02 = m[2];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    if (m !== dst) {
-      dst[0] = m00;
-      dst[1] = m01;
-      dst[2] = m02;
-      dst[4] = m10;
-      dst[5] = m11;
-      dst[6] = m12;
-    }
-    dst[8] = m00 * v0 + m10 * v1 + m20;
-    dst[9] = m01 * v0 + m11 * v1 + m21;
-    dst[10] = m02 * v0 + m12 * v1 + m22;
-    return dst;
-  }
-  function rotation$1(angleInRadians, dst) {
-    dst = dst || newMat3();
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[0] = c;
-    dst[1] = s;
-    dst[2] = 0;
-    dst[4] = -s;
-    dst[5] = c;
-    dst[6] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1;
-    return dst;
-  }
-  function rotate$1(m, angleInRadians, dst) {
-    dst = dst || newMat3();
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[0] = c * m00 + s * m10;
-    dst[1] = c * m01 + s * m11;
-    dst[2] = c * m02 + s * m12;
-    dst[4] = c * m10 - s * m00;
-    dst[5] = c * m11 - s * m01;
-    dst[6] = c * m12 - s * m02;
-    if (m !== dst) {
-      dst[8] = m[8];
-      dst[9] = m[9];
-      dst[10] = m[10];
-    }
-    return dst;
-  }
-  function scaling$1(v, dst) {
-    dst = dst || newMat3();
-    dst[0] = v[0];
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[4] = 0;
-    dst[5] = v[1];
-    dst[6] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1;
-    return dst;
-  }
-  function scale$4(m, v, dst) {
-    dst = dst || newMat3();
-    const v0 = v[0];
-    const v1 = v[1];
-    dst[0] = v0 * m[0 * 4 + 0];
-    dst[1] = v0 * m[0 * 4 + 1];
-    dst[2] = v0 * m[0 * 4 + 2];
-    dst[4] = v1 * m[1 * 4 + 0];
-    dst[5] = v1 * m[1 * 4 + 1];
-    dst[6] = v1 * m[1 * 4 + 2];
-    if (m !== dst) {
-      dst[8] = m[8];
-      dst[9] = m[9];
-      dst[10] = m[10];
-    }
-    return dst;
-  }
-  function uniformScaling$1(s, dst) {
-    dst = dst || newMat3();
-    dst[0] = s;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[4] = 0;
-    dst[5] = s;
-    dst[6] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1;
-    return dst;
-  }
-  function uniformScale$1(m, s, dst) {
-    dst = dst || newMat3();
-    dst[0] = s * m[0 * 4 + 0];
-    dst[1] = s * m[0 * 4 + 1];
-    dst[2] = s * m[0 * 4 + 2];
-    dst[4] = s * m[1 * 4 + 0];
-    dst[5] = s * m[1 * 4 + 1];
-    dst[6] = s * m[1 * 4 + 2];
-    if (m !== dst) {
-      dst[8] = m[8];
-      dst[9] = m[9];
-      dst[10] = m[10];
-    }
-    return dst;
-  }
-  var mat3Impl = /* @__PURE__ */ Object.freeze({
-    __proto__: null,
-    setDefaultType: setDefaultType$4,
-    create: create$3,
-    set: set$4,
-    fromMat4,
-    fromQuat: fromQuat$1,
-    negate: negate$3,
-    copy: copy$4,
-    clone: clone$4,
-    equalsApproximately: equalsApproximately$4,
-    equals: equals$4,
-    identity: identity$2,
-    transpose: transpose$1,
-    inverse: inverse$4,
-    determinant: determinant$1,
-    invert: invert$3,
-    multiply: multiply$4,
-    mul: mul$4,
-    setTranslation: setTranslation$1,
-    getTranslation: getTranslation$2,
-    getAxis: getAxis$2,
-    setAxis: setAxis$1,
-    getScaling: getScaling$2,
-    translation: translation$1,
-    translate: translate$1,
-    rotation: rotation$1,
-    rotate: rotate$1,
-    scaling: scaling$1,
-    scale: scale$4,
-    uniformScaling: uniformScaling$1,
-    uniformScale: uniformScale$1
-  });
-  const fromValues$2 = create$4;
-  function set$3(x, y, z, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = x;
-    dst[1] = y;
-    dst[2] = z;
-    return dst;
-  }
-  function ceil$1(v, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = Math.ceil(v[0]);
-    dst[1] = Math.ceil(v[1]);
-    dst[2] = Math.ceil(v[2]);
-    return dst;
-  }
-  function floor$1(v, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = Math.floor(v[0]);
-    dst[1] = Math.floor(v[1]);
-    dst[2] = Math.floor(v[2]);
-    return dst;
-  }
-  function round$1(v, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = Math.round(v[0]);
-    dst[1] = Math.round(v[1]);
-    dst[2] = Math.round(v[2]);
-    return dst;
-  }
-  function clamp$1(v, min = 0, max = 1, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = Math.min(max, Math.max(min, v[0]));
-    dst[1] = Math.min(max, Math.max(min, v[1]));
-    dst[2] = Math.min(max, Math.max(min, v[2]));
-    return dst;
-  }
-  function add$2(a, b, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = a[0] + b[0];
-    dst[1] = a[1] + b[1];
-    dst[2] = a[2] + b[2];
-    return dst;
-  }
-  function addScaled$1(a, b, scale, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = a[0] + b[0] * scale;
-    dst[1] = a[1] + b[1] * scale;
-    dst[2] = a[2] + b[2] * scale;
-    return dst;
-  }
-  function angle$1(a, b) {
-    const ax = a[0];
-    const ay = a[1];
-    const az = a[2];
-    const bx = a[0];
-    const by = a[1];
-    const bz = a[2];
-    const mag1 = Math.sqrt(ax * ax + ay * ay + az * az);
-    const mag2 = Math.sqrt(bx * bx + by * by + bz * bz);
-    const mag = mag1 * mag2;
-    const cosine = mag && dot$2(a, b) / mag;
-    return Math.acos(cosine);
-  }
-  function subtract$2(a, b, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = a[0] - b[0];
-    dst[1] = a[1] - b[1];
-    dst[2] = a[2] - b[2];
-    return dst;
-  }
-  const sub$2 = subtract$2;
-  function equalsApproximately$3(a, b) {
-    return Math.abs(a[0] - b[0]) < EPSILON && Math.abs(a[1] - b[1]) < EPSILON && Math.abs(a[2] - b[2]) < EPSILON;
-  }
-  function equals$3(a, b) {
-    return a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
-  }
-  function lerp$2(a, b, t, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = a[0] + t * (b[0] - a[0]);
-    dst[1] = a[1] + t * (b[1] - a[1]);
-    dst[2] = a[2] + t * (b[2] - a[2]);
-    return dst;
-  }
-  function lerpV$1(a, b, t, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = a[0] + t[0] * (b[0] - a[0]);
-    dst[1] = a[1] + t[1] * (b[1] - a[1]);
-    dst[2] = a[2] + t[2] * (b[2] - a[2]);
-    return dst;
-  }
-  function max$1(a, b, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = Math.max(a[0], b[0]);
-    dst[1] = Math.max(a[1], b[1]);
-    dst[2] = Math.max(a[2], b[2]);
-    return dst;
-  }
-  function min$1(a, b, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = Math.min(a[0], b[0]);
-    dst[1] = Math.min(a[1], b[1]);
-    dst[2] = Math.min(a[2], b[2]);
-    return dst;
-  }
-  function mulScalar$2(v, k, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = v[0] * k;
-    dst[1] = v[1] * k;
-    dst[2] = v[2] * k;
-    return dst;
-  }
-  const scale$3 = mulScalar$2;
-  function divScalar$2(v, k, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = v[0] / k;
-    dst[1] = v[1] / k;
-    dst[2] = v[2] / k;
-    return dst;
-  }
-  function inverse$3(v, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = 1 / v[0];
-    dst[1] = 1 / v[1];
-    dst[2] = 1 / v[2];
-    return dst;
-  }
-  const invert$2 = inverse$3;
-  function cross(a, b, dst) {
-    dst = dst || new VecType$1(3);
-    const t1 = a[2] * b[0] - a[0] * b[2];
-    const t2 = a[0] * b[1] - a[1] * b[0];
-    dst[0] = a[1] * b[2] - a[2] * b[1];
-    dst[1] = t1;
-    dst[2] = t2;
-    return dst;
-  }
-  function dot$2(a, b) {
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-  }
-  function length$2(v) {
-    const v0 = v[0];
-    const v1 = v[1];
-    const v2 = v[2];
-    return Math.sqrt(v0 * v0 + v1 * v1 + v2 * v2);
-  }
-  const len$2 = length$2;
-  function lengthSq$2(v) {
-    const v0 = v[0];
-    const v1 = v[1];
-    const v2 = v[2];
-    return v0 * v0 + v1 * v1 + v2 * v2;
-  }
-  const lenSq$2 = lengthSq$2;
-  function distance$1(a, b) {
-    const dx = a[0] - b[0];
-    const dy = a[1] - b[1];
-    const dz = a[2] - b[2];
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-  }
-  const dist$1 = distance$1;
-  function distanceSq$1(a, b) {
-    const dx = a[0] - b[0];
-    const dy = a[1] - b[1];
-    const dz = a[2] - b[2];
-    return dx * dx + dy * dy + dz * dz;
-  }
-  const distSq$1 = distanceSq$1;
-  function normalize$2(v, dst) {
-    dst = dst || new VecType$1(3);
-    const v0 = v[0];
-    const v1 = v[1];
-    const v2 = v[2];
-    const len = Math.sqrt(v0 * v0 + v1 * v1 + v2 * v2);
-    if (len > 1e-5) {
-      dst[0] = v0 / len;
-      dst[1] = v1 / len;
-      dst[2] = v2 / len;
-    } else {
-      dst[0] = 0;
-      dst[1] = 0;
-      dst[2] = 0;
-    }
-    return dst;
-  }
-  function negate$2(v, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = -v[0];
-    dst[1] = -v[1];
-    dst[2] = -v[2];
-    return dst;
-  }
-  function copy$3(v, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = v[0];
-    dst[1] = v[1];
-    dst[2] = v[2];
-    return dst;
-  }
-  const clone$3 = copy$3;
-  function multiply$3(a, b, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = a[0] * b[0];
-    dst[1] = a[1] * b[1];
-    dst[2] = a[2] * b[2];
-    return dst;
-  }
-  const mul$3 = multiply$3;
-  function divide$1(a, b, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = a[0] / b[0];
-    dst[1] = a[1] / b[1];
-    dst[2] = a[2] / b[2];
-    return dst;
-  }
-  const div$1 = divide$1;
-  function random(scale = 1, dst) {
-    dst = dst || new VecType$1(3);
-    const angle = Math.random() * 2 * Math.PI;
-    const z = Math.random() * 2 - 1;
-    const zScale = Math.sqrt(1 - z * z) * scale;
-    dst[0] = Math.cos(angle) * zScale;
-    dst[1] = Math.sin(angle) * zScale;
-    dst[2] = z * scale;
-    return dst;
-  }
-  function zero$1(dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = 0;
-    dst[1] = 0;
-    dst[2] = 0;
-    return dst;
-  }
-  function transformMat4$1(v, m, dst) {
-    dst = dst || new VecType$1(3);
-    const x = v[0];
-    const y = v[1];
-    const z = v[2];
-    const w = m[3] * x + m[7] * y + m[11] * z + m[15] || 1;
-    dst[0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) / w;
-    dst[1] = (m[1] * x + m[5] * y + m[9] * z + m[13]) / w;
-    dst[2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) / w;
-    return dst;
-  }
-  function transformMat4Upper3x3(v, m, dst) {
-    dst = dst || new VecType$1(3);
-    const v0 = v[0];
-    const v1 = v[1];
-    const v2 = v[2];
-    dst[0] = v0 * m[0 * 4 + 0] + v1 * m[1 * 4 + 0] + v2 * m[2 * 4 + 0];
-    dst[1] = v0 * m[0 * 4 + 1] + v1 * m[1 * 4 + 1] + v2 * m[2 * 4 + 1];
-    dst[2] = v0 * m[0 * 4 + 2] + v1 * m[1 * 4 + 2] + v2 * m[2 * 4 + 2];
-    return dst;
-  }
-  function transformMat3(v, m, dst) {
-    dst = dst || new VecType$1(3);
-    const x = v[0];
-    const y = v[1];
-    const z = v[2];
-    dst[0] = x * m[0] + y * m[4] + z * m[8];
-    dst[1] = x * m[1] + y * m[5] + z * m[9];
-    dst[2] = x * m[2] + y * m[6] + z * m[10];
-    return dst;
-  }
-  function transformQuat(v, q, dst) {
-    dst = dst || new VecType$1(3);
-    const qx = q[0];
-    const qy = q[1];
-    const qz = q[2];
-    const w2 = q[3] * 2;
-    const x = v[0];
-    const y = v[1];
-    const z = v[2];
-    const uvX = qy * z - qz * y;
-    const uvY = qz * x - qx * z;
-    const uvZ = qx * y - qy * x;
-    dst[0] = x + uvX * w2 + (qy * uvZ - qz * uvY) * 2;
-    dst[1] = y + uvY * w2 + (qz * uvX - qx * uvZ) * 2;
-    dst[2] = z + uvZ * w2 + (qx * uvY - qy * uvX) * 2;
-    return dst;
-  }
-  function getTranslation$1(m, dst) {
-    dst = dst || new VecType$1(3);
-    dst[0] = m[12];
-    dst[1] = m[13];
-    dst[2] = m[14];
-    return dst;
-  }
-  function getAxis$1(m, axis, dst) {
-    dst = dst || new VecType$1(3);
-    const off = axis * 4;
-    dst[0] = m[off + 0];
-    dst[1] = m[off + 1];
-    dst[2] = m[off + 2];
-    return dst;
-  }
-  function getScaling$1(m, dst) {
-    dst = dst || new VecType$1(3);
-    const xx = m[0];
-    const xy = m[1];
-    const xz = m[2];
-    const yx = m[4];
-    const yy = m[5];
-    const yz = m[6];
-    const zx = m[8];
-    const zy = m[9];
-    const zz = m[10];
-    dst[0] = Math.sqrt(xx * xx + xy * xy + xz * xz);
-    dst[1] = Math.sqrt(yx * yx + yy * yy + yz * yz);
-    dst[2] = Math.sqrt(zx * zx + zy * zy + zz * zz);
-    return dst;
-  }
-  var vec3Impl = /* @__PURE__ */ Object.freeze({
-    __proto__: null,
-    create: create$4,
-    setDefaultType: setDefaultType$5,
-    fromValues: fromValues$2,
-    set: set$3,
-    ceil: ceil$1,
-    floor: floor$1,
-    round: round$1,
-    clamp: clamp$1,
-    add: add$2,
-    addScaled: addScaled$1,
-    angle: angle$1,
-    subtract: subtract$2,
-    sub: sub$2,
-    equalsApproximately: equalsApproximately$3,
-    equals: equals$3,
-    lerp: lerp$2,
-    lerpV: lerpV$1,
-    max: max$1,
-    min: min$1,
-    mulScalar: mulScalar$2,
-    scale: scale$3,
-    divScalar: divScalar$2,
-    inverse: inverse$3,
-    invert: invert$2,
-    cross,
-    dot: dot$2,
-    length: length$2,
-    len: len$2,
-    lengthSq: lengthSq$2,
-    lenSq: lenSq$2,
-    distance: distance$1,
-    dist: dist$1,
-    distanceSq: distanceSq$1,
-    distSq: distSq$1,
-    normalize: normalize$2,
-    negate: negate$2,
-    copy: copy$3,
-    clone: clone$3,
-    multiply: multiply$3,
-    mul: mul$3,
-    divide: divide$1,
-    div: div$1,
-    random,
-    zero: zero$1,
-    transformMat4: transformMat4$1,
-    transformMat4Upper3x3,
-    transformMat3,
-    transformQuat,
-    getTranslation: getTranslation$1,
-    getAxis: getAxis$1,
-    getScaling: getScaling$1
-  });
-  let MatType = Float32Array;
-  function setDefaultType$3(ctor) {
-    const oldType = MatType;
-    MatType = ctor;
-    return oldType;
-  }
-  function create$2(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) {
-    const dst = new MatType(16);
-    if (v0 !== void 0) {
-      dst[0] = v0;
-      if (v1 !== void 0) {
-        dst[1] = v1;
-        if (v2 !== void 0) {
-          dst[2] = v2;
-          if (v3 !== void 0) {
-            dst[3] = v3;
-            if (v4 !== void 0) {
-              dst[4] = v4;
-              if (v5 !== void 0) {
-                dst[5] = v5;
-                if (v6 !== void 0) {
-                  dst[6] = v6;
-                  if (v7 !== void 0) {
-                    dst[7] = v7;
-                    if (v8 !== void 0) {
-                      dst[8] = v8;
-                      if (v9 !== void 0) {
-                        dst[9] = v9;
-                        if (v10 !== void 0) {
-                          dst[10] = v10;
-                          if (v11 !== void 0) {
-                            dst[11] = v11;
-                            if (v12 !== void 0) {
-                              dst[12] = v12;
-                              if (v13 !== void 0) {
-                                dst[13] = v13;
-                                if (v14 !== void 0) {
-                                  dst[14] = v14;
-                                  if (v15 !== void 0) {
-                                    dst[15] = v15;
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return dst;
-  }
-  function set$2(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = v0;
-    dst[1] = v1;
-    dst[2] = v2;
-    dst[3] = v3;
-    dst[4] = v4;
-    dst[5] = v5;
-    dst[6] = v6;
-    dst[7] = v7;
-    dst[8] = v8;
-    dst[9] = v9;
-    dst[10] = v10;
-    dst[11] = v11;
-    dst[12] = v12;
-    dst[13] = v13;
-    dst[14] = v14;
-    dst[15] = v15;
-    return dst;
-  }
-  function fromMat3(m3, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = m3[0];
-    dst[1] = m3[1];
-    dst[2] = m3[2];
-    dst[3] = 0;
-    dst[4] = m3[4];
-    dst[5] = m3[5];
-    dst[6] = m3[6];
-    dst[7] = 0;
-    dst[8] = m3[8];
-    dst[9] = m3[9];
-    dst[10] = m3[10];
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function fromQuat(q, dst) {
-    dst = dst || new MatType(16);
-    const x = q[0];
-    const y = q[1];
-    const z = q[2];
-    const w = q[3];
-    const x2 = x + x;
-    const y2 = y + y;
-    const z2 = z + z;
-    const xx = x * x2;
-    const yx = y * x2;
-    const yy = y * y2;
-    const zx = z * x2;
-    const zy = z * y2;
-    const zz = z * z2;
-    const wx = w * x2;
-    const wy = w * y2;
-    const wz = w * z2;
-    dst[0] = 1 - yy - zz;
-    dst[1] = yx + wz;
-    dst[2] = zx - wy;
-    dst[3] = 0;
-    dst[4] = yx - wz;
-    dst[5] = 1 - xx - zz;
-    dst[6] = zy + wx;
-    dst[7] = 0;
-    dst[8] = zx + wy;
-    dst[9] = zy - wx;
-    dst[10] = 1 - xx - yy;
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function negate$1(m, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = -m[0];
-    dst[1] = -m[1];
-    dst[2] = -m[2];
-    dst[3] = -m[3];
-    dst[4] = -m[4];
-    dst[5] = -m[5];
-    dst[6] = -m[6];
-    dst[7] = -m[7];
-    dst[8] = -m[8];
-    dst[9] = -m[9];
-    dst[10] = -m[10];
-    dst[11] = -m[11];
-    dst[12] = -m[12];
-    dst[13] = -m[13];
-    dst[14] = -m[14];
-    dst[15] = -m[15];
-    return dst;
-  }
-  function copy$2(m, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = m[0];
-    dst[1] = m[1];
-    dst[2] = m[2];
-    dst[3] = m[3];
-    dst[4] = m[4];
-    dst[5] = m[5];
-    dst[6] = m[6];
-    dst[7] = m[7];
-    dst[8] = m[8];
-    dst[9] = m[9];
-    dst[10] = m[10];
-    dst[11] = m[11];
-    dst[12] = m[12];
-    dst[13] = m[13];
-    dst[14] = m[14];
-    dst[15] = m[15];
-    return dst;
-  }
-  const clone$2 = copy$2;
-  function equalsApproximately$2(a, b) {
-    return Math.abs(a[0] - b[0]) < EPSILON && Math.abs(a[1] - b[1]) < EPSILON && Math.abs(a[2] - b[2]) < EPSILON && Math.abs(a[3] - b[3]) < EPSILON && Math.abs(a[4] - b[4]) < EPSILON && Math.abs(a[5] - b[5]) < EPSILON && Math.abs(a[6] - b[6]) < EPSILON && Math.abs(a[7] - b[7]) < EPSILON && Math.abs(a[8] - b[8]) < EPSILON && Math.abs(a[9] - b[9]) < EPSILON && Math.abs(a[10] - b[10]) < EPSILON && Math.abs(a[11] - b[11]) < EPSILON && Math.abs(a[12] - b[12]) < EPSILON && Math.abs(a[13] - b[13]) < EPSILON && Math.abs(a[14] - b[14]) < EPSILON && Math.abs(a[15] - b[15]) < EPSILON;
-  }
-  function equals$2(a, b) {
-    return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3] && a[4] === b[4] && a[5] === b[5] && a[6] === b[6] && a[7] === b[7] && a[8] === b[8] && a[9] === b[9] && a[10] === b[10] && a[11] === b[11] && a[12] === b[12] && a[13] === b[13] && a[14] === b[14] && a[15] === b[15];
-  }
-  function identity$1(dst) {
-    dst = dst || new MatType(16);
-    dst[0] = 1;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = 1;
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1;
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function transpose(m, dst) {
-    dst = dst || new MatType(16);
-    if (dst === m) {
-      let t;
-      t = m[1];
-      m[1] = m[4];
-      m[4] = t;
-      t = m[2];
-      m[2] = m[8];
-      m[8] = t;
-      t = m[3];
-      m[3] = m[12];
-      m[12] = t;
-      t = m[6];
-      m[6] = m[9];
-      m[9] = t;
-      t = m[7];
-      m[7] = m[13];
-      m[13] = t;
-      t = m[11];
-      m[11] = m[14];
-      m[14] = t;
-      return dst;
-    }
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m03 = m[0 * 4 + 3];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m13 = m[1 * 4 + 3];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    const m23 = m[2 * 4 + 3];
-    const m30 = m[3 * 4 + 0];
-    const m31 = m[3 * 4 + 1];
-    const m32 = m[3 * 4 + 2];
-    const m33 = m[3 * 4 + 3];
-    dst[0] = m00;
-    dst[1] = m10;
-    dst[2] = m20;
-    dst[3] = m30;
-    dst[4] = m01;
-    dst[5] = m11;
-    dst[6] = m21;
-    dst[7] = m31;
-    dst[8] = m02;
-    dst[9] = m12;
-    dst[10] = m22;
-    dst[11] = m32;
-    dst[12] = m03;
-    dst[13] = m13;
-    dst[14] = m23;
-    dst[15] = m33;
-    return dst;
-  }
-  function inverse$2(m, dst) {
-    dst = dst || new MatType(16);
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m03 = m[0 * 4 + 3];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m13 = m[1 * 4 + 3];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    const m23 = m[2 * 4 + 3];
-    const m30 = m[3 * 4 + 0];
-    const m31 = m[3 * 4 + 1];
-    const m32 = m[3 * 4 + 2];
-    const m33 = m[3 * 4 + 3];
-    const tmp0 = m22 * m33;
-    const tmp1 = m32 * m23;
-    const tmp2 = m12 * m33;
-    const tmp3 = m32 * m13;
-    const tmp4 = m12 * m23;
-    const tmp5 = m22 * m13;
-    const tmp6 = m02 * m33;
-    const tmp7 = m32 * m03;
-    const tmp8 = m02 * m23;
-    const tmp9 = m22 * m03;
-    const tmp10 = m02 * m13;
-    const tmp11 = m12 * m03;
-    const tmp12 = m20 * m31;
-    const tmp13 = m30 * m21;
-    const tmp14 = m10 * m31;
-    const tmp15 = m30 * m11;
-    const tmp16 = m10 * m21;
-    const tmp17 = m20 * m11;
-    const tmp18 = m00 * m31;
-    const tmp19 = m30 * m01;
-    const tmp20 = m00 * m21;
-    const tmp21 = m20 * m01;
-    const tmp22 = m00 * m11;
-    const tmp23 = m10 * m01;
-    const t0 = tmp0 * m11 + tmp3 * m21 + tmp4 * m31 - (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
-    const t1 = tmp1 * m01 + tmp6 * m21 + tmp9 * m31 - (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
-    const t2 = tmp2 * m01 + tmp7 * m11 + tmp10 * m31 - (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
-    const t3 = tmp5 * m01 + tmp8 * m11 + tmp11 * m21 - (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
-    const d = 1 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
-    dst[0] = d * t0;
-    dst[1] = d * t1;
-    dst[2] = d * t2;
-    dst[3] = d * t3;
-    dst[4] = d * (tmp1 * m10 + tmp2 * m20 + tmp5 * m30 - (tmp0 * m10 + tmp3 * m20 + tmp4 * m30));
-    dst[5] = d * (tmp0 * m00 + tmp7 * m20 + tmp8 * m30 - (tmp1 * m00 + tmp6 * m20 + tmp9 * m30));
-    dst[6] = d * (tmp3 * m00 + tmp6 * m10 + tmp11 * m30 - (tmp2 * m00 + tmp7 * m10 + tmp10 * m30));
-    dst[7] = d * (tmp4 * m00 + tmp9 * m10 + tmp10 * m20 - (tmp5 * m00 + tmp8 * m10 + tmp11 * m20));
-    dst[8] = d * (tmp12 * m13 + tmp15 * m23 + tmp16 * m33 - (tmp13 * m13 + tmp14 * m23 + tmp17 * m33));
-    dst[9] = d * (tmp13 * m03 + tmp18 * m23 + tmp21 * m33 - (tmp12 * m03 + tmp19 * m23 + tmp20 * m33));
-    dst[10] = d * (tmp14 * m03 + tmp19 * m13 + tmp22 * m33 - (tmp15 * m03 + tmp18 * m13 + tmp23 * m33));
-    dst[11] = d * (tmp17 * m03 + tmp20 * m13 + tmp23 * m23 - (tmp16 * m03 + tmp21 * m13 + tmp22 * m23));
-    dst[12] = d * (tmp14 * m22 + tmp17 * m32 + tmp13 * m12 - (tmp16 * m32 + tmp12 * m12 + tmp15 * m22));
-    dst[13] = d * (tmp20 * m32 + tmp12 * m02 + tmp19 * m22 - (tmp18 * m22 + tmp21 * m32 + tmp13 * m02));
-    dst[14] = d * (tmp18 * m12 + tmp23 * m32 + tmp15 * m02 - (tmp22 * m32 + tmp14 * m02 + tmp19 * m12));
-    dst[15] = d * (tmp22 * m22 + tmp16 * m02 + tmp21 * m12 - (tmp20 * m12 + tmp23 * m22 + tmp17 * m02));
-    return dst;
-  }
-  function determinant(m) {
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m03 = m[0 * 4 + 3];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m13 = m[1 * 4 + 3];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    const m23 = m[2 * 4 + 3];
-    const m30 = m[3 * 4 + 0];
-    const m31 = m[3 * 4 + 1];
-    const m32 = m[3 * 4 + 2];
-    const m33 = m[3 * 4 + 3];
-    const tmp0 = m22 * m33;
-    const tmp1 = m32 * m23;
-    const tmp2 = m12 * m33;
-    const tmp3 = m32 * m13;
-    const tmp4 = m12 * m23;
-    const tmp5 = m22 * m13;
-    const tmp6 = m02 * m33;
-    const tmp7 = m32 * m03;
-    const tmp8 = m02 * m23;
-    const tmp9 = m22 * m03;
-    const tmp10 = m02 * m13;
-    const tmp11 = m12 * m03;
-    const t0 = tmp0 * m11 + tmp3 * m21 + tmp4 * m31 - (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
-    const t1 = tmp1 * m01 + tmp6 * m21 + tmp9 * m31 - (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
-    const t2 = tmp2 * m01 + tmp7 * m11 + tmp10 * m31 - (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
-    const t3 = tmp5 * m01 + tmp8 * m11 + tmp11 * m21 - (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
-    return m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3;
-  }
-  const invert$1 = inverse$2;
-  function multiply$2(a, b, dst) {
-    dst = dst || new MatType(16);
-    const a00 = a[0];
-    const a01 = a[1];
-    const a02 = a[2];
-    const a03 = a[3];
-    const a10 = a[4 + 0];
-    const a11 = a[4 + 1];
-    const a12 = a[4 + 2];
-    const a13 = a[4 + 3];
-    const a20 = a[8 + 0];
-    const a21 = a[8 + 1];
-    const a22 = a[8 + 2];
-    const a23 = a[8 + 3];
-    const a30 = a[12 + 0];
-    const a31 = a[12 + 1];
-    const a32 = a[12 + 2];
-    const a33 = a[12 + 3];
-    const b00 = b[0];
-    const b01 = b[1];
-    const b02 = b[2];
-    const b03 = b[3];
-    const b10 = b[4 + 0];
-    const b11 = b[4 + 1];
-    const b12 = b[4 + 2];
-    const b13 = b[4 + 3];
-    const b20 = b[8 + 0];
-    const b21 = b[8 + 1];
-    const b22 = b[8 + 2];
-    const b23 = b[8 + 3];
-    const b30 = b[12 + 0];
-    const b31 = b[12 + 1];
-    const b32 = b[12 + 2];
-    const b33 = b[12 + 3];
-    dst[0] = a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03;
-    dst[1] = a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03;
-    dst[2] = a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03;
-    dst[3] = a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03;
-    dst[4] = a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13;
-    dst[5] = a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13;
-    dst[6] = a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13;
-    dst[7] = a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13;
-    dst[8] = a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23;
-    dst[9] = a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23;
-    dst[10] = a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23;
-    dst[11] = a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23;
-    dst[12] = a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33;
-    dst[13] = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33;
-    dst[14] = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33;
-    dst[15] = a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33;
-    return dst;
-  }
-  const mul$2 = multiply$2;
-  function setTranslation(a, v, dst) {
-    dst = dst || identity$1();
-    if (a !== dst) {
-      dst[0] = a[0];
-      dst[1] = a[1];
-      dst[2] = a[2];
-      dst[3] = a[3];
-      dst[4] = a[4];
-      dst[5] = a[5];
-      dst[6] = a[6];
-      dst[7] = a[7];
-      dst[8] = a[8];
-      dst[9] = a[9];
-      dst[10] = a[10];
-      dst[11] = a[11];
-    }
-    dst[12] = v[0];
-    dst[13] = v[1];
-    dst[14] = v[2];
-    dst[15] = 1;
-    return dst;
-  }
-  function getTranslation(m, dst) {
-    dst = dst || create$4();
-    dst[0] = m[12];
-    dst[1] = m[13];
-    dst[2] = m[14];
-    return dst;
-  }
-  function getAxis(m, axis, dst) {
-    dst = dst || create$4();
-    const off = axis * 4;
-    dst[0] = m[off + 0];
-    dst[1] = m[off + 1];
-    dst[2] = m[off + 2];
-    return dst;
-  }
-  function setAxis(a, v, axis, dst) {
-    if (dst !== a) {
-      dst = copy$2(a, dst);
-    }
-    const off = axis * 4;
-    dst[off + 0] = v[0];
-    dst[off + 1] = v[1];
-    dst[off + 2] = v[2];
-    return dst;
-  }
-  function getScaling(m, dst) {
-    dst = dst || create$4();
-    const xx = m[0];
-    const xy = m[1];
-    const xz = m[2];
-    const yx = m[4];
-    const yy = m[5];
-    const yz = m[6];
-    const zx = m[8];
-    const zy = m[9];
-    const zz = m[10];
-    dst[0] = Math.sqrt(xx * xx + xy * xy + xz * xz);
-    dst[1] = Math.sqrt(yx * yx + yy * yy + yz * yz);
-    dst[2] = Math.sqrt(zx * zx + zy * zy + zz * zz);
-    return dst;
-  }
-  function perspective(fieldOfViewYInRadians, aspect, zNear, zFar, dst) {
-    dst = dst || new MatType(16);
-    const f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewYInRadians);
-    dst[0] = f / aspect;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = f;
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[11] = -1;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[15] = 0;
-    if (zFar === Infinity) {
-      dst[10] = -1;
-      dst[14] = -zNear;
-    } else {
-      const rangeInv = 1 / (zNear - zFar);
-      dst[10] = zFar * rangeInv;
-      dst[14] = zFar * zNear * rangeInv;
-    }
-    return dst;
-  }
-  function ortho(left, right, bottom, top, near, far, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = 2 / (right - left);
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = 2 / (top - bottom);
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1 / (near - far);
-    dst[11] = 0;
-    dst[12] = (right + left) / (left - right);
-    dst[13] = (top + bottom) / (bottom - top);
-    dst[14] = near / (near - far);
-    dst[15] = 1;
-    return dst;
-  }
-  function frustum(left, right, bottom, top, near, far, dst) {
-    dst = dst || new MatType(16);
-    const dx = right - left;
-    const dy = top - bottom;
-    const dz = near - far;
-    dst[0] = 2 * near / dx;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = 2 * near / dy;
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = (left + right) / dx;
-    dst[9] = (top + bottom) / dy;
-    dst[10] = far / dz;
-    dst[11] = -1;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = near * far / dz;
-    dst[15] = 0;
-    return dst;
-  }
-  let xAxis;
-  let yAxis;
-  let zAxis;
-  function aim(position, target, up, dst) {
-    dst = dst || new MatType(16);
-    xAxis = xAxis || create$4();
-    yAxis = yAxis || create$4();
-    zAxis = zAxis || create$4();
-    normalize$2(subtract$2(target, position, zAxis), zAxis);
-    normalize$2(cross(up, zAxis, xAxis), xAxis);
-    normalize$2(cross(zAxis, xAxis, yAxis), yAxis);
-    dst[0] = xAxis[0];
-    dst[1] = xAxis[1];
-    dst[2] = xAxis[2];
-    dst[3] = 0;
-    dst[4] = yAxis[0];
-    dst[5] = yAxis[1];
-    dst[6] = yAxis[2];
-    dst[7] = 0;
-    dst[8] = zAxis[0];
-    dst[9] = zAxis[1];
-    dst[10] = zAxis[2];
-    dst[11] = 0;
-    dst[12] = position[0];
-    dst[13] = position[1];
-    dst[14] = position[2];
-    dst[15] = 1;
-    return dst;
-  }
-  function cameraAim(eye, target, up, dst) {
-    dst = dst || new MatType(16);
-    xAxis = xAxis || create$4();
-    yAxis = yAxis || create$4();
-    zAxis = zAxis || create$4();
-    normalize$2(subtract$2(eye, target, zAxis), zAxis);
-    normalize$2(cross(up, zAxis, xAxis), xAxis);
-    normalize$2(cross(zAxis, xAxis, yAxis), yAxis);
-    dst[0] = xAxis[0];
-    dst[1] = xAxis[1];
-    dst[2] = xAxis[2];
-    dst[3] = 0;
-    dst[4] = yAxis[0];
-    dst[5] = yAxis[1];
-    dst[6] = yAxis[2];
-    dst[7] = 0;
-    dst[8] = zAxis[0];
-    dst[9] = zAxis[1];
-    dst[10] = zAxis[2];
-    dst[11] = 0;
-    dst[12] = eye[0];
-    dst[13] = eye[1];
-    dst[14] = eye[2];
-    dst[15] = 1;
-    return dst;
-  }
-  function lookAt(eye, target, up, dst) {
-    dst = dst || new MatType(16);
-    xAxis = xAxis || create$4();
-    yAxis = yAxis || create$4();
-    zAxis = zAxis || create$4();
-    normalize$2(subtract$2(eye, target, zAxis), zAxis);
-    normalize$2(cross(up, zAxis, xAxis), xAxis);
-    normalize$2(cross(zAxis, xAxis, yAxis), yAxis);
-    dst[0] = xAxis[0];
-    dst[1] = yAxis[0];
-    dst[2] = zAxis[0];
-    dst[3] = 0;
-    dst[4] = xAxis[1];
-    dst[5] = yAxis[1];
-    dst[6] = zAxis[1];
-    dst[7] = 0;
-    dst[8] = xAxis[2];
-    dst[9] = yAxis[2];
-    dst[10] = zAxis[2];
-    dst[11] = 0;
-    dst[12] = -(xAxis[0] * eye[0] + xAxis[1] * eye[1] + xAxis[2] * eye[2]);
-    dst[13] = -(yAxis[0] * eye[0] + yAxis[1] * eye[1] + yAxis[2] * eye[2]);
-    dst[14] = -(zAxis[0] * eye[0] + zAxis[1] * eye[1] + zAxis[2] * eye[2]);
-    dst[15] = 1;
-    return dst;
-  }
-  function translation(v, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = 1;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = 1;
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1;
-    dst[11] = 0;
-    dst[12] = v[0];
-    dst[13] = v[1];
-    dst[14] = v[2];
-    dst[15] = 1;
-    return dst;
-  }
-  function translate(m, v, dst) {
-    dst = dst || new MatType(16);
-    const v0 = v[0];
-    const v1 = v[1];
-    const v2 = v[2];
-    const m00 = m[0];
-    const m01 = m[1];
-    const m02 = m[2];
-    const m03 = m[3];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m13 = m[1 * 4 + 3];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    const m23 = m[2 * 4 + 3];
-    const m30 = m[3 * 4 + 0];
-    const m31 = m[3 * 4 + 1];
-    const m32 = m[3 * 4 + 2];
-    const m33 = m[3 * 4 + 3];
-    if (m !== dst) {
-      dst[0] = m00;
-      dst[1] = m01;
-      dst[2] = m02;
-      dst[3] = m03;
-      dst[4] = m10;
-      dst[5] = m11;
-      dst[6] = m12;
-      dst[7] = m13;
-      dst[8] = m20;
-      dst[9] = m21;
-      dst[10] = m22;
-      dst[11] = m23;
-    }
-    dst[12] = m00 * v0 + m10 * v1 + m20 * v2 + m30;
-    dst[13] = m01 * v0 + m11 * v1 + m21 * v2 + m31;
-    dst[14] = m02 * v0 + m12 * v1 + m22 * v2 + m32;
-    dst[15] = m03 * v0 + m13 * v1 + m23 * v2 + m33;
-    return dst;
-  }
-  function rotationX(angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[0] = 1;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = c;
-    dst[6] = s;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = -s;
-    dst[10] = c;
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function rotateX$1(m, angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    const m10 = m[4];
-    const m11 = m[5];
-    const m12 = m[6];
-    const m13 = m[7];
-    const m20 = m[8];
-    const m21 = m[9];
-    const m22 = m[10];
-    const m23 = m[11];
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[4] = c * m10 + s * m20;
-    dst[5] = c * m11 + s * m21;
-    dst[6] = c * m12 + s * m22;
-    dst[7] = c * m13 + s * m23;
-    dst[8] = c * m20 - s * m10;
-    dst[9] = c * m21 - s * m11;
-    dst[10] = c * m22 - s * m12;
-    dst[11] = c * m23 - s * m13;
-    if (m !== dst) {
-      dst[0] = m[0];
-      dst[1] = m[1];
-      dst[2] = m[2];
-      dst[3] = m[3];
-      dst[12] = m[12];
-      dst[13] = m[13];
-      dst[14] = m[14];
-      dst[15] = m[15];
-    }
-    return dst;
-  }
-  function rotationY(angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[0] = c;
-    dst[1] = 0;
-    dst[2] = -s;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = 1;
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = s;
-    dst[9] = 0;
-    dst[10] = c;
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function rotateY$1(m, angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m03 = m[0 * 4 + 3];
-    const m20 = m[2 * 4 + 0];
-    const m21 = m[2 * 4 + 1];
-    const m22 = m[2 * 4 + 2];
-    const m23 = m[2 * 4 + 3];
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[0] = c * m00 - s * m20;
-    dst[1] = c * m01 - s * m21;
-    dst[2] = c * m02 - s * m22;
-    dst[3] = c * m03 - s * m23;
-    dst[8] = c * m20 + s * m00;
-    dst[9] = c * m21 + s * m01;
-    dst[10] = c * m22 + s * m02;
-    dst[11] = c * m23 + s * m03;
-    if (m !== dst) {
-      dst[4] = m[4];
-      dst[5] = m[5];
-      dst[6] = m[6];
-      dst[7] = m[7];
-      dst[12] = m[12];
-      dst[13] = m[13];
-      dst[14] = m[14];
-      dst[15] = m[15];
-    }
-    return dst;
-  }
-  function rotationZ(angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[0] = c;
-    dst[1] = s;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = -s;
-    dst[5] = c;
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = 1;
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function rotateZ$1(m, angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    const m00 = m[0 * 4 + 0];
-    const m01 = m[0 * 4 + 1];
-    const m02 = m[0 * 4 + 2];
-    const m03 = m[0 * 4 + 3];
-    const m10 = m[1 * 4 + 0];
-    const m11 = m[1 * 4 + 1];
-    const m12 = m[1 * 4 + 2];
-    const m13 = m[1 * 4 + 3];
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    dst[0] = c * m00 + s * m10;
-    dst[1] = c * m01 + s * m11;
-    dst[2] = c * m02 + s * m12;
-    dst[3] = c * m03 + s * m13;
-    dst[4] = c * m10 - s * m00;
-    dst[5] = c * m11 - s * m01;
-    dst[6] = c * m12 - s * m02;
-    dst[7] = c * m13 - s * m03;
-    if (m !== dst) {
-      dst[8] = m[8];
-      dst[9] = m[9];
-      dst[10] = m[10];
-      dst[11] = m[11];
-      dst[12] = m[12];
-      dst[13] = m[13];
-      dst[14] = m[14];
-      dst[15] = m[15];
-    }
-    return dst;
-  }
-  function axisRotation(axis, angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    let x = axis[0];
-    let y = axis[1];
-    let z = axis[2];
-    const n = Math.sqrt(x * x + y * y + z * z);
-    x /= n;
-    y /= n;
-    z /= n;
-    const xx = x * x;
-    const yy = y * y;
-    const zz = z * z;
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    const oneMinusCosine = 1 - c;
-    dst[0] = xx + (1 - xx) * c;
-    dst[1] = x * y * oneMinusCosine + z * s;
-    dst[2] = x * z * oneMinusCosine - y * s;
-    dst[3] = 0;
-    dst[4] = x * y * oneMinusCosine - z * s;
-    dst[5] = yy + (1 - yy) * c;
-    dst[6] = y * z * oneMinusCosine + x * s;
-    dst[7] = 0;
-    dst[8] = x * z * oneMinusCosine + y * s;
-    dst[9] = y * z * oneMinusCosine - x * s;
-    dst[10] = zz + (1 - zz) * c;
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  const rotation = axisRotation;
-  function axisRotate(m, axis, angleInRadians, dst) {
-    dst = dst || new MatType(16);
-    let x = axis[0];
-    let y = axis[1];
-    let z = axis[2];
-    const n = Math.sqrt(x * x + y * y + z * z);
-    x /= n;
-    y /= n;
-    z /= n;
-    const xx = x * x;
-    const yy = y * y;
-    const zz = z * z;
-    const c = Math.cos(angleInRadians);
-    const s = Math.sin(angleInRadians);
-    const oneMinusCosine = 1 - c;
-    const r00 = xx + (1 - xx) * c;
-    const r01 = x * y * oneMinusCosine + z * s;
-    const r02 = x * z * oneMinusCosine - y * s;
-    const r10 = x * y * oneMinusCosine - z * s;
-    const r11 = yy + (1 - yy) * c;
-    const r12 = y * z * oneMinusCosine + x * s;
-    const r20 = x * z * oneMinusCosine + y * s;
-    const r21 = y * z * oneMinusCosine - x * s;
-    const r22 = zz + (1 - zz) * c;
-    const m00 = m[0];
-    const m01 = m[1];
-    const m02 = m[2];
-    const m03 = m[3];
-    const m10 = m[4];
-    const m11 = m[5];
-    const m12 = m[6];
-    const m13 = m[7];
-    const m20 = m[8];
-    const m21 = m[9];
-    const m22 = m[10];
-    const m23 = m[11];
-    dst[0] = r00 * m00 + r01 * m10 + r02 * m20;
-    dst[1] = r00 * m01 + r01 * m11 + r02 * m21;
-    dst[2] = r00 * m02 + r01 * m12 + r02 * m22;
-    dst[3] = r00 * m03 + r01 * m13 + r02 * m23;
-    dst[4] = r10 * m00 + r11 * m10 + r12 * m20;
-    dst[5] = r10 * m01 + r11 * m11 + r12 * m21;
-    dst[6] = r10 * m02 + r11 * m12 + r12 * m22;
-    dst[7] = r10 * m03 + r11 * m13 + r12 * m23;
-    dst[8] = r20 * m00 + r21 * m10 + r22 * m20;
-    dst[9] = r20 * m01 + r21 * m11 + r22 * m21;
-    dst[10] = r20 * m02 + r21 * m12 + r22 * m22;
-    dst[11] = r20 * m03 + r21 * m13 + r22 * m23;
-    if (m !== dst) {
-      dst[12] = m[12];
-      dst[13] = m[13];
-      dst[14] = m[14];
-      dst[15] = m[15];
-    }
-    return dst;
-  }
-  const rotate = axisRotate;
-  function scaling(v, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = v[0];
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = v[1];
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = v[2];
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function scale$2(m, v, dst) {
-    dst = dst || new MatType(16);
-    const v0 = v[0];
-    const v1 = v[1];
-    const v2 = v[2];
-    dst[0] = v0 * m[0 * 4 + 0];
-    dst[1] = v0 * m[0 * 4 + 1];
-    dst[2] = v0 * m[0 * 4 + 2];
-    dst[3] = v0 * m[0 * 4 + 3];
-    dst[4] = v1 * m[1 * 4 + 0];
-    dst[5] = v1 * m[1 * 4 + 1];
-    dst[6] = v1 * m[1 * 4 + 2];
-    dst[7] = v1 * m[1 * 4 + 3];
-    dst[8] = v2 * m[2 * 4 + 0];
-    dst[9] = v2 * m[2 * 4 + 1];
-    dst[10] = v2 * m[2 * 4 + 2];
-    dst[11] = v2 * m[2 * 4 + 3];
-    if (m !== dst) {
-      dst[12] = m[12];
-      dst[13] = m[13];
-      dst[14] = m[14];
-      dst[15] = m[15];
-    }
-    return dst;
-  }
-  function uniformScaling(s, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = s;
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
-    dst[5] = s;
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
-    dst[10] = s;
-    dst[11] = 0;
-    dst[12] = 0;
-    dst[13] = 0;
-    dst[14] = 0;
-    dst[15] = 1;
-    return dst;
-  }
-  function uniformScale(m, s, dst) {
-    dst = dst || new MatType(16);
-    dst[0] = s * m[0 * 4 + 0];
-    dst[1] = s * m[0 * 4 + 1];
-    dst[2] = s * m[0 * 4 + 2];
-    dst[3] = s * m[0 * 4 + 3];
-    dst[4] = s * m[1 * 4 + 0];
-    dst[5] = s * m[1 * 4 + 1];
-    dst[6] = s * m[1 * 4 + 2];
-    dst[7] = s * m[1 * 4 + 3];
-    dst[8] = s * m[2 * 4 + 0];
-    dst[9] = s * m[2 * 4 + 1];
-    dst[10] = s * m[2 * 4 + 2];
-    dst[11] = s * m[2 * 4 + 3];
-    if (m !== dst) {
-      dst[12] = m[12];
-      dst[13] = m[13];
-      dst[14] = m[14];
-      dst[15] = m[15];
-    }
-    return dst;
-  }
-  var mat4Impl = /* @__PURE__ */ Object.freeze({
-    __proto__: null,
-    setDefaultType: setDefaultType$3,
-    create: create$2,
-    set: set$2,
-    fromMat3,
-    fromQuat,
-    negate: negate$1,
-    copy: copy$2,
-    clone: clone$2,
-    equalsApproximately: equalsApproximately$2,
-    equals: equals$2,
-    identity: identity$1,
-    transpose,
-    inverse: inverse$2,
-    determinant,
-    invert: invert$1,
-    multiply: multiply$2,
-    mul: mul$2,
-    setTranslation,
-    getTranslation,
-    getAxis,
-    setAxis,
-    getScaling,
-    perspective,
-    ortho,
-    frustum,
-    aim,
-    cameraAim,
-    lookAt,
-    translation,
-    translate,
-    rotationX,
-    rotateX: rotateX$1,
-    rotationY,
-    rotateY: rotateY$1,
-    rotationZ,
-    rotateZ: rotateZ$1,
-    axisRotation,
-    rotation,
-    axisRotate,
-    rotate,
-    scaling,
-    scale: scale$2,
-    uniformScaling,
-    uniformScale
-  });
   class PrimitiveFloatUniform extends Float32Array {
     constructor(type, val, createLocalVariable = false) {
       super(val);
@@ -2674,6 +833,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "propertyNames");
       __publicField(this, "createVariableInsideMain", false);
       __publicField(this, "className");
+      __publicField(this, "feedbackVertexId", 0);
+      __publicField(this, "feedbackInstanceId", 0);
       this.type = new GPUType(type);
       this.createVariableInsideMain = createLocalVariable;
       this.className = this.constructor.name;
@@ -2752,6 +913,11 @@ var __publicField = (obj, key, value) => {
       const res = "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";\n";
       return res;
     }
+    setFeedback(vertexId, instanceId) {
+      this.feedbackVertexId = vertexId;
+      this.feedbackInstanceId = instanceId;
+      return this;
+    }
     update() {
     }
   }
@@ -2767,6 +933,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "propertyNames");
       __publicField(this, "createVariableInsideMain", false);
       __publicField(this, "className");
+      __publicField(this, "feedbackVertexId", 0);
+      __publicField(this, "feedbackInstanceId", 0);
       this.type = new GPUType(type);
       this.createVariableInsideMain = createLocalVariable;
       this.className = this.constructor.name;
@@ -2833,6 +1001,11 @@ var __publicField = (obj, key, value) => {
         type = "vec4<i32>";
       return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
     }
+    setFeedback(vertexId, instanceId) {
+      this.feedbackVertexId = vertexId;
+      this.feedbackInstanceId = instanceId;
+      return this;
+    }
     update() {
     }
   }
@@ -2848,6 +1021,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "propertyNames");
       __publicField(this, "createVariableInsideMain", false);
       __publicField(this, "className");
+      __publicField(this, "feedbackVertexId", 0);
+      __publicField(this, "feedbackInstanceId", 0);
       this.type = new GPUType(type);
       this.createVariableInsideMain = createLocalVariable;
       this.className = this.constructor.name;
@@ -2911,6 +1086,11 @@ var __publicField = (obj, key, value) => {
       if (type === "UVec4")
         type = "vec4<u32>";
       return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
+    }
+    setFeedback(vertexId, instanceId) {
+      this.feedbackVertexId = vertexId;
+      this.feedbackInstanceId = instanceId;
+      return this;
     }
     update() {
     }
@@ -3265,14 +1445,44 @@ var __publicField = (obj, key, value) => {
   }
   class Matrix3x3 extends PrimitiveFloatUniform {
     constructor() {
-      super("mat3x3<f32>", mat3Impl.create());
+      super("mat3x3<f32>", new Float32Array([
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]));
     }
   }
   class Matrix4x4 extends PrimitiveFloatUniform {
     constructor(floatArray = null) {
       const disableUpdate = !!floatArray;
       if (!floatArray)
-        floatArray = mat4Impl.create();
+        floatArray = new Float32Array([
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]);
       super("mat4x4<f32>", floatArray);
       __publicField(this, "_x", 0);
       __publicField(this, "_y", 0);
@@ -3394,12 +1604,12 @@ var __publicField = (obj, key, value) => {
       if (this.disableUpdate)
         return;
       if (this.mustBeTransfered) {
-        mat4Impl.identity(this);
-        mat4Impl.rotateX(this, this._rx, this);
-        mat4Impl.rotateY(this, this._ry, this);
-        mat4Impl.rotateZ(this, this._rz, this);
-        mat4Impl.translate(this, vec3Impl.fromValues(this._x, this._y, this._z), this);
-        mat4Impl.scale(this, vec3Impl.fromValues(this._sx, this._sy, this._sz), this);
+        glMatrix.mat4.identity(this);
+        glMatrix.mat4.rotate(this, this, this._rx, glMatrix.vec3.fromValues(1, 0, 0));
+        glMatrix.mat4.rotate(this, this, this._ry, glMatrix.vec3.fromValues(0, 1, 0));
+        glMatrix.mat4.rotate(this, this, this._rz, glMatrix.vec3.fromValues(0, 0, 1));
+        glMatrix.mat4.translate(this, this, glMatrix.vec3.fromValues(this._x, this._y, this._z));
+        glMatrix.mat4.scale(this, this, glMatrix.vec3.fromValues(this._sx, this._sy, this._sz));
       }
     }
   }
@@ -3722,7 +1932,6 @@ var __publicField = (obj, key, value) => {
       return this._textureType;
     }
     set textureType(o) {
-      console.log("set textureType ", o);
       this._textureType = o;
     }
     createBindGroupLayoutEntry(bindingId) {
@@ -3731,7 +1940,6 @@ var __publicField = (obj, key, value) => {
         sampleType = "sint";
       else if (this.sampledType === "u32")
         sampleType = "uint";
-      console.warn("createBindGroupLayoutEntry ", this.io);
       if (this.io != 2)
         return {
           binding: bindingId,
@@ -4286,6 +2494,10 @@ var __publicField = (obj, key, value) => {
       }
       this.items = this.stackItems(items);
     }
+    set(datas) {
+      this.datas = datas;
+      this.mustBeTransfered = true;
+    }
     get uniformBuffer() {
       return this.buffer;
     }
@@ -4714,6 +2926,12 @@ var __publicField = (obj, key, value) => {
         });
         this.update();
       }
+    }
+    getItemsAsArray() {
+      const result = [];
+      for (let i = 0; i < this.itemNames.length; i++)
+        result[i] = this.items[this.itemNames[i]];
+      return result;
     }
     destroyGpuResource() {
       if (this.time && (/* @__PURE__ */ new Date()).getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
@@ -5151,6 +3369,7 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "_bufferSize");
       __publicField(this, "deviceId");
       __publicField(this, "time");
+      __publicField(this, "destroyed", true);
       if (!descriptor)
         descriptor = {};
       else
@@ -5300,12 +3519,15 @@ var __publicField = (obj, key, value) => {
     createBindGroupEntry(bindingId) {
       if (!this.gpuResource)
         this.createGpuResource();
+      let size = 0;
+      if (this.datas)
+        size = this.datas.byteLength;
       return {
         binding: bindingId,
         resource: {
           buffer: this.gpuResource,
           offset: 0,
-          size: this.datas.byteLength
+          size
         }
       };
     }
@@ -5314,23 +3536,33 @@ var __publicField = (obj, key, value) => {
         return;
       this.pipelineType = pipelineType;
       if (pipelineType === "render") {
-        this.descriptor.accessMode = "read";
-        this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
+        if (!this.descriptor.accessMode)
+          this.descriptor.accessMode = "read";
+        if (!this.descriptor.usage)
+          this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
       } else if (pipelineType === "compute_mixed") {
         if (this.io === 1 || this.io === 0) {
-          this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-          this.descriptor.accessMode = "read";
+          if (!this.descriptor.usage)
+            this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+          if (!this.descriptor.accessMode)
+            this.descriptor.accessMode = "read";
         } else if (this.io === 2) {
-          this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-          this.descriptor.accessMode = "read_write";
+          if (!this.descriptor.usage)
+            this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+          if (!this.descriptor.accessMode)
+            this.descriptor.accessMode = "read_write";
         }
       } else if (pipelineType === "compute") {
         if (this.io === 1 || this.io == 0) {
-          this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-          this.descriptor.accessMode = "read";
+          if (!this.descriptor.usage)
+            this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+          if (!this.descriptor.accessMode)
+            this.descriptor.accessMode = "read";
         } else if (this.io === 2) {
-          this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
-          this.descriptor.accessMode = "read_write";
+          if (!this.descriptor.usage)
+            this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+          if (!this.descriptor.accessMode)
+            this.descriptor.accessMode = "read_write";
         }
       }
     }
@@ -5431,7 +3663,6 @@ var __publicField = (obj, key, value) => {
       }
     }
     createVertexBufferLayout(builtinOffset = 0) {
-      console.log(this.io, this.descriptor.stepMode);
       if (this.gpuBufferIOs) {
         return this.stackAttributes(builtinOffset);
       }
@@ -5477,9 +3708,12 @@ var __publicField = (obj, key, value) => {
         usage: this.descriptor.usage,
         mappedAtCreation: false
       });
+      this.destroyed = false;
       this.mustBeTransfered = true;
     }
     destroyGpuResource() {
+      if (this.destroyed)
+        return;
       if (this.time && (/* @__PURE__ */ new Date()).getTime() - this.time < 100 && XGPU.loseDeviceRecently) {
         return;
       }
@@ -5517,6 +3751,7 @@ var __publicField = (obj, key, value) => {
         this.gpuResource.destroy();
         this.gpuResource = null;
       }
+      this.destroyed = true;
     }
     updateBuffer() {
       if (!this.datas)
@@ -5595,7 +3830,6 @@ var __publicField = (obj, key, value) => {
       this.descriptor = descriptor;
       if (!descriptor.stepMode)
         descriptor.stepMode = "instance";
-      console.log(descriptor.stepMode);
       this.deviceId = XGPU.deviceId;
       this.buffers[0] = new VertexBuffer(attributes, descriptor);
       this.buffers[1] = new VertexBuffer(attributes, descriptor);
@@ -5633,13 +3867,13 @@ var __publicField = (obj, key, value) => {
         return null;
       if (!this.canCallMapAsync)
         return;
+      this.canCallMapAsync = false;
       if (!this.stagingBuffer)
         this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
       const copyEncoder = XGPU.device.createCommandEncoder();
       const stage = this.stagingBuffer;
       copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
       XGPU.device.queue.submit([copyEncoder.finish()]);
-      this.canCallMapAsync = false;
       await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size);
       this.canCallMapAsync = true;
       const copyArray = stage.getMappedRange(0, stage.size);
@@ -5854,6 +4088,234 @@ var __publicField = (obj, key, value) => {
   const _HighLevelParser = class {
     constructor() {
       __publicField(this, "targetIsBindgroup");
+      __publicField(this, "parseDebugValues", (descriptor) => {
+        let o;
+        let indexs = [];
+        let objectById = [];
+        let objectByName = {};
+        let nb = 0;
+        for (let name in descriptor) {
+          o = descriptor[name];
+          if (o.__debug == true) {
+            if (typeof o === "function") {
+              o = { name, id: nb, ...o() };
+            } else {
+              o.id = nb;
+              o.name = name;
+            }
+            descriptor[name] = void 0;
+            indexs[nb] = new Vec4(o.vertexId, o.instanceId, 0, 0);
+            objectByName[name] = o;
+            objectById[nb] = o;
+            nb++;
+          }
+        }
+        return {
+          nb,
+          indexs,
+          objectByName,
+          objectById
+        };
+      });
+      __publicField(this, "parseVertexShaderDebug", (descriptor) => {
+        if (typeof descriptor.vertexShader === "string") {
+          descriptor.vertexShader = { main: descriptor.vertexShader };
+        }
+        const clearDebug = (shader2) => {
+          let lines = shader2.split("\n");
+          let line;
+          let result = "";
+          for (let i = 0; i < lines.length; i++) {
+            line = lines[i];
+            if (line.includes("debug."))
+              continue;
+            result += line + "\n";
+          }
+          return result;
+        };
+        const shader = descriptor.vertexShader.main;
+        descriptor.vertexShader.main = clearDebug(shader);
+        const debugByName = descriptor.__DEBUG__.objectByName;
+        const removeEmptySpaceAtStart = (line) => {
+          let abc = "abcdefghijklmnopqrstuvwxyz/";
+          abc += abc.toUpperCase();
+          let char;
+          for (let i = 0; i < line.length; i++) {
+            char = line[i];
+            if (abc.includes(char)) {
+              return line.slice(i);
+            }
+          }
+          return line;
+        };
+        const extractDebugName = (line) => {
+          let abc = "abcdefghijklmnopqrstuvwxyz0123456789_";
+          abc += abc.toUpperCase();
+          let char;
+          let name = "";
+          for (let i = 0; i < line.length; i++) {
+            char = line[i];
+            if (abc.includes(char)) {
+              name += char;
+              continue;
+            }
+            if (char === " ")
+              continue;
+            if (char != "=") {
+              throw new Error(`VERTEX SHADER ERROR on this line :"debug.${line} ". The keyword "debug" must only be used to store data. It can't be used in computations.`);
+            }
+            return name;
+          }
+          return name;
+        };
+        const analyseAndRewriteDebug = (shader2) => {
+          let lines = shader2.split("\n");
+          let line;
+          let result = ";";
+          let names = [];
+          let nbUsedByName = {};
+          let newName;
+          let objById = [];
+          let count = 0;
+          for (let i = 0; i < lines.length; i++) {
+            line = removeEmptySpaceAtStart(lines[i]);
+            if (line.slice(0, 2) == "//")
+              continue;
+            if (line.includes("debug.")) {
+              if (line.slice(0, "debug.".length) === "debug.") {
+                if (line.split("=").length == 2) {
+                  const dName = extractDebugName(line.slice("debug.".length));
+                  const o = debugByName[dName];
+                  if (!debugByName[dName]) {
+                    throw new Error(`VERTEX SHADER ERROR on this line :" ${line} ". The value "debug.${dName}" is used in the vertexShader but not defined in RenderPipeline.initFromObject `);
+                  }
+                  if (names.includes(dName) === false)
+                    names.push(dName);
+                  if (isNaN(nbUsedByName[dName])) {
+                    nbUsedByName[dName] = 0;
+                  } else
+                    nbUsedByName[dName]++;
+                  newName = dName + "__" + nbUsedByName[dName];
+                  o.newName = newName;
+                  debugByName[newName] = objById[count++] = { ...o };
+                  line = line.replace("debug." + dName, "debug." + newName);
+                } else {
+                  throw new Error(`VERTEX SHADER ERROR on this line :" ${line} ".`);
+                }
+              } else {
+                throw new Error(`VERTEX SHADER ERROR on this line :" ${line} ". The keyword "debug" must only be used to store data. It can't be used in computations.`);
+              }
+            }
+            result += line + "\n";
+          }
+          descriptor.__DEBUG__.objectById = objById;
+          for (let i = 0; i < names.length; i++) {
+            debugByName[names[i]] = void 0;
+            delete debugByName[names[i]];
+          }
+          return result;
+        };
+        const clearComments = (shader2) => {
+          let lines = shader2.split("\n");
+          for (let i = 0; i < lines.length; i++)
+            lines[i] = lines[i].split("//")[0];
+          return lines.join("\n");
+        };
+        descriptor.vertexShader.debugVersion = analyseAndRewriteDebug(clearComments(shader));
+        const simplifyComplexData = () => {
+          const objById = descriptor.__DEBUG__.objectById;
+          const objByName = descriptor.__DEBUG__.objectByName;
+          let o, name, newName, n;
+          let result = [];
+          for (let i = 0; i < objById.length; i++) {
+            o = { ...objById[i] };
+            if (o.type == "mat4x4<f32>") {
+              name = o.newName;
+              newName = name + "_m4";
+              o.isMatrix = true;
+              o.realType = o.type;
+              o.type = "vec4<f32>";
+              objByName[name] = void 0;
+              delete objByName[name];
+              n = newName + "0";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+              n = newName + "1";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+              n = newName + "2";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+              n = newName + "3";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+            } else if (o.type == "mat3x3<f32>") {
+              name = o.newName;
+              newName = name + "_m3";
+              o.isMatrix = true;
+              o.realType = o.type;
+              o.type = "vec3<f32>";
+              objByName[name] = void 0;
+              delete objByName[name];
+              n = newName + "0";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+              n = newName + "1";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+              n = newName + "2";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+              n = newName + "3";
+              objByName[n] = { ...o, newName: n };
+              result.push(objByName[n]);
+            } else if (o.isArray) {
+              const arrayOfMatrix = o.type.includes("mat");
+              const len = o.len;
+              name = o.newName;
+              newName = name + "_ar";
+              o.isMatrix = false;
+              o.realType = o.type;
+              o.type = "vec4<f32>";
+              if (o.realType.includes("i32"))
+                o.type = "vec4<i32>";
+              else if (o.realType.includes("u32"))
+                o.type = "vec4<u32>";
+              objByName[name] = void 0;
+              delete objByName[name];
+              if (arrayOfMatrix) {
+                objByName[name] = void 0;
+                delete objByName[name];
+                for (let j = 0; j < len; j++) {
+                  n = newName + j + "_m0";
+                  objByName[n] = { ...o, newName: n };
+                  result.push(objByName[n]);
+                  n = newName + j + "_m1";
+                  objByName[n] = { ...o, newName: n };
+                  result.push(objByName[n]);
+                  n = newName + j + "_m2";
+                  objByName[n] = { ...o, newName: n };
+                  result.push(objByName[n]);
+                  n = newName + j + "_m3";
+                  objByName[n] = { ...o, newName: n };
+                  result.push(objByName[n]);
+                }
+              } else {
+                for (let i2 = 0; i2 < len; i2++) {
+                  n = newName + i2;
+                  objByName[n] = { ...o, newName: n };
+                  result.push(objByName[n]);
+                }
+              }
+            } else {
+              result.push(o);
+            }
+          }
+          descriptor.__DEBUG__.objectById = result;
+        };
+        simplifyComplexData();
+        return descriptor;
+      });
     }
     parseShaderBuiltins(descriptor) {
       const addComputeInput = (name, val) => {
@@ -6466,9 +4928,15 @@ var __publicField = (obj, key, value) => {
       if (target === "bindgroup") {
         descriptor = this.parseBindgroupEntries(descriptor);
       } else {
+        const debug = this.parseDebugValues(descriptor);
         descriptor = this.firstPass(descriptor, target, drawConfig);
         descriptor = this.parseHighLevelObj(descriptor);
         descriptor = this.findAndFixRepetitionInDataStructure(descriptor);
+        if (debug.nb != 0) {
+          descriptor.__DEBUG__ = debug;
+          descriptor = this.parseVertexShaderDebug(descriptor);
+        }
+        console.log(descriptor);
       }
       return descriptor;
     }
@@ -6658,7 +5126,7 @@ var __publicField = (obj, key, value) => {
                   if (!resource1.gpuResource) resource1.createGpuResource();
                   if (!resource2.gpuResource) resource2.createGpuResource();
       
-                  console.log(resource1, resource2)
+                  //console.log(resource1, resource2)
                   //console.log(resource1.gpuResource === resource2.gpuResource)
       
                   const textures = [resource1.gpuResource, resource2.gpuResource];
@@ -6906,7 +5374,7 @@ var __publicField = (obj, key, value) => {
         }
       }
     }
-    setupDraw() {
+    setupDraw(force = false) {
       if (this.vertexBuffers) {
         for (let i = 0; i < this.vertexBuffers.length; i++) {
           if (!this.vertexBuffers[i].gpuResource) {
@@ -6916,8 +5384,8 @@ var __publicField = (obj, key, value) => {
       }
       if (this.parent.drawConfig) {
         this.indexBuffer = this.parent.drawConfig.indexBuffer;
-        if (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
-          if (!this.parent.resources.types.vertexBuffers) {
+        if (force || !this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
+          if (!force && !this.parent.resources.types.vertexBuffers) {
             throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw");
           }
           const buffers = this.parent.resources.types.vertexBuffers;
@@ -7514,7 +5982,6 @@ var __publicField = (obj, key, value) => {
           if (resource instanceof VertexBuffer)
             ;
           else if (resource instanceof UniformBuffer) {
-            console.log(resource);
             let item;
             for (let z in resource.items) {
               item = resource.items[z];
@@ -7727,6 +6194,13 @@ var __publicField = (obj, key, value) => {
         }
       }
       return null;
+    }
+    setupDraw(force = false) {
+      for (let i = 0; i < this.groups.length; i++) {
+        if (!this.groups[i].setupDrawCompleted) {
+          this.groups[i].setupDraw(force);
+        }
+      }
     }
     get drawConfig() {
       return this.pipeline.drawConfig || null;
@@ -8048,11 +6522,93 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "constants");
       __publicField(this, "main");
       __publicField(this, "shaderType");
+      __publicField(this, "debugLogs", []);
+      __publicField(this, "debugRenders", []);
       __publicField(this, "_shaderInfos");
       this.shaderType = shaderType;
       this.constants = new ShaderNode();
       this.main = new ShaderNode("", true);
     }
+    /*
+        public extractDebugInfo(shaderCode: string): string {
+            const { code, debugLogs, debugRenders } = ShaderStage.extractDebugInfo(shaderCode);
+            this.debugLogs = debugLogs;
+            this.debugRenders = debugRenders;
+            return code;
+        }
+    
+        public static extractDebugInfo(code: string): {
+            code: string,
+            debugLogs: any[],
+            debugRenders: any[]
+        } {
+    
+            const result: any = {};
+            result.debugLogs = [];
+            result.debugRenders = [];
+    
+            const cut = (s: string) => {
+                let id;
+                for (let i = s.length - 1; i > -1; i--) {
+                    if (s[i] === ",") {
+                        id = i;
+                        break;
+                    }
+                }
+    
+                return {
+                    label: s.slice(0, id),
+                    val: s.slice(id + 1)
+                }
+    
+            }
+    
+            const extractDebug = (line: string) => {
+                let s: string = line.split("XGPU.debug(")[1].split(");")[0];
+    
+                //const { label, val } = cut(s);
+                //console.log("A = ", label);
+                //console.log("B = ", val);
+                result.debugLogs.push(cut(s));
+            }
+            const extractDebugRender = (line: string) => {
+                //XGPU.renderDebug("testC : ",output.position,vec4(0.0,0.0,1.0,1.0));
+                let s: string = line.split("XGPU.renderDebug(")[1].split(");")[0];
+                let t = s.split(",vec4")
+                let color = "vec4" + t[1];
+                s = t[0];
+    
+                //const { label, val } = cut(s);
+                //console.log("A = ", label);
+                //console.log("B = ", val);
+                //console.log("C = ", color);
+    
+                result.debugRenders.push({
+                    ...cut(s),
+                    color
+                })
+    
+            }
+    
+    
+            const lines: string[] = code.split("\n");
+            const newLines: string[] = [];
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].includes("XGPU.debug")) {
+                    extractDebug(lines[i])
+                } else if (lines[i].includes("XGPU.renderDebug")) {
+                    extractDebugRender(lines[i]);
+                } else {
+                    newLines.push(lines[i]);
+                }
+            }
+    
+            result.code = newLines.join("\n");
+    
+            return result;
+    
+    
+        }*/
     unwrapVariableInMainFunction(shaderVariables) {
       const variables = shaderVariables.split("\n");
       let s;
@@ -8138,7 +6694,7 @@ var __publicField = (obj, key, value) => {
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
-      if (XGPU.debugFragmentShader) {
+      if (XGPU.showFragmentShader) {
         console.log("------------- FRAGMENT SHADER --------------");
         console.log(result);
         console.log("--------------------------------------------");
@@ -8159,15 +6715,16 @@ var __publicField = (obj, key, value) => {
       result += input.getComputeVariableDeclaration();
       let bool = false;
       for (let i = 0; i < this.outputs.length; i++) {
-        if (this.outputs[0].builtin === BuiltIns.vertexOutputs.position.builtin) {
+        if (this.outputs[i].builtin === BuiltIns.vertexOutputs.position.builtin) {
           bool = true;
         }
       }
-      if (!bool)
+      if (!bool) {
         this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position });
+      }
       let output = new ShaderStruct("Output", [...this.outputs]);
       result += output.struct + "\n";
-      const mainFunc = this.unwrapVariableInMainFunction(obj.variables);
+      let mainFunc = this.unwrapVariableInMainFunction(obj.variables);
       result += "@vertex\n";
       result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
       result += "   var output:Output;\n";
@@ -8175,7 +6732,7 @@ var __publicField = (obj, key, value) => {
       result += "   return output;\n";
       result += "}\n";
       result = this.formatWGSLCode(result);
-      if (XGPU.debugVertexShader) {
+      if (XGPU.showVertexShader) {
         console.log("------------- VERTEX SHADER --------------");
         console.log(result);
         console.log("------------------------------------------");
@@ -8277,6 +6834,847 @@ var __publicField = (obj, key, value) => {
       }
     }
   }
+  class ComputeShader extends ShaderStage {
+    constructor() {
+      super("compute");
+    }
+    build(shaderPipeline, inputs) {
+      if (this._shaderInfos)
+        return this._shaderInfos;
+      let result = "";
+      const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
+      result += obj.result + "\n\n";
+      result += this.constants.value + "\n\n";
+      const w = shaderPipeline.workgroups;
+      let mainFunc = this.unwrapVariableInMainFunction(obj.variables);
+      result += "@compute @workgroup_size(" + w[0] + "," + w[1] + "," + w[2] + ")\n";
+      result += "fn main(" + inputs.getFunctionParams() + ") {\n";
+      result += mainFunc;
+      result += "}\n";
+      if (XGPU.showComputeShader) {
+        console.log("------------- COMPUTE SHADER --------------");
+        console.log(result);
+        console.log("-------------------------------------------");
+      }
+      this._shaderInfos = { code: result, output: null };
+      return this._shaderInfos;
+    }
+  }
+  class ComputePipeline extends Pipeline {
+    constructor() {
+      super();
+      __publicField(this, "computeShader");
+      __publicField(this, "onReceiveData");
+      __publicField(this, "gpuComputePipeline");
+      __publicField(this, "workgroups");
+      __publicField(this, "dispatchWorkgroup");
+      __publicField(this, "bufferSize");
+      __publicField(this, "textureSize");
+      // [width,height]
+      __publicField(this, "stagingBuffer");
+      __publicField(this, "bufferIOs");
+      __publicField(this, "textureIOs");
+      __publicField(this, "onComputeBegin");
+      __publicField(this, "onComputeEnd");
+      __publicField(this, "vertexBufferIOs", []);
+      __publicField(this, "imageTextureIOs", []);
+      __publicField(this, "resourceIOs", []);
+      __publicField(this, "nbVertexMax", 0);
+      __publicField(this, "widthMax", 0);
+      __publicField(this, "heightMax", 0);
+      __publicField(this, "deviceId");
+      __publicField(this, "lastFrameTime", -1);
+      __publicField(this, "rebuildingAfterDeviceLost", false);
+      __publicField(this, "firstFrame", true);
+      __publicField(this, "processingFirstFrame", false);
+      __publicField(this, "waitingFrame", false);
+      this.computeShader = new ComputeShader();
+      this.type = "compute";
+    }
+    set useRenderPipeline(b) {
+      if (b)
+        this.type = "compute_mixed";
+      else
+        this.type = "compute";
+    }
+    initFromObject(descriptor) {
+      this._resources = {};
+      this.vertexShader = null;
+      this.fragmentShader = null;
+      this.bindGroups.destroy();
+      this.bindGroups = new Bindgroups(this, "pipeline");
+      descriptor = HighLevelParser.parse(descriptor, "compute");
+      super.initFromObject(descriptor);
+      if (descriptor.bindgroups) {
+        let group;
+        for (let z in descriptor.bindgroups) {
+          group = new Bindgroup();
+          group.name = z;
+          group.initFromObject(descriptor.bindgroups[z]);
+          this.bindGroups.add(group);
+        }
+        if (descriptor.bindgroups.default) {
+          if (descriptor.bindgroups.default.buffer) {
+            const attributes = descriptor.bindgroups.default.buffer.attributes;
+            for (let z in attributes) {
+              if (descriptor[z])
+                descriptor[z] = attributes[z];
+            }
+          }
+        }
+      }
+      const createArrayOfObjects = (obj) => {
+        const result = [];
+        let o;
+        for (let z in obj) {
+          o = obj[z];
+          result.push({ name: z, ...o });
+        }
+        return result;
+      };
+      this.computeShader = new ComputeShader();
+      if (typeof descriptor.computeShader === "string") {
+        this.computeShader.main.text = descriptor.computeShader;
+      } else {
+        this.computeShader.inputs = createArrayOfObjects(descriptor.computeShader.inputs);
+        this.computeShader.outputs = createArrayOfObjects(descriptor.computeShader.outputs);
+        if (descriptor.computeShader.constants)
+          this.computeShader.constants.text = descriptor.computeShader.constants;
+        this.computeShader.main.text = descriptor.computeShader.main;
+      }
+      let vertexBufferReadyToUse = true;
+      for (let bufferName in this.resources.bindgroups.io) {
+        if (!this.resources.bindgroups.io[bufferName].data) {
+          vertexBufferReadyToUse = false;
+        }
+      }
+      if (vertexBufferReadyToUse)
+        this.nextFrame();
+      return descriptor;
+    }
+    destroy() {
+      this.bindGroups.destroy();
+      for (let z in this.description)
+        this.description[z] = null;
+      for (let z in this) {
+        try {
+          this[z].destroy();
+        } catch (e) {
+          try {
+            this[z].destroyGpuResource();
+          } catch (e2) {
+          }
+        }
+        this[z] = null;
+      }
+    }
+    setWorkgroups(x, y = 1, z = 1) {
+      this.workgroups = [x, y, z];
+    }
+    setDispatchWorkgroup(x = 1, y = 1, z = 1) {
+      this.dispatchWorkgroup = [x, y, z];
+    }
+    initResourceIOs() {
+      const resources = this.bindGroups.resources.io;
+      if (!resources)
+        return;
+      let res;
+      let io;
+      for (let z in resources) {
+        res = resources[z];
+        io = res.resourceIO;
+        if (io instanceof VertexBufferIO) {
+          if (this.vertexBufferIOs.indexOf(io) === -1) {
+            this.resourceIOs.push(io);
+            if (io.nbVertex > this.nbVertexMax)
+              this.nbVertexMax = io.nbVertex;
+            this.vertexBufferIOs.push(io);
+          }
+        } else if (io instanceof ImageTextureIO) {
+          if (this.imageTextureIOs.indexOf(io) === -1) {
+            this.resourceIOs.push(io);
+            if (io.width > this.widthMax)
+              this.widthMax = io.width;
+            if (io.height > this.heightMax)
+              this.heightMax = io.height;
+            this.imageTextureIOs.push(io);
+          }
+        } else
+          ;
+      }
+    }
+    update() {
+      if (!this.gpuComputePipeline)
+        return;
+      if (this.deviceId !== XGPU.deviceId) {
+        this.deviceId = XGPU.deviceId;
+        this.clearAfterDeviceLostAndRebuild();
+        if ((/* @__PURE__ */ new Date()).getTime() - this.lastFrameTime < 100) {
+          this.nextFrame();
+        }
+      }
+      this.bindGroups.update();
+      this.lastFrameTime = (/* @__PURE__ */ new Date()).getTime();
+    }
+    setupDefaultWorkgroups() {
+      if (this.vertexBufferIOs.length) {
+        let n = 64;
+        while (this.nbVertexMax / n >= 65536)
+          n *= 2;
+        this.setWorkgroups(n);
+        this.setDispatchWorkgroup(Math.ceil(this.nbVertexMax / n));
+      } else {
+        this.setWorkgroups(1);
+        this.setDispatchWorkgroup(this.widthMax, this.heightMax);
+      }
+    }
+    clearAfterDeviceLostAndRebuild() {
+      console.warn("ComputePipeline.clearAfterDeviceLostAndRebuild()");
+      this.gpuComputePipeline = null;
+      this.rebuildingAfterDeviceLost = true;
+      super.clearAfterDeviceLostAndRebuild();
+    }
+    buildGpuPipeline() {
+      if (this.gpuComputePipeline)
+        return this.gpuComputePipeline;
+      this.initPipelineResources(this);
+      this.createLayouts();
+      this.bindGroups.handleComputePipelineResourceIOs();
+      this.initResourceIOs();
+      if (!this.workgroups)
+        this.setupDefaultWorkgroups();
+      this.bindGroups.build();
+      const outputs = this.computeShader.outputs;
+      const inputs = this.computeShader.inputs;
+      for (let i = 0; i < outputs.length; i++) {
+        if (outputs[i].type.createGpuResource) {
+          outputs[i].isOutput = true;
+          inputs.push(outputs[i]);
+        }
+      }
+      const inputStruct = new ShaderStruct("Input", [...inputs]);
+      const { code } = this.computeShader.build(this, inputStruct);
+      this.description.compute = {
+        module: XGPU.device.createShaderModule({ code }),
+        entryPoint: "main"
+      };
+      this.description.layout = this.gpuPipelineLayout;
+      this.deviceId = XGPU.deviceId;
+      this.gpuComputePipeline = XGPU.createComputePipeline(this.description);
+      return this.gpuComputePipeline;
+    }
+    async nextFrame() {
+      if (this.processingFirstFrame) {
+        this.waitingFrame = true;
+        return;
+      }
+      if (this.onComputeBegin)
+        this.onComputeBegin();
+      this.processingFirstFrame = this.firstFrame;
+      this.update();
+      const commandEncoder = XGPU.device.createCommandEncoder();
+      const computePass = commandEncoder.beginComputePass();
+      computePass.setPipeline(this.buildGpuPipeline());
+      this.bindGroups.update();
+      this.bindGroups.apply(computePass);
+      computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);
+      computePass.end();
+      XGPU.device.queue.submit([commandEncoder.finish()]);
+      if (this.firstFrame) {
+        await XGPU.device.queue.onSubmittedWorkDone();
+      }
+      for (let i = 0; i < this.resourceIOs.length; i++) {
+        this.resourceIOs[i].getOutputData();
+      }
+      this.firstFrame = false;
+      this.processingFirstFrame = false;
+      if (this.onComputeEnd)
+        this.onComputeEnd();
+      if (this.waitingFrame) {
+        this.waitingFrame = false;
+        this.nextFrame();
+      }
+    }
+  }
+  class VertexShaderDebuggerPipeline extends ComputePipeline {
+    constructor() {
+      super();
+      __publicField(this, "onLog");
+      __publicField(this, "config");
+      __publicField(this, "vertexShaderInputs");
+      __publicField(this, "renderPipeline");
+      __publicField(this, "computeShaderObj");
+      __publicField(this, "resourceByType");
+      __publicField(this, "indexBuffer");
+      __publicField(this, "results");
+      __publicField(this, "resultBufferStructure", {});
+      __publicField(this, "nbValueByFieldIndex", {});
+      __publicField(this, "nbValueByFieldName", {});
+      __publicField(this, "dataTypeByFieldname", {});
+      __publicField(this, "fieldNames", []);
+      __publicField(this, "fieldNewNames", []);
+      __publicField(this, "fieldIndexByName", {});
+      __publicField(this, "attributes", {});
+      __publicField(this, "vertexIdName");
+      // = "vertexId";
+      __publicField(this, "instanceIdName");
+      __publicField(this, "renderUniformBuffers");
+      __publicField(this, "renderVertexBuffers");
+      __publicField(this, "bufferNameByAttributeName");
+      __publicField(this, "vertexBufferIO");
+      __publicField(this, "firstPass", true);
+      __publicField(this, "temporaryIndex", 0);
+    }
+    initRenderPipeline(renderPipeline) {
+      this.renderPipeline = renderPipeline;
+      if (!renderPipeline.pipeline)
+        ;
+      renderPipeline.bindGroups.setupDraw(true);
+      this.resourceByType = renderPipeline.bindGroups.resources.types;
+      this.vertexShaderInputs = renderPipeline.vertexShader.inputs;
+      this.renderUniformBuffers = this.resourceByType.uniformBuffers;
+    }
+    setupIndexBuffer() {
+      let indexBuffer = null;
+      if (this.renderPipeline.resources.indexBuffer) {
+        indexBuffer = this.renderPipeline.resources.indexBuffer;
+        this.computeShaderObj["indexBuffer"] = new VertexBuffer({ id: VertexAttribute.Uint() }, {
+          stepMode: "vertex",
+          datas: indexBuffer.datas
+        });
+      }
+    }
+    setupDataStructure() {
+      this.results = {};
+      this.resultBufferStructure = {};
+      this.nbValueByFieldIndex = {};
+      this.nbValueByFieldName = {};
+      this.dataTypeByFieldname = {};
+      this.fieldNames = [];
+      this.fieldNewNames = [];
+      this.fieldIndexByName = {};
+      this.attributes = {};
+      const vertexShaderDebugs = this.renderPipeline.resources.__DEBUG__.objectById;
+      let nb, name;
+      let debug;
+      for (let i = 0; i < vertexShaderDebugs.length; i++) {
+        debug = vertexShaderDebugs[i];
+        name = debug.name;
+        nb = this.getNbValueByType(debug.type);
+        this.fieldNames[i] = name;
+        this.fieldNewNames[i] = debug.newName;
+        this.fieldIndexByName[name] = i;
+        this.nbValueByFieldIndex[i] = debug.nbValue;
+        this.dataTypeByFieldname[name] = debug.type;
+        this.resultBufferStructure[name] = this.createEmptyArray(nb);
+        this.nbValueByFieldName[name] = nb;
+        this.attributes[debug.newName] = this.getObjectByType(debug.type);
+      }
+    }
+    // = "instanceId";
+    //protected computeUniforms = {};
+    setupVertexShaderBuiltIns() {
+      let input;
+      for (let i = 0; i < this.vertexShaderInputs.length; i++) {
+        input = this.vertexShaderInputs[i];
+        if (input.builtin) {
+          if (input.builtin === "@builtin(vertex_index)") {
+            this.vertexIdName = input.name;
+          } else if (input.builtin === "@builtin(instance_index)") {
+            this.instanceIdName = input.name;
+          }
+        }
+      }
+      if (!this.vertexIdName) {
+        this.vertexIdName = "VERTEX_ID";
+      }
+      if (!this.instanceIdName) {
+        this.instanceIdName = "INSTANCE_ID";
+      }
+    }
+    setupUniformBuffers() {
+      let ub;
+      const cloneUniformBuffer = (buf) => {
+        const result = {};
+        for (let i = 0; i < buf.itemNames.length; i++) {
+          result[buf.itemNames[i]] = buf.items[buf.itemNames[i]].clone();
+        }
+        return new UniformBuffer(result, { useLocalVariable: buf.descriptor.useLocalVariable });
+      };
+      if (this.renderUniformBuffers) {
+        for (let i = 0; i < this.renderUniformBuffers.length; i++) {
+          ub = this.renderUniformBuffers[i];
+          this.computeShaderObj[ub.name] = cloneUniformBuffer(ub.resource);
+        }
+      }
+    }
+    setupVertexBuffers() {
+      this.renderVertexBuffers = this.resourceByType.vertexBuffers;
+      this.bufferNameByAttributeName = [];
+      let vb;
+      let vBuffer;
+      if (this.renderVertexBuffers) {
+        for (let i = 0; i < this.renderVertexBuffers.length; i++) {
+          vb = this.renderVertexBuffers[i];
+          vBuffer = vb.resource;
+          let attributes = vBuffer.attributeDescriptor;
+          for (let z in attributes) {
+            this.bufferNameByAttributeName[z] = vb.name;
+          }
+          this.computeShaderObj[vb.name] = new VertexBuffer(vBuffer.attributeDescriptor, {
+            stepMode: vBuffer.stepMode,
+            datas: vBuffer.datas
+          });
+        }
+      }
+    }
+    setupComputeShaderVertexBufferIO() {
+      this.vertexBufferIO = new VertexBufferIO(this.attributes);
+      this.vertexBufferIO.createVertexInstances(this.config.nbVertex, () => {
+        return this.resultBufferStructure;
+      });
+      let outputResultId;
+      this.vertexBufferIO.onOutputData = (data) => {
+        const result = new Float32Array(data);
+        outputResultId = 0;
+        let outputResults = [];
+        this.vertexBufferIO.getVertexInstances(result, (o) => {
+          let result2 = {};
+          for (let z in o)
+            result2[z] = { ...o[z] };
+          outputResults[outputResultId++] = result2;
+          if (this.onLog && outputResultId == this.config.nbVertex) {
+            this.onLog({
+              config: this.config,
+              results: outputResults,
+              nbValueByFieldName: this.nbValueByFieldName,
+              renderPipeline: this.renderPipeline,
+              dataTypeByFieldname: this.dataTypeByFieldname
+            });
+          }
+        });
+      };
+    }
+    convertLetIntoVar(shader) {
+      let result = "";
+      let lines = shader.split("\n");
+      let line;
+      let chars = "abcdefghijklmnopqrstuvwxyz/";
+      chars += chars.toUpperCase();
+      const getFirstCharId = (line2) => {
+        for (let i = 0; i < line2.length; i++) {
+          if (chars.includes(line2[i]))
+            return i;
+        }
+        return line2.length - 1;
+      };
+      for (let i = 0; i < lines.length; i++) {
+        line = lines[i];
+        line = line.slice(getFirstCharId(line));
+        if (line.slice(0, 4) === "let ") {
+          line = "var " + line.slice(4);
+        }
+        result += " " + line + "\n";
+      }
+      return result;
+    }
+    removeVar(shader) {
+      let result = "";
+      let lines = shader.split("\n");
+      let line;
+      for (let i = 0; i < lines.length; i++) {
+        line = lines[i];
+        if (line.slice(0, 5) === " var ")
+          line = line.slice(5);
+        result += " " + line + "\n";
+      }
+      return result;
+    }
+    writeComputeShader() {
+      let outputVariables = "";
+      let outputs = this.renderPipeline.vertexShader.outputs;
+      for (let i = 0; i < outputs.length; i++) {
+        outputVariables += `var output_${outputs[i].name} = ${this.getNewInstanceByType(outputs[i].type)};
+`;
+      }
+      let computeShader = ``;
+      if (this.indexBuffer)
+        computeShader += `let index:u32 = indexBuffer[global_id.x].id;`;
+      else
+        computeShader += `let index = global_id.x;`;
+      computeShader += `
+        ${outputVariables}
+        let nbResult = arrayLength(&result);
+        if(index >= nbResult){
+            return;
+        }
+
+        var computeResult = result[index];
+        var ${this.vertexIdName}:u32 = 0;
+        var ${this.instanceIdName}:u32 = 0;
+        `;
+      let input;
+      for (let i = 0; i < this.vertexShaderInputs.length; i++) {
+        input = this.vertexShaderInputs[i];
+        if (input.builtin.slice(0, 8) != "@builtin") {
+          computeShader += `var computed_vertex_${input.name}:${input.type};
+`;
+        }
+      }
+      let usedNames = {};
+      const vertexShaderDebugs = this.renderPipeline.resources.__DEBUG__.objectById;
+      for (let i = 0; i < vertexShaderDebugs.length; i++) {
+        if (!usedNames[vertexShaderDebugs[i].name]) {
+          usedNames[vertexShaderDebugs[i].name] = true;
+          computeShader += this.writeVertexShader(vertexShaderDebugs[i]);
+        }
+      }
+      if (XGPU.showVertexDebuggerShader) {
+        console.log("------------- VERTEX DEBUGGER SHADER --------------");
+        console.log(computeShader);
+        console.log("---------------------------------------------------");
+      }
+      return computeShader;
+    }
+    writeVertexShader(debugObject) {
+      const { vertexId, instanceId, name } = debugObject;
+      let mainCode = `
+        ${this.vertexIdName} = ${vertexId};
+        ${this.instanceIdName} = ${instanceId};
+
+        `;
+      let input;
+      for (let i = 0; i < this.vertexShaderInputs.length; i++) {
+        input = this.vertexShaderInputs[i];
+        if (input.builtin.slice(0, 8) != "@builtin") {
+          mainCode += `computed_vertex_${input.name} = ${this.bufferNameByAttributeName[input.name]}[${this.vertexIdName}+index].${input.name};
+`;
+        }
+      }
+      const searchAndReplace = (shaderCode, wordToReplace, replacement) => {
+        const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
+        return shaderCode.replace(regex, replacement);
+      };
+      let attributeNames = [];
+      let vertexShaderText = this.renderPipeline.resources.vertexShader.debugVersion;
+      for (let i = 0; i < this.vertexShaderInputs.length; i++) {
+        input = this.vertexShaderInputs[i];
+        if (input.builtin.slice(0, 8) != "@builtin") {
+          attributeNames[this.fieldIndexByName[input.name]] = input.name;
+          vertexShaderText = searchAndReplace(vertexShaderText, input.name, "computed_vertex_" + input.name);
+        }
+      }
+      const lines = vertexShaderText.split("\n");
+      const chars = "abcdefghijklmnopqrstuvwxyz/";
+      const isChars = {};
+      for (let i = 0; i < chars.length; i++) {
+        isChars[chars[i]] = true;
+        isChars[chars[i].toUpperCase()] = true;
+      }
+      const getFirstCharId = (line) => {
+        for (let i = 0; i < line.length; i++) {
+          if (isChars[line[i]])
+            return i;
+        }
+        return line.length - 1;
+      };
+      for (let i = 0; i < lines.length; i++) {
+        lines[i] = " " + lines[i].slice(getFirstCharId(lines[i]));
+      }
+      vertexShaderText = lines.join("\n");
+      vertexShaderText = searchAndReplace(vertexShaderText, "output.", "output_");
+      let vertexResultText = searchAndReplace(vertexShaderText, "debug", "computeResult");
+      function keepCurrentResourceDeclarationOnly(code, searchBase, search) {
+        const lines2 = code.split("\n");
+        let result = "";
+        let line;
+        let alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
+        let trimLine;
+        alphaNumeric += alphaNumeric.toUpperCase();
+        for (let i = 0; i < lines2.length; i++) {
+          line = lines2[i];
+          if (line.includes(searchBase)) {
+            if (line.includes(search)) {
+              const array = line.split(search);
+              let bool = true;
+              for (let j = 0; j < array.length; j++) {
+                if (alphaNumeric.includes(array[j][0])) {
+                  bool = false;
+                  break;
+                }
+              }
+              if (bool)
+                result += line + "\n";
+            }
+          } else {
+            trimLine = line.trim();
+            if (trimLine.length != 0) {
+              result += line + "\n";
+            }
+          }
+        }
+        return result;
+      }
+      vertexResultText = keepCurrentResourceDeclarationOnly(vertexResultText, "computeResult.", "computeResult." + debugObject.name);
+      vertexResultText = this.convertLetIntoVar(vertexResultText);
+      if (!this.firstPass)
+        vertexResultText = this.removeVar(vertexResultText);
+      mainCode += vertexResultText + "\n";
+      for (let i = 0; i < this.fieldNames.length; i++) {
+        if (this.fieldNewNames[i].includes(debugObject.name)) {
+          mainCode += `result_out[index].${this.fieldNewNames[i]} =  computeResult.${this.fieldNewNames[i]};
+`;
+        }
+      }
+      const debugById = this.renderPipeline.resources.__DEBUG__.objectById;
+      let debug;
+      let alreadyDefined = {};
+      let temp;
+      let isMatrix4x4;
+      for (let i = 0; i < debugById.length; i++) {
+        debug = debugById[i];
+        if (debug.name != name)
+          continue;
+        if (debug.isMatrix) {
+          isMatrix4x4 = debug.newName.includes("_m4");
+          if (isMatrix4x4)
+            temp = debug.newName.split("_m4")[0];
+          else
+            temp = debug.newName.split("_m3")[0];
+          if (!alreadyDefined[temp]) {
+            alreadyDefined[temp] = true;
+            mainCode = this.writeMatrixTemplate(mainCode, temp, isMatrix4x4);
+          }
+        } else if (debug.isArray) {
+          temp = debug.newName.split("_ar")[0];
+          if (!alreadyDefined[temp]) {
+            alreadyDefined[temp] = true;
+            mainCode = this.writeArrayTemplate(mainCode, temp, debug.len, debug.primitiveType);
+          }
+        }
+      }
+      this.firstPass = false;
+      return mainCode;
+    }
+    writeArrayTemplate(shader, computeMatrixName, arrayLen, primitiveType) {
+      let abc = "abcdefghijklmnopqrstuvwxyz0123456789";
+      abc += abc.toUpperCase();
+      let lines = shader.split("\n");
+      let line;
+      const isComplexVal = (val) => {
+        for (let i = 0; i < val.length; i++) {
+          if (abc.includes(val[i]))
+            continue;
+          else
+            return true;
+        }
+        return false;
+      };
+      let tempName;
+      const writeTemplate = (computeName, matrixName) => {
+        let result = "";
+        let nb = arrayLen;
+        let isArrayMatrix = primitiveType == "mat4";
+        for (let i = 0; i < nb; i++) {
+          if (!isArrayMatrix)
+            result += `computeResult.${computeName}_ar${i} = ${matrixName}[${i}];
+`;
+          else {
+            result += `computeResult.${computeName}_ar${i}_m0 = ${matrixName}[${i}][0];
+`;
+            result += `computeResult.${computeName}_ar${i}_m1 = ${matrixName}[${i}][1];
+`;
+            result += `computeResult.${computeName}_ar${i}_m2 = ${matrixName}[${i}][2];
+`;
+            result += `computeResult.${computeName}_ar${i}_m3 = ${matrixName}[${i}][3];
+`;
+          }
+        }
+        result += "\n";
+        return result;
+      };
+      let newLine = "";
+      for (let i = 0; i < lines.length; i++) {
+        line = lines[i];
+        if (line.includes("computeResult." + computeMatrixName) == true) {
+          newLine = "";
+          let val = line.split("=")[1].split(";")[0].trim();
+          let j = i;
+          if (isComplexVal(val)) {
+            if (line.includes(";") === false) {
+              for (j = i + 1; j < lines.length; j++) {
+                if (lines[j].includes(";") == false) {
+                  val += lines[j] + "\n";
+                  lines[j] = "";
+                } else {
+                  val += lines[j].split(";")[0] + "";
+                  lines[j] = "";
+                  break;
+                }
+              }
+            }
+            tempName = "temporaryVariable_" + this.temporaryIndex++;
+            if (primitiveType === "mat4")
+              newLine = "let " + tempName + ":array<mat4x4<f32>," + arrayLen + "> = " + val + ";\n";
+            else
+              newLine = "let " + tempName + ":array<vec4<" + primitiveType + "> = " + val + ";\n";
+            val = tempName;
+          }
+          newLine += writeTemplate(computeMatrixName, val);
+          lines[i] = newLine;
+          break;
+        }
+      }
+      return lines.join("\n");
+    }
+    writeMatrixTemplate(shader, computeMatrixName, mat4x4 = true) {
+      let abc = "abcdefghijklmnopqrstuvwxyz0123456789";
+      abc += abc.toUpperCase();
+      let lines = shader.split("\n");
+      let line;
+      const isComplexVal = (val) => {
+        for (let i = 0; i < val.length; i++) {
+          if (abc.includes(val[i]))
+            continue;
+          else
+            return true;
+        }
+        return false;
+      };
+      let tempName;
+      const writeTemplate = (computeName, matrixName) => {
+        let result = "";
+        let nb = 4;
+        if (mat4x4 == false)
+          nb = 3;
+        for (let i = 0; i < nb; i++) {
+          result += `computeResult.${computeName}_m${nb}${i} = ${matrixName}[${i}];
+`;
+        }
+        result += "\n";
+        return result;
+      };
+      let newLine = "";
+      for (let i = 0; i < lines.length; i++) {
+        line = lines[i];
+        if (line.includes("computeResult." + computeMatrixName) == true) {
+          newLine = "";
+          let val = line.split("=")[1].split(";")[0].trim();
+          let j = i;
+          if (isComplexVal(val)) {
+            if (line.includes(";") === false) {
+              for (j = i + 1; j < lines.length; j++) {
+                if (lines[j].includes(";") == false) {
+                  val += lines[j] + "\n";
+                  lines[j] = "";
+                } else {
+                  val += lines[j].split(";")[0] + "";
+                  lines[j] = "";
+                  break;
+                }
+              }
+            }
+            tempName = "temporaryVariable_" + this.temporaryIndex++;
+            if (mat4x4)
+              newLine = "let " + tempName + ":mat4x4<f32> = " + val + ";\n";
+            else
+              newLine = "let " + tempName + ":mat3x3<f32> = " + val + ";\n";
+            val = tempName;
+          }
+          newLine += writeTemplate(computeMatrixName, val);
+          lines[i] = newLine;
+          break;
+        }
+      }
+      return lines.join("\n");
+    }
+    buildComputeShader() {
+      this.computeShaderObj.result = this.vertexBufferIO;
+      this.computeShaderObj.global_id = BuiltIns.computeInputs.globalInvocationId;
+      this.computeShaderObj.computeShader = {
+        constants: this.renderPipeline.vertexShader.constants.text,
+        main: this.writeComputeShader()
+      };
+      this.initFromObject(this.computeShaderObj);
+      let groups = this.bindGroups.groups;
+      for (let i = 0; i < groups.length; i++)
+        groups[i].mustRefreshBindgroup = true;
+    }
+    copyUniformsFromRenderToCompute() {
+      if (!this.renderUniformBuffers)
+        return;
+      let ub;
+      let itemNames;
+      for (let i = 0; i < this.renderUniformBuffers.length; i++) {
+        ub = this.renderUniformBuffers[i];
+        itemNames = ub.resource.itemNames;
+        for (let j = 0; j < itemNames.length; j++) {
+          this.computeShaderObj[ub.name].items[itemNames[j]].set(ub.resource.items[itemNames[j]]);
+        }
+      }
+    }
+    init(renderPipeline, nbVertex) {
+      if (!nbVertex)
+        nbVertex = 1;
+      this.config = { nbVertex };
+      this.computeShaderObj = {
+        bindgroups: {
+          io: {}
+          //computeShaders have a reserved bindgroup 'io' , dedicated to the ping-pong process 
+        }
+      };
+      this.initRenderPipeline(renderPipeline);
+      this.setupIndexBuffer();
+      this.setupDataStructure();
+      this.setupVertexShaderBuiltIns();
+      this.setupUniformBuffers();
+      this.setupVertexBuffers();
+      this.setupComputeShaderVertexBufferIO();
+      this.buildComputeShader();
+      this.onComputeBegin = () => {
+        this.copyUniformsFromRenderToCompute();
+      };
+    }
+    createEmptyArray(len) {
+      const arr = [];
+      for (let i = 0; i < len; i++)
+        arr[i] = 0;
+      return arr;
+    }
+    getObjectByType(type) {
+      if (type === "f32")
+        return VertexAttribute.Float();
+      if (type === "vec2<f32>")
+        return VertexAttribute.Vec2();
+      if (type === "vec3<f32>")
+        return VertexAttribute.Vec3();
+      if (type === "vec4<f32>")
+        return VertexAttribute.Vec4();
+      return null;
+    }
+    getNbValueByType(type) {
+      if (type === "f32")
+        return 1;
+      if (type === "vec2<f32>")
+        return 2;
+      if (type === "vec3<f32>")
+        return 3;
+      if (type === "vec4<f32>")
+        return 4;
+      return 0;
+    }
+    getNewInstanceByType(type) {
+      if (type === "f32")
+        return "0.0";
+      if (type === "vec2<f32>")
+        return "vec2(0.0)";
+      if (type === "vec3<f32>")
+        return "vec3(0.0)";
+      if (type === "vec4<f32>")
+        return "vec4(0.0)";
+      return "";
+    }
+  }
   class RenderPipeline extends Pipeline {
     constructor(renderer, bgColor = { r: 0, g: 0, b: 0, a: 1 }) {
       super();
@@ -8288,11 +7686,14 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "renderPassTexture");
       __publicField(this, "outputColor");
       __publicField(this, "renderPassDescriptor", { colorAttachments: [] });
+      __publicField(this, "vertexShaderDebuggerPipeline", null);
       __publicField(this, "gpuPipeline");
       __publicField(this, "debug", "renderPipeline");
       __publicField(this, "onDrawBegin");
       __publicField(this, "onDrawEnd");
       __publicField(this, "onDraw");
+      __publicField(this, "_onLog", () => {
+      });
       __publicField(this, "blendMode");
       __publicField(this, "rebuildingAfterDeviceLost", false);
       __publicField(this, "onRebuildStartAfterDeviceLost");
@@ -8458,17 +7859,6 @@ var __publicField = (obj, key, value) => {
       }
       return descriptor;
     }
-    /*
-    private handleVertexBufferIO(){
-        const groups = this.bindGroups.groups;
-        let group:Bindgroup;
-        let element:{name:string,resource:IShaderResource};
-        for(let i=0;i<groups.length;i++){
-            group = groups[i];
-            for(group.elements
-        }
-    }
-    */
     get clearValue() {
       if (!this.renderPassDescriptor.colorAttachment)
         return null;
@@ -8498,6 +7888,18 @@ var __publicField = (obj, key, value) => {
         this.drawConfig.indexBuffer = o.indexBuffer;
       if (o.baseVertex !== void 0)
         this.drawConfig.baseVertex = o.baseVertex;
+    }
+    get onLog() {
+      return this._onLog;
+    }
+    set onLog(onLog) {
+      this._onLog = onLog;
+    }
+    get debugVertexCount() {
+      return this.resources.debugVertexCount;
+    }
+    set debugVertexCount(n) {
+      this.resources.debugVertexCount = n;
     }
     get vertexCount() {
       return this.drawConfig.vertexCount;
@@ -8639,19 +8041,12 @@ var __publicField = (obj, key, value) => {
         }
         this.description.vertex = {
           code: vertexShader.code,
-          /*module: XGPU.device.createShaderModule({
-              code: vertexShader.code
-          }),*/
           entryPoint: "main",
           buffers: o.description.vertex.buffers
-          //this.createVertexBufferLayout()
         };
         if (this.fragmentShader) {
           this.description.fragment = {
             code: fragmentShader.code,
-            /*module: XGPU.device.createShaderModule({
-                code: fragmentShader.code
-            }),*/
             entryPoint: "main",
             targets: [
               this.getFragmentShaderColorOptions()
@@ -8665,11 +8060,20 @@ var __publicField = (obj, key, value) => {
       }
       this.rebuildingAfterDeviceLost = false;
       this.gpuPipeline = XGPU.createRenderPipeline(this.description);
+      if (this.resources.__DEBUG__) {
+        this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
+        this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount);
+        this.vertexShaderDebuggerPipeline.onLog = (o2) => {
+          this._onLog(o2);
+        };
+      }
       return this.gpuPipeline;
     }
     beginRenderPass(commandEncoder, outputView, drawCallId) {
       if (!this.resourceDefined)
         return null;
+      if (this.vertexShaderDebuggerPipeline)
+        this.vertexShaderDebuggerPipeline.nextFrame();
       if (this.onDrawBegin)
         this.onDrawBegin();
       let rendererUseSinglePipeline = this.renderer.useSinglePipeline && this.pipelineCount === 1;
@@ -8815,251 +8219,6 @@ var __publicField = (obj, key, value) => {
     }
     set stripIndexFormat(s) {
       this.description.primitive.stripIndexFormat = s;
-    }
-  }
-  class ComputeShader extends ShaderStage {
-    constructor() {
-      super("compute");
-    }
-    build(shaderPipeline, inputs) {
-      if (this._shaderInfos)
-        return this._shaderInfos;
-      let result = this.constants.value + "\n\n";
-      const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
-      result += obj.result;
-      const w = shaderPipeline.workgroups;
-      result += "@compute @workgroup_size(" + w[0] + "," + w[1] + "," + w[2] + ")\n";
-      result += "fn main(" + inputs.getFunctionParams() + ") {\n";
-      result += obj.variables + "\n";
-      result += this.main.value;
-      result += "}\n";
-      if (XGPU.debugComputeShader) {
-        console.log("------------- COMPUTE SHADER --------------");
-        console.log(result);
-        console.log("-------------------------------------------");
-      }
-      this._shaderInfos = { code: result, output: null };
-      return this._shaderInfos;
-    }
-  }
-  class ComputePipeline extends Pipeline {
-    constructor() {
-      super();
-      __publicField(this, "computeShader");
-      __publicField(this, "onReceiveData");
-      __publicField(this, "gpuComputePipeline");
-      __publicField(this, "workgroups");
-      __publicField(this, "dispatchWorkgroup");
-      __publicField(this, "bufferSize");
-      __publicField(this, "textureSize");
-      // [width,height]
-      __publicField(this, "stagingBuffer");
-      __publicField(this, "bufferIOs");
-      __publicField(this, "textureIOs");
-      __publicField(this, "onComputeBegin");
-      __publicField(this, "onComputeEnd");
-      __publicField(this, "vertexBufferIOs", []);
-      __publicField(this, "imageTextureIOs", []);
-      __publicField(this, "resourceIOs", []);
-      __publicField(this, "nbVertexMax", 0);
-      __publicField(this, "widthMax", 0);
-      __publicField(this, "heightMax", 0);
-      __publicField(this, "deviceId");
-      __publicField(this, "lastFrameTime", -1);
-      __publicField(this, "rebuildingAfterDeviceLost", false);
-      __publicField(this, "firstFrame", true);
-      __publicField(this, "processingFirstFrame", false);
-      __publicField(this, "waitingFrame", false);
-      this.computeShader = new ComputeShader();
-      this.type = "compute";
-    }
-    set useRenderPipeline(b) {
-      if (b)
-        this.type = "compute_mixed";
-      else
-        this.type = "compute";
-    }
-    initFromObject(descriptor) {
-      this._resources = {};
-      this.vertexShader = null;
-      this.fragmentShader = null;
-      this.bindGroups.destroy();
-      this.bindGroups = new Bindgroups(this, "pipeline");
-      descriptor = HighLevelParser.parse(descriptor, "compute");
-      super.initFromObject(descriptor);
-      if (descriptor.bindgroups) {
-        let group;
-        for (let z in descriptor.bindgroups) {
-          group = new Bindgroup();
-          group.name = z;
-          group.initFromObject(descriptor.bindgroups[z]);
-          this.bindGroups.add(group);
-        }
-        if (descriptor.bindgroups.default) {
-          if (descriptor.bindgroups.default.buffer) {
-            const attributes = descriptor.bindgroups.default.buffer.attributes;
-            for (let z in attributes) {
-              if (descriptor[z])
-                descriptor[z] = attributes[z];
-            }
-          }
-        }
-      }
-      const createArrayOfObjects = (obj) => {
-        const result = [];
-        let o;
-        for (let z in obj) {
-          o = obj[z];
-          result.push({ name: z, ...o });
-        }
-        return result;
-      };
-      this.computeShader = new ComputeShader();
-      if (typeof descriptor.computeShader === "string") {
-        this.computeShader.main.text = descriptor.computeShader;
-      } else {
-        this.computeShader.inputs = createArrayOfObjects(descriptor.computeShader.inputs);
-        this.computeShader.outputs = createArrayOfObjects(descriptor.computeShader.outputs);
-        if (descriptor.computeShader.constants)
-          this.computeShader.constants.text = descriptor.computeShader.constants;
-        this.computeShader.main.text = descriptor.computeShader.main;
-      }
-      let vertexBufferReadyToUse = true;
-      for (let bufferName in this.resources.bindgroups.io) {
-        if (!this.resources.bindgroups.io[bufferName].data) {
-          vertexBufferReadyToUse = false;
-        }
-      }
-      if (vertexBufferReadyToUse)
-        this.nextFrame();
-      return descriptor;
-    }
-    setWorkgroups(x, y = 1, z = 1) {
-      this.workgroups = [x, y, z];
-    }
-    setDispatchWorkgroup(x = 1, y = 1, z = 1) {
-      this.dispatchWorkgroup = [x, y, z];
-    }
-    initResourceIOs() {
-      const resources = this.bindGroups.resources.io;
-      if (!resources)
-        return;
-      let res;
-      let io;
-      for (let z in resources) {
-        res = resources[z];
-        io = res.resourceIO;
-        if (io instanceof VertexBufferIO) {
-          if (this.vertexBufferIOs.indexOf(io) === -1) {
-            this.resourceIOs.push(io);
-            if (io.nbVertex > this.nbVertexMax)
-              this.nbVertexMax = io.nbVertex;
-            this.vertexBufferIOs.push(io);
-          }
-        } else if (io instanceof ImageTextureIO) {
-          if (this.imageTextureIOs.indexOf(io) === -1) {
-            this.resourceIOs.push(io);
-            if (io.width > this.widthMax)
-              this.widthMax = io.width;
-            if (io.height > this.heightMax)
-              this.heightMax = io.height;
-            this.imageTextureIOs.push(io);
-          }
-        } else
-          ;
-      }
-    }
-    update() {
-      if (!this.gpuComputePipeline)
-        return;
-      if (this.deviceId !== XGPU.deviceId) {
-        this.deviceId = XGPU.deviceId;
-        this.clearAfterDeviceLostAndRebuild();
-        if ((/* @__PURE__ */ new Date()).getTime() - this.lastFrameTime < 100) {
-          this.nextFrame();
-        }
-      }
-      this.bindGroups.update();
-      this.lastFrameTime = (/* @__PURE__ */ new Date()).getTime();
-    }
-    setupDefaultWorkgroups() {
-      if (this.vertexBufferIOs.length) {
-        let n = 64;
-        while (this.nbVertexMax / n >= 65536)
-          n *= 2;
-        this.setWorkgroups(n);
-        this.setDispatchWorkgroup(Math.ceil(this.nbVertexMax / n));
-      } else {
-        this.setWorkgroups(1);
-        this.setDispatchWorkgroup(this.widthMax, this.heightMax);
-      }
-    }
-    clearAfterDeviceLostAndRebuild() {
-      console.warn("ComputePipeline.clearAfterDeviceLostAndRebuild()");
-      this.gpuComputePipeline = null;
-      this.rebuildingAfterDeviceLost = true;
-      super.clearAfterDeviceLostAndRebuild();
-    }
-    buildGpuPipeline() {
-      if (this.gpuComputePipeline)
-        return this.gpuComputePipeline;
-      this.initPipelineResources(this);
-      this.createLayouts();
-      this.bindGroups.handleComputePipelineResourceIOs();
-      this.initResourceIOs();
-      if (!this.workgroups)
-        this.setupDefaultWorkgroups();
-      this.bindGroups.build();
-      const outputs = this.computeShader.outputs;
-      const inputs = this.computeShader.inputs;
-      for (let i = 0; i < outputs.length; i++) {
-        if (outputs[i].type.createGpuResource) {
-          outputs[i].isOutput = true;
-          inputs.push(outputs[i]);
-        }
-      }
-      const inputStruct = new ShaderStruct("Input", [...inputs]);
-      const { code } = this.computeShader.build(this, inputStruct);
-      this.description.compute = {
-        module: XGPU.device.createShaderModule({ code }),
-        entryPoint: "main"
-      };
-      this.description.layout = this.gpuPipelineLayout;
-      this.deviceId = XGPU.deviceId;
-      this.gpuComputePipeline = XGPU.createComputePipeline(this.description);
-      return this.gpuComputePipeline;
-    }
-    async nextFrame() {
-      if (this.processingFirstFrame) {
-        this.waitingFrame = true;
-        return;
-      }
-      if (this.onComputeBegin)
-        this.onComputeBegin();
-      this.processingFirstFrame = this.firstFrame;
-      this.update();
-      const commandEncoder = XGPU.device.createCommandEncoder();
-      const computePass = commandEncoder.beginComputePass();
-      computePass.setPipeline(this.buildGpuPipeline());
-      this.bindGroups.update();
-      this.bindGroups.apply(computePass);
-      computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);
-      computePass.end();
-      XGPU.device.queue.submit([commandEncoder.finish()]);
-      if (this.firstFrame) {
-        await XGPU.device.queue.onSubmittedWorkDone();
-      }
-      for (let i = 0; i < this.resourceIOs.length; i++) {
-        this.resourceIOs[i].getOutputData();
-      }
-      this.firstFrame = false;
-      this.processingFirstFrame = false;
-      if (this.onComputeEnd)
-        this.onComputeEnd();
-      if (this.waitingFrame) {
-        this.waitingFrame = false;
-        this.nextFrame();
-      }
     }
   }
   class PipelinePlugin {
@@ -9235,6 +8394,7 @@ var __publicField = (obj, key, value) => {
   exports2.VertexBuffer = VertexBuffer;
   exports2.VertexBufferIO = VertexBufferIO;
   exports2.VertexShader = VertexShader;
+  exports2.VertexShaderDebuggerPipeline = VertexShaderDebuggerPipeline;
   exports2.VideoTexture = VideoTexture;
   exports2.XGPU = XGPU;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });

@@ -17,7 +17,7 @@ export class VertexBufferIO {
         this.descriptor = descriptor;
         if (!descriptor.stepMode)
             descriptor.stepMode = "instance";
-        console.log(descriptor.stepMode);
+        //console.log(descriptor.stepMode)
         this.deviceId = XGPU.deviceId;
         this.buffers[0] = new VertexBuffer(attributes, descriptor);
         this.buffers[1] = new VertexBuffer(attributes, descriptor);
@@ -58,13 +58,13 @@ export class VertexBufferIO {
             return null;
         if (!this.canCallMapAsync)
             return;
+        this.canCallMapAsync = false;
         if (!this.stagingBuffer)
             this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
         const copyEncoder = XGPU.device.createCommandEncoder();
         const stage = this.stagingBuffer;
         copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
         XGPU.device.queue.submit([copyEncoder.finish()]);
-        this.canCallMapAsync = false;
         await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size);
         this.canCallMapAsync = true;
         const copyArray = stage.getMappedRange(0, stage.size);

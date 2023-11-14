@@ -39,6 +39,7 @@ export declare class ComputePipeline extends Pipeline {
             constants?: string;
         } | string;
     };
+    destroy(): void;
     setWorkgroups(x: number, y?: number, z?: number): void;
     setDispatchWorkgroup(x?: number, y?: number, z?: number): void;
     protected vertexBufferIOs: VertexBufferIO[];

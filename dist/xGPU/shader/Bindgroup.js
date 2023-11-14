@@ -264,7 +264,7 @@ export class Bindgroup {
         }
     }
     setupDrawCompleted = false;
-    setupDraw() {
+    setupDraw(force = false) {
         if (this.vertexBuffers) {
             for (let i = 0; i < this.vertexBuffers.length; i++) {
                 if (!this.vertexBuffers[i].gpuResource) {
@@ -274,8 +274,8 @@ export class Bindgroup {
         }
         if (this.parent.drawConfig) { //may be undefined with a computePipeline
             this.indexBuffer = this.parent.drawConfig.indexBuffer;
-            if (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0) {
-                if (!this.parent.resources.types.vertexBuffers) {
+            if (force || (!this.indexBuffer && this.parent.drawConfig.vertexCount <= 0)) {
+                if (!force && !this.parent.resources.types.vertexBuffers) {
                     throw new Error("a renderPipeline require a vertexBuffer or a drawConfig object in order to draw. You must add a vertexBuffer or call RenderPipeline.setupDraw");
                 }
                 const buffers = this.parent.resources.types.vertexBuffers;
@@ -484,7 +484,7 @@ export class Bindgroup {
             if (!resource1.gpuResource) resource1.createGpuResource();
             if (!resource2.gpuResource) resource2.createGpuResource();
 
-            console.log(resource1, resource2)
+            //console.log(resource1, resource2)
             //console.log(resource1.gpuResource === resource2.gpuResource)
 
             const textures = [resource1.gpuResource, resource2.gpuResource];

@@ -1,13 +1,15 @@
 /// <reference types="dist" />
 export declare class XGPU {
-    static debugVertexShader: boolean;
-    static debugFragmentShader: boolean;
-    static debugComputeShader: boolean;
+    static showVertexShader: boolean;
+    static showFragmentShader: boolean;
+    static showComputeShader: boolean;
+    static showVertexDebuggerShader: boolean;
     private static _ready;
     static get ready(): boolean;
     protected static gpuDevice: GPUDevice;
-    static debugUsage(usage: number): "GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM" | "GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.UNIFORM" | "GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM" | "GPUBufferUsage.STORAGE" | "GPUBufferUsage.COPY_DST" | "GPUBufferUsage.VERTEX" | "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST" | "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX" | "GPUBufferUsage.COPY_SRC" | "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC" | "GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST" | "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST" | "GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_SRC" | "";
-    static debugShaderStage(n: number): "" | "GPUShaderStage.COMPUTE" | "GPUShaderStage.VERTEX" | "GPUShaderStage.FRAGMENT";
+    static debugUsage(usage: number): string;
+    static debugTextureUsage(usage: number): string;
+    static debugShaderStage(n: number): string;
     constructor();
     private static requestAdapterOptions;
     private static losingDevice;

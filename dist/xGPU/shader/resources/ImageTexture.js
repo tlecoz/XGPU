@@ -182,7 +182,7 @@ export class ImageTexture {
     _textureType;
     get textureType() { return this._textureType; }
     set textureType(o) {
-        console.log("set textureType ", o);
+        //console.log("set textureType ", o)
         this._textureType = o;
     }
     createBindGroupLayoutEntry(bindingId) {
@@ -191,7 +191,7 @@ export class ImageTexture {
             sampleType = "sint";
         else if (this.sampledType === "u32")
             sampleType = "uint";
-        console.warn("createBindGroupLayoutEntry ", this.io);
+        //console.warn("createBindGroupLayoutEntry ", this.io)
         if (this.io != 2)
             return {
                 binding: bindingId,

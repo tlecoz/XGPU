@@ -10,6 +10,7 @@ export class VertexShader extends ShaderStage {
         super("vertex");
     }
     build(pipeline, input) {
+        //this.main.text = this.extractDebugInfo(this.main.text);
         let result = this.constants.value + "\n\n";
         //if (this.keepRendererAspectRatio) result += "const xgpuRendererAspectRatio = " + (pipeline.renderer.width / pipeline.renderer.height).toFixed(4) + ";\n\n";
         const obj = pipeline.bindGroups.getVertexShaderDeclaration();
@@ -21,15 +22,16 @@ export class VertexShader extends ShaderStage {
         //-----
         let bool = false;
         for (let i = 0; i < this.outputs.length; i++) {
-            if (this.outputs[0].builtin === BuiltIns.vertexOutputs.position.builtin) {
+            if (this.outputs[i].builtin === BuiltIns.vertexOutputs.position.builtin) {
                 bool = true;
             }
         }
-        if (!bool)
+        if (!bool) {
             this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position });
+        }
         let output = new ShaderStruct("Output", [...this.outputs]);
         result += output.struct + "\n";
-        const mainFunc = this.unwrapVariableInMainFunction(obj.variables); //handleVariables();
+        let mainFunc = this.unwrapVariableInMainFunction(obj.variables); //handleVariables();
         //------
         //console.log("VertexShader.variables = ", obj.variables)
         result += "@vertex\n";
@@ -39,7 +41,7 @@ export class VertexShader extends ShaderStage {
         result += "   return output;\n";
         result += "}\n";
         result = this.formatWGSLCode(result);
-        if (XGPU.debugVertexShader) {
+        if (XGPU.showVertexShader) {
             console.log("------------- VERTEX SHADER --------------");
             console.log(result);
             console.log("------------------------------------------");

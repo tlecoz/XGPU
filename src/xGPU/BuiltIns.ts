@@ -1,6 +1,5 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
-import { Float, IVec2, IVec3, IVec4, IVec4Array, Int, Matrix3x3, Matrix4x4, Matrix4x4Array, PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform, UVec2, UVec3, UVec4, UVec4Array, Uint, Vec2, Vec3, Vec4, Vec4Array } from "./PrimitiveType"
 
 
 export class BuiltIns {

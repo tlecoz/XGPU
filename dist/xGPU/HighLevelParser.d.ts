@@ -20,6 +20,8 @@ export declare class HighLevelParser {
     protected findAndFixRepetitionInDataStructure(o: any): any;
     protected targetIsBindgroup: boolean;
     protected parseBindgroupEntries(descriptor: any): any;
+    private parseDebugValues;
+    private parseVertexShaderDebug;
     parse(descriptor: any, target: "render" | "compute" | "bindgroup", drawConfig?: DrawConfig): any;
     private static instance;
     static parse(descriptor: any, target: "render" | "compute" | "bindgroup", drawConfig?: DrawConfig): any;

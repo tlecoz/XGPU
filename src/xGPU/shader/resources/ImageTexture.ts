@@ -274,7 +274,7 @@ export class ImageTexture implements IShaderResource {
     protected _textureType: { texture: any } | { storageTexture: any };
     public get textureType(): any { return this._textureType }
     public set textureType(o: any) {
-        console.log("set textureType ", o)
+        //console.log("set textureType ", o)
         this._textureType = o;
     }
     public createBindGroupLayoutEntry(bindingId: number): { binding: number, visibility: number, storageTexture?: GPUStorageTextureBindingLayout, texture?: GPUTextureBindingLayout } {
@@ -283,7 +283,7 @@ export class ImageTexture implements IShaderResource {
         if (this.sampledType === "i32") sampleType = "sint";
         else if (this.sampledType === "u32") sampleType = "uint";
 
-        console.warn("createBindGroupLayoutEntry ", this.io)
+        //console.warn("createBindGroupLayoutEntry ", this.io)
 
 
         if (this.io != 2) return {

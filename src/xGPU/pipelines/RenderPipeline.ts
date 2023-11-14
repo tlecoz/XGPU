@@ -617,8 +617,6 @@ export class RenderPipeline extends Pipeline {
         this.rebuildingAfterDeviceLost = false;
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
 
-        let started: boolean = false;
-        let name: string;
 
 
         if (this.resources.__DEBUG__) {
@@ -626,13 +624,7 @@ export class RenderPipeline extends Pipeline {
             this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount)
             this.vertexShaderDebuggerPipeline.onLog = (o) => {
-                if (!started) {
-                    started = true;
-                    for (let z in o.results[0]) {
-                        name = z;
-                        break;
-                    }
-                }
+
 
                 this._onLog(o);
             }

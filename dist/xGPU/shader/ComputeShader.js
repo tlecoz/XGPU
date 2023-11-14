@@ -9,17 +9,20 @@ export class ComputeShader extends ShaderStage {
     build(shaderPipeline, inputs) {
         if (this._shaderInfos)
             return this._shaderInfos;
-        let result = this.constants.value + "\n\n";
+        let result = "";
         const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
-        result += obj.result;
+        result += obj.result + "\n\n";
+        result += this.constants.value + "\n\n";
         //------
         const w = shaderPipeline.workgroups;
+        let mainFunc = this.unwrapVariableInMainFunction(obj.variables); //handleVariables();
         result += "@compute @workgroup_size(" + w[0] + "," + w[1] + "," + w[2] + ")\n";
         result += "fn main(" + inputs.getFunctionParams() + ") {\n";
-        result += obj.variables + "\n";
-        result += this.main.value;
+        //result += obj.variables + "\n";
+        //result += this.main.value;
+        result += mainFunc;
         result += "}\n";
-        if (XGPU.debugComputeShader) {
+        if (XGPU.showComputeShader) {
             console.log("------------- COMPUTE SHADER --------------");
             console.log(result);
             console.log("-------------------------------------------");

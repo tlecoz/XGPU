@@ -638,7 +638,7 @@ export class Bindgroup {
             if (!resource1.gpuResource) resource1.createGpuResource();
             if (!resource2.gpuResource) resource2.createGpuResource();
 
-            console.log(resource1, resource2)
+            //console.log(resource1, resource2)
             //console.log(resource1.gpuResource === resource2.gpuResource)
 
             const textures = [resource1.gpuResource, resource2.gpuResource];

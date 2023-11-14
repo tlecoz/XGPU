@@ -7,7 +7,7 @@ export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance";
     accessMode?: "read" | "read_write";
     usage?: GPUBufferUsageFlags;
-    datas?: Float32Array | Int32Array | Uint32Array;
+    datas?: Float32Array | Int32Array | Uint32Array | Uint16Array;
 };
 export declare class VertexBuffer implements IShaderResource {
     bufferId: number;
@@ -24,7 +24,9 @@ export declare class VertexBuffer implements IShaderResource {
     attributeChanged: boolean;
     constructor(attributes: any, descriptor?: {
         stepMode?: "vertex" | "instance";
-        datas?: Float32Array | Int32Array | Uint32Array;
+        accessMode?: "read" | "read_write";
+        usage?: GPUBufferUsageFlags;
+        datas?: Float32Array | Int32Array | Uint32Array | Uint16Array;
     });
     clone(): VertexBuffer;
     protected gpuBufferIOs: GPUBuffer[];
@@ -36,8 +38,8 @@ export declare class VertexBuffer implements IShaderResource {
     get length(): number;
     get nbComponent(): number;
     get nbVertex(): number;
-    get datas(): Float32Array | Int32Array | Uint32Array;
-    set datas(f: Float32Array | Int32Array | Uint32Array);
+    get datas(): Float32Array | Int32Array | Uint32Array | Uint16Array;
+    set datas(f: Float32Array | Int32Array | Uint32Array | Uint16Array);
     setComplexDatas(datas: Float32Array | Int32Array | Uint32Array, nbComponentTotal: number): void;
     get attributeDescriptor(): any;
     private _byteCount;
@@ -63,6 +65,7 @@ export declare class VertexBuffer implements IShaderResource {
     get bufferSize(): number;
     createGpuResource(): void;
     time: number;
+    protected destroyed: boolean;
     destroyGpuResource(): void;
     updateBuffer(): void;
     getVertexArrayById(id: number): VertexAttribute;
