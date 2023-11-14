@@ -23,9 +23,10 @@ export class ComputeShader extends ShaderStage {
 
 
 
-        let result = this.constants.value + "\n\n";
+        let result = "";
         const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
-        result += obj.result;
+        result += obj.result + "\n\n";
+        result += this.constants.value + "\n\n";
 
         //------
 
@@ -42,7 +43,7 @@ export class ComputeShader extends ShaderStage {
         result += mainFunc;
         result += "}\n";
 
-        if (XGPU.debugComputeShader) {
+        if (XGPU.showComputeShader) {
             console.log("------------- COMPUTE SHADER --------------")
             console.log(result)
             console.log("-------------------------------------------")

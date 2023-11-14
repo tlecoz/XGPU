@@ -56,7 +56,7 @@ export class FragmentShader extends ShaderStage {
 
         result = this.formatWGSLCode(result)
 
-        if (XGPU.debugFragmentShader) {
+        if (XGPU.showFragmentShader) {
             console.log("------------- FRAGMENT SHADER --------------")
             console.log(result)
             console.log("--------------------------------------------")

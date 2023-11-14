@@ -10,9 +10,10 @@ import { WebGPUProperties } from "./WebGPUProperties";
 export class XGPU {
 
 
-    public static debugVertexShader: boolean = false;
-    public static debugFragmentShader: boolean = false;
-    public static debugComputeShader: boolean = false;
+    public static showVertexShader: boolean = false;
+    public static showFragmentShader: boolean = false;
+    public static showComputeShader: boolean = true;
+    public static showVertexDebuggerShader: boolean = true;
 
     private static _ready: boolean = false;
     public static get ready(): boolean { return this._ready; }

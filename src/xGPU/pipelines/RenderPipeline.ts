@@ -26,8 +26,6 @@ import { ImageTextureIO } from "../shader/resources/ImageTextureIO";
 import { PrimitiveType } from "../PrimitiveType";
 import { UniformBuffer } from "../shader/resources/UniformBuffer";
 import { VertexShaderDebuggerPipeline } from "./VertexShaderDebuggerPipeline";
-import { ShaderStage } from "../shader/shaderParts/ShaderStage";
-import { VertexShaderFeedbackPipeline } from "./VertexShaderFeedbackPipeline";
 
 
 export type HighLevelShaderResource = (IShaderResource | VertexBufferIO | ImageTextureIO | PrimitiveType | VertexAttribute)
@@ -74,6 +72,7 @@ export type RenderPipelineProperties = {
 
     vertexCount?: number,
     instanceCount?: number,
+    debugVertexCount?: number,
     firstVertexId?: number,
     firstInstanceId?: number,
     cullMode?: "front" | "back" | "none",
@@ -89,11 +88,7 @@ export type RenderPipelineProperties = {
     bindgroups?: BindgroupsDescriptor,
     indexBuffer?: IndexBuffer,
     fragmentShader?: FragmentShaderDescriptor,
-    vertexShaderDebugger?: {
-        startVertexId?: number,
-        instanceId?: number,
-        nbVertex?: number
-    },
+
 }
 
 export type RenderPipelineDescriptor = RenderPipelineProperties & BindgroupDescriptor
@@ -111,11 +106,7 @@ export class RenderPipeline extends Pipeline {
     public renderPassDescriptor: any = { colorAttachments: [] }
 
 
-
-    protected vertexDebuggerPipeline: VertexShaderDebuggerPipeline = null;
-    protected vertexDebuggerConfig: { startVertexId: number, instanceId: number, nbVertex: number } = null;
-
-    protected vertexFeedbackPipeline: VertexShaderFeedbackPipeline = null;
+    protected vertexShaderDebuggerPipeline: VertexShaderDebuggerPipeline = null;
 
     protected gpuPipeline: GPURenderPipeline;
 
@@ -183,6 +174,7 @@ export class RenderPipeline extends Pipeline {
         keepRendererAspectRatio?: boolean,
         vertexCount?: number,
         instanceCount?: number,
+        debugVertexCount?: number,
         antiAliasing?: boolean,
         useDepthTexture?: boolean,
         depthTextureSize?: number,
@@ -191,11 +183,7 @@ export class RenderPipeline extends Pipeline {
         blendMode?: BlendMode,
         bindgroups?: any,
         indexBuffer?: IndexBuffer,
-        vertexShaderDebugger?: {
-            startVertexId?: number,
-            instanceId?: number,
-            nbVertex?: number,
-        },
+
 
         vertexShader: {
             main: string
@@ -213,8 +201,7 @@ export class RenderPipeline extends Pipeline {
     }): any {
 
 
-        this.vertexDebuggerConfig = null;
-        this.vertexDebuggerPipeline = null;
+
         this._resources = {};
         this.vertexShader = null;
         this.fragmentShader = null;
@@ -222,37 +209,10 @@ export class RenderPipeline extends Pipeline {
         this.bindGroups.destroy();
         this.bindGroups = new Bindgroups(this, "pipeline");
 
-        //--------
-
-        if (descriptor.vertexShaderDebugger || true) {
-            this.vertexDebuggerConfig = {
-                startVertexId: 0,
-                instanceId: 0,
-                nbVertex: 1,
-                ...descriptor.vertexShaderDebugger
-            }
-
-            let shader: string;
-            if (typeof (descriptor.vertexShader) === "string") shader = descriptor.vertexShader;
-            else shader = descriptor.vertexShader.main;
-
-
-        }
-
-
-
-
-
-
 
 
 
         descriptor = HighLevelParser.parse(descriptor, "render", this.drawConfig);
-        //console.log("descriptor ", descriptor)
-
-
-
-
 
 
         super.initFromObject(descriptor);
@@ -277,9 +237,7 @@ export class RenderPipeline extends Pipeline {
 
 
         if (descriptor.indexBuffer) {
-
             this.drawConfig.indexBuffer = descriptor.indexBuffer;
-            //this.indexBuffer = descriptor.indexBuffer;
         }
 
         if (this.outputColor) {
@@ -363,8 +321,6 @@ export class RenderPipeline extends Pipeline {
 
         this.vertexShader = new VertexShader();
 
-        //if (descriptor.keepRendererAspectRatio !== undefined) this.vertexShader.keepRendererAspectRatio = descriptor.keepRendererAspectRatio;
-
         if (typeof descriptor.vertexShader === "string") {
             this.vertexShader.main.text = descriptor.vertexShader;
         } else {
@@ -390,23 +346,11 @@ export class RenderPipeline extends Pipeline {
 
         }
 
-        //console.log("initFromObject time = ", (new Date().getTime() - time))
-
 
         return descriptor;
 
     }
-    /*
-    private handleVertexBufferIO(){
-        const groups = this.bindGroups.groups;
-        let group:Bindgroup;
-        let element:{name:string,resource:IShaderResource};
-        for(let i=0;i<groups.length;i++){
-            group = groups[i];
-            for(group.elements
-        }
-    }
-    */
+
     public get clearValue(): { r: number, g: number, b: number, a: number } {
         if (!this.renderPassDescriptor.colorAttachment) return null;
         return this.renderPassDescriptor.colorAttachment.clearValue;
@@ -445,6 +389,15 @@ export class RenderPipeline extends Pipeline {
         if (o.baseVertex !== undefined) this.drawConfig.baseVertex = o.baseVertex;
     }
 
+
+
+    private _onLog: (o?: any) => void = () => { };
+    public get onLog() { return this._onLog };
+    public set onLog(onLog: (o: any) => void) { this._onLog = onLog; }
+
+
+    public get debugVertexCount(): number { return this.resources.debugVertexCount }
+    public set debugVertexCount(n: number) { this.resources.debugVertexCount = n; }
 
     public get vertexCount(): number { return this.drawConfig.vertexCount }
     public set vertexCount(n: number) { this.drawConfig.vertexCount = n; }
@@ -579,13 +532,6 @@ export class RenderPipeline extends Pipeline {
     }
 
 
-    private _onLog: (o?: any) => void = () => { };
-    public get onLog() { return this._onLog };
-    public set onLog(onLog: (o: any) => void) {
-        this._onLog = onLog;
-        if (this.vertexDebuggerPipeline) this.vertexDebuggerPipeline.onLog = onLog;
-    }
-
 
 
 
@@ -643,20 +589,14 @@ export class RenderPipeline extends Pipeline {
 
             this.description.vertex = {
                 code: vertexShader.code,
-                /*module: XGPU.device.createShaderModule({
-                    code: vertexShader.code
-                }),*/
                 entryPoint: "main",
-                buffers: o.description.vertex.buffers//this.createVertexBufferLayout()
+                buffers: o.description.vertex.buffers
             }
 
             if (this.fragmentShader) {
 
                 this.description.fragment = {
                     code: fragmentShader.code,
-                    /*module: XGPU.device.createShaderModule({
-                        code: fragmentShader.code
-                    }),*/
                     entryPoint: "main",
                     targets: [
                         this.getFragmentShaderColorOptions()
@@ -673,48 +613,19 @@ export class RenderPipeline extends Pipeline {
             this.description.fragment.module = XGPU.device.createShaderModule({ code: this.description.fragment.code })
         }
 
-        //console.log(this.description)
 
         this.rebuildingAfterDeviceLost = false;
-        //console.log("pipelineDescription : ", this.description)
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
-
 
         let started: boolean = false;
         let name: string;
 
 
-        if (this.vertexDebuggerConfig && this.type == "render") {
-
-
-            this.vertexDebuggerPipeline = new VertexShaderDebuggerPipeline();
-            this.vertexDebuggerPipeline.init(this, this.vertexDebuggerConfig);
-
-            /*
-            this.vertexDebuggerPipeline.onLog = (o) => {
-                if (!started) {
-                    started = true;
-                    for (let z in o.results[0]) {
-                        name = z;
-                        break;
-                    }
-                }
-                //console.log(name, o.results[0][name]);
-
-                this._onLog(o);
-            }
-            */
-
-            console.log("this.vertexDebuggerPipeline = ", this.vertexDebuggerPipeline)
-
-        }
-
-
         if (this.resources.__DEBUG__) {
 
-            this.vertexFeedbackPipeline = new VertexShaderFeedbackPipeline();
-            this.vertexFeedbackPipeline.init(this, this.vertexDebuggerConfig)
-            this.vertexFeedbackPipeline.onLog = (o) => {
+            this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
+            this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount)
+            this.vertexShaderDebuggerPipeline.onLog = (o) => {
                 if (!started) {
                     started = true;
                     for (let z in o.results[0]) {
@@ -722,9 +633,8 @@ export class RenderPipeline extends Pipeline {
                         break;
                     }
                 }
-                console.log(name, o.results[0]);
 
-                //this._onLog(o);
+                this._onLog(o);
             }
         }
 
@@ -743,8 +653,8 @@ export class RenderPipeline extends Pipeline {
         if (!this.resourceDefined) return null;
 
 
-        if (this.vertexDebuggerPipeline) this.vertexDebuggerPipeline.nextFrame();
-        if (this.vertexFeedbackPipeline) this.vertexFeedbackPipeline.nextFrame();
+
+        if (this.vertexShaderDebuggerPipeline) this.vertexShaderDebuggerPipeline.nextFrame();
 
 
         if (this.onDrawBegin) this.onDrawBegin();
@@ -781,17 +691,8 @@ export class RenderPipeline extends Pipeline {
 
         if (!this.gpuPipeline) this.buildGpuPipeline();
 
-
-
-
-
         if (outputView && this.outputColor) this.handleOutputColor(outputView);
 
-
-
-
-
-        //console.log("renderPassDescriptor = ", this.renderPassDescriptor);
         return commandEncoder.beginRenderPass(this.renderPassDescriptor);
     }
 
@@ -831,13 +732,9 @@ export class RenderPipeline extends Pipeline {
 
         if (!this.resourceDefined) return;
 
-
-
-
         renderPass.setPipeline(this.gpuPipeline);
 
         this.bindGroups.apply(renderPass);
-
 
     }
 

@@ -873,9 +873,11 @@ export class HighLevelParser {
                     o.name = name;
                 }
 
+
+                /*
                 if (name.includes("_")) {
                     throw new Error(`BUILTINS ERROR :: ${name}  A variable using a BuiltIns.vertexDebug cannot use an underscore in its name.`)
-                }
+                }*/
 
                 descriptor[name] = undefined;
                 indexs[nb] = new Vec4(o.vertexId, o.instanceId, 0, 0);
@@ -935,7 +937,7 @@ export class HighLevelParser {
         }
 
         const extractDebugName = (line: string): string => {
-            let abc = "abcdefghijklmnopqrstuvwxyz0123456789";
+            let abc = "abcdefghijklmnopqrstuvwxyz0123456789_";
             abc += abc.toUpperCase();
 
             let char: string;

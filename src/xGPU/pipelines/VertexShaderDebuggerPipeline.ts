@@ -1,5 +1,5 @@
 import { BuiltIns } from "../BuiltIns";
-import { Uint, Vec4 } from "../PrimitiveType";
+import { Uint } from "../PrimitiveType";
 import { ComputePipeline } from "./ComputePipeline";
 import { RenderPipeline } from "./RenderPipeline";
 import { IndexBuffer } from "./resources/IndexBuffer";
@@ -7,6 +7,7 @@ import { UniformBuffer } from "../shader/resources/UniformBuffer";
 import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
+import { XGPU } from "../XGPU";
 
 
 export class VertexShaderDebuggerPipeline extends ComputePipeline {
@@ -76,6 +77,7 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
     protected nbValueByFieldName: any = {};
     protected dataTypeByFieldname: any = {};
     protected fieldNames: string[] = [];
+    protected fieldNewNames: string[] = [];
     protected fieldIndexByName: any = {};
     protected attributes: any = {};
 
@@ -86,22 +88,28 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
         this.nbValueByFieldName = {};
         this.dataTypeByFieldname = {};
         this.fieldNames = [];
+        this.fieldNewNames = [];
         this.fieldIndexByName = {};
         this.attributes = {};
 
-        const vertexShaderOutputs = this.renderPipeline.vertexShader.outputs;
+        //const vertexShaderOutputs = this.renderPipeline.vertexShader.outputs;
+        const vertexShaderDebugs = this.renderPipeline.resources.__DEBUG__.objectById;
+
         let nb: number, name: string;
-        let output: { name: string, type: string, builtin?: string };
-        for (let i = 0; i < vertexShaderOutputs.length; i++) {
-            output = vertexShaderOutputs[i];
-            name = output.name;
-            nb = this.getNbValueByType(output.type)
+        let debug: { name: string, newName: string, type: string, builtin?: string, nbValue: number };
+        for (let i = 0; i < vertexShaderDebugs.length; i++) {
+            debug = vertexShaderDebugs[i];
+            name = debug.name;
+            nb = this.getNbValueByType(debug.type)
+
+            //console.log(i, debug.name, debug.newName)
 
             //used to write the shader code
             this.fieldNames[i] = name;
+            this.fieldNewNames[i] = debug.newName;
             this.fieldIndexByName[name] = i;
-            this.nbValueByFieldIndex[i] = nb;
-            this.dataTypeByFieldname[name] = output.type;
+            this.nbValueByFieldIndex[i] = debug.nbValue;
+            this.dataTypeByFieldname[name] = debug.type;
 
 
             //used to fill the vertexBufferIO with the appropriate property names and the correct data structure
@@ -110,7 +118,8 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
             //used to manipule the data outside of this class
             this.nbValueByFieldName[name] = nb;
 
-            this.attributes[name] = this.getObjectByType(output.type)
+            //console.log("debug.type = ", debug)
+            this.attributes[debug.newName] = this.getObjectByType(debug.type)
 
         }
     }
@@ -118,7 +127,7 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
     protected vertexIdName: string;// = "vertexId";
     protected instanceIdName: string;// = "instanceId";
-    protected computeUniforms = {};
+    //protected computeUniforms = {};
 
     protected setupVertexShaderBuiltIns() {
         let input: { name: string, type: string, builtin?: string };
@@ -135,22 +144,22 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
             if (input.builtin) {
                 if (input.builtin === "@builtin(vertex_index)") {
                     this.vertexIdName = input.name;
-                    this.computeUniforms[input.name] = new Uint(this.config.startVertexId, true)
+                    //this.computeUniforms[input.name] = new Uint(this.config.startVertexId, true)
                 } else if (input.builtin === "@builtin(instance_index)") {
                     this.instanceIdName = input.name;
-                    this.computeUniforms[input.name] = new Uint(this.config.instanceId, true)
+                    //this.computeUniforms[input.name] = new Uint(this.config.instanceId, true)
                 }
             }
         }
 
         if (!this.vertexIdName) {
-            this.vertexIdName = "vertex_ID"
-            this.computeUniforms[this.vertexIdName] = new Uint(this.config.startVertexId, true)
+            this.vertexIdName = "VERTEX_ID";
+            //this.computeUniforms[this.vertexIdName] = new Uint(this.config.startVertexId, true)
         }
 
         if (!this.instanceIdName) {
-            this.instanceIdName = "instance_ID"
-            this.computeUniforms[this.instanceIdName] = new Uint(this.config.startVertexId, true)
+            this.instanceIdName = "INSTANCE_ID";
+            //this.computeUniforms[this.instanceIdName] = new Uint(this.config.startVertexId, true)
         }
     }
 
@@ -252,34 +261,23 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
     }
 
 
-    protected writeComputeShader(): string {
+    protected writeVertexShader(debugObject: any): string {
 
+        const { vertexId, instanceId, name } = debugObject;
 
-        /*
-        the VertexAttributes used as input of the vertexShader must be redefined in the computeShader in 
-        order to target a particular vertex in the buffer, to mimic the behaviour of a vertexShader
-        */
+        let mainCode: string = `
+        ${this.vertexIdName} = ${vertexId};
+        ${this.instanceIdName} = ${instanceId};
 
-        let computeShader: string = ``;
-        if (this.indexBuffer) computeShader += `let index:u32 = indexBuffer[global_id.x].id;`;
-        else computeShader += `let index = global_id.x;`;
-        computeShader += `
-        let nbResult = arrayLength(&result);
-        if(index >= nbResult){
-            return;
-        }
-
-
-
-        var computeResult = result[index];
         `;
+
 
         let input: any;
         for (let i = 0; i < this.vertexShaderInputs.length; i++) {
             input = this.vertexShaderInputs[i];
 
             if (input.builtin.slice(0, 8) != "@builtin") { //if it's not explicitly a builtin, it's a vertexAttribute
-                computeShader += `var computed_vertex_${input.name} = ${this.bufferNameByAttributeName[input.name]}[${this.vertexIdName}+index].${input.name};\n`;
+                mainCode += `computed_vertex_${input.name} = ${this.bufferNameByAttributeName[input.name]}[${this.vertexIdName}+index].${input.name};\n`;
             }
         }
 
@@ -296,7 +294,8 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
 
         let attributeNames: string[] = [];
-        let vertexShaderText = this.renderPipeline.vertexShader.main.value;
+        let vertexShaderText = this.renderPipeline.resources.vertexShader.debugVersion;
+
         for (let i = 0; i < this.vertexShaderInputs.length; i++) {
             input = this.vertexShaderInputs[i];
             if (input.builtin.slice(0, 8) != "@builtin") {
@@ -307,7 +306,7 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
 
         /*
-        we also need to update the code that involve the keyword 'output' in order to target our result buffer instead
+        we also need to update the code that involve the keyword 'debug' in order to target our result buffer instead
         */
 
 
@@ -331,10 +330,63 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
         vertexShaderText = lines.join("\n");
 
+        vertexShaderText = searchAndReplace(vertexShaderText, "output.", "output_");
 
-        vertexShaderText = searchAndReplace(vertexShaderText, "output", "computeResult");
-        computeShader += vertexShaderText + "\n";
 
+        let vertexResultText = searchAndReplace(vertexShaderText, "debug", "computeResult");
+
+
+        /*
+        we keep only the computeResult value related to the debug-object we are processing
+        in order to not replace the previously computed values 
+        (the function "vertexShader" will be called multiple times, shering the same string-output)
+        */
+        function keepCurrentResourceDeclarationOnly(code: string, searchBase: string, search: string) {
+
+            /*
+            we keep every line that : 
+            - are not empty
+            - doesn't contain "computeResult."
+            - contain "computeResult.${debugObject.name}"
+            */
+
+            const lines = code.split("\n");
+            let result = "";
+            let line;
+            let alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
+            let trimLine: string;
+            alphaNumeric += alphaNumeric.toUpperCase();
+
+            for (let i = 0; i < lines.length; i++) {
+                line = lines[i];
+                if (line.includes(searchBase)) {
+                    if (line.includes(search)) {
+                        const array = line.split(search);
+                        let bool = true;
+                        for (let j = 0; j < array.length; j++) {
+                            if (alphaNumeric.includes(array[j][0])) {
+                                bool = false;
+                                break;
+                            }
+                        }
+                        if (bool) result += line + "\n";
+                    }
+
+                } else {
+                    trimLine = line.trim();
+                    if (trimLine.length != 0) {
+                        result += line + "\n";
+                    }
+
+                }
+            }
+            return result;
+        }
+        vertexResultText = keepCurrentResourceDeclarationOnly(vertexResultText, "computeResult.", "computeResult." + debugObject.name);
+
+
+
+        mainCode += vertexResultText + "\n";
 
         /*
         we put the vertexData in our result buffer
@@ -343,17 +395,295 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
 
         for (let i = 0; i < this.fieldNames.length; i++) {
-            computeShader += `
-            result_out[index].${this.fieldNames[i]} =  computeResult.${this.fieldNames[i]};    
-                `;
+            console.log(i, this.fieldNewNames[i], this.fieldNames[i], debugObject.name)
+            if (this.fieldNewNames[i].includes(debugObject.name)) {
+                mainCode += `result_out[index].${this.fieldNewNames[i]} =  computeResult.${this.fieldNewNames[i]};\n`;
+            }
+        }
+
+
+        const debugById = this.renderPipeline.resources.__DEBUG__.objectById;
+        let debug: any;
+        let alreadyDefined: any = {};
+        let temp: string;
+        let isMatrix4x4;
+        for (let i = 0; i < debugById.length; i++) {
+            debug = debugById[i];
+            if (debug.name != name) continue;
+
+            if (debug.isMatrix) {
+
+                isMatrix4x4 = debug.newName.includes("_m4");
+
+                if (isMatrix4x4) temp = debug.newName.split("_m4")[0];
+                else temp = debug.newName.split("_m3")[0];
+
+                if (!alreadyDefined[temp]) {
+                    alreadyDefined[temp] = true;
+                    mainCode = this.writeMatrixTemplate(mainCode, temp, isMatrix4x4)
+                }
+            } else if (debug.isArray) {
+
+                temp = debug.newName.split("_ar")[0];
+                if (!alreadyDefined[temp]) {
+                    alreadyDefined[temp] = true;
+                    mainCode = this.writeArrayTemplate(mainCode, temp, debug.len, debug.primitiveType)
+                }
+
+            }
+        }
+
+        return mainCode;
+    }
+
+
+    protected writeComputeShader(): string {
+
+        /*
+        the vertexShader outputs must be replaced by local variables
+        */
+        let outputVariables = "";
+        let outputs = this.renderPipeline.vertexShader.outputs;
+        for (let i = 0; i < outputs.length; i++) {
+            console.log(i, outputs[i])
+            outputVariables += `var output_${outputs[i].name} = ${this.getNewInstanceByType(outputs[i].type)};\n`
+        }
+
+
+
+        /*
+        the VertexAttributes used as input of the vertexShader must be redefined in the computeShader in 
+        order to target a particular vertex in the buffer, to mimic the behaviour of a vertexShader
+        */
+        let computeShader: string = ``;
+        if (this.indexBuffer) computeShader += `let index:u32 = indexBuffer[global_id.x].id;`;
+        else computeShader += `let index = global_id.x;`;
+        computeShader += `
+        ${outputVariables}
+        let nbResult = arrayLength(&result);
+        if(index >= nbResult){
+            return;
+        }
+
+        var computeResult = result[index];
+        var ${this.vertexIdName}:u32 = 0;
+        var ${this.instanceIdName}:u32 = 0;
+        `;
+
+        let input: any;
+        for (let i = 0; i < this.vertexShaderInputs.length; i++) {
+            input = this.vertexShaderInputs[i];
+            console.log("input.type = ", input)
+            if (input.builtin.slice(0, 8) != "@builtin") { //if it's not explicitly a builtin, it's a vertexAttribute
+                computeShader += `var computed_vertex_${input.name}:${input.type};\n`;
+            }
+        }
+
+
+
+        const vertexShaderDebugs = this.renderPipeline.resources.__DEBUG__.objectById;
+        for (let i = 0; i < vertexShaderDebugs.length; i++) {
+
+            computeShader += this.writeVertexShader(vertexShaderDebugs[i]);
+        }
+
+
+
+        if (XGPU.showVertexDebuggerShader) {
+            console.log("------------- VERTEX DEBUGGER SHADER --------------")
+            console.log(computeShader)
+            console.log("---------------------------------------------------")
         }
 
         return computeShader;
     }
 
 
+
+
+
+    private writeArrayTemplate(shader: string, computeMatrixName: string, arrayLen: number, primitiveType: "f32" | "i32" | "u32" | "mat4"): string {
+        let abc = "abcdefghijklmnopqrstuvwxyz0123456789"
+        abc += abc.toUpperCase();
+        let lines: string[] = shader.split("\n");
+        let line: string;
+
+        const isComplexVal = (val: string): boolean => {
+            for (let i = 0; i < val.length; i++) {
+                if (abc.includes(val[i])) continue;
+                else return true;
+            }
+            return false;
+        }
+
+
+
+        let tempName: string;
+
+
+
+        const writeTemplate = (computeName: string, matrixName: string): string => {
+            let result = "";
+            let nb = arrayLen;
+            let isArrayMatrix = primitiveType == "mat4";
+
+            for (let i = 0; i < nb; i++) {
+                if (!isArrayMatrix) result += `computeResult.${computeName}_ar${i} = ${matrixName}[${i}];\n`;
+                else {
+                    result += `computeResult.${computeName}_ar${i}_m0 = ${matrixName}[${i}][0];\n`;
+                    result += `computeResult.${computeName}_ar${i}_m1 = ${matrixName}[${i}][1];\n`;
+                    result += `computeResult.${computeName}_ar${i}_m2 = ${matrixName}[${i}][2];\n`;
+                    result += `computeResult.${computeName}_ar${i}_m3 = ${matrixName}[${i}][3];\n\n`;
+                }
+            }
+            result += "\n";
+            return result;
+        }
+
+        let newLine = "";
+        for (let i = 0; i < lines.length; i++) {
+            line = lines[i];
+            //console.log(i, " line = ", computeMatrixName, line);
+            if (line.includes("computeResult." + computeMatrixName) == true) {
+                newLine = "";
+                let val = line.split("=")[1].split(";")[0].trim();
+                //console.log("val = ", val)
+
+                let j = i;
+                if (isComplexVal(val)) {
+
+                    if (line.includes(";") === false) {
+
+                        for (j = i + 1; j < lines.length; j++) {
+
+                            if (lines[j].includes(";") == false) {
+                                val += lines[j] + "\n";
+                                lines[j] = "";
+                            } else {
+                                val += lines[j].split(";")[0] + "";
+                                lines[j] = "";
+                                break;
+                            }
+                        }
+                    }
+
+
+                    tempName = "temporaryVariable_" + this.temporaryIndex++;
+                    if (primitiveType === "mat4") newLine = "let " + tempName + ":array<mat4x4<f32>," + arrayLen + "> = " + val + ";\n";
+                    else newLine = "let " + tempName + ":array<vec4<" + primitiveType + "> = " + val + ";\n";
+                    val = tempName;
+                }
+
+                newLine += writeTemplate(computeMatrixName, val);
+                lines[i] = newLine;
+
+
+                break;
+
+            }
+
+        }
+
+        return lines.join("\n");
+
+
+    }
+
+
+
+
+
+
+
+    private temporaryIndex: number = 0;
+    private writeMatrixTemplate(shader: string, computeMatrixName: string, mat4x4: boolean = true): string {
+        let abc = "abcdefghijklmnopqrstuvwxyz0123456789"
+        abc += abc.toUpperCase();
+        let lines: string[] = shader.split("\n");
+        let line: string;
+
+        const isComplexVal = (val: string): boolean => {
+            for (let i = 0; i < val.length; i++) {
+                if (abc.includes(val[i])) continue;
+                else return true;
+            }
+            return false;
+        }
+
+
+        let tempId = 0;
+        let tempName: string;
+
+
+
+        const writeTemplate = (computeName: string, matrixName: string): string => {
+            let result = "";
+            let nb = 4;
+            if (mat4x4 == false) nb = 3;
+            console.log(computeName + " => mat4x4:", mat4x4);
+            for (let i = 0; i < nb; i++) {
+                result += `computeResult.${computeName}_m${nb}${i} = ${matrixName}[${i}];\n`;
+            }
+            result += "\n";
+            return result;
+        }
+
+        let newLine = "";
+        for (let i = 0; i < lines.length; i++) {
+            line = lines[i];
+            //console.log(i, " line = ", computeMatrixName, line);
+            if (line.includes("computeResult." + computeMatrixName) == true) {
+                newLine = "";
+                let val = line.split("=")[1].split(";")[0].trim();
+                //console.log("val = ", val)
+
+                let j = i;
+                if (isComplexVal(val)) {
+
+                    if (line.includes(";") === false) {
+
+                        for (j = i + 1; j < lines.length; j++) {
+
+                            if (lines[j].includes(";") == false) {
+                                val += lines[j] + "\n";
+                                lines[j] = "";
+                            } else {
+                                val += lines[j].split(";")[0] + "";
+                                lines[j] = "";
+                                break;
+                            }
+                        }
+                    }
+
+
+                    tempName = "temporaryVariable_" + this.temporaryIndex++;
+                    if (mat4x4) newLine = "let " + tempName + ":mat4x4<f32> = " + val + ";\n";
+                    else newLine = "let " + tempName + ":mat3x3<f32> = " + val + ";\n";
+                    val = tempName;
+                }
+
+                newLine += writeTemplate(computeMatrixName, val);
+                lines[i] = newLine;
+
+
+                break;
+
+            }
+
+        }
+
+        return lines.join("\n");
+
+
+    }
+
+
+
+
+
+
     protected buildComputeShader() {
-        this.computeShaderObj.computeUniforms = new UniformBuffer(this.computeUniforms)
+        //this.computeShaderObj.computeUniforms = new UniformBuffer(this.computeUniforms)
         this.computeShaderObj.result = this.vertexBufferIO;
         this.computeShaderObj.global_id = BuiltIns.computeInputs.globalInvocationId;
         this.computeShaderObj.computeShader = {
@@ -385,10 +715,11 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
     }
 
 
-    public init(renderPipeline: RenderPipeline, config: { nbVertex: number, startVertexId: number, instanceId: number }) {
+    public init(renderPipeline: RenderPipeline, nbVertex: number) {
 
+        if (!nbVertex) nbVertex = 1;
 
-        this.config = config;
+        this.config = { nbVertex };
         this.computeShaderObj = {
             bindgroups: {
                 io: {}, //computeShaders have a reserved bindgroup 'io' , dedicated to the ping-pong process 
@@ -481,5 +812,10 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
         if (type === "vec3<f32>") return 3;
         if (type === "vec4<f32>") return 4;
     }
-
+    private getNewInstanceByType(type: string): string {
+        if (type === "f32") return "0.0";
+        if (type === "vec2<f32>") return "vec2(0.0)";
+        if (type === "vec3<f32>") return "vec3(0.0)";
+        if (type === "vec4<f32>") return "vec4(0.0)";
+    }
 }
