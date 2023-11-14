@@ -1202,7 +1202,7 @@ export class HighLevelParser {
                 descriptor = this.parseVertexShaderDebug(descriptor);
             }
 
-            console.log(descriptor);
+            //console.log(descriptor);
         }
 
         return descriptor;

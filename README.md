@@ -22,6 +22,7 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 - Automatic handling of BindgroupLayout
 - Extendable pipelines & resources 
 - Ability to plug advanced features (such as light, shadow, etc.) into an existing pipeline.
+- Ability to make a (kind of) console.log directly from the vertexShader
 - Declare your variables once for all in javascript with the name you want and use them directly in your shader
 - produce code easy-to-read, easy-to-write, easy-to-maintain
 

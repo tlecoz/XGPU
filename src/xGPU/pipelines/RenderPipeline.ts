@@ -624,8 +624,6 @@ export class RenderPipeline extends Pipeline {
             this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount)
             this.vertexShaderDebuggerPipeline.onLog = (o) => {
-
-
                 this._onLog(o);
             }
         }
