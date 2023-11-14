@@ -243,6 +243,7 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
                 let result = {};
                 for (let z in o) result[z] = { ...o[z] };
 
+
                 outputResults[outputResultId++] = result;
                 if (this.onLog && outputResultId == this.config.nbVertex) {
                     this.onLog({
@@ -261,6 +262,120 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
     }
 
 
+
+    private convertLetIntoVar(shader: string): string {
+        let result = ""
+        let lines: string[] = shader.split("\n");
+        let line: string;
+        let chars = "abcdefghijklmnopqrstuvwxyz/"
+        chars += chars.toUpperCase();
+
+        const getFirstCharId = (line: string) => {
+            for (let i = 0; i < line.length; i++) {
+                if (chars.includes(line[i])) return i;
+            }
+        }
+
+
+        for (let i = 0; i < lines.length; i++) {
+            line = lines[i];
+            line = line.slice(getFirstCharId(line));
+            if (line.slice(0, 4) === "let ") {
+                line = "var " + line.slice(4);
+            }
+
+            //adding a first empty char is a dirty fix to another process 
+            result += " " + line + "\n";
+        }
+
+
+        return result;
+    }
+
+    private removeVar(shader: string): string {
+        let result = ""
+        let lines: string[] = shader.split("\n");
+        let line: string;
+
+
+        for (let i = 0; i < lines.length; i++) {
+            line = lines[i];
+            if (line.slice(0, 5) === " var ") line = line.slice(5);
+            result += " " + line + "\n";
+        }
+
+
+        return result;
+    }
+
+
+    protected writeComputeShader(): string {
+
+        /*
+        the vertexShader outputs must be replaced by local variables
+        */
+        let outputVariables = "";
+        let outputs = this.renderPipeline.vertexShader.outputs;
+        for (let i = 0; i < outputs.length; i++) {
+            console.log(i, outputs[i])
+            outputVariables += `var output_${outputs[i].name} = ${this.getNewInstanceByType(outputs[i].type)};\n`
+        }
+
+
+
+        /*
+        the VertexAttributes used as input of the vertexShader must be redefined in the computeShader in 
+        order to target a particular vertex in the buffer, to mimic the behaviour of a vertexShader
+        */
+        let computeShader: string = ``;
+        if (this.indexBuffer) computeShader += `let index:u32 = indexBuffer[global_id.x].id;`;
+        else computeShader += `let index = global_id.x;`;
+        computeShader += `
+        ${outputVariables}
+        let nbResult = arrayLength(&result);
+        if(index >= nbResult){
+            return;
+        }
+
+        var computeResult = result[index];
+        var ${this.vertexIdName}:u32 = 0;
+        var ${this.instanceIdName}:u32 = 0;
+        `;
+
+        let input: any;
+        for (let i = 0; i < this.vertexShaderInputs.length; i++) {
+            input = this.vertexShaderInputs[i];
+            console.log("input.type = ", input)
+            if (input.builtin.slice(0, 8) != "@builtin") { //if it's not explicitly a builtin, it's a vertexAttribute
+                computeShader += `var computed_vertex_${input.name}:${input.type};\n`;
+            }
+        }
+
+
+        let usedNames: any = {};
+        const vertexShaderDebugs = this.renderPipeline.resources.__DEBUG__.objectById;
+        for (let i = 0; i < vertexShaderDebugs.length; i++) {
+            //console.log(i, vertexShaderDebugs[i].name)
+            if (!usedNames[vertexShaderDebugs[i].name]) {
+                usedNames[vertexShaderDebugs[i].name] = true;
+                computeShader += this.writeVertexShader(vertexShaderDebugs[i]);
+            }
+
+        }
+
+
+
+        if (XGPU.showVertexDebuggerShader) {
+            console.log("------------- VERTEX DEBUGGER SHADER --------------")
+            console.log(computeShader)
+            console.log("---------------------------------------------------")
+        }
+
+        return computeShader;
+    }
+
+
+    protected firstPass: boolean = true;
     protected writeVertexShader(debugObject: any): string {
 
         const { vertexId, instanceId, name } = debugObject;
@@ -331,8 +446,6 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
         vertexShaderText = lines.join("\n");
 
         vertexShaderText = searchAndReplace(vertexShaderText, "output.", "output_");
-
-
         let vertexResultText = searchAndReplace(vertexShaderText, "debug", "computeResult");
 
 
@@ -386,6 +499,23 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
 
 
+        /*
+        if we call the vertexShader function multiple times, we must keep the "var " only for the first pass. 
+        We also must convert the "let " into "var "   
+        */
+
+
+
+
+
+        vertexResultText = this.convertLetIntoVar(vertexResultText);
+
+        if (!this.firstPass) vertexResultText = this.removeVar(vertexResultText);
+
+
+
+
+
         mainCode += vertexResultText + "\n";
 
         /*
@@ -395,9 +525,15 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
 
         for (let i = 0; i < this.fieldNames.length; i++) {
-            console.log(i, this.fieldNewNames[i], this.fieldNames[i], debugObject.name)
+            //console.log(i, this.fieldNewNames[i], this.fieldNames[i], debugObject.name)
+
             if (this.fieldNewNames[i].includes(debugObject.name)) {
+
+
                 mainCode += `result_out[index].${this.fieldNewNames[i]} =  computeResult.${this.fieldNewNames[i]};\n`;
+
+
+
             }
         }
 
@@ -433,70 +569,11 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
             }
         }
 
+        this.firstPass = false;
         return mainCode;
     }
 
 
-    protected writeComputeShader(): string {
-
-        /*
-        the vertexShader outputs must be replaced by local variables
-        */
-        let outputVariables = "";
-        let outputs = this.renderPipeline.vertexShader.outputs;
-        for (let i = 0; i < outputs.length; i++) {
-            console.log(i, outputs[i])
-            outputVariables += `var output_${outputs[i].name} = ${this.getNewInstanceByType(outputs[i].type)};\n`
-        }
-
-
-
-        /*
-        the VertexAttributes used as input of the vertexShader must be redefined in the computeShader in 
-        order to target a particular vertex in the buffer, to mimic the behaviour of a vertexShader
-        */
-        let computeShader: string = ``;
-        if (this.indexBuffer) computeShader += `let index:u32 = indexBuffer[global_id.x].id;`;
-        else computeShader += `let index = global_id.x;`;
-        computeShader += `
-        ${outputVariables}
-        let nbResult = arrayLength(&result);
-        if(index >= nbResult){
-            return;
-        }
-
-        var computeResult = result[index];
-        var ${this.vertexIdName}:u32 = 0;
-        var ${this.instanceIdName}:u32 = 0;
-        `;
-
-        let input: any;
-        for (let i = 0; i < this.vertexShaderInputs.length; i++) {
-            input = this.vertexShaderInputs[i];
-            console.log("input.type = ", input)
-            if (input.builtin.slice(0, 8) != "@builtin") { //if it's not explicitly a builtin, it's a vertexAttribute
-                computeShader += `var computed_vertex_${input.name}:${input.type};\n`;
-            }
-        }
-
-
-
-        const vertexShaderDebugs = this.renderPipeline.resources.__DEBUG__.objectById;
-        for (let i = 0; i < vertexShaderDebugs.length; i++) {
-
-            computeShader += this.writeVertexShader(vertexShaderDebugs[i]);
-        }
-
-
-
-        if (XGPU.showVertexDebuggerShader) {
-            console.log("------------- VERTEX DEBUGGER SHADER --------------")
-            console.log(computeShader)
-            console.log("---------------------------------------------------")
-        }
-
-        return computeShader;
-    }
 
 
 
@@ -533,7 +610,7 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
                     result += `computeResult.${computeName}_ar${i}_m0 = ${matrixName}[${i}][0];\n`;
                     result += `computeResult.${computeName}_ar${i}_m1 = ${matrixName}[${i}][1];\n`;
                     result += `computeResult.${computeName}_ar${i}_m2 = ${matrixName}[${i}][2];\n`;
-                    result += `computeResult.${computeName}_ar${i}_m3 = ${matrixName}[${i}][3];\n\n`;
+                    result += `computeResult.${computeName}_ar${i}_m3 = ${matrixName}[${i}][3];\n`;
                 }
             }
             result += "\n";
@@ -620,7 +697,7 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
             let result = "";
             let nb = 4;
             if (mat4x4 == false) nb = 3;
-            console.log(computeName + " => mat4x4:", mat4x4);
+            //console.log(computeName + " => mat4x4:", mat4x4);
             for (let i = 0; i < nb; i++) {
                 result += `computeResult.${computeName}_m${nb}${i} = ${matrixName}[${i}];\n`;
             }
@@ -730,37 +807,6 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
 
         this.initRenderPipeline(renderPipeline);
-
-        /*
-        if (!this.renderPipeline.disableDebuggerCreation) {
-            this.renderPipeline.disableDebuggerCreation = true;
-            if (!this.renderUniformBuffers) {
-                const resource = new UniformBuffer({
-                    debugUniform: new Vec4(0, 1, 0, 1)
-                }, { useLocalVariable: true });
-                const name: string = "debugUniformBuffer"
-                this.renderUniformBuffers = [{ name, resource }];
-                this.renderPipeline.bindGroups.groups[0].add(name, resource)
-            } else {
-
-
-                this.renderUniformBuffers[0].resource.add("debugUniform", new Vec4(0, 1, 0, 1), true)
-                console.log(this.renderPipeline)
-
-
-            }
-        }
-
-        */
-
-
-
-
-        //this.computeShaderObj[ub.name].items[itemNames[j]]
-
-
-
-
         this.setupIndexBuffer();
         this.setupDataStructure();
         this.setupVertexShaderBuiltIns();
@@ -770,19 +816,6 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
         this.buildComputeShader();
 
 
-
-
-        //this.computeShaderObj[this.renderUniformBuffers[0].name].add("debugUniform", new Vec4(0, 1, 0, 1)) 
-
-
-
-
-        /*
-        this.renderPipeline.initFromObject(
-            {
-                ...this.renderPipeline.resources
-            }
-        )*/
 
         this.onComputeBegin = () => {
             this.copyUniformsFromRenderToCompute();

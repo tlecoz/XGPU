@@ -23,59 +23,59 @@ export class BuiltIns {
 
     public static vertexDebug = {
 
-        Float: (vertexId: number = 0, instanceId: number = 0) => {
+        Float: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "f32", __debug: true }
         },
-        Vec2: (vertexId: number = 0, instanceId: number = 0) => {
+        Vec2: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec2<f32>", __debug: true }
         },
-        Vec3: (vertexId: number = 0, instanceId: number = 0) => {
+        Vec3: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec3<f32>", __debug: true }
         },
-        Vec4: (vertexId: number = 0, instanceId: number = 0) => {
+        Vec4: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec4<f32>", __debug: true }
         },
-        Int: (vertexId: number = 0, instanceId: number = 0) => {
+        Int: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "i32", __debug: true }
         },
-        IVec2: (vertexId: number = 0, instanceId: number = 0) => {
+        IVec2: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec2<i32>", __debug: true }
         },
-        IVec3: (vertexId: number = 0, instanceId: number = 0) => {
+        IVec3: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec3<i32>", __debug: true }
         },
-        IVec4: (vertexId: number = 0, instanceId: number = 0) => {
+        IVec4: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec4<i32>", __debug: true }
         },
-        Uint: (vertexId: number = 0, instanceId: number = 0) => {
+        Uint: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "uint", __debug: true }
         },
-        UVec2: (vertexId: number = 0, instanceId: number = 0) => {
+        UVec2: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec2<u32>", __debug: true }
         },
-        UVec3: (vertexId: number = 0, instanceId: number = 0) => {
+        UVec3: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec3<u32>", __debug: true }
         },
-        UVec4: (vertexId: number = 0, instanceId: number = 0) => {
+        UVec4: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "vec4<uf32>", __debug: true }
         },
-        Matrix3x3: (vertexId: number = 0, instanceId: number = 0) => {
+        Matrix3x3: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "mat3x3<f32>", __debug: true }
         },
-        Matrix4x4: (vertexId: number = 0, instanceId: number = 0) => {
+        Matrix4x4: (instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "mat4x4<f32>", __debug: true }
         },
 
-        Vec4Array: (len: number = 1, vertexId: number = 0, instanceId: number = 0) => {
+        Vec4Array: (len: number = 1, instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "array<vec4<f32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "f32" }
         },
-        IVec4Array: (len: number = 1, vertexId: number = 0, instanceId: number = 0) => {
+        IVec4Array: (len: number = 1, instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "array<vec4<i32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "i32" }
         },
-        UVec4Array: (len: number = 1, vertexId: number = 0, instanceId: number = 0) => {
+        UVec4Array: (len: number = 1, instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "array<vec4<u32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "u32" }
         },
-        Matrix4x4Array: (len: number = 1, vertexId: number = 0, instanceId: number = 0) => {
+        Matrix4x4Array: (len: number = 1, instanceId: number = 0, vertexId: number = 0) => {
             return { vertexId, instanceId, type: "array<mat4x4<f32>," + len + ">", __debug: true, len, isArray: true, primitiveType: "mat4" }
         }
     }

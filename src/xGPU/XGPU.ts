@@ -13,7 +13,7 @@ export class XGPU {
     public static showVertexShader: boolean = false;
     public static showFragmentShader: boolean = false;
     public static showComputeShader: boolean = true;
-    public static showVertexDebuggerShader: boolean = true;
+    public static showVertexDebuggerShader: boolean = false;
 
     private static _ready: boolean = false;
     public static get ready(): boolean { return this._ready; }

@@ -902,6 +902,13 @@ export class HighLevelParser {
             descriptor.vertexShader = { main: descriptor.vertexShader };
         }
 
+
+
+
+
+
+
+
         const clearDebug = (shader: string) => {
             let lines = shader.split("\n");
             let line: string;
@@ -1025,7 +1032,15 @@ export class HighLevelParser {
             return result;
         }
 
-        descriptor.vertexShader.debugVersion = analyseAndRewriteDebug(shader);
+        const clearComments = (shader: string) => {
+            let lines = shader.split("\n");
+            for (let i = 0; i < lines.length; i++) lines[i] = lines[i].split("//")[0];
+            return lines.join("\n");
+        }
+
+        descriptor.vertexShader.debugVersion = analyseAndRewriteDebug(clearComments(shader));
+
+
 
 
         const simplifyComplexData = () => {
