@@ -102,27 +102,32 @@ This primitive type, once associated to a Pipeline using Pipeline.initFromObject
 
 ---------------------------
 
-Vanilla-WebGPU introduce a concept of Bindgroup/BindgroupLayout. 
-The idea behind it is great but it's very confusing to use from scratch (in my opinion)
-(check the [official webgpu samples](https://webgpu.github.io/webgpu-samples/) to have an idea)
+## Bindgroups in XGPU vs. Vanilla-WebGPU
 
-Here is how it works in XGPU : 
+In Vanilla-WebGPU, the concept of Bindgroup and BindgroupLayout is introduced. While the idea is great, getting started with it can be confusing (refer to the [official WebGPU samples](https://webgpu.github.io/webgpu-samples/) to understand the complexity).
 
-A RenderPipeline/ComputePipeline has a property "bindGroups" that can contains up to 4 Bindgroups (called BindgroupLayout in vanilla-webgpu). 
-A Bindgroup (in XGPU - it works a bit differently in vanilla-webgpu -) , is a collection of resources used in a shader. It can be what you want (texture, vertexBuffer, uniformBuffer, ...) . Each Bindgroup can contains up to 1000 resources. 
+### XGPU Approach:
 
-At first sight, it doesn't make sens to have 4 differents bindgroups to contains the shader-resources because it's more straight forward to put everything in the same bindgroup, and that's actually what XGPU do by default. If you dont't define explicitly a bindgroup and the data inside in Pipeline.initFromObject, it will create a default bindgroup called "default" and put everything inside it. 
+In XGPU, the handling of Bindgroups is designed to be more intuitive and efficient. Here's how it works:
 
-Multiple bindgroups are usefull when you have multiple pipelines that have common resources used in it. It allow you to pack these ressource in an object and share this object with your pipeline which is much more efficient than defining / transfering the resource twice. 
+- **Bindgroups in XGPU:**
+  - A `RenderPipeline` or `ComputePipeline` in XGPU has a property called "bindGroups" which can contain up to 4 Bindgroups (referred to as BindgroupLayout in Vanilla-WebGPU).
+  - A Bindgroup in XGPU is a collection of resources utilized in a shader, such as textures, vertex buffers, uniform buffers, and more. Each Bindgroup can hold up to 1000 resources.
 
-Also , a bindgroup allow you to create advanced logic involving some well-defined resources and not the others.
- It's the case when you create a VertexBufferIO or an ImageTextureIO for a computePipeline. These resources works differently than others and have a dedicated Bindgroup for them called "io". This "io" Bindgroup allow me to update the index of the buffers/textures defined inside it for each frame without altering the index of the resources contained in another Bindgroup.
+- **Default Bindgroup:**
+  - By default, XGPU places all resources in a default bindgroup called "default" if you don't explicitly define one in `Pipeline.initFromObject`. It simplifies the process when you want everything in the same bindgroup.
 
+- **Multiple Bindgroups Usage:**
+  - Multiple bindgroups become useful when you have multiple pipelines sharing common resources. This enables you to pack these resources in an object and efficiently share it among pipelines, avoiding redundant resource definition and transfer.
 
-Pipeline.initFromObject has no contraints in the data structure, you can add a VertexAttribute without creating a VertexBuffer (you can create one but if you don't a default vertexBuffer will be created to contain it) , you can add primitive type without creating an UniformBuffer. Every resources is defined just above the code of the shader, like properties in a class. XGPU handle all the boring stuff for you (but let you the popssibility to customize everything) 
+- **Advanced Logic with Bindgroups:**
+  - Bindgroups also enable the creation of advanced logic involving specific resources. For instance, when dealing with a `VertexBufferIO` or an `ImageTextureIO` in a `computePipeline`, these resources work differently and have a dedicated Bindgroup called "io." The "io" Bindgroup allows updating the index of buffers/textures for each frame without affecting resources in another Bindgroup.
 
+- **Flexible Data Structure:**
+  - `Pipeline.initFromObject` imposes no constraints on the data structure. You can add a `VertexAttribute` without creating a `VertexBuffer` explicitly. Similarly, you can include primitive types without creating a separate `UniformBuffer`. Each resource is defined above the shader code, resembling properties in a class. XGPU handles the necessary details automatically while providing customization options.
 
-I'll try to add more sample involving multiple bindgroups to make things more clear.  
+- **Future Samples:**
+  - The plan is to include more samples illustrating the usage of multiple bindgroups to enhance clarity and provide practical insights into their application.
 
 
 
