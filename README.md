@@ -41,16 +41,10 @@ You can install XGPU by using npm install
  ```
 npm install xgpu
  ```
+Contrary to Vanilla-WebGPU that use GPUTexture/GPUBuffer everywhere, XGPU uses very specialized types for every resources usable in a shader to handle the different usecase without need to define everything everytime.
 
-Vanilla-WebGPU use (almost) only 2 kinds : GPUBuffer & GPUTexture. 
-Because of that, it's very easy to copy a buffer or a texture in another one. 
-But in order to be able to have only 2 types, you must use a descriptor (a kind of css that describe how you want to use your buffer/texture) for every resource you use in a shader. Il produce a very long and descriptive code, a bit like if every element of your project was a textfield with a different style each time. 
-
-I did the opposite with XGPU. 
-I created a very specialized type for every resource usable in a shader. Each class contains it's own descriptor fullfilled with default value and handle the different usecase automaticly. 
-
-
-Every data type used in WGSL has been reproduced in XGPU 
+Every data type used in WGSL has been reproduced in typescript and are usable in XGPU. 
+This primitive type, once associated to a Pipeline using Pipeline.initFromObject is automaticly binded to the pipeline : if you update its value, it will be updated in the shader.
 
 # Primitive types : 
 
