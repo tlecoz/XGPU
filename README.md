@@ -49,37 +49,33 @@ But in order to be able to have only 2 types, you must use a descriptor (a kind 
 I did the opposite with XGPU. 
 I created a very specialized type for every resource usable in a shader. Each class contains it's own descriptor fullfilled with default value and handle the different usecase automaticly. 
 
-Here is the list of the shader resource you can use: 
+# List of Shader Resources
 
-1) Buffers : 
-VertexAttribute : represents a set of data defined by vertex in a VertexBuffer
-VertexBuffer : represents a set of vertexAttributes packaged in a single buffer (the final buffer transfered to the GPU)
-VertexBufferIO : represents 2 vertexBuffers, one buffer "read-only" usable in a computePipeline AND in a renderPipeline,and another buffer "read-write" usable only in a computeShader.
-UniformGroup : act like an object containing primitiveType only (Float, Vec2,...), or other UniformGroup and produce a "struct" in the shader
-UniformGroupArray : an array of uniformGroups sharing the same buffer
-UniformBuffer : it extends UniformGroup and may contains others UniformGroup/UniformGroupArray. 
-                 UniformGroup & UniformGroupArray are just abstractions, they are contained by a UniformBuffer that is transfered to the GPU
+## 1) Buffers
 
-2) Textures :
+- **VertexAttribute:** Represents a set of data defined by vertex in a VertexBuffer.
+- **VertexBuffer:** Represents a set of vertexAttributes packaged in a single buffer (the final buffer transferred to the GPU).
+- **VertexBufferIO:** Represents 2 vertexBuffers: one buffer "read-only" usable in a computePipeline AND in a renderPipeline, and another buffer "read-write" usable only in a computeShader.
+- **UniformGroup:** Acts like an object containing primitive types only (Float, Vec2, ...), or other UniformGroup, and produces a "struct" in the shader.
+- **UniformGroupArray:** An array of uniformGroups sharing the same buffer.
+- **UniformBuffer:** Extends UniformGroup and may contain other UniformGroup/UniformGroupArray. UniformGroup & UniformGroupArray are just abstractions; they are contained by a UniformBuffer that is transferred to the GPU.
 
-a) texture that you probably would like to use
+## 2) Textures
 
-ImageTexture : represent an image (it can be an HTMLImmageElement, a HTMLCanvasElement or an ImageBitmap)
-ImageTextureArray : an array of ImageTexture
-CubeMapTexture : an array of 6 imageTextures with some datas dedicated to this usecase
-VideoTexture : a texture that contains a video 
-ImageTextureIO : represents 2 textures, one  "read only" usable in a computePipeline AND in a renderPipeline,
-                 and another texture "read-write" usable only in a computeShader.   
+### a) Textures for General Use
 
-TextureSampler : an object that works with every kind of texture in a fragmentShader. 
-                 If you don't know what you are doing, just create a new instance without parameters 
-                 and use it with your texture in the fragmentShader
+- **ImageTexture:** Represents an image (it can be an HTMLImageElement, an HTMLCanvasElement, or an ImageBitmap).
+- **ImageTextureArray:** An array of ImageTexture.
+- **CubeMapTexture:** An array of 6 ImageTextures with some data dedicated to this use case.
+- **VideoTexture:** A texture that contains a video.
+- **ImageTextureIO:** Represents 2 textures: one "read-only" usable in a computePipeline AND in a renderPipeline, and another texture "read-write" usable only in a computeShader.
+- **TextureSampler:** An object that works with every kind of texture in a fragmentShader. If you don't know what you are doing, just create a new instance without parameters and use it with your texture in the fragmentShader.
 
-b) texture designed to be used by the pipeline itself (but that can be also used as shader-resource)
+### b) Textures for Pipeline Use
 
-DepthStencilTexture : works with 'depthTest:true' in RenderPipeline.initFromObject ; also works with shadow rendering
-DepthTextureArray : an array of DepthTexture
-MultiSampleTexture : works with 'antialiasing:true" in RenderPipeline.initFromObject
+- **DepthStencilTexture:** Works with 'depthTest:true' in RenderPipeline.initFromObject; also works with shadow rendering.
+- **DepthTextureArray:** An array of DepthTexture.
+- **MultiSampleTexture:** Works with 'antialiasing:true' in RenderPipeline.initFromObject.
 
 
 
