@@ -49,6 +49,33 @@ But in order to be able to have only 2 types, you must use a descriptor (a kind 
 I did the opposite with XGPU. 
 I created a very specialized type for every resource usable in a shader. Each class contains it's own descriptor fullfilled with default value and handle the different usecase automaticly. 
 
+
+Every data type used in WGSL has been reproduced in XGPU 
+
+# Primitive types : 
+
+- **Float**
+- **Vec2**
+- **Vec3**
+- **Vec4**
+- **Int**
+- **IVec2**
+- **IVec3**
+- **IVec4**
+- **Uint**
+- **UVec2**
+- **UVec3**
+- **UVec4**
+- **Matrix3x3**
+- **Matrix4x4**
+- **Vec4Array**
+- **IVec4Array**
+- **UVec4Array**
+- **Matrix4x4Array**
+
+
+
+
 # List of Shader Resources
 
 ## 1) Buffers
@@ -96,6 +123,10 @@ Multiple bindgroups are usefull when you have multiple pipelines that have commo
 
 Also , a bindgroup allow you to create advanced logic involving some well-defined resources and not the others.
  It's the case when you create a VertexBufferIO or an ImageTextureIO for a computePipeline. These resources works differently than others and have a dedicated Bindgroup for them called "io". This "io" Bindgroup allow me to update the index of the buffers/textures defined inside it for each frame without altering the index of the resources contained in another Bindgroup.
+
+
+Pipeline.initFromObject has no contraints in the data structure, you can add a VertexAttribute without creating a VertexBuffer (you can create one but if you don't a default vertexBuffer will be created to contain it) , you can add primitive type without creating an UniformBuffer. Every resources is defined just above the code of the shader, like properties in a class. XGPU handle all the boring stuff for you (but let you the popssibility to customize everything) 
+
 
 I'll try to add more sample involving multiple bindgroups to make things more clear.  
 
