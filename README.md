@@ -29,6 +29,8 @@ The "X" stands for "Extendable". The core idea behind XGPU is the ability to use
 
 # DEMOS 
 
+[![image of the samples-page](https://raw.githubusercontent.com/tlecoz/XGPU/main/public/samples.jpg)](https://xgpu-samples.netlify.app/samples/TonsOfCubes)
+
 check the [samples-page](https://xgpu-samples.netlify.app/samples/TonsOfCubes)
 
 The repo containing the samples is [here](https://github.com/tlecoz/xgpu-samples).
@@ -39,6 +41,69 @@ You can install XGPU by using npm install
  ```
 npm install xgpu
  ```
+
+Vanilla-WebGPU use (almost) only 2 kinds : GPUBuffer & GPUTexture. 
+Because of that, it's very easy to copy a buffer or a texture in another one. 
+But in order to be able to have only 2 types, you must use a descriptor (a kind of css that describe how you want to use your buffer/texture) for every resource you use in a shader. Il produce a very long and descriptive code, a bit like if every element of your project was a textfield with a different style each time. 
+
+I did the opposite with XGPU. 
+I created a very specialized type for every resource usable in a shader. Each class contains it's own descriptor fullfilled with default value and handle the different usecase automaticly. 
+
+Here is the list of the shader resource you can use: 
+
+1) Buffers : 
+VertexAttribute : represents a set of data defined by vertex in a VertexBuffer
+VertexBuffer : represents a set of vertexAttributes packaged in a single buffer (the final buffer transfered to the GPU)
+VertexBufferIO : represents 2 vertexBuffers, one buffer "read-only" usable in a computePipeline AND in a renderPipeline,and another buffer "read-write" usable only in a computeShader.
+UniformGroup : act like an object containing primitiveType only (Float, Vec2,...), or other UniformGroup and produce a "struct" in the shader
+UniformGroupArray : an array of uniformGroups sharing the same buffer
+UniformBuffer : it extends UniformGroup and may contains others UniformGroup/UniformGroupArray. 
+                 UniformGroup & UniformGroupArray are just abstractions, they are contained by a UniformBuffer that is transfered to the GPU
+
+2) Textures :
+
+a) texture that you probably would like to use
+
+ImageTexture : represent an image (it can be an HTMLImmageElement, a HTMLCanvasElement or an ImageBitmap)
+ImageTextureArray : an array of ImageTexture
+CubeMapTexture : an array of 6 imageTextures with some datas dedicated to this usecase
+VideoTexture : a texture that contains a video 
+ImageTextureIO : represents 2 textures, one  "read only" usable in a computePipeline AND in a renderPipeline,
+                 and another texture "read-write" usable only in a computeShader.   
+
+TextureSampler : an object that works with every kind of texture in a fragmentShader. 
+                 If you don't know what you are doing, just create a new instance without parameters 
+                 and use it with your texture in the fragmentShader
+
+b) texture designed to be used by the pipeline itself (but that can be also used as shader-resource)
+
+DepthStencilTexture : works with 'depthTest:true' in RenderPipeline.initFromObject ; also works with shadow rendering
+DepthTextureArray : an array of DepthTexture
+MultiSampleTexture : works with 'antialiasing:true" in RenderPipeline.initFromObject
+
+
+
+---------------------------
+
+Vanilla-WebGPU introduce a concept of Bindgroup/BindgroupLayout. 
+The idea behind it is great but it's very confusing to use from scratch (in my opinion)
+(check the [official webgpu samples](https://webgpu.github.io/webgpu-samples/) to have an idea)
+
+Here is how it works in XGPU : 
+
+A RenderPipeline/ComputePipeline has a property "bindGroups" that can contains up to 4 Bindgroups (called BindgroupLayout in vanilla-webgpu). 
+A Bindgroup (in XGPU - it works a bit differently in vanilla-webgpu -) , is a collection of resources used in a shader. It can be what you want (texture, vertexBuffer, uniformBuffer, ...) . Each Bindgroup can contains up to 1000 resources. 
+
+At first sight, it doesn't make sens to have 4 differents bindgroups to contains the shader-resources because it's more straight forward to put everything in the same bindgroup, and that's actually what XGPU do by default. If you dont't define explicitly a bindgroup and the data inside in Pipeline.initFromObject, it will create a default bindgroup called "default" and put everything inside it. 
+
+Multiple bindgroups are usefull when you have multiple pipelines that have common resources used in it. It allow you to pack these ressource in an object and share this object with your pipeline which is much more efficient than defining / transfering the resource twice. 
+
+Also , a bindgroup allow you to create advanced logic involving some well-defined resources and not the others.
+ It's the case when you create a VertexBufferIO or an ImageTextureIO for a computePipeline. These resources works differently than others and have a dedicated Bindgroup for them called "io". This "io" Bindgroup allow me to update the index of the buffers/textures defined inside it for each frame without altering the index of the resources contained in another Bindgroup.
+
+I'll try to add more sample involving multiple bindgroups to make things more clear.  
+
+
 
 Let's see the code of the very first sample, just to see what it look like : 
 

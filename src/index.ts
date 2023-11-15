@@ -42,7 +42,6 @@ export * from "./xGPU/shader/shaderParts/ShaderStruct"
 
 export * from "./xGPU/shader/resources/IShaderResource"
 export * from "./xGPU/shader/resources/CubeMapTexture"
-
 export * from "./xGPU/shader/resources/ImageTexture"
 export * from "./xGPU/shader/resources/ImageTextureArray"
 export * from "./xGPU/pipelines/resources/textures/DepthTextureArray"
