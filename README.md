@@ -43,7 +43,7 @@ npm install xgpu
  ```
 Contrary to Vanilla-WebGPU that use GPUTexture/GPUBuffer everywhere, XGPU uses very specialized types for every resources usable in a shader to handle the different usecase.
 
-Every data type used in WGSL has been reproduced in typescript and are usable in XGPU. 
+Every data type used in WGSL has been reproduced in XGPU. 
 This primitive type, once associated to a Pipeline using Pipeline.initFromObject is automaticly binded to the pipeline : if you update its value, it will be updated in the shader.
 
 # Primitive types : 
