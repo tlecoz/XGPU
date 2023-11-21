@@ -3,6 +3,8 @@
 
 
 
+
+
 export * from "./xGPU/XGPU"
 export * from "./xGPU/IRenderer"
 export * from "./xGPU/GPURenderer"
@@ -55,6 +57,24 @@ export * from "./xGPU/shader/resources/VertexBuffer"
 export * from "./xGPU/shader/resources/VertexBufferIO"
 export * from "./xGPU/shader/resources/VideoTexture"
 export * from "./xGPU/pipelines/resources/textures/RenderPassTexture"
+
+export * from "./xGPU/shader/resources/attributes/FloatBuffer"
+export * from "./xGPU/shader/resources/attributes/Vec2Buffer"
+export * from "./xGPU/shader/resources/attributes/Vec3Buffer"
+export * from "./xGPU/shader/resources/attributes/Vec4Buffer"
+
+export * from "./xGPU/shader/resources/attributes/IntBuffer"
+export * from "./xGPU/shader/resources/attributes/IVec2Buffer"
+export * from "./xGPU/shader/resources/attributes/IVec3Buffer"
+export * from "./xGPU/shader/resources/attributes/IVec4Buffer"
+
+export * from "./xGPU/shader/resources/attributes/UintBuffer"
+export * from "./xGPU/shader/resources/attributes/UVec2Buffer"
+export * from "./xGPU/shader/resources/attributes/UVec3Buffer"
+export * from "./xGPU/shader/resources/attributes/UVec4Buffer"
+
 export * from "./xGPU/HighLevelParser"
+
+
 
 

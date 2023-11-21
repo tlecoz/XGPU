@@ -74,12 +74,26 @@ This primitive type, once associated to a Pipeline using Pipeline.initFromObject
 
 ## 1) Buffers
 
-- **VertexAttribute:** Represents a set of data defined by vertex in a VertexBuffer.
-- **VertexBuffer:** Represents a set of vertexAttributes packaged in a single buffer (the final buffer transferred to the GPU).
+
+- **VertexBuffer:** Represents a set of vertexAttributes packaged in a single buffer transfered to the GPU .
 - **VertexBufferIO:** Represents 2 vertexBuffers: one buffer "read-only" usable in a computePipeline AND in a renderPipeline, and another buffer "read-write" usable only in a computeShader.
-- **UniformGroup:** Acts like an object containing primitive types only (Float, Vec2, ...), or other UniformGroup, and produces a "struct" in the shader.
-- **UniformGroupArray:** An array of uniformGroups sharing the same buffer.
-- **UniformBuffer:** Extends UniformGroup and may contain other UniformGroup/UniformGroupArray. UniformGroup & UniformGroupArray are just abstractions; they are contained by a UniformBuffer that is transferred to the GPU.
+- **VertexAttribute:** Represents a set of data defined by vertex in a VertexBuffer.
+  - FloatBuffer: Extends VertexAttribute ; contains one Float per vertex.
+  - Vec2Buffer: Extends VertexAttribute ; contains one Vec2 per vertex.
+  - Vec3Buffer: Extends VertexAttribute ; contains one Vec3 per vertex.
+  - Vec4Buffer: Extends VertexAttribute ; contains one Vec4 per vertex.
+  - IntBuffer: Extends VertexAttribute ; contains one Int per vertex.
+  - IVec2Buffer: Extends VertexAttribute ; contains one IVec2 per vertex.
+  - IVec3Buffer: Extends VertexAttribute ; contains one IVec3 per vertex.
+  - IVec4Buffer: Extends VertexAttribute ; contains one IVec4 per vertex.
+  - UintBuffer: Extends VertexAttribute ; contains one Uint per vertex.
+  - UVec2Buffer: Extends VertexAttribute ; contains one UVec2 per vertex.
+  - UVec3Buffer: Extends VertexAttribute ; contains one UVec3 per vertex.
+  - UVec4Buffer: Extends VertexAttribute ; contains one UVec4 per vertex.
+
+- **UniformGroup:** represents a set of PrimitiveType(s)  (Float, Vec2, ...) and/or UniformGroup(s) storable in an UniformBuffer.
+- **UniformGroupArray:** An array of uniformGroups sharing the same buffer, storable in an uniformBuffer
+- **UniformBuffer:** represents one or multiple set of PrimitiveTypes and/or UniformGroup/UniformGroupArray packed in a buffer transfered to the GPU. 
 
 ## 2) Textures
 
@@ -125,9 +139,6 @@ In XGPU, the handling of Bindgroups is designed to be more intuitive and efficie
 
 - **Flexible Data Structure:**
   - `Pipeline.initFromObject` imposes no constraints on the data structure. You can add a `VertexAttribute` without creating a `VertexBuffer` explicitly. Similarly, you can include primitive types without creating a separate `UniformBuffer`. Each resource is defined above the shader code, resembling properties in a class. XGPU handles the necessary details automatically while providing customization options.
-
-- **Future Samples:**
-  - The plan is to include more samples illustrating the usage of multiple bindgroups to enhance clarity and provide practical insights into their application.
 
 
 

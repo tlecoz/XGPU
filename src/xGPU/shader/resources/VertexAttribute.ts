@@ -7,6 +7,7 @@ import { VertexBuffer } from "./VertexBuffer";
 export class VertexAttribute {
 
 
+
     public static Float(datas?: number[][] | number[] | number, offset?: number) {
 
 
@@ -177,7 +178,12 @@ export class VertexAttribute {
     public dataOffset: number;
     public mustBeTransfered: boolean = false;
 
-    public vertexBuffer: VertexBuffer;
+    protected _vertexBuffer: VertexBuffer;
+
+
+
+
+
 
     constructor(name: string, dataType: string, offset?: number) {
 
@@ -198,11 +204,25 @@ export class VertexAttribute {
         }
     }
 
+
+    protected waitingVertexBuffer: boolean = false;
+    public get vertexBuffer(): VertexBuffer { return this._vertexBuffer; }
+    public set vertexBuffer(vb: VertexBuffer) {
+        this._vertexBuffer = vb;
+        if (this.waitingVertexBuffer) {
+            this.waitingVertexBuffer = true;
+            this.vertexBuffer.attributeChanged = true;
+        }
+    }
+
+
+
     public get datas(): number[][] | number[] { return this._data }
     public set datas(n: number[][] | number[]) {
         if (this._data != n) {
             this._data = n;
-            this.vertexBuffer.attributeChanged = true;
+            if (this.vertexBuffer) this.vertexBuffer.attributeChanged = true;
+            else this.waitingVertexBuffer = true;
             this.mustBeTransfered = true;
         }
     }
@@ -211,6 +231,13 @@ export class VertexAttribute {
     public get useByVertexData(): boolean { return typeof this._data[0] != "number" }
 
     public get format(): string { return this._dataType }
+
+    public get type(): string {//---------------------------
+        //this function will be used in HighLevelParser. 
+        //It mimic the existing structure using VertexAttribute.Float instead of FloatBuffer
+        return this._dataType;
+    }//---------------------------------------------------
+
     public get bytePerElement(): number { return this.vertexType.bytes }
     public get varType(): string { return this.vertexType.varType }
     public get name(): string { return this._name; }

@@ -160,12 +160,14 @@ export class VertexBuffer implements IShaderResource {
     private _byteCount: number = 0;
     public createArray(name: string, dataType: string, offset?: number): VertexAttribute {
 
-        if (this.attributes[name]) {
+        if (this.attributes[name] && this.attributes[name].vertexBuffer) {
 
             return this.attributes[name];
         }
 
-        const v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
+
+        let v: VertexAttribute = this.attributes[name];
+        if (!v) v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
         v.vertexBuffer = this;
 
         const nbCompo = v.nbComponent;

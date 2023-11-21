@@ -140,7 +140,11 @@ export class RenderPipeline extends Pipeline {
 
 
     }
-    public get canvas(): any { return this.renderer.canvas; }
+    public get canvas(): any {
+
+        return this.renderer.canvas;
+    }
+
     public get depthStencilTexture(): DepthStencilTexture { return this._depthStencilTexture; }
 
 
@@ -208,7 +212,6 @@ export class RenderPipeline extends Pipeline {
         this.gpuPipeline = null;
         this.bindGroups.destroy();
         this.bindGroups = new Bindgroups(this, "pipeline");
-
 
 
 
@@ -395,6 +398,9 @@ export class RenderPipeline extends Pipeline {
     public get onLog() { return this._onLog };
     public set onLog(onLog: (o: any) => void) { this._onLog = onLog; }
 
+
+    public get offscreen(): boolean { return this.resources.offscreen; }
+    public set offscreen(b: boolean) { this.resources.offscreen = b; }
 
     public get debugVertexCount(): number { return this.resources.debugVertexCount }
     public set debugVertexCount(n: number) { this.resources.debugVertexCount = n; }
@@ -629,7 +635,6 @@ export class RenderPipeline extends Pipeline {
         }
 
 
-
         return this.gpuPipeline;
 
     }
@@ -659,21 +664,24 @@ export class RenderPipeline extends Pipeline {
         if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
             this.clearOpReady = true;
 
+            if (this.offscreen && this.renderPassDescriptor.colorAttachments[0]) {
+                this.renderPassDescriptor.colorAttachments[0].loadOp = "clear"
+            } else {
+                if (rendererUseSinglePipeline && this.pipelineCount == 1) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                else {
+                    if (this.pipelineCount === 1) {
+                        if (this.renderer.firstPipeline === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                        else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                    } else {
 
+                        this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                        if (drawCallId === 0) { }
+                        else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                    }
 
-            if (rendererUseSinglePipeline && this.pipelineCount == 1) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-            else {
-                if (this.pipelineCount === 1) {
-                    if (this.renderer.firstPipeline === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-                    else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
-                } else {
-
-                    this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-                    if (drawCallId === 0) { }
-                    else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
                 }
-
             }
+
         }
 
 
@@ -731,7 +739,7 @@ export class RenderPipeline extends Pipeline {
 
     //-------------------------------
 
-    public end(commandEncoder, renderPass) {
+    public end(commandEncoder: GPUCommandEncoder, renderPass) {
         if (!this.resourceDefined) return;
         renderPass.end();
 
