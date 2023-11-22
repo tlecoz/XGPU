@@ -1,14 +1,11 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
-
-
-
-
 export * from "./xGPU/XGPU"
+export * from "./xGPU/EventDispatcher"
 export * from "./xGPU/IRenderer"
 export * from "./xGPU/GPURenderer"
-export * from "./xGPU/HeadlessGPURenderer"
+export * from "./xGPU/TextureRenderer"
 export * from "./xGPU/GPUType"
 export * from "./xGPU/BuiltIns"
 export * from "./xGPU/PrimitiveType"

@@ -1,4 +1,28 @@
 
+au moment d'updater une renderPipeline : 
+ - si elle utilise une ImageTexture dont la source est une renderPassTexture
+   |=> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 pouvoir définir une valeur de debug une seule fois via BuiltIns.vertexDebug 
 
 et s'en servir plusieur fois , par exemple : 

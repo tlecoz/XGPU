@@ -1,12 +1,12 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
-import { HeadlessGPURenderer } from "./HeadlessGPURenderer";
+import { TextureRenderer } from "./TextureRenderer";
 import { IRenderer } from "./IRenderer";
 import { XGPU } from "./XGPU";
 
 
-export class GPURenderer extends HeadlessGPURenderer implements IRenderer {
+export class GPURenderer extends TextureRenderer implements IRenderer {
 
     protected domElement: HTMLCanvasElement = null;
     protected ctx: GPUCanvasContext;

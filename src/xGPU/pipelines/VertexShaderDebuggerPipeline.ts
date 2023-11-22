@@ -11,6 +11,8 @@ import { XGPU } from "../XGPU";
 
 export class VertexShaderDebuggerPipeline extends ComputePipeline {
 
+
+
     public onLog: (o: {
         config: any,
         results: any[],

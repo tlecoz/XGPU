@@ -96,10 +96,58 @@ export type RenderPipelineDescriptor = RenderPipelineProperties & BindgroupDescr
 export class RenderPipeline extends Pipeline {
 
 
-    public renderer: IRenderer;//GPURenderer | HeadlessGPURenderer;
+    public static ON_ADDED_TO_RENDERER: string = "ON_ADDED_TO_RENDERER";
+    public static ON_REMOVED_FROM_RENDERER: string = "ON_REMOVED_FROM_RENDERER";
+    public static ON_DRAW_BEGIN: string = "ON_DRAW_BEGIN";
+    public static ON_DRAW_END: string = "ON_DRAW_END";
+    public static ON_DRAW: string = "ON_DRAW";
+    public static ON_GPU_PIPELINE_BUILT: string = "ON_GPU_PIPELINE_BUILT";
+    public static ON_LOG: string = "ON_LOG";
+
+    protected _renderer: IRenderer;
+    public get renderer(): IRenderer { return this._renderer }
+    public set renderer(renderer: IRenderer) {
+        if (this._renderer != renderer) {
+
+
+            this._renderer = renderer;
+
+            if (renderer) {
+
+                if (this.waitingMultisampleTexture) {
+                    this.setupMultiSampleView(this.multiSampleTextureDescriptor)
+                    this.waitingMultisampleTexture = false;
+                }
+
+                if (this.waitingDepthStencilTexture) {
+                    this.setupDepthStencilView(this.depthStencilTextureDescriptor);
+                    this.waitingDepthStencilTexture = false;
+                }
+
+                this.dispatchEvent(RenderPipeline.ON_ADDED_TO_RENDERER);
+
+            } else {
+                this.dispatchEvent(RenderPipeline.ON_REMOVED_FROM_RENDERER);
+            }
+
+        }
+    }
+
+
     public drawConfig: DrawConfig;
-    protected _depthStencilTexture: DepthStencilTexture;
+
+
+    protected multiSampleTextureDescriptor: any;
+    protected waitingMultisampleTexture: boolean = false;
     protected multisampleTexture: MultiSampleTexture;
+
+    protected waitingDepthStencilTexture: boolean = false;
+    protected depthStencilTextureDescriptor: any;
+    protected _depthStencilTexture: DepthStencilTexture;
+
+
+
+
     protected renderPassTexture: RenderPassTexture;
 
     public outputColor: any;
@@ -111,18 +159,14 @@ export class RenderPipeline extends Pipeline {
     protected gpuPipeline: GPURenderPipeline;
 
     public debug: string = "renderPipeline";
-    public onDrawBegin: () => void;
-    public onDrawEnd: () => void;
-    public onDraw: (drawCallId: number) => void;
 
-    constructor(renderer: IRenderer, bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
+
+    constructor(bgColor: { r: number, g: number, b: number, a: number } = { r: 0, g: 0, b: 0, a: 1 }) {
         super();
 
-        if (!renderer.canvas) {
-            throw new Error("A RenderPipeline need a GPUProcess with a canvas in order to draw things inside. You must pass a reference to a canvas when you instanciate the GPUProcess.")
-        }
+
         this.type = "render";
-        this.renderer = renderer;
+
         this.drawConfig = new DrawConfig(this);
         this.vertexShader = new VertexShader();
         this.fragmentShader = new FragmentShader();
@@ -136,12 +180,14 @@ export class RenderPipeline extends Pipeline {
             this.outputColor = this.createColorAttachment(bgColor);
         }
 
-
-
-
     }
-    public get canvas(): any {
 
+
+
+
+
+    public get canvas(): any {
+        if (!this.renderer) return null;
         return this.renderer.canvas;
     }
 
@@ -360,6 +406,8 @@ export class RenderPipeline extends Pipeline {
     }
     public createColorAttachment(rgba: { r: number, g: number, b: number, a: number }, view: GPUTextureView = undefined): any {
 
+        console.warn("createColorAttachment ", rgba)
+
         const colorAttachment = {
             view: view,
             clearValue: rgba,
@@ -394,9 +442,7 @@ export class RenderPipeline extends Pipeline {
 
 
 
-    private _onLog: (o?: any) => void = () => { };
-    public get onLog() { return this._onLog };
-    public set onLog(onLog: (o: any) => void) { this._onLog = onLog; }
+
 
 
     public get offscreen(): boolean { return this.resources.offscreen; }
@@ -432,6 +478,12 @@ export class RenderPipeline extends Pipeline {
         resolveTarget?: GPUTextureView
     }) {
 
+        if (!this.renderer) {
+            this.waitingMultisampleTexture = true;
+            this.multiSampleTextureDescriptor = descriptor;
+            return;
+        }
+
 
         if (this.multisampleTexture) this.multisampleTexture.destroy();
         if (!descriptor) descriptor = {};
@@ -466,6 +518,13 @@ export class RenderPipeline extends Pipeline {
         depthStencilAttachmentOptions?: any
 
     ) {
+
+        if (!this.renderer) {
+            this.waitingDepthStencilTexture = true;
+            this.depthStencilTextureDescriptor = descriptor;
+            return;
+        }
+
 
         if (!depthStencilAttachmentOptions) depthStencilAttachmentOptions = {};
 
@@ -630,11 +689,12 @@ export class RenderPipeline extends Pipeline {
             this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount)
             this.vertexShaderDebuggerPipeline.onLog = (o) => {
-                this._onLog(o);
+                this.dispatchEvent(RenderPipeline.ON_LOG, o);
+                //this._onLog(o);
             }
         }
 
-
+        this.dispatchEvent(RenderPipeline.ON_GPU_PIPELINE_BUILT)
         return this.gpuPipeline;
 
     }
@@ -652,7 +712,8 @@ export class RenderPipeline extends Pipeline {
         if (this.vertexShaderDebuggerPipeline) this.vertexShaderDebuggerPipeline.nextFrame();
 
 
-        if (this.onDrawBegin) this.onDrawBegin();
+
+        this.dispatchEvent(RenderPipeline.ON_DRAW_BEGIN);
 
         let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline && this.pipelineCount === 1;
 
@@ -768,11 +829,7 @@ export class RenderPipeline extends Pipeline {
 
 
 
-        if (this.renderPassTexture) {
-            if (!this.renderPassTexture.gpuResource) this.renderPassTexture.createGpuResource();
 
-            commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
-        }
 
 
         if ((this.canvas as any).dimensionChanged) {
@@ -789,12 +846,23 @@ export class RenderPipeline extends Pipeline {
             }
         }
 
+
+
+
+
+        if (this.renderPassTexture) {
+            if (!this.renderPassTexture.gpuResource) this.renderPassTexture.createGpuResource();
+
+            commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
+        }
+
         if (this.multisampleTexture) this.multisampleTexture.update();
         if (this.depthStencilTexture) this.depthStencilTexture.update();
         if (this.renderPassTexture) this.renderPassTexture.update();
 
 
-        if (this.onDrawEnd) this.onDrawEnd();
+
+        this.dispatchEvent(RenderPipeline.ON_DRAW_END);
     }
 
 

@@ -10,6 +10,15 @@ export type PrimitiveType = PrimitiveFloatUniform | PrimitiveIntUniform | Primit
 
 export class PrimitiveFloatUniform extends Float32Array {
 
+
+
+
+
+
+
+    public static ON_CHANGED: string = "ON_CHANGED";
+
+
     //public uniform: Uniform;
     public name: string;
     public type: GPUType;
@@ -21,7 +30,8 @@ export class PrimitiveFloatUniform extends Float32Array {
     public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
     public set mustBeTransfered(b: boolean) {
         if (b != this._mustBeTransfered) {
-            if (!b && this.onChange) this.onChange();
+            if (!b) this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED)
+            //if (!b && this.onChange) this.onChange();
             this._mustBeTransfered = b;
         }
     }
@@ -75,27 +85,7 @@ export class PrimitiveFloatUniform extends Float32Array {
     }
 
 
-    /*
-    public createVariable(uniformBufferName: string): string {
-        if (!this.createVariableInsideMain) return "";
 
-        let type = this.className;
-        if (type === "Float") type = "f32";
-        if (type === "Vec2") type = "vec2<f32>";
-        if (type === "Vec3") type = "vec3<f32>";
-        if (type === "Vec4") type = "vec4<f32>";
-
-        const items = this.uniformBuffer.items;
-        let name: string;
-        for (let z in items) {
-            if (items[z] === this) {
-                name = z;
-            }
-        }
-
-        return "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";"
-    }
-    */
     public createVariable(uniformBufferName: string, name?: string): string {
         if (!this.createVariableInsideMain) return "";
 
@@ -124,11 +114,40 @@ export class PrimitiveFloatUniform extends Float32Array {
 
 
     public update() { }
+
+
+
+    //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Float32Array)----
+    protected eventListeners: any = {};
+    public addEventListener(eventName: string, callback: (dispatcher: PrimitiveFloatUniform, data?: any) => void) {
+        if (!this.eventListeners[eventName]) this.eventListeners[eventName] = [];
+        this.eventListeners[eventName].push(callback);
+    }
+    public removeEventListener(eventName: string, callback: (dispatcher: PrimitiveFloatUniform, data?: any) => void) {
+        if (this.eventListeners[eventName]) {
+            const id = this.eventListeners[eventName].indexOf(callback);
+            if (id != -1) {
+                this.eventListeners[eventName].splice(id, 1);
+            }
+        }
+    }
+    public dispatchEvent(eventName: string, eventData?: any) {
+        if (this.eventListeners[eventName]) {
+            this.eventListeners[eventName].forEach(callback => {
+                callback(this, eventData);
+            });
+        }
+    }
+    //---------------------------------------------------------------------------------------------
 }
 
 
 export class PrimitiveIntUniform extends Int32Array {
 
+
+
+
+    public static ON_CHANGED: string = "ON_CHANGED";
 
     public name: string;
     public type: GPUType;
@@ -139,7 +158,8 @@ export class PrimitiveIntUniform extends Int32Array {
     public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
     public set mustBeTransfered(b: boolean) {
         if (b != this._mustBeTransfered) {
-            if (!b && this.onChange) this.onChange();
+            if (!b) this.dispatchEvent(PrimitiveIntUniform.ON_CHANGED)
+            //if (!b && this.onChange) this.onChange();
             this._mustBeTransfered = b;
         }
     }
@@ -177,27 +197,7 @@ export class PrimitiveIntUniform extends Int32Array {
         return result;
     }
 
-    /*
-    public createVariable(uniformBufferName: string): string {
-        if (!this.createVariableInsideMain) return "";
 
-        let type = this.className;
-        if (type === "Int") type = "i32";
-        if (type === "IVec2") type = "vec2<i32>";
-        if (type === "IVec3") type = "vec3<i32>";
-        if (type === "IVec4") type = "vec4<i32>";
-
-
-        const items = this.uniformBuffer.items;
-        let name: string;
-        for (let z in items) {
-            if (items[z] === this) {
-                name = z;
-            }
-        }
-        return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
-    }
-    */
 
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
@@ -221,10 +221,39 @@ export class PrimitiveIntUniform extends Int32Array {
 
     public update() { }
 
+    //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Int32Array)----
+    protected eventListeners: any = {};
+    public addEventListener(eventName: string, callback: (dispatcher: PrimitiveIntUniform, data?: any) => void) {
+        if (!this.eventListeners[eventName]) this.eventListeners[eventName] = [];
+        this.eventListeners[eventName].push(callback);
+    }
+    public removeEventListener(eventName: string, callback: (dispatcher: PrimitiveIntUniform, data?: any) => void) {
+        if (this.eventListeners[eventName]) {
+            const id = this.eventListeners[eventName].indexOf(callback);
+            if (id != -1) {
+                this.eventListeners[eventName].splice(id, 1);
+            }
+        }
+    }
+    public dispatchEvent(eventName: string, eventData?: any) {
+        if (this.eventListeners[eventName]) {
+            this.eventListeners[eventName].forEach(callback => {
+                callback(this, eventData);
+            });
+        }
+    }
+    //---------------------------------------------------------------------------------------------
+
 }
 
 
 export class PrimitiveUintUniform extends Uint32Array {
+
+
+
+    public static ON_CHANGED: string = "ON_CHANGED";
+
+
 
     public name: string;
     public type: GPUType;
@@ -236,7 +265,8 @@ export class PrimitiveUintUniform extends Uint32Array {
     public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
     public set mustBeTransfered(b: boolean) {
         if (b != this._mustBeTransfered) {
-            if (!b && this.onChange) this.onChange();
+            //if (!b && this.onChange) this.onChange();
+            if (!b) this.dispatchEvent(PrimitiveUintUniform.ON_CHANGED)
             this._mustBeTransfered = b;
         }
     }
@@ -272,25 +302,7 @@ export class PrimitiveUintUniform extends Uint32Array {
         return result;
     }
 
-    /*
-    public createVariable(uniformBufferName: string): string {
-        if (!this.createVariableInsideMain) return "";
 
-        let type = this.className;
-        if (type === "Uint") type = "u32";
-        if (type === "UVec2") type = "vec2<u32>";
-        if (type === "UVec3") type = "vec3<u32>";
-        if (type === "UVec4") type = "vec4<u32>";
-
-        const items = this.uniformBuffer.items;
-        let name: string;
-        for (let z in items) {
-            if (items[z] === this) {
-                name = z;
-            }
-        }
-        return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
-    }*/
 
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
@@ -315,6 +327,30 @@ export class PrimitiveUintUniform extends Uint32Array {
 
 
     public update() { }
+
+    //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Uint32Array)----
+    protected eventListeners: any = {};
+    public addEventListener(eventName: string, callback: (dispatcher: PrimitiveUintUniform, data?: any) => void) {
+        if (!this.eventListeners[eventName]) this.eventListeners[eventName] = [];
+        this.eventListeners[eventName].push(callback);
+    }
+    public removeEventListener(eventName: string, callback: (dispatcher: PrimitiveUintUniform, data?: any) => void) {
+        if (this.eventListeners[eventName]) {
+            const id = this.eventListeners[eventName].indexOf(callback);
+            if (id != -1) {
+                this.eventListeners[eventName].splice(id, 1);
+            }
+        }
+    }
+    public dispatchEvent(eventName: string, eventData?: any) {
+        if (this.eventListeners[eventName]) {
+            this.eventListeners[eventName].forEach(callback => {
+                callback(this, eventData);
+            });
+        }
+    }
+    //---------------------------------------------------------------------------------------------
+
 }
 
 //--------------

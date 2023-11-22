@@ -6,7 +6,7 @@ import { RenderPipeline } from "./pipelines/RenderPipeline";
 import { Texture } from "./pipelines/resources/textures/Texture";
 import { IRenderer } from "./IRenderer"
 
-export class HeadlessGPURenderer implements IRenderer {
+export class TextureRenderer implements IRenderer {
 
     protected textureObj: Texture
     protected dimension: { width: number, height: number, dimensionChanged: boolean };
@@ -63,35 +63,28 @@ export class HeadlessGPURenderer implements IRenderer {
 
     protected nbColorAttachment: number = 0;
 
-    public async addPipeline(pipeline: RenderPipeline, offset: number = null) {
+    public addPipeline(pipeline: RenderPipeline, offset: number = null): RenderPipeline {
 
+        pipeline.renderer = this;
         if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment++;
 
         if (offset === null) this.renderPipelines.push(pipeline);
         else this.renderPipelines.splice(offset, 0, pipeline)
 
-
-        /*
-        //console.log("pipeline.buildGPUPipeline")
-        pipeline.buildGpuPipeline();
-
-        XGPU.device.queue.submit([]);
-        //console.time("addPipeline onSubmittedWorkDone")
-        await XGPU.device.queue.onSubmittedWorkDone()
-        //console.timeEnd("addPipeline onSubmittedWorkDone")
-        */
-
-
-
-
-        //setTimeout(() => {
-
-
-        //}, 1)
-
-
-
+        return pipeline;
     }
+
+    public removePipeline(pipeline: RenderPipeline) {
+        if (pipeline.renderPassDescriptor.colorAttachments[0]) this.nbColorAttachment--;
+        const id = this.renderPipelines.indexOf(pipeline);
+        if (id != -1) {
+            this.renderPipelines.splice(id, 1);
+        }
+        pipeline.renderer = null;
+        return pipeline;
+    }
+
+
     public get nbPipeline(): number { return this.renderPipelines.length }
     public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
 
@@ -142,7 +135,8 @@ export class HeadlessGPURenderer implements IRenderer {
             for (let j = 0; j < pipeline.pipelineCount; j++) {
 
                 renderPass = pipeline.beginRenderPass(commandEncoder, this.view, j);
-                if (pipeline.onDraw) pipeline.onDraw(j);
+                pipeline.dispatchEvent(RenderPipeline.ON_DRAW, j);
+                //if (pipeline.onDraw) pipeline.onDraw(j);
                 pipeline.draw(renderPass);
                 pipeline.end(commandEncoder, renderPass);
             }
@@ -164,11 +158,11 @@ export class HeadlessGPURenderer implements IRenderer {
     public get height(): number { return this.dimension.height }
 
     public get texture(): GPUTexture {
-        if (!this.textureObj) throw new Error("HeadlessGPURenderer is not initialized yet. You must Use HeadlessGPURenderer.init in order to initialize it")
+        if (!this.textureObj) throw new Error("TextureRenderer is not initialized yet. You must Use TextureRenderer.init in order to initialize it")
         return this.textureObj.gpuResource;
     }
     public get view(): GPUTextureView {
-        if (!this.textureObj) throw new Error("HeadlessGPURenderer is not initialized yet. You must Use HeadlessGPURenderer.init in order to initialize it")
+        if (!this.textureObj) throw new Error("TextureRenderer is not initialized yet. You must Use TextureRenderer.init in order to initialize it")
         return this.textureObj.view;
     }
 

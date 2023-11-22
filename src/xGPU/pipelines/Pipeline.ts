@@ -11,11 +11,12 @@ import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
+import { EventDispatcher } from "../EventDispatcher";
 
 
 
 
-export class Pipeline {
+export class Pipeline extends EventDispatcher {
 
     public description: any = {};
     public nbVertex: number;
@@ -32,6 +33,7 @@ export class Pipeline {
     public type: "compute" | "compute_mixed" | "render" = null;
 
     constructor() {
+        super();
         this.bindGroups = new Bindgroups(this, "pipeline");
 
     }
