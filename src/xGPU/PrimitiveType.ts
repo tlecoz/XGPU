@@ -920,7 +920,7 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
     }
 
     public set scaleXYZ(n: number) {
-        this._sx = this._sy = this._sz = n;
+        this.scaleX = this.scaleY = this.scaleZ = n;
         this.mustBeTransfered = true;
     }
 

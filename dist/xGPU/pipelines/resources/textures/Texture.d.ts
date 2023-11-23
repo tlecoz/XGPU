@@ -1,11 +1,13 @@
 /// <reference types="dist" />
+import { EventDispatcher } from "../../../EventDispatcher";
 export type TextureDescriptor = {
     size: GPUExtent3D;
     format: GPUTextureFormat;
     usage?: GPUTextureUsageFlags;
     sampleCount?: GPUSize32;
+    label?: string;
 };
-export declare class Texture {
+export declare class Texture extends EventDispatcher {
     descriptor: TextureDescriptor;
     gpuResource: GPUTexture;
     protected _view: GPUTextureView;
@@ -14,6 +16,7 @@ export declare class Texture {
         format: GPUTextureFormat;
         usage?: GPUTextureUsageFlags;
         sampleCount?: GPUSize32;
+        label?: string;
     });
     get sampleCount(): number;
     get format(): any;

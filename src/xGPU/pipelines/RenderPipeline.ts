@@ -123,7 +123,7 @@ export class RenderPipeline extends Pipeline {
                     this.setupDepthStencilView(this.depthStencilTextureDescriptor);
                     this.waitingDepthStencilTexture = false;
                 }
-
+                console.log("dispatch")
                 this.dispatchEvent(RenderPipeline.ON_ADDED_TO_RENDERER);
 
             } else {
@@ -185,12 +185,12 @@ export class RenderPipeline extends Pipeline {
 
 
 
-
+    /*
     public get canvas(): any {
         if (!this.renderer) return null;
         return this.renderer.canvas;
     }
-
+    */
     public get depthStencilTexture(): DepthStencilTexture { return this._depthStencilTexture; }
 
 
@@ -400,13 +400,14 @@ export class RenderPipeline extends Pipeline {
 
     }
 
+    protected _clearValue: { r: number, g: number, b: number, a: number } = null;
     public get clearValue(): { r: number, g: number, b: number, a: number } {
-        if (!this.renderPassDescriptor.colorAttachment) return null;
-        return this.renderPassDescriptor.colorAttachment.clearValue;
+        return this._clearValue;
+        //if (!this.renderPassDescriptor.colorAttachment) return null;
+        //return this.renderPassDescriptor.colorAttachment.clearValue;
     }
     public createColorAttachment(rgba: { r: number, g: number, b: number, a: number }, view: GPUTextureView = undefined): any {
 
-        console.warn("createColorAttachment ", rgba)
 
         const colorAttachment = {
             view: view,
@@ -443,10 +444,6 @@ export class RenderPipeline extends Pipeline {
 
 
 
-
-
-    public get offscreen(): boolean { return this.resources.offscreen; }
-    public set offscreen(b: boolean) { this.resources.offscreen = b; }
 
     public get debugVertexCount(): number { return this.resources.debugVertexCount }
     public set debugVertexCount(n: number) { this.resources.debugVertexCount = n; }
@@ -487,7 +484,7 @@ export class RenderPipeline extends Pipeline {
 
         if (this.multisampleTexture) this.multisampleTexture.destroy();
         if (!descriptor) descriptor = {};
-        if (!descriptor.size) descriptor.size = [this.canvas.width, this.canvas.height];
+        if (!descriptor.size) descriptor.size = [this.renderer.width, this.renderer.height];
         this.multisampleTexture = new MultiSampleTexture(descriptor as any);
 
         this.description.multisample = {
@@ -549,9 +546,13 @@ export class RenderPipeline extends Pipeline {
     public get renderPassView(): GPUTextureView { return this.renderPass.view }
     public get renderPass(): RenderPassTexture {
         if (!this.renderPassTexture) {
-            this.renderPassTexture = new RenderPassTexture({ size: [this.canvas.width, this.canvas.height] })
+            this.renderPassTexture = new RenderPassTexture(this)
         }
         return this.renderPassTexture;
+    }
+
+    public get useRenderPassTexture(): boolean {
+        return !!this.renderPassTexture;
     }
 
 
@@ -586,9 +587,9 @@ export class RenderPipeline extends Pipeline {
 
         this.gpuPipeline = null;
         if (this.drawConfig.indexBuffer) this.drawConfig.indexBuffer.createGpuResource();
-        if (this.multisampleTexture) this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
-        if (this.depthStencilTexture) this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
-        if (this.renderPassTexture) this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
+        if (this.multisampleTexture) this.multisampleTexture.resize(this.renderer.width, this.renderer.height);
+        if (this.depthStencilTexture) this.depthStencilTexture.resize(this.renderer.width, this.renderer.height);
+        if (this.renderPassTexture) this.renderPassTexture.resize(this.renderer.width, this.renderer.height);
 
         this.rebuildingAfterDeviceLost = true;
         super.clearAfterDeviceLostAndRebuild();
@@ -599,9 +600,11 @@ export class RenderPipeline extends Pipeline {
 
 
 
-
+    private buildingPipeline: boolean = false;
     public buildGpuPipeline(): GPURenderPipeline {
-        if (this.gpuPipeline) return this.gpuPipeline;
+        if (this.gpuPipeline || this.buildingPipeline) return this.gpuPipeline;
+        this.buildingPipeline = true;
+        //console.warn("BUILD GPUPIPELINE")
 
         this.bindGroups.handleRenderPipelineResourceIOs();
 
@@ -693,7 +696,7 @@ export class RenderPipeline extends Pipeline {
                 //this._onLog(o);
             }
         }
-
+        this.buildingPipeline = false;
         this.dispatchEvent(RenderPipeline.ON_GPU_PIPELINE_BUILT)
         return this.gpuPipeline;
 
@@ -704,7 +707,7 @@ export class RenderPipeline extends Pipeline {
     private clearOpReady: boolean = false;
     private rendererUseSinglePipeline: boolean = true;
 
-    public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView, drawCallId?: number): GPURenderPassEncoder {
+    public beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView, drawCallId?: number, usingRenderPassTexture: boolean = false): GPURenderPassEncoder {
         if (!this.resourceDefined) return null;
 
 
@@ -713,25 +716,36 @@ export class RenderPipeline extends Pipeline {
 
 
 
+
+
         this.dispatchEvent(RenderPipeline.ON_DRAW_BEGIN);
 
-        let rendererUseSinglePipeline: boolean = this.renderer.useSinglePipeline && this.pipelineCount === 1;
+        if (usingRenderPassTexture) {
+            //console.log("usingRenderPassTexture")
+            this.renderPassDescriptor.colorAttachments[0].loadOp = "clear"
 
-        if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
-            this.clearOpReady = false;
-            this.rendererUseSinglePipeline = rendererUseSinglePipeline;
-        }
+        } else {
+            this._clearValue = this.renderPassDescriptor.colorAttachments[0].clearValue;
 
-        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
-            this.clearOpReady = true;
+            //console.log("not usingRenderPassTexture")
 
-            if (this.offscreen && this.renderPassDescriptor.colorAttachments[0]) {
-                this.renderPassDescriptor.colorAttachments[0].loadOp = "clear"
-            } else {
+            let rendererUseSinglePipeline: boolean = this.renderer.renderPipelines.length == 1 && this.pipelineCount === 1;
+
+            if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
+                this.clearOpReady = false;
+                this.rendererUseSinglePipeline = rendererUseSinglePipeline;
+            }
+
+            if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
+                this.clearOpReady = true;
+
+                /*if (this.useRenderPassTexture && this.renderPassDescriptor.colorAttachments[0]) {
+                    this.renderPassDescriptor.colorAttachments[0].loadOp = "clear"
+                } else {*/
                 if (rendererUseSinglePipeline && this.pipelineCount == 1) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
                 else {
                     if (this.pipelineCount === 1) {
-                        if (this.renderer.firstPipeline === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                        if (this.renderer.renderPipelines[0] === this) this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
                         else this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
                     } else {
 
@@ -741,9 +755,14 @@ export class RenderPipeline extends Pipeline {
                     }
 
                 }
+                //}
+
             }
 
+
         }
+
+
 
 
 
@@ -751,6 +770,9 @@ export class RenderPipeline extends Pipeline {
         if (!this.gpuPipeline) this.buildGpuPipeline();
 
         if (outputView && this.outputColor) this.handleOutputColor(outputView);
+
+
+
 
         return commandEncoder.beginRenderPass(this.renderPassDescriptor);
     }
@@ -789,8 +811,10 @@ export class RenderPipeline extends Pipeline {
 
     public draw(renderPass: GPURenderPassEncoder) {
 
+
         if (!this.resourceDefined) return;
 
+        //console.log("draw")
         renderPass.setPipeline(this.gpuPipeline);
 
         this.bindGroups.apply(renderPass);
@@ -804,7 +828,7 @@ export class RenderPipeline extends Pipeline {
         if (!this.resourceDefined) return;
         renderPass.end();
 
-
+        //console.log("end")
         //------ the arrays of textures may contains GPUTexture so I must use commandEncoder.copyTextureToTexture 
         // to update the content from a GPUTexture to the texture_array_2d 
         const types = this.bindGroups.resources.types;
@@ -829,20 +853,22 @@ export class RenderPipeline extends Pipeline {
 
 
 
+        const { width, height } = this.renderer;
 
 
 
-        if ((this.canvas as any).dimensionChanged) {
+
+        if (this.renderer.resized) {
 
 
             if (this.multisampleTexture) {
-                this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
+                this.multisampleTexture.resize(width, height);
             }
             if (this.depthStencilTexture) {
-                this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
+                this.depthStencilTexture.resize(width, height);
             }
             if (this.renderPassTexture) {
-                this.renderPassTexture.resize(this.canvas.width, this.canvas.height)
+                this.renderPassTexture.resize(width, height)
             }
         }
 
@@ -850,10 +876,10 @@ export class RenderPipeline extends Pipeline {
 
 
 
-        if (this.renderPassTexture) {
+        if (this.renderPassTexture && this.renderPassTexture.mustUseCopyTextureToTexture) {
             if (!this.renderPassTexture.gpuResource) this.renderPassTexture.createGpuResource();
 
-            commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
+            commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [width, height]);
         }
 
         if (this.multisampleTexture) this.multisampleTexture.update();

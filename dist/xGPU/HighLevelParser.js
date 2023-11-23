@@ -726,7 +726,7 @@ export class HighLevelParser {
         let nb = 0;
         for (let name in descriptor) {
             o = descriptor[name];
-            if (o.__debug == true) {
+            if (o && o.__debug == true) {
                 if (typeof (o) === "function") {
                     o = { name, id: nb, ...(o()) };
                 }
@@ -977,7 +977,7 @@ export class HighLevelParser {
                 descriptor.__DEBUG__ = debug;
                 descriptor = this.parseVertexShaderDebug(descriptor);
             }
-            console.log(descriptor);
+            //console.log(descriptor);
         }
         return descriptor;
     }

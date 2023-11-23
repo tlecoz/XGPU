@@ -2,33 +2,26 @@
 import { RenderPipeline } from "./pipelines/RenderPipeline";
 import { Texture } from "./pipelines/resources/textures/Texture";
 import { IRenderer } from "./IRenderer";
-export declare class HeadlessGPURenderer implements IRenderer {
+export declare class TextureRenderer implements IRenderer {
     protected textureObj: Texture;
-    protected dimension: {
-        width: number;
-        height: number;
-        dimensionChanged: boolean;
-    };
-    protected renderPipelines: RenderPipeline[];
+    protected dimensionChanged: boolean;
+    protected currentWidth: number;
+    protected currentHeight: number;
+    renderPipelines: RenderPipeline[];
     protected useTextureInComputeShader: any;
-    onDrawEnd: () => void;
+    frameId: number;
     constructor(useTextureInComputeShader?: boolean);
     protected deviceId: number;
     init(w: number, h: number, usage?: number, sampleCount?: number): Promise<any>;
-    get firstPipeline(): RenderPipeline;
     protected nbColorAttachment: number;
-    addPipeline(pipeline: RenderPipeline, offset?: number): Promise<void>;
-    get nbPipeline(): number;
-    get useSinglePipeline(): boolean;
+    addPipeline(pipeline: RenderPipeline, offset?: number): RenderPipeline;
+    removePipeline(pipeline: RenderPipeline): RenderPipeline;
     resize(w: number, h: number): void;
     destroy(): void;
+    commandEncoder: GPUCommandEncoder;
     update(): Promise<void>;
-    get dimensionChanged(): boolean;
-    get canvas(): {
-        width: number;
-        height: number;
-        dimensionChanged: boolean;
-    };
+    get resized(): boolean;
+    get canvas(): HTMLCanvasElement;
     get width(): number;
     get height(): number;
     get texture(): GPUTexture;

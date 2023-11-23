@@ -21,10 +21,16 @@ export class EventDispatcher {
             }
         }
     }
+    public clearEvents(eventName) {
+        this.addEventListener[eventName] = [];
+    }
+    public hasEventListener(eventName): boolean { return !!this.eventListeners[eventName] }
 
     public dispatchEvent(eventName: string, eventData?: any) {
         if (this.eventListeners[eventName]) {
-            this.eventListeners[eventName].forEach(callback => {
+
+            const t = [...this.eventListeners[eventName]];
+            t.forEach(callback => {
                 callback(this, eventData);
                 if ((callback as any).removeAfter) this.removeEventListener(eventName, callback);
             });

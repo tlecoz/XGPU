@@ -115,10 +115,12 @@ export class VertexBuffer {
     }
     _byteCount = 0;
     createArray(name, dataType, offset) {
-        if (this.attributes[name]) {
+        if (this.attributes[name] && this.attributes[name].vertexBuffer) {
             return this.attributes[name];
         }
-        const v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
+        let v = this.attributes[name];
+        if (!v)
+            v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
         v.vertexBuffer = this;
         const nbCompo = v.nbComponent;
         const _offset = v.dataOffset === undefined ? 0 : v.dataOffset;

@@ -1,16 +1,20 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
+import { EventDispatcher } from "../../../EventDispatcher";
 import { XGPU } from "../../../XGPU";
-export class Texture {
+export class Texture extends EventDispatcher {
     descriptor;
     gpuResource = null;
     _view = null;
     constructor(descriptor) {
+        super();
         //console.log(descriptor.format + " ::: " + descriptor.usage)
         if (undefined === descriptor.usage)
             descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.sampleCount && descriptor.format !== "depth32float")
             descriptor.sampleCount = 1;
+        if (undefined === descriptor.label)
+            descriptor.label = "Texture";
         this.descriptor = descriptor;
     }
     get sampleCount() { return this.descriptor.sampleCount; }

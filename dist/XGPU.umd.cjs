@@ -303,271 +303,40 @@ var __publicField = (obj, key, value) => {
   __publicField(XGPU, "deviceLostTime");
   __publicField(XGPU, "deviceId", -1);
   __publicField(XGPU, "_preferedCanvasFormat");
-  class Texture {
-    constructor(descriptor) {
-      __publicField(this, "descriptor");
-      __publicField(this, "gpuResource", null);
-      __publicField(this, "_view", null);
-      __publicField(this, "deviceId");
-      __publicField(this, "time");
-      if (void 0 === descriptor.usage)
-        descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
-      if (void 0 === descriptor.sampleCount && descriptor.format !== "depth32float")
-        descriptor.sampleCount = 1;
-      this.descriptor = descriptor;
+  class EventDispatcher {
+    constructor() {
+      __publicField(this, "eventListeners", {});
     }
-    get sampleCount() {
-      return this.descriptor.sampleCount;
+    addEventListener(eventName, callback, removeListenerAfterDispatch = false) {
+      if (!this.eventListeners[eventName])
+        this.eventListeners[eventName] = [];
+      if (removeListenerAfterDispatch)
+        callback.removeAfter = true;
+      this.eventListeners[eventName].push(callback);
     }
-    get format() {
-      return this.descriptor.format;
-    }
-    get size() {
-      return this.descriptor.size;
-    }
-    get usage() {
-      return this.descriptor.usage;
-    }
-    get view() {
-      if (!this._view)
-        this.create();
-      return this._view;
-    }
-    destroy() {
-      if (this.gpuResource) {
-        this.gpuResource.xgpuObject = null;
-        this.gpuResource.destroy();
-      }
-      this.gpuResource = null;
-      this._view = null;
-    }
-    create() {
-      this.time = (/* @__PURE__ */ new Date()).getTime();
-      if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId)
-        return;
-      if (this.gpuResource) {
-        this.gpuResource.xgpuObject = null;
-        this.gpuResource.destroy();
-      }
-      this.deviceId = XGPU.deviceId;
-      this.gpuResource = XGPU.device.createTexture(this.descriptor);
-      this.gpuResource.xgpuObject = this;
-      this.createView();
-    }
-    createGpuResource() {
-      this.create();
-    }
-    update() {
-      if (this.deviceId !== XGPU.deviceId) {
-        this.create();
+    removeEventListener(eventName, callback) {
+      if (this.eventListeners[eventName]) {
+        const id = this.eventListeners[eventName].indexOf(callback);
+        if (id != -1) {
+          this.eventListeners[eventName].splice(id, 1);
+        }
       }
     }
-    createView() {
-      if (!this.gpuResource)
-        this.create();
-      this._view = this.gpuResource.createView();
+    clearEvents(eventName) {
+      this.addEventListener[eventName] = [];
     }
-    resize(width, height) {
-      this.descriptor.size = [width, height];
-      this.create();
+    hasEventListener(eventName) {
+      return !!this.eventListeners[eventName];
     }
-  }
-  class HeadlessGPURenderer {
-    constructor(useTextureInComputeShader = false) {
-      __publicField(this, "textureObj");
-      __publicField(this, "dimension");
-      __publicField(this, "renderPipelines", []);
-      __publicField(this, "useTextureInComputeShader");
-      __publicField(this, "onDrawEnd");
-      __publicField(this, "deviceId");
-      __publicField(this, "nbColorAttachment", 0);
-      this.useTextureInComputeShader = useTextureInComputeShader;
-    }
-    init(w, h, usage, sampleCount) {
-      this.dimension = { width: w, height: h, dimensionChanged: true };
-      return new Promise((onResolve) => {
-        XGPU.init().then(() => {
-          this.deviceId = XGPU.deviceId;
-          if (!usage)
-            usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC;
-          let format = "bgra8unorm";
-          if (this.useTextureInComputeShader) {
-            format = "rgba8unorm";
-            usage += GPUTextureUsage.STORAGE_BINDING;
-          }
-          this.textureObj = new Texture({
-            size: [w, h],
-            format,
-            usage,
-            sampleCount
-          });
-          this.textureObj.create();
-          onResolve(this);
+    dispatchEvent(eventName, eventData) {
+      if (this.eventListeners[eventName]) {
+        const t = [...this.eventListeners[eventName]];
+        t.forEach((callback) => {
+          callback(this, eventData);
+          if (callback.removeAfter)
+            this.removeEventListener(eventName, callback);
         });
-      });
-    }
-    get firstPipeline() {
-      return this.renderPipelines[0];
-    }
-    async addPipeline(pipeline, offset = null) {
-      if (pipeline.renderPassDescriptor.colorAttachments[0])
-        this.nbColorAttachment++;
-      if (offset === null)
-        this.renderPipelines.push(pipeline);
-      else
-        this.renderPipelines.splice(offset, 0, pipeline);
-    }
-    get nbPipeline() {
-      return this.renderPipelines.length;
-    }
-    get useSinglePipeline() {
-      return this.nbColorAttachment === 1;
-    }
-    resize(w, h) {
-      this.dimension.width = w;
-      this.dimension.height = h;
-      this.dimension.dimensionChanged = true;
-      if (this.textureObj)
-        this.textureObj.resize(w, h);
-    }
-    destroy() {
-      for (let i = 0; i < this.renderPipelines.length; i++) {
-        this.renderPipelines[i].destroy();
       }
-      this.renderPipelines = [];
-      for (let z in this) {
-        this[z] = null;
-      }
-    }
-    async update() {
-      if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === void 0)
-        return;
-      let deviceChanged = XGPU.deviceId != this.deviceId;
-      if (deviceChanged) {
-        if (this.textureObj)
-          this.textureObj.create();
-        this.deviceId = XGPU.deviceId;
-        for (let i = 0; i < this.renderPipelines.length; i++) {
-          this.renderPipelines[i].clearAfterDeviceLostAndRebuild();
-        }
-      }
-      const commandEncoder = XGPU.device.createCommandEncoder();
-      let pipeline, renderPass;
-      for (let i = 0; i < this.renderPipelines.length; i++) {
-        pipeline = this.renderPipelines[i];
-        pipeline.update();
-        for (let j = 0; j < pipeline.pipelineCount; j++) {
-          renderPass = pipeline.beginRenderPass(commandEncoder, this.view, j);
-          if (pipeline.onDraw)
-            pipeline.onDraw(j);
-          pipeline.draw(renderPass);
-          pipeline.end(commandEncoder, renderPass);
-        }
-      }
-      const commandBuffer = commandEncoder.finish();
-      XGPU.device.queue.submit([commandBuffer]);
-      this.canvas.dimensionChanged = false;
-      if (this.onDrawEnd)
-        this.onDrawEnd();
-    }
-    get dimensionChanged() {
-      return this.dimension.dimensionChanged;
-    }
-    get canvas() {
-      return this.dimension;
-    }
-    get width() {
-      return this.dimension.width;
-    }
-    get height() {
-      return this.dimension.height;
-    }
-    get texture() {
-      if (!this.textureObj)
-        throw new Error("HeadlessGPURenderer is not initialized yet. You must Use HeadlessGPURenderer.init in order to initialize it");
-      return this.textureObj.gpuResource;
-    }
-    get view() {
-      if (!this.textureObj)
-        throw new Error("HeadlessGPURenderer is not initialized yet. You must Use HeadlessGPURenderer.init in order to initialize it");
-      return this.textureObj.view;
-    }
-  }
-  class GPURenderer extends HeadlessGPURenderer {
-    constructor(useTextureInComputeShader = false) {
-      super(useTextureInComputeShader);
-      __publicField(this, "domElement", null);
-      __publicField(this, "ctx");
-      __publicField(this, "canvasW");
-      __publicField(this, "canvasH");
-      __publicField(this, "gpuCtxConfiguration");
-    }
-    initCanvas(canvas, alphaMode = "opaque") {
-      this.canvasW = canvas.width;
-      this.canvasH = canvas.height;
-      this.domElement = canvas;
-      this.dimension = { width: canvas.width, height: canvas.height, dimensionChanged: true };
-      return new Promise(async (resolve, error) => {
-        await XGPU.init();
-        this.deviceId = XGPU.deviceId;
-        if (this.domElement == null)
-          return;
-        try {
-          this.gpuCtxConfiguration = {
-            device: XGPU.device,
-            format: XGPU.getPreferredCanvasFormat(),
-            alphaMode,
-            colorSpace: "srgb",
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING
-          };
-          this.ctx = this.domElement.getContext("webgpu");
-          this.ctx.configure(this.gpuCtxConfiguration);
-          resolve(canvas);
-        } catch (e) {
-          error(e);
-        }
-      });
-    }
-    get canvas() {
-      return this.domElement;
-    }
-    get texture() {
-      return this.ctx.getCurrentTexture();
-    }
-    get width() {
-      return this.canvas.width;
-    }
-    get height() {
-      return this.canvas.height;
-    }
-    get dimensionChanged() {
-      return this.canvas.dimensionChanged;
-    }
-    get view() {
-      return this.ctx.getCurrentTexture().createView();
-    }
-    configure(textureUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING, alphaMode = "opaque") {
-      this.gpuCtxConfiguration = {
-        device: XGPU.device,
-        format: XGPU.getPreferredCanvasFormat(),
-        alphaMode,
-        colorSpace: "srgb",
-        usage: textureUsage
-      };
-      this.ctx.configure(this.gpuCtxConfiguration);
-    }
-    async update() {
-      if (!this.ctx)
-        return;
-      if (XGPU.deviceId != this.deviceId) {
-        this.ctx.configure({ ...this.gpuCtxConfiguration, device: XGPU.device });
-      }
-      if (this.canvas.width != this.canvasW || this.canvas.height != this.canvasH) {
-        this.canvasW = this.canvas.width;
-        this.canvasH = this.canvas.height;
-        this.canvas.dimensionChanged = true;
-      }
-      super.update();
     }
   }
   class GPUType {
@@ -820,7 +589,7 @@ var __publicField = (obj, key, value) => {
       this._sizeOf = o[1];
     }
   }
-  class PrimitiveFloatUniform extends Float32Array {
+  const _PrimitiveFloatUniform = class extends Float32Array {
     constructor(type, val, createLocalVariable = false) {
       super(val);
       //public uniform: Uniform;
@@ -835,6 +604,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "className");
       __publicField(this, "feedbackVertexId", 0);
       __publicField(this, "feedbackInstanceId", 0);
+      //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Float32Array)----
+      __publicField(this, "eventListeners", {});
       this.type = new GPUType(type);
       this.createVariableInsideMain = createLocalVariable;
       this.className = this.constructor.name;
@@ -844,13 +615,13 @@ var __publicField = (obj, key, value) => {
     }
     set mustBeTransfered(b) {
       if (b != this._mustBeTransfered) {
-        if (!b && this.onChange)
-          this.onChange();
+        if (!b)
+          this.dispatchEvent(_PrimitiveFloatUniform.ON_CHANGED);
         this._mustBeTransfered = b;
       }
     }
     clone() {
-      const o = new PrimitiveFloatUniform(this.type.rawType, this, this.createVariableInsideMain);
+      const o = new _PrimitiveFloatUniform(this.type.rawType, this, this.createVariableInsideMain);
       o.propertyNames = this.propertyNames;
       o.className = this.className;
       o.name = this.name;
@@ -875,27 +646,6 @@ var __publicField = (obj, key, value) => {
       super.set(m, offset);
       this.mustBeTransfered = true;
     }
-    /*
-        public createVariable(uniformBufferName: string): string {
-            if (!this.createVariableInsideMain) return "";
-    
-            let type = this.className;
-            if (type === "Float") type = "f32";
-            if (type === "Vec2") type = "vec2<f32>";
-            if (type === "Vec3") type = "vec3<f32>";
-            if (type === "Vec4") type = "vec4<f32>";
-    
-            const items = this.uniformBuffer.items;
-            let name: string;
-            for (let z in items) {
-                if (items[z] === this) {
-                    name = z;
-                }
-            }
-    
-            return "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";"
-        }
-        */
     createVariable(uniformBufferName, name) {
       if (!this.createVariableInsideMain)
         return "";
@@ -920,8 +670,31 @@ var __publicField = (obj, key, value) => {
     }
     update() {
     }
-  }
-  class PrimitiveIntUniform extends Int32Array {
+    addEventListener(eventName, callback) {
+      if (!this.eventListeners[eventName])
+        this.eventListeners[eventName] = [];
+      this.eventListeners[eventName].push(callback);
+    }
+    removeEventListener(eventName, callback) {
+      if (this.eventListeners[eventName]) {
+        const id = this.eventListeners[eventName].indexOf(callback);
+        if (id != -1) {
+          this.eventListeners[eventName].splice(id, 1);
+        }
+      }
+    }
+    dispatchEvent(eventName, eventData) {
+      if (this.eventListeners[eventName]) {
+        this.eventListeners[eventName].forEach((callback) => {
+          callback(this, eventData);
+        });
+      }
+    }
+    //---------------------------------------------------------------------------------------------
+  };
+  let PrimitiveFloatUniform = _PrimitiveFloatUniform;
+  __publicField(PrimitiveFloatUniform, "ON_CHANGED", "ON_CHANGED");
+  const _PrimitiveIntUniform = class extends Int32Array {
     constructor(type, val, createLocalVariable = false) {
       super(val);
       __publicField(this, "name");
@@ -935,6 +708,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "className");
       __publicField(this, "feedbackVertexId", 0);
       __publicField(this, "feedbackInstanceId", 0);
+      //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Int32Array)----
+      __publicField(this, "eventListeners", {});
       this.type = new GPUType(type);
       this.createVariableInsideMain = createLocalVariable;
       this.className = this.constructor.name;
@@ -944,13 +719,13 @@ var __publicField = (obj, key, value) => {
     }
     set mustBeTransfered(b) {
       if (b != this._mustBeTransfered) {
-        if (!b && this.onChange)
-          this.onChange();
+        if (!b)
+          this.dispatchEvent(_PrimitiveIntUniform.ON_CHANGED);
         this._mustBeTransfered = b;
       }
     }
     clone() {
-      return new PrimitiveIntUniform(this.type.rawType, this, this.createVariableInsideMain);
+      return new _PrimitiveIntUniform(this.type.rawType, this, this.createVariableInsideMain);
     }
     initStruct(propertyNames, createVariableInsideMain = false) {
       if (this.type.isArray || this.type.isMatrix)
@@ -966,27 +741,6 @@ var __publicField = (obj, key, value) => {
       result += "}\n";
       return result;
     }
-    /*
-        public createVariable(uniformBufferName: string): string {
-            if (!this.createVariableInsideMain) return "";
-    
-            let type = this.className;
-            if (type === "Int") type = "i32";
-            if (type === "IVec2") type = "vec2<i32>";
-            if (type === "IVec3") type = "vec3<i32>";
-            if (type === "IVec4") type = "vec4<i32>";
-    
-    
-            const items = this.uniformBuffer.items;
-            let name: string;
-            for (let z in items) {
-                if (items[z] === this) {
-                    name = z;
-                }
-            }
-            return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
-        }
-        */
     createVariable(uniformBufferName) {
       if (!this.createVariableInsideMain)
         return "";
@@ -1008,8 +762,31 @@ var __publicField = (obj, key, value) => {
     }
     update() {
     }
-  }
-  class PrimitiveUintUniform extends Uint32Array {
+    addEventListener(eventName, callback) {
+      if (!this.eventListeners[eventName])
+        this.eventListeners[eventName] = [];
+      this.eventListeners[eventName].push(callback);
+    }
+    removeEventListener(eventName, callback) {
+      if (this.eventListeners[eventName]) {
+        const id = this.eventListeners[eventName].indexOf(callback);
+        if (id != -1) {
+          this.eventListeners[eventName].splice(id, 1);
+        }
+      }
+    }
+    dispatchEvent(eventName, eventData) {
+      if (this.eventListeners[eventName]) {
+        this.eventListeners[eventName].forEach((callback) => {
+          callback(this, eventData);
+        });
+      }
+    }
+    //---------------------------------------------------------------------------------------------
+  };
+  let PrimitiveIntUniform = _PrimitiveIntUniform;
+  __publicField(PrimitiveIntUniform, "ON_CHANGED", "ON_CHANGED");
+  const _PrimitiveUintUniform = class extends Uint32Array {
     constructor(type, val, createLocalVariable = false) {
       super(val);
       __publicField(this, "name");
@@ -1023,6 +800,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "className");
       __publicField(this, "feedbackVertexId", 0);
       __publicField(this, "feedbackInstanceId", 0);
+      //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Uint32Array)----
+      __publicField(this, "eventListeners", {});
       this.type = new GPUType(type);
       this.createVariableInsideMain = createLocalVariable;
       this.className = this.constructor.name;
@@ -1032,13 +811,13 @@ var __publicField = (obj, key, value) => {
     }
     set mustBeTransfered(b) {
       if (b != this._mustBeTransfered) {
-        if (!b && this.onChange)
-          this.onChange();
+        if (!b)
+          this.dispatchEvent(_PrimitiveUintUniform.ON_CHANGED);
         this._mustBeTransfered = b;
       }
     }
     clone() {
-      return new PrimitiveUintUniform(this.type.rawType, this, this.createVariableInsideMain);
+      return new _PrimitiveUintUniform(this.type.rawType, this, this.createVariableInsideMain);
     }
     initStruct(propertyNames, createVariableInsideMain = false) {
       if (this.type.isArray || this.type.isMatrix)
@@ -1054,25 +833,6 @@ var __publicField = (obj, key, value) => {
       result += "}\n";
       return result;
     }
-    /*
-        public createVariable(uniformBufferName: string): string {
-            if (!this.createVariableInsideMain) return "";
-    
-            let type = this.className;
-            if (type === "Uint") type = "u32";
-            if (type === "UVec2") type = "vec2<u32>";
-            if (type === "UVec3") type = "vec3<u32>";
-            if (type === "UVec4") type = "vec4<u32>";
-    
-            const items = this.uniformBuffer.items;
-            let name: string;
-            for (let z in items) {
-                if (items[z] === this) {
-                    name = z;
-                }
-            }
-            return "   var " + this.constructor.name.toLowerCase() + ":" + type + " = " + uniformBufferName + "." + name + ";"
-        }*/
     createVariable(uniformBufferName) {
       if (!this.createVariableInsideMain)
         return "";
@@ -1094,7 +854,30 @@ var __publicField = (obj, key, value) => {
     }
     update() {
     }
-  }
+    addEventListener(eventName, callback) {
+      if (!this.eventListeners[eventName])
+        this.eventListeners[eventName] = [];
+      this.eventListeners[eventName].push(callback);
+    }
+    removeEventListener(eventName, callback) {
+      if (this.eventListeners[eventName]) {
+        const id = this.eventListeners[eventName].indexOf(callback);
+        if (id != -1) {
+          this.eventListeners[eventName].splice(id, 1);
+        }
+      }
+    }
+    dispatchEvent(eventName, eventData) {
+      if (this.eventListeners[eventName]) {
+        this.eventListeners[eventName].forEach((callback) => {
+          callback(this, eventData);
+        });
+      }
+    }
+    //---------------------------------------------------------------------------------------------
+  };
+  let PrimitiveUintUniform = _PrimitiveUintUniform;
+  __publicField(PrimitiveUintUniform, "ON_CHANGED", "ON_CHANGED");
   class Float extends PrimitiveFloatUniform {
     constructor(x = 0, createLocalVariable = false) {
       super("f32", [x], createLocalVariable);
@@ -1593,7 +1376,7 @@ var __publicField = (obj, key, value) => {
       this._sz = n;
     }
     set scaleXYZ(n) {
-      this._sx = this._sy = this._sz = n;
+      this.scaleX = this.scaleY = this.scaleZ = n;
       this.mustBeTransfered = true;
     }
     setMatrix(mat) {
@@ -1639,123 +1422,9 @@ var __publicField = (obj, key, value) => {
       this.mustBeTransfered = mustBeTransfered;
     }
   }
-  class BlendMode {
-    constructor() {
-      __publicField(this, "color", { operation: "add", srcFactor: "one", dstFactor: "zero" });
-      __publicField(this, "alpha", { operation: "add", srcFactor: "one", dstFactor: "zero" });
-    }
-  }
-  class AlphaBlendMode extends BlendMode {
-    constructor() {
-      super();
-      this.color.operation = "add";
-      this.color.srcFactor = "src-alpha";
-      this.color.dstFactor = "one-minus-src-alpha";
-      this.alpha.operation = "add";
-      this.alpha.srcFactor = "src-alpha";
-      this.alpha.dstFactor = "one-minus-src-alpha";
-    }
-  }
-  class DepthStencilTexture extends Texture {
-    constructor(descriptor, depthStencilDescription = null, depthStencilAttachmentOptions = null) {
-      if (void 0 === descriptor.format)
-        descriptor.format = "depth24plus";
-      if (void 0 === descriptor.sampleCount)
-        descriptor.sampleCount = 1;
-      super(descriptor);
-      /*
-      When you apply a shadow to a renderPipeline , you actually create a ShadowPipeline that store information in the DepthStencilTexture.
-      This texture is then used as IShaderResource in the renderPipeline. 
-      Because it can be an IShaderResource , we must implement the IShaderResource interface
-      */
-      __publicField(this, "_isDepthTexture", false);
-      __publicField(this, "_description");
-      __publicField(this, "_attachment");
-      //--------------------------------- IShaderResource ---------------------------------------------------------
-      __publicField(this, "mustBeTransfered", false);
-      __publicField(this, "_visibility", GPUShaderStage.FRAGMENT);
-      this.createGpuResource();
-      if (!depthStencilDescription) {
-        depthStencilDescription = {
-          depthWriteEnabled: true,
-          depthCompare: "less",
-          format: this.gpuResource.format
-        };
-      }
-      this._description = { format: this.gpuResource.format, ...depthStencilDescription };
-      this._attachment = {
-        view: this._view,
-        depthClearValue: 1,
-        depthLoadOp: "clear",
-        depthStoreOp: "store"
-      };
-      if (descriptor.format === "depth24plus-stencil8") {
-        this._attachment.stencilClearValue = 0;
-        this._attachment.stencilLoadOp = "clear";
-        this._attachment.stencilStoreOp = "store";
-      } else if (descriptor.format === "depth32float") {
-        this._isDepthTexture = true;
-      }
-      for (let z in depthStencilAttachmentOptions) {
-        this._attachment[z] = depthStencilAttachmentOptions[z];
-      }
-    }
-    get description() {
-      return this._description;
-    }
-    get attachment() {
-      return this._attachment;
-    }
-    get isDepthTexture() {
-      return this._isDepthTexture;
-    }
-    setPipelineType(pipelineType) {
-      if (pipelineType === "render")
-        this._visibility = GPUShaderStage.FRAGMENT;
-      else if (pipelineType === "compute_mixed")
-        this._visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
-      else if (pipelineType === "compute")
-        this._visibility = GPUShaderStage.COMPUTE;
-    }
-    createBindGroupEntry(bindingId) {
-      return {
-        binding: bindingId,
-        resource: this._view
-      };
-    }
-    createBindGroupLayoutEntry(bindingId) {
-      return {
-        binding: bindingId,
-        visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX,
-        texture: {
-          sampleType: "depth"
-        }
-      };
-    }
-    createDeclaration(varName, bindingId, groupId) {
-      return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_depth_2d;\n";
-    }
-    createGpuResource() {
-      this.create();
-    }
-    destroyGpuResource() {
-      if (this.gpuResource) {
-        this._view = null;
-        this.gpuResource.destroy();
-        this.gpuResource = null;
-        this.create();
-      }
-    }
-    resize(width, height) {
-      super.resize(width, height);
-      this._attachment.view = this._view;
-    }
-    clone() {
-      return new DepthStencilTexture(this.descriptor);
-    }
-  }
-  class ImageTexture {
+  class ImageTexture extends EventDispatcher {
     constructor(descriptor) {
+      super();
       __publicField(this, "resourceIO");
       __publicField(this, "io", 0);
       __publicField(this, "mustBeTransfered", false);
@@ -1764,35 +1433,49 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "_view");
       __publicField(this, "viewDescriptor");
       __publicField(this, "useOutsideTexture", false);
+      __publicField(this, "renderPassTexture");
       __publicField(this, "gpuTextureIOs");
       __publicField(this, "gpuTextureIO_index", 1);
       __publicField(this, "deviceId");
       __publicField(this, "time");
       __publicField(this, "_textureType");
       descriptor = { ...descriptor };
+      this.descriptor = descriptor;
       if (void 0 === descriptor.sampledType)
         descriptor.sampledType = "f32";
       if (void 0 === descriptor.usage)
         descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT;
       if (void 0 === descriptor.format)
         descriptor.format = "rgba8unorm";
+      if (void 0 === descriptor.label)
+        descriptor.label = "ImageTexture";
       if (void 0 === descriptor.size) {
         if (descriptor.source) {
           descriptor.size = [descriptor.source.width, descriptor.source.height];
           if (descriptor.source instanceof GPUTexture) {
-            this.gpuResource = descriptor.source;
-            descriptor.format = descriptor.source.format;
-            descriptor.usage = descriptor.source.usage;
-            this._view = this.gpuResource.createView();
-            descriptor.source = void 0;
-            this.useOutsideTexture = true;
+            this.initFromTexture(descriptor.source);
+          } else if (descriptor.source instanceof ImageTexture && descriptor.source.isRenderPass) {
+            this.renderPassTexture = descriptor.source;
+            console.log("wait resource changed");
+            this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
+              console.log("ON_RESOURCE_CHANGED");
+              this.initFromTexture(this.renderPassTexture.texture);
+            });
+            this.initFromTexture(descriptor.source.texture);
           }
         } else
           descriptor.size = [1, 1];
       }
       if (descriptor.source)
         this.mustBeTransfered = true;
-      this.descriptor = descriptor;
+    }
+    initFromTexture(tex) {
+      this.gpuResource = tex;
+      this.descriptor.format = tex.format;
+      this.descriptor.usage = tex.usage;
+      this._view = this.gpuResource.createView();
+      this.descriptor.source = void 0;
+      this.useOutsideTexture = true;
     }
     clone() {
       return new ImageTexture(this.descriptor);
@@ -1802,6 +1485,9 @@ var __publicField = (obj, key, value) => {
     }
     set sampledType(type) {
       this.descriptor.sampledType = type;
+    }
+    get isRenderPass() {
+      return false;
     }
     initTextureIO(textures) {
       this.gpuTextureIOs = textures;
@@ -1836,15 +1522,28 @@ var __publicField = (obj, key, value) => {
       return this.descriptor.source;
     }
     set source(bmp) {
-      this.useOutsideTexture = bmp instanceof GPUTexture;
+      this.useOutsideTexture = bmp instanceof GPUTexture || bmp instanceof ImageTexture && bmp.isRenderPass;
       if (this.useOutsideTexture) {
-        this.gpuResource = bmp;
-        this._view = bmp.createView();
+        if (bmp instanceof GPUTexture) {
+          this.gpuResource = bmp;
+          this._view = this.gpuResource.createView();
+        } else {
+          this.renderPassTexture = bmp;
+          this.renderPassTexture.clearEvents("RESOURCE_CHANGED");
+          this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
+            console.log("ON_RESOURCE_CHANGED");
+            this.initFromTexture(this.renderPassTexture.texture);
+          });
+          this.gpuResource = bmp.texture;
+          this._view = this.gpuResource.createView();
+        }
       } else
         this.mustBeTransfered = true;
       this.descriptor.source = bmp;
     }
-    update() {
+    update(pipeline) {
+      if (this.renderPassTexture && !this.renderPassTexture.mustUseCopyTextureToTexture)
+        this.renderPassTexture.applyRenderPass(pipeline);
       if (this.useOutsideTexture)
         return;
       if (!this.gpuResource)
@@ -2999,7 +2698,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "_data");
       __publicField(this, "dataOffset");
       __publicField(this, "mustBeTransfered", false);
-      __publicField(this, "vertexBuffer");
+      __publicField(this, "_vertexBuffer");
+      __publicField(this, "waitingVertexBuffer", false);
       dataType = this.renameVertexDataType(dataType);
       this._name = name;
       this._dataType = dataType;
@@ -3155,13 +2855,26 @@ var __publicField = (obj, key, value) => {
         "sint32x4": { nbComponent: 4, bytes: 16, varType: "vec4<i32>" }
       };
     }
+    get vertexBuffer() {
+      return this._vertexBuffer;
+    }
+    set vertexBuffer(vb) {
+      this._vertexBuffer = vb;
+      if (this.waitingVertexBuffer) {
+        this.waitingVertexBuffer = true;
+        this.vertexBuffer.attributeChanged = true;
+      }
+    }
     get datas() {
       return this._data;
     }
     set datas(n) {
       if (this._data != n) {
         this._data = n;
-        this.vertexBuffer.attributeChanged = true;
+        if (this.vertexBuffer)
+          this.vertexBuffer.attributeChanged = true;
+        else
+          this.waitingVertexBuffer = true;
         this.mustBeTransfered = true;
       }
     }
@@ -3171,6 +2884,10 @@ var __publicField = (obj, key, value) => {
     get format() {
       return this._dataType;
     }
+    get type() {
+      return this._dataType;
+    }
+    //---------------------------------------------------
     get bytePerElement() {
       return this.vertexType.bytes;
     }
@@ -3464,10 +3181,12 @@ var __publicField = (obj, key, value) => {
       return result;
     }
     createArray(name, dataType, offset) {
-      if (this.attributes[name]) {
+      if (this.attributes[name] && this.attributes[name].vertexBuffer) {
         return this.attributes[name];
       }
-      const v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
+      let v = this.attributes[name];
+      if (!v)
+        v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
       v.vertexBuffer = this;
       const nbCompo = v.nbComponent;
       const _offset = v.dataOffset === void 0 ? 0 : v.dataOffset;
@@ -4096,7 +3815,7 @@ var __publicField = (obj, key, value) => {
         let nb = 0;
         for (let name in descriptor) {
           o = descriptor[name];
-          if (o.__debug == true) {
+          if (o && o.__debug == true) {
             if (typeof o === "function") {
               o = { name, id: nb, ...o() };
             } else {
@@ -4936,7 +4655,6 @@ var __publicField = (obj, key, value) => {
           descriptor.__DEBUG__ = debug;
           descriptor = this.parseVertexShaderDebug(descriptor);
         }
-        console.log(descriptor);
       }
       return descriptor;
     }
@@ -5409,7 +5127,7 @@ var __publicField = (obj, key, value) => {
         this.setupDraw();
       }
       if (renderPass instanceof GPUComputePassEncoder) {
-        this.update();
+        this.update(this.parent.pipeline);
         renderPass.setBindGroup(this.bindgroupId, this.group);
         return;
       }
@@ -5418,7 +5136,7 @@ var __publicField = (obj, key, value) => {
       const applyDraw = this.applyDraw;
       for (let i = 0; i < instances.length; i++) {
         instances[i].update();
-        this.update();
+        this.update(this.parent.pipeline);
         renderPass.setBindGroup(this.bindgroupId, instances[i].group);
         if (this.vertexBuffers) {
           let buf;
@@ -5483,7 +5201,7 @@ var __publicField = (obj, key, value) => {
         let bool = false;
         for (let i = 0; i < this.elements.length; i++) {
           if (this.elements[i].resource.mustBeTransfered) {
-            this.elements[i].resource.update();
+            this.elements[i].resource.update(this.parent.pipeline);
             bool = true;
             break;
           }
@@ -5663,9 +5381,9 @@ var __publicField = (obj, key, value) => {
       }
       return this._group;
     }
-    update() {
+    update(pipeline) {
       for (let i = 0; i < this.elements.length; i++) {
-        this.elements[i].resource.update();
+        this.elements[i].resource.update(pipeline);
       }
     }
     destroy() {
@@ -5673,6 +5391,474 @@ var __publicField = (obj, key, value) => {
         this.elements[i].resource.destroyGpuResource();
       }
       this.elements = [];
+    }
+  }
+  class ShaderNode {
+    constructor(code = "", insideMainFunction = false) {
+      __publicField(this, "enabled", true);
+      __publicField(this, "executeSubNodeAfterCode", true);
+      __publicField(this, "_text");
+      __publicField(this, "insideMainFunction");
+      __publicField(this, "subNodes");
+      this.text = code;
+      this.insideMainFunction = insideMainFunction;
+    }
+    get text() {
+      return this._text;
+    }
+    set text(s) {
+      const lines = s.split("\n");
+      let line;
+      let nbTabMin = 99999999;
+      if (lines.length > 1) {
+        for (let i = 0; i < lines.length; i++) {
+          line = lines[i];
+          for (let j = 0; j < line.length; j++) {
+            if (line[j] === "\n")
+              continue;
+            if (line[j] !== " ") {
+              if (nbTabMin > j)
+                nbTabMin = j;
+              break;
+            }
+          }
+        }
+        if (this.insideMainFunction && nbTabMin >= 3)
+          nbTabMin -= 3;
+        for (let i = 0; i < lines.length; i++) {
+          lines[i] = lines[i].slice(nbTabMin);
+        }
+        s = lines.join("\n");
+      }
+      this._text = s;
+    }
+    replaceValues(values) {
+      for (let i = 0; i < values.length; i++) {
+        this.replaceKeyWord(values[i].old, values[i].new);
+      }
+    }
+    replaceKeyWord(wordToReplace, replacement) {
+      const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
+      this._text = this._text.replace(regex, replacement);
+    }
+    get value() {
+      let result = "";
+      if (this.executeSubNodeAfterCode) {
+        result += this.text + "\n";
+      }
+      if (this.subNodes) {
+        for (let i = 0; i < this.subNodes.length; i++) {
+          result += this.subNodes[i].value + "\n";
+        }
+      }
+      if (!this.executeSubNodeAfterCode)
+        result += this.text + "\n";
+      return result;
+    }
+    createNode(code = "") {
+      const node = new ShaderNode(code);
+      if (!this.subNodes)
+        this.subNodes = [];
+      this.subNodes.push(node);
+      return node;
+    }
+  }
+  class ShaderStage {
+    constructor(shaderType) {
+      __publicField(this, "inputs", []);
+      __publicField(this, "outputs", []);
+      __publicField(this, "export", []);
+      __publicField(this, "require", []);
+      __publicField(this, "pipelineConstants", {});
+      __publicField(this, "constants");
+      __publicField(this, "main");
+      __publicField(this, "shaderType");
+      __publicField(this, "debugLogs", []);
+      __publicField(this, "debugRenders", []);
+      __publicField(this, "_shaderInfos");
+      this.shaderType = shaderType;
+      this.constants = new ShaderNode();
+      this.main = new ShaderNode("", true);
+    }
+    /*
+        public extractDebugInfo(shaderCode: string): string {
+            const { code, debugLogs, debugRenders } = ShaderStage.extractDebugInfo(shaderCode);
+            this.debugLogs = debugLogs;
+            this.debugRenders = debugRenders;
+            return code;
+        }
+    
+        public static extractDebugInfo(code: string): {
+            code: string,
+            debugLogs: any[],
+            debugRenders: any[]
+        } {
+    
+            const result: any = {};
+            result.debugLogs = [];
+            result.debugRenders = [];
+    
+            const cut = (s: string) => {
+                let id;
+                for (let i = s.length - 1; i > -1; i--) {
+                    if (s[i] === ",") {
+                        id = i;
+                        break;
+                    }
+                }
+    
+                return {
+                    label: s.slice(0, id),
+                    val: s.slice(id + 1)
+                }
+    
+            }
+    
+            const extractDebug = (line: string) => {
+                let s: string = line.split("XGPU.debug(")[1].split(");")[0];
+    
+                //const { label, val } = cut(s);
+                //console.log("A = ", label);
+                //console.log("B = ", val);
+                result.debugLogs.push(cut(s));
+            }
+            const extractDebugRender = (line: string) => {
+                //XGPU.renderDebug("testC : ",output.position,vec4(0.0,0.0,1.0,1.0));
+                let s: string = line.split("XGPU.renderDebug(")[1].split(");")[0];
+                let t = s.split(",vec4")
+                let color = "vec4" + t[1];
+                s = t[0];
+    
+                //const { label, val } = cut(s);
+                //console.log("A = ", label);
+                //console.log("B = ", val);
+                //console.log("C = ", color);
+    
+                result.debugRenders.push({
+                    ...cut(s),
+                    color
+                })
+    
+            }
+    
+    
+            const lines: string[] = code.split("\n");
+            const newLines: string[] = [];
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].includes("XGPU.debug")) {
+                    extractDebug(lines[i])
+                } else if (lines[i].includes("XGPU.renderDebug")) {
+                    extractDebugRender(lines[i]);
+                } else {
+                    newLines.push(lines[i]);
+                }
+            }
+    
+            result.code = newLines.join("\n");
+    
+            return result;
+    
+    
+        }*/
+    unwrapVariableInMainFunction(shaderVariables) {
+      const variables = shaderVariables.split("\n");
+      let s;
+      let objs = [];
+      for (let i = 0; i < variables.length; i++) {
+        variables[i] = s = variables[i].split("	").join("").trim().slice(4);
+        if (!s.length)
+          continue;
+        let t = s.split(" = ");
+        let varName = t[0].split(":")[0];
+        let otherName = t[1].slice(0, t[1].length - 1);
+        objs.push({
+          varName,
+          otherName
+        });
+      }
+      const searchAndReplace = (shaderCode, wordToReplace, replacement) => {
+        const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
+        return shaderCode.replace(regex, replacement);
+      };
+      let shader = this.main.value + "";
+      for (let i = 0; i < objs.length; i++) {
+        shader = searchAndReplace(shader, objs[i].varName, objs[i].otherName);
+      }
+      return shader;
+    }
+    addOutputVariable(name, shaderType) {
+      this.outputs.push({ name, type: shaderType.type });
+    }
+    addInputVariable(name, shaderTypeOrBuiltIn) {
+      this.outputs.push({ name, type: shaderTypeOrBuiltIn.type, builtin: shaderTypeOrBuiltIn.builtin });
+    }
+    formatWGSLCode(code) {
+      const lines = code.replace(/\n+/g, "\n").split("\n");
+      let formattedCode = "";
+      let indentLevel = 0;
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith("}")) {
+          indentLevel--;
+        }
+        const indentedLine = "   ".repeat(indentLevel) + trimmedLine;
+        if (trimmedLine.endsWith("{")) {
+          indentLevel++;
+        }
+        formattedCode += indentedLine + "\n";
+      }
+      return formattedCode;
+    }
+    get shaderInfos() {
+      return this._shaderInfos;
+    }
+    build(shaderPipeline, input) {
+      if (this._shaderInfos)
+        return this._shaderInfos;
+      this._shaderInfos = { code: "", output: null };
+      return this._shaderInfos;
+    }
+  }
+  class FragmentShader extends ShaderStage {
+    constructor() {
+      super("fragment");
+    }
+    build(shaderPipeline, inputs) {
+      if (this._shaderInfos)
+        return this._shaderInfos;
+      let result = this.constants.value + "\n\n";
+      const obj = shaderPipeline.bindGroups.getVertexShaderDeclaration(true);
+      result += obj.result;
+      for (let i = 0; i < this.inputs.length; i++) {
+        inputs.addProperty(this.inputs[i]);
+      }
+      if (this.outputs.length === 0) {
+        this.outputs[0] = { name: "color", ...BuiltIns.fragmentOutputs.color };
+      }
+      const output = new ShaderStruct("Output", this.outputs);
+      result += output.struct + "\n";
+      const mainFunc = this.unwrapVariableInMainFunction(obj.variables);
+      result += "@fragment\n";
+      result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
+      result += "   var output:Output;\n";
+      result += mainFunc;
+      result += "   return output;\n";
+      result += "}\n";
+      result = this.formatWGSLCode(result);
+      if (XGPU.showFragmentShader) {
+        console.log("------------- FRAGMENT SHADER --------------");
+        console.log(result);
+        console.log("--------------------------------------------");
+      }
+      this._shaderInfos = { code: result, output };
+      return this._shaderInfos;
+    }
+  }
+  class VertexShader extends ShaderStage {
+    //public keepRendererAspectRatio: boolean = true;
+    constructor() {
+      super("vertex");
+    }
+    build(pipeline, input) {
+      let result = this.constants.value + "\n\n";
+      const obj = pipeline.bindGroups.getVertexShaderDeclaration();
+      result += obj.result;
+      result += input.getComputeVariableDeclaration();
+      let bool = false;
+      for (let i = 0; i < this.outputs.length; i++) {
+        if (this.outputs[i].builtin === BuiltIns.vertexOutputs.position.builtin) {
+          bool = true;
+        }
+      }
+      if (!bool) {
+        this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position });
+      }
+      let output = new ShaderStruct("Output", [...this.outputs]);
+      result += output.struct + "\n";
+      let mainFunc = this.unwrapVariableInMainFunction(obj.variables);
+      result += "@vertex\n";
+      result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
+      result += "   var output:Output;\n";
+      result += mainFunc;
+      result += "   return output;\n";
+      result += "}\n";
+      result = this.formatWGSLCode(result);
+      if (XGPU.showVertexShader) {
+        console.log("------------- VERTEX SHADER --------------");
+        console.log(result);
+        console.log("------------------------------------------");
+      }
+      return { code: result, output };
+    }
+  }
+  class Texture extends EventDispatcher {
+    constructor(descriptor) {
+      super();
+      __publicField(this, "descriptor");
+      __publicField(this, "gpuResource", null);
+      __publicField(this, "_view", null);
+      __publicField(this, "deviceId");
+      __publicField(this, "time");
+      if (void 0 === descriptor.usage)
+        descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
+      if (void 0 === descriptor.sampleCount && descriptor.format !== "depth32float")
+        descriptor.sampleCount = 1;
+      if (void 0 === descriptor.label)
+        descriptor.label = "Texture";
+      this.descriptor = descriptor;
+    }
+    get sampleCount() {
+      return this.descriptor.sampleCount;
+    }
+    get format() {
+      return this.descriptor.format;
+    }
+    get size() {
+      return this.descriptor.size;
+    }
+    get usage() {
+      return this.descriptor.usage;
+    }
+    get view() {
+      if (!this._view)
+        this.create();
+      return this._view;
+    }
+    destroy() {
+      if (this.gpuResource) {
+        this.gpuResource.xgpuObject = null;
+        this.gpuResource.destroy();
+      }
+      this.gpuResource = null;
+      this._view = null;
+    }
+    create() {
+      this.time = (/* @__PURE__ */ new Date()).getTime();
+      if (XGPU.loseDeviceRecently && this.deviceId === XGPU.deviceId)
+        return;
+      if (this.gpuResource) {
+        this.gpuResource.xgpuObject = null;
+        this.gpuResource.destroy();
+      }
+      this.deviceId = XGPU.deviceId;
+      this.gpuResource = XGPU.device.createTexture(this.descriptor);
+      this.gpuResource.xgpuObject = this;
+      this.createView();
+    }
+    createGpuResource() {
+      this.create();
+    }
+    update() {
+      if (this.deviceId !== XGPU.deviceId) {
+        this.create();
+      }
+    }
+    createView() {
+      if (!this.gpuResource)
+        this.create();
+      this._view = this.gpuResource.createView();
+    }
+    resize(width, height) {
+      this.descriptor.size = [width, height];
+      this.create();
+    }
+  }
+  class DepthStencilTexture extends Texture {
+    constructor(descriptor, depthStencilDescription = null, depthStencilAttachmentOptions = null) {
+      if (void 0 === descriptor.format)
+        descriptor.format = "depth24plus";
+      if (void 0 === descriptor.sampleCount)
+        descriptor.sampleCount = 1;
+      super(descriptor);
+      /*
+      When you apply a shadow to a renderPipeline , you actually create a ShadowPipeline that store information in the DepthStencilTexture.
+      This texture is then used as IShaderResource in the renderPipeline. 
+      Because it can be an IShaderResource , we must implement the IShaderResource interface
+      */
+      __publicField(this, "_isDepthTexture", false);
+      __publicField(this, "_description");
+      __publicField(this, "_attachment");
+      //--------------------------------- IShaderResource ---------------------------------------------------------
+      __publicField(this, "mustBeTransfered", false);
+      __publicField(this, "_visibility", GPUShaderStage.FRAGMENT);
+      this.createGpuResource();
+      if (!depthStencilDescription) {
+        depthStencilDescription = {
+          depthWriteEnabled: true,
+          depthCompare: "less",
+          format: this.gpuResource.format
+        };
+      }
+      this._description = { format: this.gpuResource.format, ...depthStencilDescription };
+      this._attachment = {
+        view: this._view,
+        depthClearValue: 1,
+        depthLoadOp: "clear",
+        depthStoreOp: "store"
+      };
+      if (descriptor.format === "depth24plus-stencil8") {
+        this._attachment.stencilClearValue = 0;
+        this._attachment.stencilLoadOp = "clear";
+        this._attachment.stencilStoreOp = "store";
+      } else if (descriptor.format === "depth32float") {
+        this._isDepthTexture = true;
+      }
+      for (let z in depthStencilAttachmentOptions) {
+        this._attachment[z] = depthStencilAttachmentOptions[z];
+      }
+    }
+    get description() {
+      return this._description;
+    }
+    get attachment() {
+      return this._attachment;
+    }
+    get isDepthTexture() {
+      return this._isDepthTexture;
+    }
+    setPipelineType(pipelineType) {
+      if (pipelineType === "render")
+        this._visibility = GPUShaderStage.FRAGMENT;
+      else if (pipelineType === "compute_mixed")
+        this._visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+      else if (pipelineType === "compute")
+        this._visibility = GPUShaderStage.COMPUTE;
+    }
+    createBindGroupEntry(bindingId) {
+      return {
+        binding: bindingId,
+        resource: this._view
+      };
+    }
+    createBindGroupLayoutEntry(bindingId) {
+      return {
+        binding: bindingId,
+        visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX,
+        texture: {
+          sampleType: "depth"
+        }
+      };
+    }
+    createDeclaration(varName, bindingId, groupId) {
+      return "@binding(" + bindingId + ") @group(" + groupId + ") var " + varName + ":texture_depth_2d;\n";
+    }
+    createGpuResource() {
+      this.create();
+    }
+    destroyGpuResource() {
+      if (this.gpuResource) {
+        this._view = null;
+        this.gpuResource.destroy();
+        this.gpuResource = null;
+        this.create();
+      }
+    }
+    resize(width, height) {
+      super.resize(width, height);
+      this._attachment.view = this._view;
+    }
+    clone() {
+      return new DepthStencilTexture(this.descriptor);
     }
   }
   class CubeMapTextureArray extends ImageTextureArray {
@@ -5895,7 +6081,7 @@ var __publicField = (obj, key, value) => {
     }
     update() {
       for (let i = 0; i < this.groups.length; i++) {
-        this.groups[i].update();
+        this.groups[i].update(this.pipeline);
       }
     }
     getVertexShaderDeclaration(fromFragmentShader = false) {
@@ -6217,8 +6403,9 @@ var __publicField = (obj, key, value) => {
       this._resources = {};
     }
   }
-  class Pipeline {
+  class Pipeline extends EventDispatcher {
     constructor() {
+      super();
       __publicField(this, "description", {});
       __publicField(this, "nbVertex");
       __publicField(this, "bindGroups");
@@ -6442,304 +6629,6 @@ var __publicField = (obj, key, value) => {
       return result;
     }
   }
-  class ShaderNode {
-    constructor(code = "", insideMainFunction = false) {
-      __publicField(this, "enabled", true);
-      __publicField(this, "executeSubNodeAfterCode", true);
-      __publicField(this, "_text");
-      __publicField(this, "insideMainFunction");
-      __publicField(this, "subNodes");
-      this.text = code;
-      this.insideMainFunction = insideMainFunction;
-    }
-    get text() {
-      return this._text;
-    }
-    set text(s) {
-      const lines = s.split("\n");
-      let line;
-      let nbTabMin = 99999999;
-      if (lines.length > 1) {
-        for (let i = 0; i < lines.length; i++) {
-          line = lines[i];
-          for (let j = 0; j < line.length; j++) {
-            if (line[j] === "\n")
-              continue;
-            if (line[j] !== " ") {
-              if (nbTabMin > j)
-                nbTabMin = j;
-              break;
-            }
-          }
-        }
-        if (this.insideMainFunction && nbTabMin >= 3)
-          nbTabMin -= 3;
-        for (let i = 0; i < lines.length; i++) {
-          lines[i] = lines[i].slice(nbTabMin);
-        }
-        s = lines.join("\n");
-      }
-      this._text = s;
-    }
-    replaceValues(values) {
-      for (let i = 0; i < values.length; i++) {
-        this.replaceKeyWord(values[i].old, values[i].new);
-      }
-    }
-    replaceKeyWord(wordToReplace, replacement) {
-      const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
-      this._text = this._text.replace(regex, replacement);
-    }
-    get value() {
-      let result = "";
-      if (this.executeSubNodeAfterCode) {
-        result += this.text + "\n";
-      }
-      if (this.subNodes) {
-        for (let i = 0; i < this.subNodes.length; i++) {
-          result += this.subNodes[i].value + "\n";
-        }
-      }
-      if (!this.executeSubNodeAfterCode)
-        result += this.text + "\n";
-      return result;
-    }
-    createNode(code = "") {
-      const node = new ShaderNode(code);
-      if (!this.subNodes)
-        this.subNodes = [];
-      this.subNodes.push(node);
-      return node;
-    }
-  }
-  class ShaderStage {
-    constructor(shaderType) {
-      __publicField(this, "inputs", []);
-      __publicField(this, "outputs", []);
-      __publicField(this, "export", []);
-      __publicField(this, "require", []);
-      __publicField(this, "pipelineConstants", {});
-      __publicField(this, "constants");
-      __publicField(this, "main");
-      __publicField(this, "shaderType");
-      __publicField(this, "debugLogs", []);
-      __publicField(this, "debugRenders", []);
-      __publicField(this, "_shaderInfos");
-      this.shaderType = shaderType;
-      this.constants = new ShaderNode();
-      this.main = new ShaderNode("", true);
-    }
-    /*
-        public extractDebugInfo(shaderCode: string): string {
-            const { code, debugLogs, debugRenders } = ShaderStage.extractDebugInfo(shaderCode);
-            this.debugLogs = debugLogs;
-            this.debugRenders = debugRenders;
-            return code;
-        }
-    
-        public static extractDebugInfo(code: string): {
-            code: string,
-            debugLogs: any[],
-            debugRenders: any[]
-        } {
-    
-            const result: any = {};
-            result.debugLogs = [];
-            result.debugRenders = [];
-    
-            const cut = (s: string) => {
-                let id;
-                for (let i = s.length - 1; i > -1; i--) {
-                    if (s[i] === ",") {
-                        id = i;
-                        break;
-                    }
-                }
-    
-                return {
-                    label: s.slice(0, id),
-                    val: s.slice(id + 1)
-                }
-    
-            }
-    
-            const extractDebug = (line: string) => {
-                let s: string = line.split("XGPU.debug(")[1].split(");")[0];
-    
-                //const { label, val } = cut(s);
-                //console.log("A = ", label);
-                //console.log("B = ", val);
-                result.debugLogs.push(cut(s));
-            }
-            const extractDebugRender = (line: string) => {
-                //XGPU.renderDebug("testC : ",output.position,vec4(0.0,0.0,1.0,1.0));
-                let s: string = line.split("XGPU.renderDebug(")[1].split(");")[0];
-                let t = s.split(",vec4")
-                let color = "vec4" + t[1];
-                s = t[0];
-    
-                //const { label, val } = cut(s);
-                //console.log("A = ", label);
-                //console.log("B = ", val);
-                //console.log("C = ", color);
-    
-                result.debugRenders.push({
-                    ...cut(s),
-                    color
-                })
-    
-            }
-    
-    
-            const lines: string[] = code.split("\n");
-            const newLines: string[] = [];
-            for (let i = 0; i < lines.length; i++) {
-                if (lines[i].includes("XGPU.debug")) {
-                    extractDebug(lines[i])
-                } else if (lines[i].includes("XGPU.renderDebug")) {
-                    extractDebugRender(lines[i]);
-                } else {
-                    newLines.push(lines[i]);
-                }
-            }
-    
-            result.code = newLines.join("\n");
-    
-            return result;
-    
-    
-        }*/
-    unwrapVariableInMainFunction(shaderVariables) {
-      const variables = shaderVariables.split("\n");
-      let s;
-      let objs = [];
-      for (let i = 0; i < variables.length; i++) {
-        variables[i] = s = variables[i].split("	").join("").trim().slice(4);
-        if (!s.length)
-          continue;
-        let t = s.split(" = ");
-        let varName = t[0].split(":")[0];
-        let otherName = t[1].slice(0, t[1].length - 1);
-        objs.push({
-          varName,
-          otherName
-        });
-      }
-      const searchAndReplace = (shaderCode, wordToReplace, replacement) => {
-        const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
-        return shaderCode.replace(regex, replacement);
-      };
-      let shader = this.main.value + "";
-      for (let i = 0; i < objs.length; i++) {
-        shader = searchAndReplace(shader, objs[i].varName, objs[i].otherName);
-      }
-      return shader;
-    }
-    addOutputVariable(name, shaderType) {
-      this.outputs.push({ name, type: shaderType.type });
-    }
-    addInputVariable(name, shaderTypeOrBuiltIn) {
-      this.outputs.push({ name, type: shaderTypeOrBuiltIn.type, builtin: shaderTypeOrBuiltIn.builtin });
-    }
-    formatWGSLCode(code) {
-      const lines = code.replace(/\n+/g, "\n").split("\n");
-      let formattedCode = "";
-      let indentLevel = 0;
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine.startsWith("}")) {
-          indentLevel--;
-        }
-        const indentedLine = "   ".repeat(indentLevel) + trimmedLine;
-        if (trimmedLine.endsWith("{")) {
-          indentLevel++;
-        }
-        formattedCode += indentedLine + "\n";
-      }
-      return formattedCode;
-    }
-    get shaderInfos() {
-      return this._shaderInfos;
-    }
-    build(shaderPipeline, input) {
-      if (this._shaderInfos)
-        return this._shaderInfos;
-      this._shaderInfos = { code: "", output: null };
-      return this._shaderInfos;
-    }
-  }
-  class FragmentShader extends ShaderStage {
-    constructor() {
-      super("fragment");
-    }
-    build(shaderPipeline, inputs) {
-      if (this._shaderInfos)
-        return this._shaderInfos;
-      let result = this.constants.value + "\n\n";
-      const obj = shaderPipeline.bindGroups.getVertexShaderDeclaration(true);
-      result += obj.result;
-      for (let i = 0; i < this.inputs.length; i++) {
-        inputs.addProperty(this.inputs[i]);
-      }
-      if (this.outputs.length === 0) {
-        this.outputs[0] = { name: "color", ...BuiltIns.fragmentOutputs.color };
-      }
-      const output = new ShaderStruct("Output", this.outputs);
-      result += output.struct + "\n";
-      const mainFunc = this.unwrapVariableInMainFunction(obj.variables);
-      result += "@fragment\n";
-      result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
-      result += "   var output:Output;\n";
-      result += mainFunc;
-      result += "   return output;\n";
-      result += "}\n";
-      result = this.formatWGSLCode(result);
-      if (XGPU.showFragmentShader) {
-        console.log("------------- FRAGMENT SHADER --------------");
-        console.log(result);
-        console.log("--------------------------------------------");
-      }
-      this._shaderInfos = { code: result, output };
-      return this._shaderInfos;
-    }
-  }
-  class VertexShader extends ShaderStage {
-    //public keepRendererAspectRatio: boolean = true;
-    constructor() {
-      super("vertex");
-    }
-    build(pipeline, input) {
-      let result = this.constants.value + "\n\n";
-      const obj = pipeline.bindGroups.getVertexShaderDeclaration();
-      result += obj.result;
-      result += input.getComputeVariableDeclaration();
-      let bool = false;
-      for (let i = 0; i < this.outputs.length; i++) {
-        if (this.outputs[i].builtin === BuiltIns.vertexOutputs.position.builtin) {
-          bool = true;
-        }
-      }
-      if (!bool) {
-        this.outputs.unshift({ name: "position", ...BuiltIns.vertexOutputs.position });
-      }
-      let output = new ShaderStruct("Output", [...this.outputs]);
-      result += output.struct + "\n";
-      let mainFunc = this.unwrapVariableInMainFunction(obj.variables);
-      result += "@vertex\n";
-      result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
-      result += "   var output:Output;\n";
-      result += mainFunc;
-      result += "   return output;\n";
-      result += "}\n";
-      result = this.formatWGSLCode(result);
-      if (XGPU.showVertexShader) {
-        console.log("------------- VERTEX SHADER --------------");
-        console.log(result);
-        console.log("------------------------------------------");
-      }
-      return { code: result, output };
-    }
-  }
   class MultiSampleTexture extends Texture {
     constructor(descriptor) {
       if (void 0 === descriptor.format)
@@ -6772,12 +6661,18 @@ var __publicField = (obj, key, value) => {
       return this.descriptor.resolveTarget;
     }
   }
-  class RenderPassTexture extends ImageTexture {
-    constructor(descriptor) {
+  const _RenderPassTexture = class extends ImageTexture {
+    constructor(pipeline, descriptor) {
+      if (!descriptor) {
+        if (pipeline.renderer)
+          descriptor = { size: [pipeline.renderer.width, pipeline.renderer.height] };
+        else
+          descriptor = { size: [1, 1] };
+      }
       if (!descriptor.format)
         descriptor.format = XGPU.getPreferredCanvasFormat();
       if (!descriptor.usage)
-        descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC;
+        descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT;
       if (!descriptor.mipLevelCount)
         descriptor.mipLevelCount = 1;
       if (!descriptor.sampleCount)
@@ -6786,8 +6681,64 @@ var __publicField = (obj, key, value) => {
         descriptor.dimension = "2d";
       if (!descriptor.viewFormats)
         descriptor.viewFormats = [];
+      if (!descriptor.label)
+        descriptor.label = "RenderPassTexture";
       super(descriptor);
+      __publicField(this, "ready", false);
+      __publicField(this, "renderPipeline");
+      __publicField(this, "_mustUseCopyTextureToTexture", false);
+      __publicField(this, "frameId", -1);
+      if (!pipeline.renderer) {
+        this.ready = false;
+        pipeline.addEventListener(RenderPipeline.ON_ADDED_TO_RENDERER, () => {
+          this.ready = true;
+          this.resize(pipeline.renderer.width, pipeline.renderer.height);
+        }, true);
+      } else {
+        this.ready = true;
+      }
+      this.renderPipeline = pipeline;
       this.createGpuResource();
+    }
+    get mustUseCopyTextureToTexture() {
+      return this._mustUseCopyTextureToTexture;
+    }
+    applyRenderPass(pipeline) {
+      if (this.renderPipeline === pipeline) {
+        this._mustUseCopyTextureToTexture = true;
+        return;
+      } else {
+        if (!this.ready) {
+          if (pipeline instanceof RenderPipeline && pipeline.renderer) {
+            this.renderPipeline.renderer = pipeline.renderer;
+            this.ready = true;
+          } else {
+            return;
+          }
+        }
+      }
+      if (this.frameId != this.renderPipeline.renderer.frameId) {
+        const commandEncoder = this.renderPipeline.renderer.commandEncoder;
+        if (commandEncoder) {
+          this.frameId = this.renderPipeline.renderer.frameId;
+          if (!this.renderPipeline.pipeline) {
+            this.renderPipeline.buildGpuPipeline();
+          }
+          this.renderPipeline.update();
+          const renderPass = this.renderPipeline.beginRenderPass(commandEncoder, this.view, 0, true);
+          for (let j = 0; j < this.renderPipeline.pipelineCount; j++) {
+            this.renderPipeline.dispatchEvent(RenderPipeline.ON_DRAW, j);
+            this.renderPipeline.draw(renderPass);
+          }
+          this.renderPipeline.end(commandEncoder, renderPass);
+        }
+      }
+    }
+    resize(w, h) {
+      this.descriptor.size = [w, h];
+      this.createGpuResource();
+      this.dispatchEvent(_RenderPassTexture.RESOURCE_CHANGED);
+      return this;
     }
     createBindGroupEntry(bindingId) {
       if (this.deviceId !== XGPU.deviceId) {
@@ -6803,6 +6754,9 @@ var __publicField = (obj, key, value) => {
     get height() {
       return this.descriptor.size[1];
     }
+    get isRenderPass() {
+      return true;
+    }
     update() {
     }
     get source() {
@@ -6812,7 +6766,9 @@ var __publicField = (obj, key, value) => {
       if (bmp)
         return;
     }
-  }
+  };
+  let RenderPassTexture = _RenderPassTexture;
+  __publicField(RenderPassTexture, "RESOURCE_CHANGED", "RESOURCE_CHANGED");
   class DrawConfig {
     constructor(renderPipeline) {
       __publicField(this, "vertexCount", -1);
@@ -7127,8 +7083,6 @@ var __publicField = (obj, key, value) => {
     }
     initRenderPipeline(renderPipeline) {
       this.renderPipeline = renderPipeline;
-      if (!renderPipeline.pipeline)
-        ;
       renderPipeline.bindGroups.setupDraw(true);
       this.resourceByType = renderPipeline.bindGroups.resources.types;
       this.vertexShaderInputs = renderPipeline.vertexShader.inputs;
@@ -7675,36 +7629,32 @@ var __publicField = (obj, key, value) => {
       return "";
     }
   }
-  class RenderPipeline extends Pipeline {
-    constructor(renderer, bgColor = { r: 0, g: 0, b: 0, a: 1 }) {
+  const _RenderPipeline = class extends Pipeline {
+    constructor(bgColor = { r: 0, g: 0, b: 0, a: 1 }) {
       super();
-      __publicField(this, "renderer");
-      //GPURenderer | HeadlessGPURenderer;
+      __publicField(this, "_renderer");
       __publicField(this, "drawConfig");
-      __publicField(this, "_depthStencilTexture");
+      __publicField(this, "multiSampleTextureDescriptor");
+      __publicField(this, "waitingMultisampleTexture", false);
       __publicField(this, "multisampleTexture");
+      __publicField(this, "waitingDepthStencilTexture", false);
+      __publicField(this, "depthStencilTextureDescriptor");
+      __publicField(this, "_depthStencilTexture");
       __publicField(this, "renderPassTexture");
       __publicField(this, "outputColor");
       __publicField(this, "renderPassDescriptor", { colorAttachments: [] });
       __publicField(this, "vertexShaderDebuggerPipeline", null);
       __publicField(this, "gpuPipeline");
       __publicField(this, "debug", "renderPipeline");
-      __publicField(this, "onDrawBegin");
-      __publicField(this, "onDrawEnd");
-      __publicField(this, "onDraw");
-      __publicField(this, "_onLog", () => {
-      });
+      __publicField(this, "_clearValue", null);
       __publicField(this, "blendMode");
       __publicField(this, "rebuildingAfterDeviceLost", false);
       __publicField(this, "onRebuildStartAfterDeviceLost");
+      __publicField(this, "buildingPipeline", false);
       //-------------------------------------------
       __publicField(this, "clearOpReady", false);
       __publicField(this, "rendererUseSinglePipeline", true);
-      if (!renderer.canvas) {
-        throw new Error("A RenderPipeline need a GPUProcess with a canvas in order to draw things inside. You must pass a reference to a canvas when you instanciate the GPUProcess.");
-      }
       this.type = "render";
-      this.renderer = renderer;
       this.drawConfig = new DrawConfig(this);
       this.vertexShader = new VertexShader();
       this.fragmentShader = new FragmentShader();
@@ -7717,9 +7667,34 @@ var __publicField = (obj, key, value) => {
         this.outputColor = this.createColorAttachment(bgColor);
       }
     }
-    get canvas() {
-      return this.renderer.canvas;
+    get renderer() {
+      return this._renderer;
     }
+    set renderer(renderer) {
+      if (this._renderer != renderer) {
+        this._renderer = renderer;
+        if (renderer) {
+          if (this.waitingMultisampleTexture) {
+            this.setupMultiSampleView(this.multiSampleTextureDescriptor);
+            this.waitingMultisampleTexture = false;
+          }
+          if (this.waitingDepthStencilTexture) {
+            this.setupDepthStencilView(this.depthStencilTextureDescriptor);
+            this.waitingDepthStencilTexture = false;
+          }
+          console.log("dispatch");
+          this.dispatchEvent(_RenderPipeline.ON_ADDED_TO_RENDERER);
+        } else {
+          this.dispatchEvent(_RenderPipeline.ON_REMOVED_FROM_RENDERER);
+        }
+      }
+    }
+    /*
+    public get canvas(): any {
+        if (!this.renderer) return null;
+        return this.renderer.canvas;
+    }
+    */
     get depthStencilTexture() {
       return this._depthStencilTexture;
     }
@@ -7860,9 +7835,7 @@ var __publicField = (obj, key, value) => {
       return descriptor;
     }
     get clearValue() {
-      if (!this.renderPassDescriptor.colorAttachment)
-        return null;
-      return this.renderPassDescriptor.colorAttachment.clearValue;
+      return this._clearValue;
     }
     createColorAttachment(rgba, view = void 0) {
       const colorAttachment = {
@@ -7888,12 +7861,6 @@ var __publicField = (obj, key, value) => {
         this.drawConfig.indexBuffer = o.indexBuffer;
       if (o.baseVertex !== void 0)
         this.drawConfig.baseVertex = o.baseVertex;
-    }
-    get onLog() {
-      return this._onLog;
-    }
-    set onLog(onLog) {
-      this._onLog = onLog;
     }
     get debugVertexCount() {
       return this.resources.debugVertexCount;
@@ -7933,12 +7900,17 @@ var __publicField = (obj, key, value) => {
     }
     //------------------------------------------------
     setupMultiSampleView(descriptor) {
+      if (!this.renderer) {
+        this.waitingMultisampleTexture = true;
+        this.multiSampleTextureDescriptor = descriptor;
+        return;
+      }
       if (this.multisampleTexture)
         this.multisampleTexture.destroy();
       if (!descriptor)
         descriptor = {};
       if (!descriptor.size)
-        descriptor.size = [this.canvas.width, this.canvas.height];
+        descriptor.size = [this.renderer.width, this.renderer.height];
       this.multisampleTexture = new MultiSampleTexture(descriptor);
       this.description.multisample = {
         count: this.multisampleTexture.description.count
@@ -7950,6 +7922,11 @@ var __publicField = (obj, key, value) => {
     }
     //---------------------------
     setupDepthStencilView(descriptor, depthStencilDescription, depthStencilAttachmentOptions) {
+      if (!this.renderer) {
+        this.waitingDepthStencilTexture = true;
+        this.depthStencilTextureDescriptor = descriptor;
+        return;
+      }
       if (!depthStencilAttachmentOptions)
         depthStencilAttachmentOptions = {};
       if (!descriptor)
@@ -7972,9 +7949,12 @@ var __publicField = (obj, key, value) => {
     }
     get renderPass() {
       if (!this.renderPassTexture) {
-        this.renderPassTexture = new RenderPassTexture({ size: [this.canvas.width, this.canvas.height] });
+        this.renderPassTexture = new RenderPassTexture(this);
       }
       return this.renderPassTexture;
+    }
+    get useRenderPassTexture() {
+      return !!this.renderPassTexture;
     }
     cleanInputs() {
       const _inputs = [];
@@ -7999,17 +7979,18 @@ var __publicField = (obj, key, value) => {
       if (this.drawConfig.indexBuffer)
         this.drawConfig.indexBuffer.createGpuResource();
       if (this.multisampleTexture)
-        this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
+        this.multisampleTexture.resize(this.renderer.width, this.renderer.height);
       if (this.depthStencilTexture)
-        this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
+        this.depthStencilTexture.resize(this.renderer.width, this.renderer.height);
       if (this.renderPassTexture)
-        this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
+        this.renderPassTexture.resize(this.renderer.width, this.renderer.height);
       this.rebuildingAfterDeviceLost = true;
       super.clearAfterDeviceLostAndRebuild();
     }
     buildGpuPipeline() {
-      if (this.gpuPipeline)
+      if (this.gpuPipeline || this.buildingPipeline)
         return this.gpuPipeline;
+      this.buildingPipeline = true;
       this.bindGroups.handleRenderPipelineResourceIOs();
       this.initPipelineResources(this);
       const o = this.bindGroups.build();
@@ -8064,39 +8045,45 @@ var __publicField = (obj, key, value) => {
         this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
         this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount);
         this.vertexShaderDebuggerPipeline.onLog = (o2) => {
-          this._onLog(o2);
+          this.dispatchEvent(_RenderPipeline.ON_LOG, o2);
         };
       }
+      this.buildingPipeline = false;
+      this.dispatchEvent(_RenderPipeline.ON_GPU_PIPELINE_BUILT);
       return this.gpuPipeline;
     }
-    beginRenderPass(commandEncoder, outputView, drawCallId) {
+    beginRenderPass(commandEncoder, outputView, drawCallId, usingRenderPassTexture = false) {
       if (!this.resourceDefined)
         return null;
       if (this.vertexShaderDebuggerPipeline)
         this.vertexShaderDebuggerPipeline.nextFrame();
-      if (this.onDrawBegin)
-        this.onDrawBegin();
-      let rendererUseSinglePipeline = this.renderer.useSinglePipeline && this.pipelineCount === 1;
-      if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
-        this.clearOpReady = false;
-        this.rendererUseSinglePipeline = rendererUseSinglePipeline;
-      }
-      if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
-        this.clearOpReady = true;
-        if (rendererUseSinglePipeline && this.pipelineCount == 1)
-          this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-        else {
-          if (this.pipelineCount === 1) {
-            if (this.renderer.firstPipeline === this)
-              this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-            else
-              this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
-          } else {
+      this.dispatchEvent(_RenderPipeline.ON_DRAW_BEGIN);
+      if (usingRenderPassTexture) {
+        this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+      } else {
+        this._clearValue = this.renderPassDescriptor.colorAttachments[0].clearValue;
+        let rendererUseSinglePipeline = this.renderer.renderPipelines.length == 1 && this.pipelineCount === 1;
+        if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
+          this.clearOpReady = false;
+          this.rendererUseSinglePipeline = rendererUseSinglePipeline;
+        }
+        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
+          this.clearOpReady = true;
+          if (rendererUseSinglePipeline && this.pipelineCount == 1)
             this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-            if (drawCallId === 0)
-              ;
-            else
-              this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+          else {
+            if (this.pipelineCount === 1) {
+              if (this.renderer.renderPipelines[0] === this)
+                this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+              else
+                this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+            } else {
+              this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+              if (drawCallId === 0)
+                ;
+              else
+                this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+            }
           }
         }
       }
@@ -8156,21 +8143,22 @@ var __publicField = (obj, key, value) => {
           types.textureArrays[i].resource.updateInnerGpuTextures(commandEncoder);
         }
       }
-      if (this.renderPassTexture) {
-        if (!this.renderPassTexture.gpuResource)
-          this.renderPassTexture.createGpuResource();
-        commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
-      }
-      if (this.canvas.dimensionChanged) {
+      const { width, height } = this.renderer;
+      if (this.renderer.resized) {
         if (this.multisampleTexture) {
-          this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
+          this.multisampleTexture.resize(width, height);
         }
         if (this.depthStencilTexture) {
-          this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
+          this.depthStencilTexture.resize(width, height);
         }
         if (this.renderPassTexture) {
-          this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
+          this.renderPassTexture.resize(width, height);
         }
+      }
+      if (this.renderPassTexture && this.renderPassTexture.mustUseCopyTextureToTexture) {
+        if (!this.renderPassTexture.gpuResource)
+          this.renderPassTexture.createGpuResource();
+        commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [width, height]);
       }
       if (this.multisampleTexture)
         this.multisampleTexture.update();
@@ -8178,8 +8166,7 @@ var __publicField = (obj, key, value) => {
         this.depthStencilTexture.update();
       if (this.renderPassTexture)
         this.renderPassTexture.update();
-      if (this.onDrawEnd)
-        this.onDrawEnd();
+      this.dispatchEvent(_RenderPipeline.ON_DRAW_END);
     }
     get resourceDefined() {
       const bool = !!this.bindGroups.resources.all;
@@ -8219,6 +8206,346 @@ var __publicField = (obj, key, value) => {
     }
     set stripIndexFormat(s) {
       this.description.primitive.stripIndexFormat = s;
+    }
+  };
+  let RenderPipeline = _RenderPipeline;
+  __publicField(RenderPipeline, "ON_ADDED_TO_RENDERER", "ON_ADDED_TO_RENDERER");
+  __publicField(RenderPipeline, "ON_REMOVED_FROM_RENDERER", "ON_REMOVED_FROM_RENDERER");
+  __publicField(RenderPipeline, "ON_DRAW_BEGIN", "ON_DRAW_BEGIN");
+  __publicField(RenderPipeline, "ON_DRAW_END", "ON_DRAW_END");
+  __publicField(RenderPipeline, "ON_DRAW", "ON_DRAW");
+  __publicField(RenderPipeline, "ON_GPU_PIPELINE_BUILT", "ON_GPU_PIPELINE_BUILT");
+  __publicField(RenderPipeline, "ON_LOG", "ON_LOG");
+  const _GPURenderer = class extends EventDispatcher {
+    constructor() {
+      super();
+      __publicField(this, "domElement");
+      __publicField(this, "canvasView");
+      __publicField(this, "ctx");
+      __publicField(this, "currentWidth");
+      __publicField(this, "currentHeight");
+      __publicField(this, "dimensionChanged", false);
+      __publicField(this, "deviceId");
+      __publicField(this, "frameId", 0);
+      __publicField(this, "nbColorAttachment", 0);
+      __publicField(this, "renderPipelines", []);
+      __publicField(this, "texturedQuadPipeline");
+      __publicField(this, "gpuCtxConfiguration");
+      __publicField(this, "commandEncoder", null);
+      if (!_GPURenderer.texturedQuadPipeline) {
+        _GPURenderer.texturedQuadPipeline = new RenderPipeline();
+        _GPURenderer.texturedQuadPipeline.initFromObject({
+          vertexCount: 6,
+          vertexId: BuiltIns.vertexInputs.vertexIndex,
+          image: new ImageTexture({ source: null }),
+          imgSampler: new TextureSampler(),
+          uv: BuiltIns.vertexOutputs.Vec2,
+          vertexShader: {
+            constants: `
+                    const pos = array<vec2<f32>([
+                        vec2(-0.5,-0.5),
+                        vec2(+0.5,-0.5),
+                        vec2(-0.5,+0.5),
+                        vec2(+0.5,-0.5),
+                        vec2(+0.5,+0.5),
+                        vec2(-0.5,+0.5),
+                    ]);
+                    `,
+            main: `
+                    output.position = vec4(pos[vertexId],0.0,1.0);
+                    output.uv = 0.5 + output.position.xy;
+                    `
+          },
+          fragmentShader: `
+                    output.color = textureSample(image,imgSampler,uv);
+                `
+        });
+      }
+      this.texturedQuadPipeline = _GPURenderer.texturedQuadPipeline;
+    }
+    resize(w, h) {
+      this.domElement.width = w;
+      this.domElement.height = h;
+      this.dimensionChanged = true;
+    }
+    destroy() {
+      for (let i = 0; i < this.renderPipelines.length; i++) {
+        this.renderPipelines[i].destroy();
+      }
+      this.renderPipelines = [];
+      for (let z in this) {
+        this[z] = null;
+      }
+    }
+    initCanvas(canvas, alphaMode = "opaque") {
+      this.domElement = canvas;
+      return new Promise(async (resolve, error) => {
+        await XGPU.init();
+        this.deviceId = XGPU.deviceId;
+        if (this.domElement == null)
+          return;
+        this.currentWidth = this.domElement.width;
+        this.currentHeight = this.domElement.height;
+        try {
+          this.gpuCtxConfiguration = {
+            device: XGPU.device,
+            format: XGPU.getPreferredCanvasFormat(),
+            alphaMode,
+            colorSpace: "srgb",
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING
+          };
+          this.ctx = this.domElement.getContext("webgpu");
+          this.ctx.configure(this.gpuCtxConfiguration);
+          resolve(canvas);
+        } catch (e) {
+          error(e);
+        }
+      });
+    }
+    get resized() {
+      return this.dimensionChanged;
+    }
+    get firstPipeline() {
+      return this.renderPipelines[0];
+    }
+    get texture() {
+      return this.ctx.getCurrentTexture();
+    }
+    get view() {
+      return this.ctx.getCurrentTexture().createView();
+    }
+    get width() {
+      return this.domElement.width;
+    }
+    get height() {
+      return this.domElement.height;
+    }
+    get canvas() {
+      return this.domElement;
+    }
+    addPipeline(pipeline, offset = null) {
+      pipeline.renderer = this;
+      if (pipeline.renderPassDescriptor.colorAttachments[0])
+        this.nbColorAttachment++;
+      if (offset === null)
+        this.renderPipelines.push(pipeline);
+      else
+        this.renderPipelines.splice(offset, 0, pipeline);
+      return pipeline;
+    }
+    removePipeline(pipeline) {
+      if (pipeline.renderPassDescriptor.colorAttachments[0])
+        this.nbColorAttachment--;
+      const id = this.renderPipelines.indexOf(pipeline);
+      if (id != -1) {
+        this.renderPipelines.splice(id, 1);
+      }
+      pipeline.renderer = null;
+      return pipeline;
+    }
+    get nbPipeline() {
+      return this.renderPipelines.length;
+    }
+    get useSinglePipeline() {
+      return this.nbColorAttachment === 1;
+    }
+    configure(textureUsage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING, alphaMode = "opaque") {
+      this.gpuCtxConfiguration = {
+        device: XGPU.device,
+        format: XGPU.getPreferredCanvasFormat(),
+        alphaMode,
+        colorSpace: "srgb",
+        usage: textureUsage
+      };
+      this.ctx.configure(this.gpuCtxConfiguration);
+    }
+    async update() {
+      if (!this.ctx)
+        return;
+      if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === void 0)
+        return;
+      if (XGPU.deviceId != this.deviceId) {
+        this.ctx.configure({ ...this.gpuCtxConfiguration, device: XGPU.device });
+      }
+      if (this.canvas.width != this.currentWidth || this.canvas.height != this.currentHeight) {
+        this.currentWidth = this.canvas.width;
+        this.currentHeight = this.canvas.height;
+        this.dimensionChanged = true;
+      }
+      let deviceChanged = XGPU.deviceId != this.deviceId;
+      if (deviceChanged) {
+        this.deviceId = XGPU.deviceId;
+        for (let i = 0; i < this.renderPipelines.length; i++) {
+          this.renderPipelines[i].clearAfterDeviceLostAndRebuild();
+        }
+      }
+      this.commandEncoder = XGPU.device.createCommandEncoder();
+      let pipeline, renderPass;
+      for (let i = 0; i < this.renderPipelines.length; i++) {
+        pipeline = this.renderPipelines[i];
+        pipeline.update();
+        renderPass = pipeline.beginRenderPass(this.commandEncoder, this.view, 0);
+        for (let j = 0; j < pipeline.pipelineCount; j++) {
+          pipeline.dispatchEvent(RenderPipeline.ON_DRAW, j);
+          pipeline.draw(renderPass);
+        }
+        pipeline.end(this.commandEncoder, renderPass);
+      }
+      const commandBuffer = this.commandEncoder.finish();
+      this.commandEncoder = null;
+      XGPU.device.queue.submit([commandBuffer]);
+      this.dimensionChanged = false;
+      this.dispatchEvent(_GPURenderer.ON_DRAW_END);
+      this.frameId++;
+    }
+  };
+  let GPURenderer = _GPURenderer;
+  __publicField(GPURenderer, "ON_DRAW_END", "ON_DRAW_END");
+  __publicField(GPURenderer, "texturedQuadPipeline");
+  class TextureRenderer {
+    constructor(useTextureInComputeShader = false) {
+      __publicField(this, "textureObj");
+      __publicField(this, "dimensionChanged", false);
+      __publicField(this, "currentWidth");
+      __publicField(this, "currentHeight");
+      __publicField(this, "renderPipelines", []);
+      __publicField(this, "useTextureInComputeShader");
+      __publicField(this, "frameId", -1);
+      __publicField(this, "deviceId");
+      //public get firstPipeline(): RenderPipeline { return this.renderPipelines[0]; }
+      __publicField(this, "nbColorAttachment", 0);
+      __publicField(this, "commandEncoder", null);
+      this.useTextureInComputeShader = useTextureInComputeShader;
+    }
+    init(w, h, usage, sampleCount) {
+      this.currentWidth = w;
+      this.currentHeight = h;
+      return new Promise((onResolve) => {
+        XGPU.init().then(() => {
+          this.deviceId = XGPU.deviceId;
+          if (!usage)
+            usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC;
+          let format = "bgra8unorm";
+          if (this.useTextureInComputeShader) {
+            format = "rgba8unorm";
+            usage += GPUTextureUsage.STORAGE_BINDING;
+          }
+          this.textureObj = new Texture({
+            size: [w, h],
+            format,
+            usage,
+            sampleCount
+          });
+          this.textureObj.create();
+          onResolve(this);
+        });
+      });
+    }
+    addPipeline(pipeline, offset = null) {
+      pipeline.renderer = this;
+      if (pipeline.renderPassDescriptor.colorAttachments[0])
+        this.nbColorAttachment++;
+      if (offset === null)
+        this.renderPipelines.push(pipeline);
+      else
+        this.renderPipelines.splice(offset, 0, pipeline);
+      return pipeline;
+    }
+    removePipeline(pipeline) {
+      if (pipeline.renderPassDescriptor.colorAttachments[0])
+        this.nbColorAttachment--;
+      const id = this.renderPipelines.indexOf(pipeline);
+      if (id != -1) {
+        this.renderPipelines.splice(id, 1);
+      }
+      pipeline.renderer = null;
+      return pipeline;
+    }
+    //public get nbPipeline(): number { return this.renderPipelines.length }
+    //public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
+    resize(w, h) {
+      this.currentWidth = w;
+      this.currentHeight = h;
+      this.dimensionChanged = true;
+      if (this.textureObj)
+        this.textureObj.resize(w, h);
+    }
+    destroy() {
+      for (let i = 0; i < this.renderPipelines.length; i++) {
+        this.renderPipelines[i].destroy();
+      }
+      this.renderPipelines = [];
+      for (let z in this) {
+        this[z] = null;
+      }
+    }
+    async update() {
+      if (!XGPU.ready || this.renderPipelines.length === 0 || this.deviceId === void 0)
+        return;
+      let deviceChanged = XGPU.deviceId != this.deviceId;
+      if (deviceChanged) {
+        if (this.textureObj)
+          this.textureObj.create();
+        this.deviceId = XGPU.deviceId;
+        for (let i = 0; i < this.renderPipelines.length; i++) {
+          this.renderPipelines[i].clearAfterDeviceLostAndRebuild();
+        }
+      }
+      this.commandEncoder = XGPU.device.createCommandEncoder();
+      let pipeline, renderPass;
+      for (let i = 0; i < this.renderPipelines.length; i++) {
+        pipeline = this.renderPipelines[i];
+        pipeline.update();
+        for (let j = 0; j < pipeline.pipelineCount; j++) {
+          renderPass = pipeline.beginRenderPass(this.commandEncoder, this.view, j);
+          pipeline.dispatchEvent(RenderPipeline.ON_DRAW, j);
+          pipeline.draw(renderPass);
+          pipeline.end(this.commandEncoder, renderPass);
+        }
+      }
+      const commandBuffer = this.commandEncoder.finish();
+      this.commandEncoder = null;
+      XGPU.device.queue.submit([commandBuffer]);
+      this.dimensionChanged = false;
+    }
+    get resized() {
+      return this.dimensionChanged;
+    }
+    get canvas() {
+      return null;
+    }
+    get width() {
+      return this.currentWidth;
+    }
+    get height() {
+      return this.currentHeight;
+    }
+    get texture() {
+      if (!this.textureObj)
+        throw new Error("TextureRenderer is not initialized yet. You must Use TextureRenderer.init in order to initialize it");
+      return this.textureObj.gpuResource;
+    }
+    get view() {
+      if (!this.textureObj)
+        throw new Error("TextureRenderer is not initialized yet. You must Use TextureRenderer.init in order to initialize it");
+      return this.textureObj.view;
+    }
+  }
+  class BlendMode {
+    constructor() {
+      __publicField(this, "color", { operation: "add", srcFactor: "one", dstFactor: "zero" });
+      __publicField(this, "alpha", { operation: "add", srcFactor: "one", dstFactor: "zero" });
+    }
+  }
+  class AlphaBlendMode extends BlendMode {
+    constructor() {
+      super();
+      this.color.operation = "add";
+      this.color.srcFactor = "src-alpha";
+      this.color.dstFactor = "one-minus-src-alpha";
+      this.alpha.operation = "add";
+      this.alpha.srcFactor = "src-alpha";
+      this.alpha.dstFactor = "one-minus-src-alpha";
     }
   }
   class PipelinePlugin {
@@ -8336,6 +8663,165 @@ var __publicField = (obj, key, value) => {
   __publicField(ShaderType, "UVec2", { type: "vec2<u32>" });
   __publicField(ShaderType, "UVec3", { type: "vec3<u32>" });
   __publicField(ShaderType, "UVec4", { type: "vec4<u32>" });
+  class FloatBuffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "float32", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class Vec2Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "float32x2", offset);
+      if (typeof datas != "number") {
+        this.datas = datas;
+      }
+    }
+  }
+  class Vec3Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "float32x3", offset);
+      if (typeof datas != "number") {
+        this.datas = datas;
+      }
+    }
+  }
+  class Vec4Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "float32x4", offset);
+      if (typeof datas != "number") {
+        this.datas = datas;
+      }
+    }
+  }
+  class IntBuffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "sint32", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class IVec2Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "sint32x2", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class IVec3Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "sint32x3", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class IVec4Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "sint32x4", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class UintBuffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "uint32", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class UVec2Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "uint32x2", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class UVec3Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "uint32x3", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
+  class UVec4Buffer extends VertexAttribute {
+    constructor(datas, offset) {
+      if (datas != void 0 && offset === void 0) {
+        if (typeof datas === "number") {
+          offset = datas;
+          datas = void 0;
+        }
+      }
+      super("", "uint32x4", offset);
+      if (typeof datas != "number")
+        this.datas = datas;
+    }
+  }
   exports2.AlphaBlendMode = AlphaBlendMode;
   exports2.Bindgroup = Bindgroup;
   exports2.Bindgroups = Bindgroups;
@@ -8346,21 +8832,26 @@ var __publicField = (obj, key, value) => {
   exports2.CubeMapTexture = CubeMapTexture;
   exports2.DepthStencilTexture = DepthStencilTexture;
   exports2.DepthTextureArray = DepthTextureArray;
+  exports2.EventDispatcher = EventDispatcher;
   exports2.Float = Float;
+  exports2.FloatBuffer = FloatBuffer;
   exports2.FragmentShader = FragmentShader;
   exports2.GPURenderer = GPURenderer;
   exports2.GPUType = GPUType;
-  exports2.HeadlessGPURenderer = HeadlessGPURenderer;
   exports2.HighLevelParser = HighLevelParser;
   exports2.IVec2 = IVec2;
+  exports2.IVec2Buffer = IVec2Buffer;
   exports2.IVec3 = IVec3;
+  exports2.IVec3Buffer = IVec3Buffer;
   exports2.IVec4 = IVec4;
   exports2.IVec4Array = IVec4Array;
+  exports2.IVec4Buffer = IVec4Buffer;
   exports2.ImageTexture = ImageTexture;
   exports2.ImageTextureArray = ImageTextureArray;
   exports2.ImageTextureIO = ImageTextureIO;
   exports2.IndexBuffer = IndexBuffer;
   exports2.Int = Int;
+  exports2.IntBuffer = IntBuffer;
   exports2.Matrix3x3 = Matrix3x3;
   exports2.Matrix4x4 = Matrix4x4;
   exports2.Matrix4x4Array = Matrix4x4Array;
@@ -8377,19 +8868,27 @@ var __publicField = (obj, key, value) => {
   exports2.ShaderStruct = ShaderStruct;
   exports2.ShaderType = ShaderType;
   exports2.Texture = Texture;
+  exports2.TextureRenderer = TextureRenderer;
   exports2.TextureSampler = TextureSampler;
   exports2.UVec2 = UVec2;
+  exports2.UVec2Buffer = UVec2Buffer;
   exports2.UVec3 = UVec3;
+  exports2.UVec3Buffer = UVec3Buffer;
   exports2.UVec4 = UVec4;
   exports2.UVec4Array = UVec4Array;
+  exports2.UVec4Buffer = UVec4Buffer;
   exports2.Uint = Uint;
+  exports2.UintBuffer = UintBuffer;
   exports2.UniformBuffer = UniformBuffer;
   exports2.UniformGroup = UniformGroup;
   exports2.UniformGroupArray = UniformGroupArray;
   exports2.Vec2 = Vec2;
+  exports2.Vec2Buffer = Vec2Buffer;
   exports2.Vec3 = Vec3;
+  exports2.Vec3Buffer = Vec3Buffer;
   exports2.Vec4 = Vec4;
   exports2.Vec4Array = Vec4Array;
+  exports2.Vec4Buffer = Vec4Buffer;
   exports2.VertexAttribute = VertexAttribute;
   exports2.VertexBuffer = VertexBuffer;
   exports2.VertexBufferIO = VertexBufferIO;

@@ -7,7 +7,8 @@ import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { VertexShader } from "../shader/VertexShader";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
-export declare class Pipeline {
+import { EventDispatcher } from "../EventDispatcher";
+export declare class Pipeline extends EventDispatcher {
     description: any;
     nbVertex: number;
     bindGroups: Bindgroups;

@@ -77,26 +77,35 @@ export type RenderPipelineProperties = {
 };
 export type RenderPipelineDescriptor = RenderPipelineProperties & BindgroupDescriptor;
 export declare class RenderPipeline extends Pipeline {
-    renderer: IRenderer;
+    static ON_ADDED_TO_RENDERER: string;
+    static ON_REMOVED_FROM_RENDERER: string;
+    static ON_DRAW_BEGIN: string;
+    static ON_DRAW_END: string;
+    static ON_DRAW: string;
+    static ON_GPU_PIPELINE_BUILT: string;
+    static ON_LOG: string;
+    protected _renderer: IRenderer;
+    get renderer(): IRenderer;
+    set renderer(renderer: IRenderer);
     drawConfig: DrawConfig;
-    protected _depthStencilTexture: DepthStencilTexture;
+    protected multiSampleTextureDescriptor: any;
+    protected waitingMultisampleTexture: boolean;
     protected multisampleTexture: MultiSampleTexture;
+    protected waitingDepthStencilTexture: boolean;
+    protected depthStencilTextureDescriptor: any;
+    protected _depthStencilTexture: DepthStencilTexture;
     protected renderPassTexture: RenderPassTexture;
     outputColor: any;
     renderPassDescriptor: any;
     protected vertexShaderDebuggerPipeline: VertexShaderDebuggerPipeline;
     protected gpuPipeline: GPURenderPipeline;
     debug: string;
-    onDrawBegin: () => void;
-    onDrawEnd: () => void;
-    onDraw: (drawCallId: number) => void;
-    constructor(renderer: IRenderer, bgColor?: {
+    constructor(bgColor?: {
         r: number;
         g: number;
         b: number;
         a: number;
     });
-    get canvas(): any;
     get depthStencilTexture(): DepthStencilTexture;
     destroy(): void;
     initFromObject(descriptor: {
@@ -135,6 +144,12 @@ export declare class RenderPipeline extends Pipeline {
         } | string;
         [key: string]: unknown;
     }): any;
+    protected _clearValue: {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+    };
     get clearValue(): {
         r: number;
         g: number;
@@ -155,9 +170,6 @@ export declare class RenderPipeline extends Pipeline {
         indexBuffer?: IndexBuffer;
         baseVertex?: number;
     }): void;
-    private _onLog;
-    get onLog(): (o: any) => void;
-    set onLog(onLog: (o: any) => void);
     get debugVertexCount(): number;
     set debugVertexCount(n: number);
     get vertexCount(): number;
@@ -190,20 +202,22 @@ export declare class RenderPipeline extends Pipeline {
     }, depthStencilAttachmentOptions?: any): void;
     get renderPassView(): GPUTextureView;
     get renderPass(): RenderPassTexture;
+    get useRenderPassTexture(): boolean;
     protected cleanInputs(): any[];
     blendMode: BlendMode;
     private getFragmentShaderColorOptions;
     protected rebuildingAfterDeviceLost: boolean;
     onRebuildStartAfterDeviceLost: () => void;
     clearAfterDeviceLostAndRebuild(): void;
+    private buildingPipeline;
     buildGpuPipeline(): GPURenderPipeline;
     private clearOpReady;
     private rendererUseSinglePipeline;
-    beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView, drawCallId?: number): GPURenderPassEncoder;
+    beginRenderPass(commandEncoder: GPUCommandEncoder, outputView?: GPUTextureView, drawCallId?: number, usingRenderPassTexture?: boolean): GPURenderPassEncoder;
     private handleOutputColor;
     update(): void;
     draw(renderPass: GPURenderPassEncoder): void;
-    end(commandEncoder: any, renderPass: any): void;
+    end(commandEncoder: GPUCommandEncoder, renderPass: any): void;
     get resourceDefined(): boolean;
     get pipeline(): GPURenderPipeline;
     get cullMode(): "front" | "back" | "none";

@@ -1,3 +1,4 @@
+import { Pipeline } from "../../pipelines/Pipeline";
 export interface IShaderResource {
     mustBeTransfered: boolean;
     gpuResource: any;
@@ -8,6 +9,6 @@ export interface IShaderResource {
     createBindGroupEntry(bindingId: number): any;
     createGpuResource(): any;
     destroyGpuResource(): any;
-    update(): any;
+    update(pipeline?: Pipeline): any;
     clone(): IShaderResource;
 }

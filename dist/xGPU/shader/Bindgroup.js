@@ -299,7 +299,7 @@ export class Bindgroup {
             this.setupDraw();
         }
         if (renderPass instanceof GPUComputePassEncoder) {
-            this.update();
+            this.update(this.parent.pipeline);
             renderPass.setBindGroup(this.bindgroupId, this.group);
             return;
         }
@@ -308,7 +308,7 @@ export class Bindgroup {
         //console.log("instances.length = ", instances.length)
         for (let i = 0; i < instances.length; i++) {
             instances[i].update();
-            this.update();
+            this.update(this.parent.pipeline);
             renderPass.setBindGroup(this.bindgroupId, instances[i].group);
             if (this.vertexBuffers) {
                 let buf;
@@ -378,7 +378,7 @@ export class Bindgroup {
             let bool = false;
             for (let i = 0; i < this.elements.length; i++) {
                 if (this.elements[i].resource.mustBeTransfered) {
-                    this.elements[i].resource.update();
+                    this.elements[i].resource.update(this.parent.pipeline);
                     bool = true;
                     break;
                 }
@@ -628,9 +628,9 @@ export class Bindgroup {
         }
         return this._group;
     }
-    update() {
+    update(pipeline) {
         for (let i = 0; i < this.elements.length; i++) {
-            this.elements[i].resource.update();
+            this.elements[i].resource.update(pipeline);
         }
     }
     destroy() {

@@ -1,4 +1,5 @@
 /// <reference types="dist" />
+import { Pipeline } from "../pipelines/Pipeline";
 import { IndexBuffer } from "../pipelines/resources/IndexBuffer";
 import { Bindgroups } from "./Bindgroups";
 import { ImageTexture } from "./resources/ImageTexture";
@@ -60,6 +61,6 @@ export declare class Bindgroup {
     get pingPongBindgroup(): Bindgroup;
     get layout(): GPUBindGroupLayout;
     get group(): GPUBindGroup;
-    update(): void;
+    update(pipeline: Pipeline): void;
     destroy(): void;
 }

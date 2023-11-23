@@ -68,12 +68,16 @@ export declare class VertexAttribute {
     private _data;
     dataOffset: number;
     mustBeTransfered: boolean;
-    vertexBuffer: VertexBuffer;
+    protected _vertexBuffer: VertexBuffer;
     constructor(name: string, dataType: string, offset?: number);
+    protected waitingVertexBuffer: boolean;
+    get vertexBuffer(): VertexBuffer;
+    set vertexBuffer(vb: VertexBuffer);
     get datas(): number[][] | number[];
     set datas(n: number[][] | number[]);
     get useByVertexData(): boolean;
     get format(): string;
+    get type(): string;
     get bytePerElement(): number;
     get varType(): string;
     get name(): string;

@@ -14,26 +14,51 @@ import { DrawConfig } from "./resources/DrawConfig";
 import { HighLevelParser } from "../HighLevelParser";
 import { VertexShaderDebuggerPipeline } from "./VertexShaderDebuggerPipeline";
 export class RenderPipeline extends Pipeline {
-    renderer; //GPURenderer | HeadlessGPURenderer;
+    static ON_ADDED_TO_RENDERER = "ON_ADDED_TO_RENDERER";
+    static ON_REMOVED_FROM_RENDERER = "ON_REMOVED_FROM_RENDERER";
+    static ON_DRAW_BEGIN = "ON_DRAW_BEGIN";
+    static ON_DRAW_END = "ON_DRAW_END";
+    static ON_DRAW = "ON_DRAW";
+    static ON_GPU_PIPELINE_BUILT = "ON_GPU_PIPELINE_BUILT";
+    static ON_LOG = "ON_LOG";
+    _renderer;
+    get renderer() { return this._renderer; }
+    set renderer(renderer) {
+        if (this._renderer != renderer) {
+            this._renderer = renderer;
+            if (renderer) {
+                if (this.waitingMultisampleTexture) {
+                    this.setupMultiSampleView(this.multiSampleTextureDescriptor);
+                    this.waitingMultisampleTexture = false;
+                }
+                if (this.waitingDepthStencilTexture) {
+                    this.setupDepthStencilView(this.depthStencilTextureDescriptor);
+                    this.waitingDepthStencilTexture = false;
+                }
+                console.log("dispatch");
+                this.dispatchEvent(RenderPipeline.ON_ADDED_TO_RENDERER);
+            }
+            else {
+                this.dispatchEvent(RenderPipeline.ON_REMOVED_FROM_RENDERER);
+            }
+        }
+    }
     drawConfig;
-    _depthStencilTexture;
+    multiSampleTextureDescriptor;
+    waitingMultisampleTexture = false;
     multisampleTexture;
+    waitingDepthStencilTexture = false;
+    depthStencilTextureDescriptor;
+    _depthStencilTexture;
     renderPassTexture;
     outputColor;
     renderPassDescriptor = { colorAttachments: [] };
     vertexShaderDebuggerPipeline = null;
     gpuPipeline;
     debug = "renderPipeline";
-    onDrawBegin;
-    onDrawEnd;
-    onDraw;
-    constructor(renderer, bgColor = { r: 0, g: 0, b: 0, a: 1 }) {
+    constructor(bgColor = { r: 0, g: 0, b: 0, a: 1 }) {
         super();
-        if (!renderer.canvas) {
-            throw new Error("A RenderPipeline need a GPUProcess with a canvas in order to draw things inside. You must pass a reference to a canvas when you instanciate the GPUProcess.");
-        }
         this.type = "render";
-        this.renderer = renderer;
         this.drawConfig = new DrawConfig(this);
         this.vertexShader = new VertexShader();
         this.fragmentShader = new FragmentShader();
@@ -46,7 +71,12 @@ export class RenderPipeline extends Pipeline {
             this.outputColor = this.createColorAttachment(bgColor);
         }
     }
-    get canvas() { return this.renderer.canvas; }
+    /*
+    public get canvas(): any {
+        if (!this.renderer) return null;
+        return this.renderer.canvas;
+    }
+    */
     get depthStencilTexture() { return this._depthStencilTexture; }
     destroy() {
         this.bindGroups.destroy();
@@ -197,10 +227,11 @@ export class RenderPipeline extends Pipeline {
         }
         return descriptor;
     }
+    _clearValue = null;
     get clearValue() {
-        if (!this.renderPassDescriptor.colorAttachment)
-            return null;
-        return this.renderPassDescriptor.colorAttachment.clearValue;
+        return this._clearValue;
+        //if (!this.renderPassDescriptor.colorAttachment) return null;
+        //return this.renderPassDescriptor.colorAttachment.clearValue;
     }
     createColorAttachment(rgba, view = undefined) {
         const colorAttachment = {
@@ -227,10 +258,6 @@ export class RenderPipeline extends Pipeline {
         if (o.baseVertex !== undefined)
             this.drawConfig.baseVertex = o.baseVertex;
     }
-    _onLog = () => { };
-    get onLog() { return this._onLog; }
-    ;
-    set onLog(onLog) { this._onLog = onLog; }
     get debugVertexCount() { return this.resources.debugVertexCount; }
     set debugVertexCount(n) { this.resources.debugVertexCount = n; }
     get vertexCount() { return this.drawConfig.vertexCount; }
@@ -245,12 +272,17 @@ export class RenderPipeline extends Pipeline {
     set baseVertex(n) { this.drawConfig.baseVertex = n; }
     //------------------------------------------------
     setupMultiSampleView(descriptor) {
+        if (!this.renderer) {
+            this.waitingMultisampleTexture = true;
+            this.multiSampleTextureDescriptor = descriptor;
+            return;
+        }
         if (this.multisampleTexture)
             this.multisampleTexture.destroy();
         if (!descriptor)
             descriptor = {};
         if (!descriptor.size)
-            descriptor.size = [this.canvas.width, this.canvas.height];
+            descriptor.size = [this.renderer.width, this.renderer.height];
         this.multisampleTexture = new MultiSampleTexture(descriptor);
         this.description.multisample = {
             count: this.multisampleTexture.description.count
@@ -262,6 +294,11 @@ export class RenderPipeline extends Pipeline {
     }
     //---------------------------
     setupDepthStencilView(descriptor, depthStencilDescription, depthStencilAttachmentOptions) {
+        if (!this.renderer) {
+            this.waitingDepthStencilTexture = true;
+            this.depthStencilTextureDescriptor = descriptor;
+            return;
+        }
         if (!depthStencilAttachmentOptions)
             depthStencilAttachmentOptions = {};
         if (!descriptor)
@@ -282,9 +319,12 @@ export class RenderPipeline extends Pipeline {
     get renderPassView() { return this.renderPass.view; }
     get renderPass() {
         if (!this.renderPassTexture) {
-            this.renderPassTexture = new RenderPassTexture({ size: [this.canvas.width, this.canvas.height] });
+            this.renderPassTexture = new RenderPassTexture(this);
         }
         return this.renderPassTexture;
+    }
+    get useRenderPassTexture() {
+        return !!this.renderPassTexture;
     }
     cleanInputs( /*initIO: boolean = false*/) {
         const _inputs = [];
@@ -312,17 +352,20 @@ export class RenderPipeline extends Pipeline {
         if (this.drawConfig.indexBuffer)
             this.drawConfig.indexBuffer.createGpuResource();
         if (this.multisampleTexture)
-            this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
+            this.multisampleTexture.resize(this.renderer.width, this.renderer.height);
         if (this.depthStencilTexture)
-            this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
+            this.depthStencilTexture.resize(this.renderer.width, this.renderer.height);
         if (this.renderPassTexture)
-            this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
+            this.renderPassTexture.resize(this.renderer.width, this.renderer.height);
         this.rebuildingAfterDeviceLost = true;
         super.clearAfterDeviceLostAndRebuild();
     }
+    buildingPipeline = false;
     buildGpuPipeline() {
-        if (this.gpuPipeline)
+        if (this.gpuPipeline || this.buildingPipeline)
             return this.gpuPipeline;
+        this.buildingPipeline = true;
+        //console.warn("BUILD GPUPIPELINE")
         this.bindGroups.handleRenderPipelineResourceIOs();
         this.initPipelineResources(this);
         const o = this.bindGroups.build();
@@ -380,43 +423,57 @@ export class RenderPipeline extends Pipeline {
             this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount);
             this.vertexShaderDebuggerPipeline.onLog = (o) => {
-                this._onLog(o);
+                this.dispatchEvent(RenderPipeline.ON_LOG, o);
+                //this._onLog(o);
             };
         }
+        this.buildingPipeline = false;
+        this.dispatchEvent(RenderPipeline.ON_GPU_PIPELINE_BUILT);
         return this.gpuPipeline;
     }
     //-------------------------------------------
     clearOpReady = false;
     rendererUseSinglePipeline = true;
-    beginRenderPass(commandEncoder, outputView, drawCallId) {
+    beginRenderPass(commandEncoder, outputView, drawCallId, usingRenderPassTexture = false) {
         if (!this.resourceDefined)
             return null;
         if (this.vertexShaderDebuggerPipeline)
             this.vertexShaderDebuggerPipeline.nextFrame();
-        if (this.onDrawBegin)
-            this.onDrawBegin();
-        let rendererUseSinglePipeline = this.renderer.useSinglePipeline && this.pipelineCount === 1;
-        if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
-            this.clearOpReady = false;
-            this.rendererUseSinglePipeline = rendererUseSinglePipeline;
+        this.dispatchEvent(RenderPipeline.ON_DRAW_BEGIN);
+        if (usingRenderPassTexture) {
+            //console.log("usingRenderPassTexture")
+            this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
         }
-        if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
-            this.clearOpReady = true;
-            if (rendererUseSinglePipeline && this.pipelineCount == 1)
-                this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-            else {
-                if (this.pipelineCount === 1) {
-                    if (this.renderer.firstPipeline === this)
-                        this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-                    else
-                        this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
-                }
-                else {
+        else {
+            this._clearValue = this.renderPassDescriptor.colorAttachments[0].clearValue;
+            //console.log("not usingRenderPassTexture")
+            let rendererUseSinglePipeline = this.renderer.renderPipelines.length == 1 && this.pipelineCount === 1;
+            if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
+                this.clearOpReady = false;
+                this.rendererUseSinglePipeline = rendererUseSinglePipeline;
+            }
+            if (this.clearOpReady === false && this.renderPassDescriptor.colorAttachments[0] || this.pipelineCount > 1) {
+                this.clearOpReady = true;
+                /*if (this.useRenderPassTexture && this.renderPassDescriptor.colorAttachments[0]) {
+                    this.renderPassDescriptor.colorAttachments[0].loadOp = "clear"
+                } else {*/
+                if (rendererUseSinglePipeline && this.pipelineCount == 1)
                     this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
-                    if (drawCallId === 0) { }
-                    else
-                        this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                else {
+                    if (this.pipelineCount === 1) {
+                        if (this.renderer.renderPipelines[0] === this)
+                            this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                        else
+                            this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                    }
+                    else {
+                        this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
+                        if (drawCallId === 0) { }
+                        else
+                            this.renderPassDescriptor.colorAttachments[0].loadOp = "load";
+                    }
                 }
+                //}
             }
         }
         if (!this.gpuPipeline)
@@ -454,6 +511,7 @@ export class RenderPipeline extends Pipeline {
     draw(renderPass) {
         if (!this.resourceDefined)
             return;
+        //console.log("draw")
         renderPass.setPipeline(this.gpuPipeline);
         this.bindGroups.apply(renderPass);
     }
@@ -462,6 +520,7 @@ export class RenderPipeline extends Pipeline {
         if (!this.resourceDefined)
             return;
         renderPass.end();
+        //console.log("end")
         //------ the arrays of textures may contains GPUTexture so I must use commandEncoder.copyTextureToTexture 
         // to update the content from a GPUTexture to the texture_array_2d 
         const types = this.bindGroups.resources.types;
@@ -481,21 +540,22 @@ export class RenderPipeline extends Pipeline {
             }
         }
         //----------------------------------------------------------------------------------------
-        if (this.renderPassTexture) {
-            if (!this.renderPassTexture.gpuResource)
-                this.renderPassTexture.createGpuResource();
-            commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [this.canvas.width, this.canvas.height]);
-        }
-        if (this.canvas.dimensionChanged) {
+        const { width, height } = this.renderer;
+        if (this.renderer.resized) {
             if (this.multisampleTexture) {
-                this.multisampleTexture.resize(this.canvas.width, this.canvas.height);
+                this.multisampleTexture.resize(width, height);
             }
             if (this.depthStencilTexture) {
-                this.depthStencilTexture.resize(this.canvas.width, this.canvas.height);
+                this.depthStencilTexture.resize(width, height);
             }
             if (this.renderPassTexture) {
-                this.renderPassTexture.resize(this.canvas.width, this.canvas.height);
+                this.renderPassTexture.resize(width, height);
             }
+        }
+        if (this.renderPassTexture && this.renderPassTexture.mustUseCopyTextureToTexture) {
+            if (!this.renderPassTexture.gpuResource)
+                this.renderPassTexture.createGpuResource();
+            commandEncoder.copyTextureToTexture({ texture: this.renderer.texture }, { texture: this.renderPassTexture.gpuResource }, [width, height]);
         }
         if (this.multisampleTexture)
             this.multisampleTexture.update();
@@ -503,8 +563,7 @@ export class RenderPipeline extends Pipeline {
             this.depthStencilTexture.update();
         if (this.renderPassTexture)
             this.renderPassTexture.update();
-        if (this.onDrawEnd)
-            this.onDrawEnd();
+        this.dispatchEvent(RenderPipeline.ON_DRAW_END);
     }
     get resourceDefined() {
         const bool = !!this.bindGroups.resources.all;

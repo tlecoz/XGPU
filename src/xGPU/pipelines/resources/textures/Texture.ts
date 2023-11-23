@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { EventDispatcher } from "../../../EventDispatcher";
 import { XGPU } from "../../../XGPU";
 
 export type TextureDescriptor = {
@@ -8,9 +9,10 @@ export type TextureDescriptor = {
     format: GPUTextureFormat,
     usage?: GPUTextureUsageFlags,
     sampleCount?: GPUSize32,
+    label?: string,
 }
 
-export class Texture {
+export class Texture extends EventDispatcher {
 
     public descriptor: TextureDescriptor;
     public gpuResource: GPUTexture = null;
@@ -21,10 +23,14 @@ export class Texture {
         format: GPUTextureFormat,
         usage?: GPUTextureUsageFlags,
         sampleCount?: GPUSize32,
+        label?: string
     }) {
+
+        super();
         //console.log(descriptor.format + " ::: " + descriptor.usage)
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.sampleCount && descriptor.format !== "depth32float") descriptor.sampleCount = 1;
+        if (undefined === descriptor.label) descriptor.label = "Texture";
         this.descriptor = descriptor;
 
     }

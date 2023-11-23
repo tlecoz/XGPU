@@ -152,7 +152,7 @@ export class VertexAttribute {
     _data;
     dataOffset;
     mustBeTransfered = false;
-    vertexBuffer;
+    _vertexBuffer;
     constructor(name, dataType, offset) {
         dataType = this.renameVertexDataType(dataType);
         this._name = name;
@@ -168,16 +168,33 @@ export class VertexAttribute {
             this.vertexType = this.getVertexDataType(infos.dataType);
         }
     }
+    waitingVertexBuffer = false;
+    get vertexBuffer() { return this._vertexBuffer; }
+    set vertexBuffer(vb) {
+        this._vertexBuffer = vb;
+        if (this.waitingVertexBuffer) {
+            this.waitingVertexBuffer = true;
+            this.vertexBuffer.attributeChanged = true;
+        }
+    }
     get datas() { return this._data; }
     set datas(n) {
         if (this._data != n) {
             this._data = n;
-            this.vertexBuffer.attributeChanged = true;
+            if (this.vertexBuffer)
+                this.vertexBuffer.attributeChanged = true;
+            else
+                this.waitingVertexBuffer = true;
             this.mustBeTransfered = true;
         }
     }
     get useByVertexData() { return typeof this._data[0] != "number"; }
     get format() { return this._dataType; }
+    get type() {
+        //this function will be used in HighLevelParser. 
+        //It mimic the existing structure using VertexAttribute.Float instead of FloatBuffer
+        return this._dataType;
+    } //---------------------------------------------------
     get bytePerElement() { return this.vertexType.bytes; }
     get varType() { return this.vertexType.varType; }
     get name() { return this._name; }

@@ -17,13 +17,6 @@ export class VertexShaderDebuggerPipeline extends ComputePipeline {
     resourceByType;
     initRenderPipeline(renderPipeline) {
         this.renderPipeline = renderPipeline;
-        if (!renderPipeline.pipeline) {
-            /*
-            if the renderPipeline is not built already, we build it
-            to be sure that all the datas are in their final states
-            */
-            //renderPipeline.buildGpuPipeline();
-        }
         renderPipeline.bindGroups.setupDraw(true);
         this.resourceByType = renderPipeline.bindGroups.resources.types;
         this.vertexShaderInputs = renderPipeline.vertexShader.inputs;

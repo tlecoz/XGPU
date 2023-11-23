@@ -2,6 +2,7 @@ import { GPUType } from "./GPUType";
 import { UniformBuffer } from "./shader/resources/UniformBuffer";
 export type PrimitiveType = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform;
 export declare class PrimitiveFloatUniform extends Float32Array {
+    static ON_CHANGED: string;
     name: string;
     type: GPUType;
     startId: number;
@@ -23,8 +24,13 @@ export declare class PrimitiveFloatUniform extends Float32Array {
     feedbackInstanceId: number;
     setFeedback(vertexId: number, instanceId: number): PrimitiveFloatUniform;
     update(): void;
+    protected eventListeners: any;
+    addEventListener(eventName: string, callback: (dispatcher: PrimitiveFloatUniform, data?: any) => void): void;
+    removeEventListener(eventName: string, callback: (dispatcher: PrimitiveFloatUniform, data?: any) => void): void;
+    dispatchEvent(eventName: string, eventData?: any): void;
 }
 export declare class PrimitiveIntUniform extends Int32Array {
+    static ON_CHANGED: string;
     name: string;
     type: GPUType;
     startId: number;
@@ -45,8 +51,13 @@ export declare class PrimitiveIntUniform extends Int32Array {
     feedbackInstanceId: number;
     setFeedback(vertexId: number, instanceId: number): PrimitiveIntUniform;
     update(): void;
+    protected eventListeners: any;
+    addEventListener(eventName: string, callback: (dispatcher: PrimitiveIntUniform, data?: any) => void): void;
+    removeEventListener(eventName: string, callback: (dispatcher: PrimitiveIntUniform, data?: any) => void): void;
+    dispatchEvent(eventName: string, eventData?: any): void;
 }
 export declare class PrimitiveUintUniform extends Uint32Array {
+    static ON_CHANGED: string;
     name: string;
     type: GPUType;
     startId: number;
@@ -67,6 +78,10 @@ export declare class PrimitiveUintUniform extends Uint32Array {
     feedbackInstanceId: number;
     setFeedback(vertexId: number, instanceId: number): PrimitiveUintUniform;
     update(): void;
+    protected eventListeners: any;
+    addEventListener(eventName: string, callback: (dispatcher: PrimitiveUintUniform, data?: any) => void): void;
+    removeEventListener(eventName: string, callback: (dispatcher: PrimitiveUintUniform, data?: any) => void): void;
+    dispatchEvent(eventName: string, eventData?: any): void;
 }
 export declare class Float extends PrimitiveFloatUniform {
     constructor(x?: number, createLocalVariable?: boolean);

@@ -1,21 +1,25 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { EventDispatcher } from "../../EventDispatcher";
 import { XGPU } from "../../XGPU";
+import { Pipeline } from "../../pipelines/Pipeline";
+import { RenderPassTexture } from "../../pipelines/resources/textures/RenderPassTexture";
 import { IShaderResource } from "./IShaderResource";
 import { ImageTextureIO } from "./ImageTextureIO";
 
 export type ImageTextureDescriptor = {
-    source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture
+    source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture | RenderPassTexture
     size?: GPUExtent3D,
     usage?: GPUTextureUsageFlags,
     format?: GPUTextureFormat,
     defaultViewDescriptor?: GPUTextureViewDescriptor,
-    sampledType?: "f32" | "i32" | "u32"
+    sampledType?: "f32" | "i32" | "u32",
+    label?: string,
 }
 
 
-export class ImageTexture implements IShaderResource {
+export class ImageTexture extends EventDispatcher implements IShaderResource {
 
     public resourceIO: ImageTextureIO;
     public io: number = 0;
@@ -28,36 +32,47 @@ export class ImageTexture implements IShaderResource {
     protected viewDescriptor: GPUTextureViewDescriptor = undefined;
     protected useOutsideTexture: boolean = false;
 
+    protected renderPassTexture: RenderPassTexture;
 
     constructor(descriptor: {
-        source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture
+        source?: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture | RenderPassTexture
         size?: GPUExtent3D,
         usage?: GPUTextureUsageFlags,
         format?: GPUTextureFormat,
         defaultViewDescriptor?: GPUTextureViewDescriptor,
-        sampledType?: "f32" | "i32" | "u32"
+        sampledType?: "f32" | "i32" | "u32",
+        label?: string,
     }) {
 
+        super();
         descriptor = { ...descriptor };
+        this.descriptor = descriptor as any;
 
         //console.warn("imageTExture descriptor = ", descriptor);
         if (undefined === descriptor.sampledType) descriptor.sampledType = "f32";
         if (undefined === descriptor.usage) descriptor.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT;
         if (undefined === descriptor.format) descriptor.format = "rgba8unorm";
+        if (undefined === descriptor.label) descriptor.label = "ImageTexture";
         if (undefined === descriptor.size) {
             if (descriptor.source) {
 
                 descriptor.size = [descriptor.source.width, descriptor.source.height];
 
+
+
                 if (descriptor.source instanceof GPUTexture) {
-                    this.gpuResource = descriptor.source;
-                    descriptor.format = descriptor.source.format;
-                    descriptor.usage = descriptor.source.usage;
-                    //descriptor.usage = GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
-                    //console.log("AAAAAAAAAAAAAAAAAA ", this.gpuResource)
-                    this._view = this.gpuResource.createView();
-                    descriptor.source = undefined;
-                    this.useOutsideTexture = true;
+                    this.initFromTexture(descriptor.source);
+                } else if (descriptor.source instanceof ImageTexture && descriptor.source.isRenderPass) {
+                    //I canoot use instanceof in the constructor of ImageTexture with a class that extends it.
+                    //but I wanted to write 'if (descriptor.source instanceof RenderPassTexture){' 
+
+                    this.renderPassTexture = descriptor.source;
+                    console.log("wait resource changed")
+                    this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
+                        console.log("ON_RESOURCE_CHANGED")
+                        this.initFromTexture(this.renderPassTexture.texture)
+                    });
+                    this.initFromTexture(descriptor.source.texture)
                 }
 
             }
@@ -68,10 +83,19 @@ export class ImageTexture implements IShaderResource {
 
         if (descriptor.source) this.mustBeTransfered = true;
 
-        this.descriptor = descriptor as any;
+
         //this.createGpuResource()
     }
 
+
+    private initFromTexture(tex: GPUTexture) {
+        this.gpuResource = tex;
+        this.descriptor.format = tex.format;
+        this.descriptor.usage = tex.usage;
+        this._view = this.gpuResource.createView();
+        this.descriptor.source = undefined;
+        this.useOutsideTexture = true;
+    }
 
 
     public clone(): ImageTexture {
@@ -80,6 +104,8 @@ export class ImageTexture implements IShaderResource {
 
     public get sampledType(): "f32" | "i32" | "u32" { return this.descriptor.sampledType }
     public set sampledType(type: "f32" | "i32" | "u32") { this.descriptor.sampledType = type; }
+    public get isRenderPass(): boolean { return false; }
+
 
     protected gpuTextureIOs: GPUTexture[];
     protected gpuTextureIO_index: number = 1;
@@ -126,15 +152,30 @@ export class ImageTexture implements IShaderResource {
 
 
 
-    public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture { return this.descriptor.source }
-    public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture) {
-        this.useOutsideTexture = bmp instanceof GPUTexture;
+    public get source(): ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture | RenderPassTexture { return this.descriptor.source }
+    public set source(bmp: ImageBitmap | HTMLCanvasElement | HTMLVideoElement | OffscreenCanvas | GPUTexture | RenderPassTexture) {
+        this.useOutsideTexture = bmp instanceof GPUTexture || (bmp instanceof ImageTexture && bmp.isRenderPass);
 
         //console.warn("SOURCE ==============================================   source = ", bmp)
 
         if (this.useOutsideTexture) {
-            this.gpuResource = bmp as GPUTexture;
-            this._view = (bmp as GPUTexture).createView();
+            if (bmp instanceof GPUTexture) {
+                this.gpuResource = bmp as GPUTexture;
+                this._view = this.gpuResource.createView();
+            } else {
+                this.renderPassTexture = bmp as any;
+                this.renderPassTexture.clearEvents("RESOURCE_CHANGED");
+                this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
+                    console.log("ON_RESOURCE_CHANGED")
+                    this.initFromTexture(this.renderPassTexture.texture)
+                });
+
+
+
+                this.gpuResource = (bmp as ImageTexture).texture;
+                this._view = this.gpuResource.createView();
+            }
+
 
         } else this.mustBeTransfered = true;
         this.descriptor.source = bmp;
@@ -142,10 +183,15 @@ export class ImageTexture implements IShaderResource {
 
     }
 
-    public update(): void {
+    public update(pipeline: Pipeline): void {
+
+
+
+        if (this.renderPassTexture && !this.renderPassTexture.mustUseCopyTextureToTexture) this.renderPassTexture.applyRenderPass(pipeline);
         if (this.useOutsideTexture) return;
 
         if (!this.gpuResource) this.createGpuResource()
+
 
 
         if (this.descriptor.source) {

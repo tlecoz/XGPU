@@ -3,6 +3,7 @@
 
 
 import { HighLevelParser } from "../HighLevelParser";
+import { Pipeline } from "../pipelines/Pipeline";
 import { IndexBuffer } from "../pipelines/resources/IndexBuffer";
 import { XGPU } from "../XGPU";
 import { Bindgroups } from "./Bindgroups";
@@ -399,7 +400,7 @@ export class Bindgroup {
         }
 
         if (renderPass instanceof GPUComputePassEncoder) {
-            this.update();
+            this.update(this.parent.pipeline);
 
             renderPass.setBindGroup(this.bindgroupId, this.group);
             return;
@@ -413,7 +414,7 @@ export class Bindgroup {
         for (let i = 0; i < instances.length; i++) {
 
             instances[i].update();
-            this.update();
+            this.update(this.parent.pipeline);
 
             renderPass.setBindGroup(this.bindgroupId, instances[i].group);
 
@@ -506,7 +507,7 @@ export class Bindgroup {
             for (let i = 0; i < this.elements.length; i++) {
 
                 if (this.elements[i].resource.mustBeTransfered) {
-                    this.elements[i].resource.update();
+                    this.elements[i].resource.update(this.parent.pipeline);
                     bool = true;
                     break;
                 }
@@ -817,9 +818,9 @@ export class Bindgroup {
         return this._group;
     }
 
-    public update(): void {
+    public update(pipeline: Pipeline): void {
         for (let i = 0; i < this.elements.length; i++) {
-            this.elements[i].resource.update();
+            this.elements[i].resource.update(pipeline);
         }
     }
 

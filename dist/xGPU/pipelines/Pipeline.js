@@ -6,7 +6,8 @@ import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
 import { ShaderStruct } from "../shader/shaderParts/ShaderStruct";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../PrimitiveType";
-export class Pipeline {
+import { EventDispatcher } from "../EventDispatcher";
+export class Pipeline extends EventDispatcher {
     description = {};
     nbVertex;
     bindGroups;
@@ -19,6 +20,7 @@ export class Pipeline {
     gpuPipelineLayout;
     type = null;
     constructor() {
+        super();
         this.bindGroups = new Bindgroups(this, "pipeline");
     }
     get isComputePipeline() { return this.type === "compute" || this.type === "compute_mixed"; }

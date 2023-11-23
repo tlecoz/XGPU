@@ -9,12 +9,14 @@ import { IRenderer } from "./IRenderer"
 export class TextureRenderer implements IRenderer {
 
     protected textureObj: Texture
-    protected dimension: { width: number, height: number, dimensionChanged: boolean };
-    protected renderPipelines: RenderPipeline[] = [];
+    protected dimensionChanged: boolean = false;
+    protected currentWidth: number;
+    protected currentHeight: number;
+
+    public renderPipelines: RenderPipeline[] = [];
 
     protected useTextureInComputeShader;
-
-    public onDrawEnd: () => void;
+    public frameId: number = -1;
 
 
     constructor(useTextureInComputeShader: boolean = false) {
@@ -25,7 +27,8 @@ export class TextureRenderer implements IRenderer {
 
     public init(w: number, h: number, usage?: number, sampleCount?: number) {
 
-        this.dimension = { width: w, height: h, dimensionChanged: true };
+        this.currentWidth = w;
+        this.currentHeight = h;
 
         return new Promise((onResolve: (val: any) => void) => {
 
@@ -59,7 +62,7 @@ export class TextureRenderer implements IRenderer {
 
     }
 
-    public get firstPipeline(): RenderPipeline { return this.renderPipelines[0]; }
+    //public get firstPipeline(): RenderPipeline { return this.renderPipelines[0]; }
 
     protected nbColorAttachment: number = 0;
 
@@ -85,13 +88,13 @@ export class TextureRenderer implements IRenderer {
     }
 
 
-    public get nbPipeline(): number { return this.renderPipelines.length }
-    public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
+    //public get nbPipeline(): number { return this.renderPipelines.length }
+    //public get useSinglePipeline(): boolean { return this.nbColorAttachment === 1 }
 
     public resize(w: number, h: number) {
-        this.dimension.width = w;
-        this.dimension.height = h;
-        this.dimension.dimensionChanged = true;
+        this.currentWidth = w;
+        this.currentHeight = h;
+        this.dimensionChanged = true;
         if (this.textureObj) this.textureObj.resize(w, h);
     }
 
@@ -105,6 +108,7 @@ export class TextureRenderer implements IRenderer {
         }
     }
 
+    public commandEncoder: GPUCommandEncoder = null;
 
 
     public async update() {
@@ -124,7 +128,7 @@ export class TextureRenderer implements IRenderer {
             }
         }
 
-        const commandEncoder = XGPU.device.createCommandEncoder();
+        this.commandEncoder = XGPU.device.createCommandEncoder();
 
 
         let pipeline: RenderPipeline, renderPass;
@@ -134,28 +138,29 @@ export class TextureRenderer implements IRenderer {
 
             for (let j = 0; j < pipeline.pipelineCount; j++) {
 
-                renderPass = pipeline.beginRenderPass(commandEncoder, this.view, j);
+                renderPass = pipeline.beginRenderPass(this.commandEncoder, this.view, j);
                 pipeline.dispatchEvent(RenderPipeline.ON_DRAW, j);
                 //if (pipeline.onDraw) pipeline.onDraw(j);
                 pipeline.draw(renderPass);
-                pipeline.end(commandEncoder, renderPass);
+                pipeline.end(this.commandEncoder, renderPass);
             }
         }
 
-        const commandBuffer = commandEncoder.finish();
+        const commandBuffer = this.commandEncoder.finish();
+        this.commandEncoder = null;
 
         XGPU.device.queue.submit([commandBuffer]);
 
-        this.canvas.dimensionChanged = false;
+        this.dimensionChanged = false;
 
 
-        if (this.onDrawEnd) this.onDrawEnd();
+
     }
 
-    public get dimensionChanged(): boolean { return this.dimension.dimensionChanged; }
-    public get canvas(): { width: number, height: number, dimensionChanged: boolean } { return this.dimension; }
-    public get width(): number { return this.dimension.width }
-    public get height(): number { return this.dimension.height }
+    public get resized(): boolean { return this.dimensionChanged; }
+    public get canvas(): HTMLCanvasElement { return null; }
+    public get width(): number { return this.currentWidth }
+    public get height(): number { return this.currentHeight }
 
     public get texture(): GPUTexture {
         if (!this.textureObj) throw new Error("TextureRenderer is not initialized yet. You must Use TextureRenderer.init in order to initialize it")
@@ -165,6 +170,8 @@ export class TextureRenderer implements IRenderer {
         if (!this.textureObj) throw new Error("TextureRenderer is not initialized yet. You must Use TextureRenderer.init in order to initialize it")
         return this.textureObj.view;
     }
+
+
 
 
 
