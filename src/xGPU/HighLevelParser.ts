@@ -352,8 +352,21 @@ export class HighLevelParser {
 
 
             } else {
-                const attribute = (bindgroup.buffer as VertexBuffer).createArray(name, o.type, o.offset);
+
+
+                console.log("O = ", o)
+
+                let offset = o.offset;
+                if (o instanceof VertexAttribute) {
+                    offset = o.dataOffset;
+                    (bindgroup.buffer as VertexBuffer).attributes[o.name] = o;
+                }
+
+                const attribute = (bindgroup.buffer as VertexBuffer).createArray(name, o.type, offset);
                 if (o.datas) attribute.datas = o.datas;
+
+
+
             }
 
             //console.log("addVertexAttribute ", name, "buffer = ", bindgroup)

@@ -64,6 +64,10 @@ export class RenderPassTexture extends ImageTexture {
                 }
             }
         }
+        if (pipeline instanceof RenderPipeline && pipeline.renderer) {
+            this.renderPipeline.renderer = pipeline.renderer;
+            //console.log("this.renderPipeline.renderer.frameId = ", pipeline.renderer.frameId)
+        }
         if (this.frameId != this.renderPipeline.renderer.frameId) { //avoid potential useless renderPass
             const commandEncoder = this.renderPipeline.renderer.commandEncoder;
             if (commandEncoder) {

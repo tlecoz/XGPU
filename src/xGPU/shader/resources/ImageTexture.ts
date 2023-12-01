@@ -67,9 +67,9 @@ export class ImageTexture extends EventDispatcher implements IShaderResource {
                     //but I wanted to write 'if (descriptor.source instanceof RenderPassTexture){' 
 
                     this.renderPassTexture = descriptor.source;
-                    console.log("wait resource changed")
+                    //console.log("wait resource changed")
                     this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
-                        console.log("ON_RESOURCE_CHANGED")
+                        //console.log("ON_RESOURCE_CHANGED")
                         this.initFromTexture(this.renderPassTexture.texture)
                     });
                     this.initFromTexture(descriptor.source.texture)
@@ -166,7 +166,7 @@ export class ImageTexture extends EventDispatcher implements IShaderResource {
                 this.renderPassTexture = bmp as any;
                 this.renderPassTexture.clearEvents("RESOURCE_CHANGED");
                 this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
-                    console.log("ON_RESOURCE_CHANGED")
+                    //console.log("ON_RESOURCE_CHANGED")
                     this.initFromTexture(this.renderPassTexture.texture)
                 });
 

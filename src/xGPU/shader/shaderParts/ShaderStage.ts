@@ -123,24 +123,11 @@ export class ShaderStage {
                 varName,
                 otherName
             })
-            //console.log(varName + " => " + otherName);
         }
 
-        /*
-        let chatGPTrequest = "";
-        chatGPTrequest += "\n=========== unwrapVariableInMainFunction ============\n";
-        for (let i = 0; i < objs.length; i++) chatGPTrequest += "searchWord:" + objs[i].varName + " , replacement:" + objs[i].otherName + "\n";
-        chatGPTrequest += "-------\n";
-        chatGPTrequest += "originalCode : \n";
-        chatGPTrequest += this.main.value;
-        */
-        const searchAndReplace = (shaderCode: string, wordToReplace: string, replacement: string) => {
-            //const regex = new RegExp(`\\b${wordToReplace}\\b`, 'g');
-            //const regex = new RegExp(`[^.]\\b${wordToReplace}\\b`, 'g');
-            //const regex = new RegExp(`[^\\w.]\\b${wordToReplace}\\b`, 'g');
-            //const regex = new RegExp(`(?<=[^\\w])\\b${wordToReplace}\\b`, 'g');
-            const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, 'g');
 
+        const searchAndReplace = (shaderCode: string, wordToReplace: string, replacement: string) => {
+            const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, 'g');
             return shaderCode.replace(regex, replacement);
         }
 
@@ -150,13 +137,39 @@ export class ShaderStage {
             shader = searchAndReplace(shader, objs[i].varName, objs[i].otherName);
         }
 
-        /*
-        chatGPTrequest += "rebuilt shader :\n"
-        chatGPTrequest += shader + "\n";
-        //console.log("chatGPTRequest = ", chatGPTrequest);
-        */
         return shader;
     }
+
+    protected unwrapVariableInWGSL(shaderVariables: string, wgsl: string) {
+        const variables: string[] = shaderVariables.split("\n");
+        let s: string;
+        let objs = [];
+        for (let i = 0; i < variables.length; i++) {
+            variables[i] = s = variables[i].split("\t").join("").trim().slice(4);
+            if (!s.length) continue;
+            let t = s.split(" = ");
+            let varName = t[0].split(":")[0];
+            let otherName = t[1].slice(0, t[1].length - 1);
+            objs.push({
+                varName,
+                otherName
+            })
+        }
+
+
+        const searchAndReplace = (shaderCode: string, wordToReplace: string, replacement: string) => {
+            const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, 'g');
+            return shaderCode.replace(regex, replacement);
+        }
+
+
+        for (let i = 0; i < objs.length; i++) {
+            wgsl = searchAndReplace(wgsl, objs[i].varName, objs[i].otherName);
+        }
+
+        return wgsl;
+    }
+
 
 
 

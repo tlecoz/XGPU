@@ -40,7 +40,7 @@ export class UniformGroupArray {
         return group;
     }
 
-    public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true } }
+    public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true/*, primitive: this.groups[0].primitiveType, useMixedType: this.groups[0].useMixedTypes*/ } }
 
     protected getStructName(name: string) {
         if (!name) return null;

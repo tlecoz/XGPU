@@ -35,9 +35,9 @@ export class ImageTexture extends EventDispatcher {
                     //I canoot use instanceof in the constructor of ImageTexture with a class that extends it.
                     //but I wanted to write 'if (descriptor.source instanceof RenderPassTexture){' 
                     this.renderPassTexture = descriptor.source;
-                    console.log("wait resource changed");
+                    //console.log("wait resource changed")
                     this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
-                        console.log("ON_RESOURCE_CHANGED");
+                        //console.log("ON_RESOURCE_CHANGED")
                         this.initFromTexture(this.renderPassTexture.texture);
                     });
                     this.initFromTexture(descriptor.source.texture);
@@ -111,7 +111,7 @@ export class ImageTexture extends EventDispatcher {
                 this.renderPassTexture = bmp;
                 this.renderPassTexture.clearEvents("RESOURCE_CHANGED");
                 this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
-                    console.log("ON_RESOURCE_CHANGED");
+                    //console.log("ON_RESOURCE_CHANGED")
                     this.initFromTexture(this.renderPassTexture.texture);
                 });
                 this.gpuResource = bmp.texture;

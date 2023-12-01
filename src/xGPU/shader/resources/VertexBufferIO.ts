@@ -156,11 +156,29 @@ export class VertexBufferIO {
             this.buffers[0].stackAttributes();
         }
 
+
+
+
         const attributes = this.buffers[0].attributes;
         const arrayStride = this.buffers[0].arrayStride;
-        const datas = new Float32Array(arrayStride * nbInstance);
 
-        //console.log("==> ", arrayStride)
+
+        let type: any;
+        for (let z in attributes) {
+            type = attributes[z].format;
+            break;
+        }
+
+        let datas;
+
+
+        //console.log("createVertexInstances type = ", type)
+
+        if (type === "float32" || type === "float32x2" || type === "float32x3" || type === "float32x4") datas = new Float32Array(arrayStride * nbInstance);
+        else if (type == "sint32" || type == "sint32x2" || type == "sint32x3" || type == "sint32x4") datas = new Int32Array(arrayStride * nbInstance);
+        else if (type == "uint32" || type == "uint32x2" || type == "uint32x3" || type == "uint32x4") datas = new Uint32Array(arrayStride * nbInstance);
+
+
 
         let o: any;
         let start;
@@ -236,6 +254,7 @@ export class VertexBufferIO {
     public set datas(v: Float32Array) {
         this.buffers[0].datas = v;
         this.buffers[1].datas = v;
+
     }
 
     protected attributeDesc: any;

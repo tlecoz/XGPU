@@ -1,9 +1,11 @@
 
-au moment d'updater une renderPipeline : 
- - si elle utilise une ImageTexture dont la source est une renderPassTexture
-   |=> 
+verifier que tout les attributes d'un vertexBuffer ont le meme type, sinon créé d'autre vb
+
+ne pas rassembler les données des uniformGroup dans un unique Float32Array pour préserver les types de données 
+|-> faire tout pareil sauf la mise a jour des dates, primitiveType par primitiveType plutot que uniformGroup par uniformGroup 
 
 
+gerer les pipelineType "render-mixed" (si la renderPipeline contient une resource IO ) ; gerer le type "vertexDebug" pour gérer le debug avec les renderPipeline qui exploitent un vertexBufferIO 
 
 
 

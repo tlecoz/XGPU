@@ -123,6 +123,8 @@ export class VertexAttribute {
         return { type: "uint32x4", offset, datas }
     }
 
+
+
     public static get types(): any {
         return {
             "uint8x2": { nbComponent: 2, bytes: 2, varType: "vec2<u32>" },

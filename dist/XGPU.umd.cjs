@@ -1456,9 +1456,7 @@ var __publicField = (obj, key, value) => {
             this.initFromTexture(descriptor.source);
           } else if (descriptor.source instanceof ImageTexture && descriptor.source.isRenderPass) {
             this.renderPassTexture = descriptor.source;
-            console.log("wait resource changed");
             this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
-              console.log("ON_RESOURCE_CHANGED");
               this.initFromTexture(this.renderPassTexture.texture);
             });
             this.initFromTexture(descriptor.source.texture);
@@ -1531,7 +1529,6 @@ var __publicField = (obj, key, value) => {
           this.renderPassTexture = bmp;
           this.renderPassTexture.clearEvents("RESOURCE_CHANGED");
           this.renderPassTexture.addEventListener("RESOURCE_CHANGED", () => {
-            console.log("ON_RESOURCE_CHANGED");
             this.initFromTexture(this.renderPassTexture.texture);
           });
           this.gpuResource = bmp.texture;
@@ -6717,6 +6714,9 @@ var __publicField = (obj, key, value) => {
           }
         }
       }
+      if (pipeline instanceof RenderPipeline && pipeline.renderer) {
+        this.renderPipeline.renderer = pipeline.renderer;
+      }
       if (this.frameId != this.renderPipeline.renderer.frameId) {
         const commandEncoder = this.renderPipeline.renderer.commandEncoder;
         if (commandEncoder) {
@@ -7682,7 +7682,6 @@ var __publicField = (obj, key, value) => {
             this.setupDepthStencilView(this.depthStencilTextureDescriptor);
             this.waitingDepthStencilTexture = false;
           }
-          console.log("dispatch");
           this.dispatchEvent(_RenderPipeline.ON_ADDED_TO_RENDERER);
         } else {
           this.dispatchEvent(_RenderPipeline.ON_REMOVED_FROM_RENDERER);
@@ -8061,7 +8060,9 @@ var __publicField = (obj, key, value) => {
       if (usingRenderPassTexture) {
         this.renderPassDescriptor.colorAttachments[0].loadOp = "clear";
       } else {
-        this._clearValue = this.renderPassDescriptor.colorAttachments[0].clearValue;
+        if (this.renderPassDescriptor.colorAttachments[0]) {
+          this._clearValue = this.renderPassDescriptor.colorAttachments[0].clearValue;
+        }
         let rendererUseSinglePipeline = this.renderer.renderPipelines.length == 1 && this.pipelineCount === 1;
         if (this.rendererUseSinglePipeline !== rendererUseSinglePipeline) {
           this.clearOpReady = false;

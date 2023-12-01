@@ -123,9 +123,9 @@ export class UniformBuffer implements IShaderResource {
     //------------------------------
 
 
+    protected _bufferType: "read-only-storage" | "uniform";
     public get bufferType(): "read-only-storage" | "uniform" {
-        if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536) return "uniform";
-        return "read-only-storage";
+        return this._bufferType;
     }
 
     public createGpuResource(): any {
@@ -141,7 +141,7 @@ export class UniformBuffer implements IShaderResource {
 
             if (this.bufferType === "read-only-storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 
-            //console.log("uniformBuffer createGpuResource size = ", size, this.group.arrayStride);
+            console.log("uniformBuffer createGpuResource size = ", size, this.group.arrayStride);
             this.gpuResource = XGPU.device.createBuffer({
 
                 size,
@@ -225,14 +225,38 @@ export class UniformBuffer implements IShaderResource {
 
     //public get bufferType(): string { return "uniform"; }
 
+
+
+    protected _usage: number;
+
     protected debug: string;
     protected shaderVisibility: GPUShaderStageFlags;
+    protected pipelineType: "compute" | "render" | "compute_mixed";
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
-        ///console.warn("setPipelineType ", pipelineType)
-        //use to handle particular cases in descriptor relative to the nature of pipeline
-        if (pipelineType === "compute" || pipelineType === "compute_mixed") this.descriptor.visibility = GPUShaderStage.COMPUTE;
-        else {
 
+        /*
+        if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536 && this.pipelineType == "render") return "uniform";
+        return "read-only-storage";
+        */
+
+        let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+
+        if (this.bufferType === "read-only-storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+
+
+        this.pipelineType = pipelineType;
+
+
+
+
+        console.warn("setPipelineType ", pipelineType)
+        //use to handle particular cases in descriptor relative to the nature of pipeline
+        if (pipelineType === "compute" || pipelineType === "compute_mixed") {
+            this._bufferType = "read-only-storage";
+            this.descriptor.visibility = GPUShaderStage.COMPUTE;
+        } else {
+            if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536) this._bufferType = "uniform";
+            else this._bufferType = "uniform";
             this.descriptor.visibility = this.shaderVisibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
         }
     }

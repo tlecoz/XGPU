@@ -123,7 +123,7 @@ export class RenderPipeline extends Pipeline {
                     this.setupDepthStencilView(this.depthStencilTextureDescriptor);
                     this.waitingDepthStencilTexture = false;
                 }
-                console.log("dispatch")
+                //console.log("dispatch")
                 this.dispatchEvent(RenderPipeline.ON_ADDED_TO_RENDERER);
 
             } else {
@@ -725,7 +725,10 @@ export class RenderPipeline extends Pipeline {
             this.renderPassDescriptor.colorAttachments[0].loadOp = "clear"
 
         } else {
-            this._clearValue = this.renderPassDescriptor.colorAttachments[0].clearValue;
+            if (this.renderPassDescriptor.colorAttachments[0]) {
+                this._clearValue = this.renderPassDescriptor.colorAttachments[0].clearValue
+            }
+
 
             //console.log("not usingRenderPassTexture")
 

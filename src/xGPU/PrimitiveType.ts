@@ -103,14 +103,14 @@ export class PrimitiveFloatUniform extends Float32Array {
         return res;
     }
 
-
+    /*
     public feedbackVertexId: number = 0;
     public feedbackInstanceId: number = 0;
     public setFeedback(vertexId: number, instanceId: number): PrimitiveFloatUniform {
         this.feedbackVertexId = vertexId;
         this.feedbackInstanceId = instanceId;
         return this;
-    }
+    }*/
 
 
     public update() { }
@@ -211,13 +211,14 @@ export class PrimitiveIntUniform extends Int32Array {
         return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n"
     }
 
+    /*
     public feedbackVertexId: number = 0;
     public feedbackInstanceId: number = 0;
     public setFeedback(vertexId: number, instanceId: number): PrimitiveIntUniform {
         this.feedbackVertexId = vertexId;
         this.feedbackInstanceId = instanceId;
         return this;
-    }
+    }*/
 
     public update() { }
 
@@ -316,7 +317,7 @@ export class PrimitiveUintUniform extends Uint32Array {
 
         return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
     }
-
+    /*
     public feedbackVertexId: number = 0;
     public feedbackInstanceId: number = 0;
     public setFeedback(vertexId: number, instanceId: number): PrimitiveUintUniform {
@@ -324,7 +325,7 @@ export class PrimitiveUintUniform extends Uint32Array {
         this.feedbackInstanceId = instanceId;
         return this;
     }
-
+    */
 
     public update() { }
 

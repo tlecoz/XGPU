@@ -93,6 +93,11 @@ export class RenderPassTexture extends ImageTexture {
         }
 
 
+        if (pipeline instanceof RenderPipeline && pipeline.renderer) {
+            this.renderPipeline.renderer = pipeline.renderer
+            //console.log("this.renderPipeline.renderer.frameId = ", pipeline.renderer.frameId)
+
+        }
 
 
 
@@ -105,6 +110,7 @@ export class RenderPassTexture extends ImageTexture {
                     this.renderPipeline.buildGpuPipeline();
                 }
                 this.renderPipeline.update();
+
                 const renderPass: GPURenderPassEncoder = this.renderPipeline.beginRenderPass(commandEncoder, this.view, 0, true);
                 for (let j = 0; j < this.renderPipeline.pipelineCount; j++) {
                     this.renderPipeline.dispatchEvent(RenderPipeline.ON_DRAW, j);

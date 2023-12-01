@@ -245,7 +245,7 @@ export class UniformGroup {
 
 
 
-                    //console.log("item.byteLength = ", item.byteLength)
+
                     XGPU.device.queue.writeBuffer(
                         gpuResource,
                         item.startId * Float32Array.BYTES_PER_ELEMENT,
@@ -529,7 +529,7 @@ export class UniformGroup {
         this.arrayStride = offset;
 
         this.datas = new Float32Array(offset);
-        //console.log("arrayStride = ", this.arrayStride, result.length)
+        console.log("arrayStride = ", this.arrayStride, result.length)
 
         let o: any;
         for (let i = 0; i < result.length; i++) {
