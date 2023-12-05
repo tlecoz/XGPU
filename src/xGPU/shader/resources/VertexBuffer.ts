@@ -169,7 +169,7 @@ export class VertexBuffer implements IShaderResource {
 
         let v: VertexAttribute = this.attributes[name];
 
-        console.warn("createArray ", name, dataType, offset, this.attributes[name]);
+        //console.warn("createArray ", name, dataType, offset, this.attributes[name]);
 
         if (!v) v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
         v.vertexBuffer = this;
@@ -178,7 +178,7 @@ export class VertexBuffer implements IShaderResource {
         const _offset = v.dataOffset === undefined ? 0 : v.dataOffset;
         this._nbComponent += nbCompo;
 
-        console.log("v.dataOffset = ", name, v.dataOffset)
+        //console.log("v.dataOffset = ", name, v.dataOffset)
 
         if (v.dataOffset === undefined) this._byteCount += nbCompo * new GPUType(v.varType).byteValue;
         else this._byteCount = Math.max(this._byteCount, (_offset + v.nbComponent) * new GPUType(v.varType).byteValue);
@@ -461,7 +461,7 @@ export class VertexBuffer implements IShaderResource {
 
             componentId += this.vertexArrays[i].nbComponent;
         }
-        console.log("vb layout = ", obj)
+        //console.log("vb layout = ", obj)
         obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
         this.layout = obj;
         return obj;

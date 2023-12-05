@@ -26,6 +26,9 @@ export class PrimitiveFloatUniform extends Float32Array {
 
 
     public onChange: () => void;
+
+
+
     protected _mustBeTransfered: boolean = true;
     public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
     public set mustBeTransfered(b: boolean) {

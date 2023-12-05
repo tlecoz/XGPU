@@ -40,7 +40,19 @@ export class UniformGroupArray {
         return group;
     }
 
-    public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true/*, primitive: this.groups[0].primitiveType, useMixedType: this.groups[0].useMixedTypes*/ } }
+    public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true } }
+
+    public copyIntoDataView(dataView: DataView, offset: number) {
+
+        let group: UniformGroup;
+        for (let i = 0; i < this.groups.length; i++) {
+            group = this.groups[i];
+            group.copyIntoDataView(dataView, offset);
+            offset += group.arrayStride;
+        }
+
+    }
+
 
     protected getStructName(name: string) {
         if (!name) return null;

@@ -141,7 +141,7 @@ export class UniformBuffer implements IShaderResource {
 
             if (this.bufferType === "read-only-storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 
-            console.log("uniformBuffer createGpuResource size = ", size, this.group.arrayStride);
+            //console.log("uniformBuffer createGpuResource size = ", size, this.group.arrayStride);
             this.gpuResource = XGPU.device.createBuffer({
 
                 size,
@@ -249,7 +249,7 @@ export class UniformBuffer implements IShaderResource {
 
 
 
-        console.warn("setPipelineType ", pipelineType)
+        //console.warn("setPipelineType ", pipelineType)
         //use to handle particular cases in descriptor relative to the nature of pipeline
         if (pipelineType === "compute" || pipelineType === "compute_mixed") {
             this._bufferType = "read-only-storage";

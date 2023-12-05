@@ -5,6 +5,7 @@ import { XGPU } from "../../XGPU";
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
+import { GPUType } from "../../GPUType";
 
 export type Uniformable = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform | UniformGroup | UniformGroupArray;
 
@@ -27,12 +28,17 @@ export class UniformGroup {
                                        for every properties while being sure we don't have two sames structs*/
 
 
-    public datas: Float32Array;
+    public datas: ArrayBuffer;
+    public dataView: DataView;
 
-    public set(datas: Float32Array) { //to follow the structure of an ArrayBuffer like other uniforms
+    public set(datas: ArrayBuffer) { //to follow the structure of an ArrayBuffer like other uniforms
         this.datas = datas;
+        this.dataView = new DataView(datas, 0, datas.byteLength);
         this.mustBeTransfered = true;
     }
+
+
+
 
     protected buffer: UniformBuffer = null;
     public get uniformBuffer(): UniformBuffer { return this.buffer };
@@ -177,7 +183,6 @@ export class UniformGroup {
     }
 
 
-    public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: false } }
 
     protected getStructName(name: string) {
         if (!name) return null;
@@ -211,14 +216,62 @@ export class UniformGroup {
 
 
 
+
+
+    public get type(): any {
+        return {
+            nbComponent: this.arrayStride,
+            isUniformGroup: true,
+            isArray: false
+        }
+    }
+
+    public setDatas(item: PrimitiveType, dataView: DataView = null, offset: number = 0) {
+
+        if (!dataView) dataView = this.dataView;
+        const startId = item.startId + offset;
+        const type: GPUType = item.type;
+        const primitive: "f32" | "i32" | "u32" | "f16" = type.primitive;
+
+        switch (primitive) {
+            case "f32":
+                for (let i = 0; i < type.nbValues; i++) dataView.setFloat32((startId + i) * 4, item[i], true);
+                break;
+            case "i32":
+                for (let i = 0; i < type.nbValues; i++) dataView.setInt32((startId + i) * 4, item[i], true);
+                break;
+            case "u32":
+                for (let i = 0; i < type.nbValues; i++) dataView.setUint32((startId + i) * 4, item[i], true);
+                break;
+        }
+
+    }
+
+    public copyIntoDataView(dataView: DataView, offset: number) {
+
+        let item: Uniformable;
+        for (let i = 0; i < this.items.length; i++) {
+            item = this.items[i];
+
+            if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+                (item as UniformGroup).copyIntoDataView(dataView, offset + item.startId);
+            } else {
+                this.setDatas(item, dataView, offset)
+            }
+
+        }
+    }
+
+
+
     public async update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
 
         if (fromUniformBuffer === false) {
-
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             XGPU.device.queue.writeBuffer(
                 gpuResource,
                 this.startId,
-                this.datas.buffer,
+                this.datas,
                 0,
                 this.arrayStride * Float32Array.BYTES_PER_ELEMENT
             )
@@ -241,9 +294,8 @@ export class UniformGroup {
 
                     //console.log(item);
                     //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer.byteLength, item.buffer, item.byteOffset)
-                    this.datas.set(item, item.startId);
-
-
+                    //this.datas.set(item, item.startId);
+                    this.setDatas(item)
 
 
                     XGPU.device.queue.writeBuffer(
@@ -259,6 +311,7 @@ export class UniformGroup {
                 //console.log("uniformGroup.update time = ", (new Date().getTime() - time))
             }
         }
+
 
     }
 
@@ -379,6 +432,8 @@ export class UniformGroup {
     }
 
 
+
+
     public stackItems(items: any): Uniformable[] {
 
         //console.warn("stackItems")
@@ -396,12 +451,20 @@ export class UniformGroup {
         let v: any, type: any, nbComponent;
         let offset = 0;
 
+
+
+
         for (let z in items) {
 
 
             v = items[z];
             v.name = z;
             type = v.type;
+
+
+
+
+
 
 
             if (v instanceof UniformGroupArray) {
@@ -528,6 +591,16 @@ export class UniformGroup {
 
         this.arrayStride = offset;
 
+
+
+        this.datas = new ArrayBuffer(offset * 4);
+        this.dataView = new DataView(this.datas, 0, this.datas.byteLength);
+        this.items = result;
+        this.copyIntoDataView(this.dataView, 0);
+
+
+
+        /*
         this.datas = new Float32Array(offset);
         console.log("arrayStride = ", this.arrayStride, result.length)
 
@@ -547,11 +620,43 @@ export class UniformGroup {
             } else {
                 this.datas.set(o, o.startId)
             }
-        }
+        }*/
 
         //console.timeEnd("STACK ITEMS")
         return result
 
     }
 
+    /*
+    protected createTypedArrayBuffer(result: any) {
+
+        let datas: Float32Array | Int32Array | Uint32Array;
+        if (this.primitiveType === "f32") datas = new Float32Array(this.arrayStride);
+        else if (this.primitiveType === "i32") datas = new Int32Array(this.arrayStride);
+        else if (this.primitiveType === "u32") datas = new Uint32Array(this.arrayStride);
+
+        //console.log("uniform type = ", this._primitiveType)
+
+        let o: any;
+        for (let i = 0; i < result.length; i++) {
+            o = result[i];
+            if (o instanceof UniformGroup || o instanceof UniformGroupArray) {
+                if (o instanceof UniformGroup) {
+                    datas.set(o.datas as Float32Array | Int32Array | Uint32Array, o.startId);
+                } else {
+                    let start = o.startId;
+                    for (let j = 0; j < o.length; j++) {
+                        datas.set(o.groups[j].datas as Float32Array | Int32Array | Uint32Array, start);
+                        start += o.groups[j].arrayStride;
+                    }
+                }
+            } else {
+                datas.set(o, o.startId)
+            }
+        }
+
+        this.datas = datas;
+
+    }
+    */
 }
