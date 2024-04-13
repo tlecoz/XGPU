@@ -1,6 +1,6 @@
 # What is XGPU?
 
-XGPU provides a higher-level way to use WebGPU. It is purpose-agnostic: it can be perfectly suitable as the foundation of a rendering engine based on WebGPU, but it can also be used to process numeric data or textures in a compute shader.
+XGPU provides a higher-level way to use WebGPU, making it easier to prototype shaders and create demos quickly and efficiently. It is purpose-agnostic: it can be used to process numeric data or textures in a compute shader, or to create 3D scenes and visualizations.
 
 At its higher level, XGPU could be described as a library because it provides basic classes that allow you to build whatever you want, with the logic and variable names you desire. The higher-level code is minimal and straightforward, resembling Canvas2D code (much shorter than raw WebGPU).
 
