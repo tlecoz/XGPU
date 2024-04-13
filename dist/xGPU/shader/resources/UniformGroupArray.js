@@ -32,6 +32,14 @@ export class UniformGroupArray {
         return group;
     }
     get type() { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true }; }
+    copyIntoDataView(dataView, offset) {
+        let group;
+        for (let i = 0; i < this.groups.length; i++) {
+            group = this.groups[i];
+            group.copyIntoDataView(dataView, offset);
+            offset += group.arrayStride;
+        }
+    }
     getStructName(name) {
         if (!name)
             return null;

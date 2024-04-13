@@ -67,10 +67,9 @@ export class UniformBuffer {
     getUniformById(id) { return this.group.items[id]; }
     getUniformByName(name) { return this.group.getElementByName(name); }
     //------------------------------
+    _bufferType;
     get bufferType() {
-        if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536)
-            return "uniform";
-        return "read-only-storage";
+        return this._bufferType;
     }
     createGpuResource() {
         if (!this.gpuResource) {
@@ -143,14 +142,32 @@ export class UniformBuffer {
     get nbComponent() { return this.group.arrayStride; }
     get nbUniforms() { return this.group.items.length; }
     //public get bufferType(): string { return "uniform"; }
+    _usage;
     debug;
     shaderVisibility;
+    pipelineType;
     setPipelineType(pipelineType) {
-        ///console.warn("setPipelineType ", pipelineType)
+        /*
+        if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536 && this.pipelineType == "render") return "uniform";
+        return "read-only-storage";
+        */
+        /*
+        let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+
+        if (this.bufferType === "read-only-storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+        */
+        this.pipelineType = pipelineType;
+        //console.warn("setPipelineType ", pipelineType)
         //use to handle particular cases in descriptor relative to the nature of pipeline
-        if (pipelineType === "compute" || pipelineType === "compute_mixed")
+        if (pipelineType === "compute" || pipelineType === "compute_mixed") {
+            this._bufferType = "read-only-storage";
             this.descriptor.visibility = GPUShaderStage.COMPUTE;
+        }
         else {
+            if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536)
+                this._bufferType = "uniform";
+            else
+                this._bufferType = "uniform";
             this.descriptor.visibility = this.shaderVisibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
         }
     }

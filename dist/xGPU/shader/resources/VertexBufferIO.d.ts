@@ -19,7 +19,9 @@ export declare class VertexBufferIO {
     createVertexInstances(nbInstance: number, createInstance: (instanceId: number) => any): void;
     protected view: any;
     getVertexInstances(datas: Float32Array, onGetInstance: (o: any) => void): void;
-    set datas(v: Float32Array);
+    dataStructureChanged: boolean;
+    nextDatas: Float32Array | Int32Array | Uint32Array;
+    set datas(v: Float32Array | Int32Array | Uint32Array);
     protected attributeDesc: any;
     get attributeDescriptor(): any;
     update(): void;

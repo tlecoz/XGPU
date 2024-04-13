@@ -539,7 +539,7 @@ export class VertexBuffer implements IShaderResource {
             return
 
         }
-
+        this.destroyed = true;
         if (this.resourceIO) {
             this.resourceIO.destroy();
             this.resourceIO = null;
@@ -549,7 +549,7 @@ export class VertexBuffer implements IShaderResource {
             this.gpuResource = null;
         }
 
-        this.destroyed = true;
+
     }
 
 

@@ -12,10 +12,12 @@ export class ComputeShader extends ShaderStage {
         let result = "";
         const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
         result += obj.result + "\n\n";
-        result += this.constants.value + "\n\n";
         //------
         const w = shaderPipeline.workgroups;
-        let mainFunc = this.unwrapVariableInMainFunction(obj.variables); //handleVariables();
+        //this.unwrapVariableInMainFunction(obj.variables)//handleVariables();
+        let constants = this.unwrapVariableInWGSL(obj.variables, this.constants.value);
+        result += constants + "\n\n";
+        let mainFunc = this.unwrapVariableInWGSL(obj.variables, this.main.value);
         result += "@compute @workgroup_size(" + w[0] + "," + w[1] + "," + w[2] + ")\n";
         result += "fn main(" + inputs.getFunctionParams() + ") {\n";
         //result += obj.variables + "\n";

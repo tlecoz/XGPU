@@ -33,7 +33,7 @@ export class VertexBuffer {
             buffer = items[name];
             offset = buffer.offset;
             datas = buffer.datas;
-            //console.log("=> ", name, offset)
+            //console.log("=> ", name, buffer)
             if (!this.attributes[name]) {
                 attribute = this.createArray(name, buffer.type, offset);
                 //console.log(name, offset)
@@ -119,12 +119,14 @@ export class VertexBuffer {
             return this.attributes[name];
         }
         let v = this.attributes[name];
+        //console.warn("createArray ", name, dataType, offset, this.attributes[name]);
         if (!v)
             v = this.attributes[name] = new VertexAttribute(name, dataType, offset);
         v.vertexBuffer = this;
         const nbCompo = v.nbComponent;
         const _offset = v.dataOffset === undefined ? 0 : v.dataOffset;
         this._nbComponent += nbCompo;
+        //console.log("v.dataOffset = ", name, v.dataOffset)
         if (v.dataOffset === undefined)
             this._byteCount += nbCompo * new GPUType(v.varType).byteValue;
         else
@@ -365,6 +367,7 @@ export class VertexBuffer {
             };
             componentId += this.vertexArrays[i].nbComponent;
         }
+        //console.log("vb layout = ", obj)
         obj.arrayStride = Math.max(this._byteCount, nb * Float32Array.BYTES_PER_ELEMENT);
         this.layout = obj;
         return obj;
@@ -426,6 +429,7 @@ export class VertexBuffer {
             }
             return;
         }
+        this.destroyed = true;
         if (this.resourceIO) {
             this.resourceIO.destroy();
             this.resourceIO = null;
@@ -434,7 +438,6 @@ export class VertexBuffer {
             this.gpuResource.destroy();
             this.gpuResource = null;
         }
-        this.destroyed = true;
     }
     updateBuffer() {
         if (!this.datas)

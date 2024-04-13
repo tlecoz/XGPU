@@ -76,13 +76,14 @@ export class PrimitiveFloatUniform extends Float32Array {
         //console.log("createVariable = ", res);
         return res;
     }
-    feedbackVertexId = 0;
-    feedbackInstanceId = 0;
-    setFeedback(vertexId, instanceId) {
+    /*
+    public feedbackVertexId: number = 0;
+    public feedbackInstanceId: number = 0;
+    public setFeedback(vertexId: number, instanceId: number): PrimitiveFloatUniform {
         this.feedbackVertexId = vertexId;
         this.feedbackInstanceId = instanceId;
         return this;
-    }
+    }*/
     update() { }
     //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Float32Array)----
     eventListeners = {};
@@ -165,13 +166,14 @@ export class PrimitiveIntUniform extends Int32Array {
             type = "vec4<i32>";
         return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
     }
-    feedbackVertexId = 0;
-    feedbackInstanceId = 0;
-    setFeedback(vertexId, instanceId) {
+    /*
+    public feedbackVertexId: number = 0;
+    public feedbackInstanceId: number = 0;
+    public setFeedback(vertexId: number, instanceId: number): PrimitiveIntUniform {
         this.feedbackVertexId = vertexId;
         this.feedbackInstanceId = instanceId;
         return this;
-    }
+    }*/
     update() { }
     //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Int32Array)----
     eventListeners = {};
@@ -254,13 +256,15 @@ export class PrimitiveUintUniform extends Uint32Array {
             type = "vec4<u32>";
         return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
     }
-    feedbackVertexId = 0;
-    feedbackInstanceId = 0;
-    setFeedback(vertexId, instanceId) {
+    /*
+    public feedbackVertexId: number = 0;
+    public feedbackInstanceId: number = 0;
+    public setFeedback(vertexId: number, instanceId: number): PrimitiveUintUniform {
         this.feedbackVertexId = vertexId;
         this.feedbackInstanceId = instanceId;
         return this;
     }
+    */
     update() { }
     //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Uint32Array)----
     eventListeners = {};

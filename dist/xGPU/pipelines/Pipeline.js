@@ -118,7 +118,6 @@ export class Pipeline extends EventDispatcher {
             if (k > 0) {
                 //console.log(i, " layout : ", layout);
                 group.layout = this.gpuBindGroupLayouts[n] = XGPU.createBindgroupLayout(layout);
-                //console.log(i, " group : ", group);
                 this.gpuBindgroups[n] = XGPU.createBindgroup(group);
                 n++;
                 //console.log("-----")

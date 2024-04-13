@@ -13,6 +13,7 @@ export declare class UniformGroupArray {
     constructor(groups: UniformGroup[], createLocalVariable?: boolean);
     clone(): UniformGroupArray;
     get type(): any;
+    copyIntoDataView(dataView: DataView, offset: number): void;
     protected getStructName(name: string): string;
     protected getVarName(name: string): string;
     createVariable(uniformBufferName: string): string;

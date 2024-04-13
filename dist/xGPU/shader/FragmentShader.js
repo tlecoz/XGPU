@@ -11,7 +11,7 @@ export class FragmentShader extends ShaderStage {
     build(shaderPipeline, inputs) {
         if (this._shaderInfos)
             return this._shaderInfos;
-        let result = this.constants.value + "\n\n";
+        let result = "";
         const obj = shaderPipeline.bindGroups.getVertexShaderDeclaration(true);
         result += obj.result;
         //console.log("-------- FRAGMENT -----------");
@@ -25,7 +25,10 @@ export class FragmentShader extends ShaderStage {
         const output = new ShaderStruct("Output", this.outputs);
         result += output.struct + "\n";
         //------
-        const mainFunc = this.unwrapVariableInMainFunction(obj.variables); //handleVariables();
+        //const mainFunc = this.unwrapVariableInMainFunction(obj.variables)//handleVariables();
+        let constants = this.unwrapVariableInWGSL(obj.variables, this.constants.value);
+        result += constants + "\n\n";
+        let mainFunc = this.unwrapVariableInWGSL(obj.variables, this.main.value);
         result += "@fragment\n";
         result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
         //result += obj.variables + "\n";

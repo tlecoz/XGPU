@@ -602,8 +602,6 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "propertyNames");
       __publicField(this, "createVariableInsideMain", false);
       __publicField(this, "className");
-      __publicField(this, "feedbackVertexId", 0);
-      __publicField(this, "feedbackInstanceId", 0);
       //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Float32Array)----
       __publicField(this, "eventListeners", {});
       this.type = new GPUType(type);
@@ -663,11 +661,14 @@ var __publicField = (obj, key, value) => {
       const res = "   var " + name + ":" + type + " = " + uniformBufferName + "." + name + ";\n";
       return res;
     }
-    setFeedback(vertexId, instanceId) {
-      this.feedbackVertexId = vertexId;
-      this.feedbackInstanceId = instanceId;
-      return this;
-    }
+    /*
+    public feedbackVertexId: number = 0;
+    public feedbackInstanceId: number = 0;
+    public setFeedback(vertexId: number, instanceId: number): PrimitiveFloatUniform {
+        this.feedbackVertexId = vertexId;
+        this.feedbackInstanceId = instanceId;
+        return this;
+    }*/
     update() {
     }
     addEventListener(eventName, callback) {
@@ -706,8 +707,6 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "propertyNames");
       __publicField(this, "createVariableInsideMain", false);
       __publicField(this, "className");
-      __publicField(this, "feedbackVertexId", 0);
-      __publicField(this, "feedbackInstanceId", 0);
       //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Int32Array)----
       __publicField(this, "eventListeners", {});
       this.type = new GPUType(type);
@@ -755,11 +754,14 @@ var __publicField = (obj, key, value) => {
         type = "vec4<i32>";
       return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
     }
-    setFeedback(vertexId, instanceId) {
-      this.feedbackVertexId = vertexId;
-      this.feedbackInstanceId = instanceId;
-      return this;
-    }
+    /*
+    public feedbackVertexId: number = 0;
+    public feedbackInstanceId: number = 0;
+    public setFeedback(vertexId: number, instanceId: number): PrimitiveIntUniform {
+        this.feedbackVertexId = vertexId;
+        this.feedbackInstanceId = instanceId;
+        return this;
+    }*/
     update() {
     }
     addEventListener(eventName, callback) {
@@ -798,8 +800,6 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "propertyNames");
       __publicField(this, "createVariableInsideMain", false);
       __publicField(this, "className");
-      __publicField(this, "feedbackVertexId", 0);
-      __publicField(this, "feedbackInstanceId", 0);
       //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Uint32Array)----
       __publicField(this, "eventListeners", {});
       this.type = new GPUType(type);
@@ -847,11 +847,15 @@ var __publicField = (obj, key, value) => {
         type = "vec4<u32>";
       return "   var " + this.name + ":" + type + " = " + uniformBufferName + "." + this.name + ";\n";
     }
-    setFeedback(vertexId, instanceId) {
-      this.feedbackVertexId = vertexId;
-      this.feedbackInstanceId = instanceId;
-      return this;
+    /*
+    public feedbackVertexId: number = 0;
+    public feedbackInstanceId: number = 0;
+    public setFeedback(vertexId: number, instanceId: number): PrimitiveUintUniform {
+        this.feedbackVertexId = vertexId;
+        this.feedbackInstanceId = instanceId;
+        return this;
     }
+    */
     update() {
     }
     addEventListener(eventName, callback) {
@@ -2118,6 +2122,14 @@ var __publicField = (obj, key, value) => {
     get type() {
       return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true };
     }
+    copyIntoDataView(dataView, offset) {
+      let group;
+      for (let i = 0; i < this.groups.length; i++) {
+        group = this.groups[i];
+        group.copyIntoDataView(dataView, offset);
+        offset += group.arrayStride;
+      }
+    }
     getStructName(name) {
       if (!name)
         return null;
@@ -2176,6 +2188,7 @@ var __publicField = (obj, key, value) => {
       so we must store the name we use when we build the 'struct' in order to write a 'struct' 
       for every properties while being sure we don't have two sames structs*/
       __publicField(this, "datas");
+      __publicField(this, "dataView");
       __publicField(this, "buffer", null);
       this.createVariableInsideMain = !!useLocalVariable;
       let o;
@@ -2192,6 +2205,7 @@ var __publicField = (obj, key, value) => {
     }
     set(datas) {
       this.datas = datas;
+      this.dataView = new DataView(datas, 0, datas.byteLength);
       this.mustBeTransfered = true;
     }
     get uniformBuffer() {
@@ -2286,9 +2300,6 @@ var __publicField = (obj, key, value) => {
       }
       return null;
     }
-    get type() {
-      return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: false };
-    }
     getStructName(name) {
       if (!name)
         return null;
@@ -2315,12 +2326,52 @@ var __publicField = (obj, key, value) => {
         this.items[i].mustBeTransfered = true;
       }
     }
+    get type() {
+      return {
+        nbComponent: this.arrayStride,
+        isUniformGroup: true,
+        isArray: false
+      };
+    }
+    setDatas(item, dataView = null, offset = 0) {
+      if (!dataView)
+        dataView = this.dataView;
+      const startId = item.startId + offset;
+      const type = item.type;
+      const primitive = type.primitive;
+      switch (primitive) {
+        case "f32":
+          for (let i = 0; i < type.nbValues; i++)
+            dataView.setFloat32((startId + i) * 4, item[i], true);
+          break;
+        case "i32":
+          for (let i = 0; i < type.nbValues; i++)
+            dataView.setInt32((startId + i) * 4, item[i], true);
+          break;
+        case "u32":
+          for (let i = 0; i < type.nbValues; i++)
+            dataView.setUint32((startId + i) * 4, item[i], true);
+          break;
+      }
+    }
+    copyIntoDataView(dataView, offset) {
+      let item;
+      for (let i = 0; i < this.items.length; i++) {
+        item = this.items[i];
+        if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+          item.copyIntoDataView(dataView, offset + item.startId);
+        } else {
+          this.setDatas(item, dataView, offset);
+        }
+      }
+    }
     async update(gpuResource, fromUniformBuffer = false) {
       if (fromUniformBuffer === false) {
+        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         XGPU.device.queue.writeBuffer(
           gpuResource,
           this.startId,
-          this.datas.buffer,
+          this.datas,
           0,
           this.arrayStride * Float32Array.BYTES_PER_ELEMENT
         );
@@ -2335,7 +2386,7 @@ var __publicField = (obj, key, value) => {
           if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
             item.update(gpuResource, false);
           } else {
-            this.datas.set(item, item.startId);
+            this.setDatas(item);
             XGPU.device.queue.writeBuffer(
               gpuResource,
               item.startId * Float32Array.BYTES_PER_ELEMENT,
@@ -2517,26 +2568,44 @@ var __publicField = (obj, key, value) => {
         offset += bound - offset % bound;
       }
       this.arrayStride = offset;
-      this.datas = new Float32Array(offset);
-      let o;
-      for (let i = 0; i < result.length; i++) {
-        o = result[i];
-        if (o instanceof UniformGroup || o instanceof UniformGroupArray) {
-          if (o instanceof UniformGroup) {
-            this.datas.set(o.datas, o.startId);
-          } else {
-            let start = o.startId;
-            for (let j = 0; j < o.length; j++) {
-              this.datas.set(o.groups[j].datas, start);
-              start += o.groups[j].arrayStride;
-            }
-          }
-        } else {
-          this.datas.set(o, o.startId);
-        }
-      }
+      this.datas = new ArrayBuffer(offset * 4);
+      this.dataView = new DataView(this.datas, 0, this.datas.byteLength);
+      this.items = result;
+      this.copyIntoDataView(this.dataView, 0);
       return result;
     }
+    /*
+        protected createTypedArrayBuffer(result: any) {
+    
+            let datas: Float32Array | Int32Array | Uint32Array;
+            if (this.primitiveType === "f32") datas = new Float32Array(this.arrayStride);
+            else if (this.primitiveType === "i32") datas = new Int32Array(this.arrayStride);
+            else if (this.primitiveType === "u32") datas = new Uint32Array(this.arrayStride);
+    
+            //console.log("uniform type = ", this._primitiveType)
+    
+            let o: any;
+            for (let i = 0; i < result.length; i++) {
+                o = result[i];
+                if (o instanceof UniformGroup || o instanceof UniformGroupArray) {
+                    if (o instanceof UniformGroup) {
+                        datas.set(o.datas as Float32Array | Int32Array | Uint32Array, o.startId);
+                    } else {
+                        let start = o.startId;
+                        for (let j = 0; j < o.length; j++) {
+                            datas.set(o.groups[j].datas as Float32Array | Int32Array | Uint32Array, start);
+                            start += o.groups[j].arrayStride;
+                        }
+                    }
+                } else {
+                    datas.set(o, o.startId)
+                }
+            }
+    
+            this.datas = datas;
+    
+        }
+        */
   }
   class UniformBuffer {
     constructor(items, descriptor) {
@@ -2544,10 +2613,14 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "descriptor");
       __publicField(this, "group");
       __publicField(this, "cloned", false);
+      //------------------------------
+      __publicField(this, "_bufferType");
       __publicField(this, "time");
       //public get bufferType(): string { return "uniform"; }
+      __publicField(this, "_usage");
       __publicField(this, "debug");
       __publicField(this, "shaderVisibility");
+      __publicField(this, "pipelineType");
       this.descriptor = descriptor ? { ...descriptor } : {};
       this.group = new UniformGroup(items, this.descriptor.useLocalVariable);
       this.group.uniformBuffer = this;
@@ -2604,11 +2677,8 @@ var __publicField = (obj, key, value) => {
     getUniformByName(name) {
       return this.group.getElementByName(name);
     }
-    //------------------------------
     get bufferType() {
-      if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536)
-        return "uniform";
-      return "read-only-storage";
+      return this._bufferType;
     }
     createGpuResource() {
       if (!this.gpuResource) {
@@ -2679,9 +2749,15 @@ var __publicField = (obj, key, value) => {
       return this.group.items.length;
     }
     setPipelineType(pipelineType) {
-      if (pipelineType === "compute" || pipelineType === "compute_mixed")
+      this.pipelineType = pipelineType;
+      if (pipelineType === "compute" || pipelineType === "compute_mixed") {
+        this._bufferType = "read-only-storage";
         this.descriptor.visibility = GPUShaderStage.COMPUTE;
-      else {
+      } else {
+        if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536)
+          this._bufferType = "uniform";
+        else
+          this._bufferType = "uniform";
         this.descriptor.visibility = this.shaderVisibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
       }
     }
@@ -3459,6 +3535,7 @@ var __publicField = (obj, key, value) => {
         }
         return;
       }
+      this.destroyed = true;
       if (this.resourceIO) {
         this.resourceIO.destroy();
         this.resourceIO = null;
@@ -3467,7 +3544,6 @@ var __publicField = (obj, key, value) => {
         this.gpuResource.destroy();
         this.gpuResource = null;
       }
-      this.destroyed = true;
     }
     updateBuffer() {
       if (!this.datas)
@@ -3538,6 +3614,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "deviceId");
       __publicField(this, "currentDatas");
       __publicField(this, "view");
+      __publicField(this, "dataStructureChanged", false);
+      __publicField(this, "nextDatas");
       __publicField(this, "attributeDesc");
       if (!descriptor)
         descriptor = {};
@@ -3622,7 +3700,18 @@ var __publicField = (obj, key, value) => {
       }
       const attributes = this.buffers[0].attributes;
       const arrayStride = this.buffers[0].arrayStride;
-      const datas = new Float32Array(arrayStride * nbInstance);
+      let type;
+      for (let z in attributes) {
+        type = attributes[z].format;
+        break;
+      }
+      let datas;
+      if (type === "float32" || type === "float32x2" || type === "float32x3" || type === "float32x4")
+        datas = new Float32Array(arrayStride * nbInstance);
+      else if (type == "sint32" || type == "sint32x2" || type == "sint32x3" || type == "sint32x4")
+        datas = new Int32Array(arrayStride * nbInstance);
+      else if (type == "uint32" || type == "uint32x2" || type == "uint32x3" || type == "uint32x4")
+        datas = new Uint32Array(arrayStride * nbInstance);
       let o;
       let start;
       let attribute;
@@ -4243,7 +4332,13 @@ var __publicField = (obj, key, value) => {
           attributes[name] = o2;
           bindgroup.buffer = new VertexBuffer(attributes);
         } else {
-          const attribute = bindgroup.buffer.createArray(name, o2.type, o2.offset);
+          console.log("O = ", o2);
+          let offset = o2.offset;
+          if (o2 instanceof VertexAttribute) {
+            offset = o2.dataOffset;
+            bindgroup.buffer.attributes[o2.name] = o2;
+          }
+          const attribute = bindgroup.buffer.createArray(name, o2.type, offset);
           if (o2.datas)
             attribute.datas = o2.datas;
         }
@@ -5583,6 +5678,31 @@ var __publicField = (obj, key, value) => {
       }
       return shader;
     }
+    unwrapVariableInWGSL(shaderVariables, wgsl) {
+      const variables = shaderVariables.split("\n");
+      let s;
+      let objs = [];
+      for (let i = 0; i < variables.length; i++) {
+        variables[i] = s = variables[i].split("	").join("").trim().slice(4);
+        if (!s.length)
+          continue;
+        let t = s.split(" = ");
+        let varName = t[0].split(":")[0];
+        let otherName = t[1].slice(0, t[1].length - 1);
+        objs.push({
+          varName,
+          otherName
+        });
+      }
+      const searchAndReplace = (shaderCode, wordToReplace, replacement) => {
+        const regex = new RegExp(`(?<=[^\\w.])\\b${wordToReplace}\\b`, "g");
+        return shaderCode.replace(regex, replacement);
+      };
+      for (let i = 0; i < objs.length; i++) {
+        wgsl = searchAndReplace(wgsl, objs[i].varName, objs[i].otherName);
+      }
+      return wgsl;
+    }
     addOutputVariable(name, shaderType) {
       this.outputs.push({ name, type: shaderType.type });
     }
@@ -5623,7 +5743,7 @@ var __publicField = (obj, key, value) => {
     build(shaderPipeline, inputs) {
       if (this._shaderInfos)
         return this._shaderInfos;
-      let result = this.constants.value + "\n\n";
+      let result = "";
       const obj = shaderPipeline.bindGroups.getVertexShaderDeclaration(true);
       result += obj.result;
       for (let i = 0; i < this.inputs.length; i++) {
@@ -5634,7 +5754,9 @@ var __publicField = (obj, key, value) => {
       }
       const output = new ShaderStruct("Output", this.outputs);
       result += output.struct + "\n";
-      const mainFunc = this.unwrapVariableInMainFunction(obj.variables);
+      let constants = this.unwrapVariableInWGSL(obj.variables, this.constants.value);
+      result += constants + "\n\n";
+      let mainFunc = this.unwrapVariableInWGSL(obj.variables, this.main.value);
       result += "@fragment\n";
       result += "fn main(" + inputs.getFunctionParams() + ") -> " + output.name + "{\n";
       result += "   var output:Output;\n";
@@ -5657,7 +5779,7 @@ var __publicField = (obj, key, value) => {
       super("vertex");
     }
     build(pipeline, input) {
-      let result = this.constants.value + "\n\n";
+      let result = "";
       const obj = pipeline.bindGroups.getVertexShaderDeclaration();
       result += obj.result;
       result += input.getComputeVariableDeclaration();
@@ -5672,7 +5794,9 @@ var __publicField = (obj, key, value) => {
       }
       let output = new ShaderStruct("Output", [...this.outputs]);
       result += output.struct + "\n";
-      let mainFunc = this.unwrapVariableInMainFunction(obj.variables);
+      let constants = this.unwrapVariableInWGSL(obj.variables, this.constants.value);
+      result += constants + "\n\n";
+      let mainFunc = this.unwrapVariableInWGSL(obj.variables, this.main.value);
       result += "@vertex\n";
       result += "fn main(" + input.getFunctionParams() + ") -> " + output.name + "{\n";
       result += "   var output:Output;\n";
@@ -6800,9 +6924,10 @@ var __publicField = (obj, key, value) => {
       let result = "";
       const obj = shaderPipeline.bindGroups.getComputeShaderDeclaration();
       result += obj.result + "\n\n";
-      result += this.constants.value + "\n\n";
       const w = shaderPipeline.workgroups;
-      let mainFunc = this.unwrapVariableInMainFunction(obj.variables);
+      let constants = this.unwrapVariableInWGSL(obj.variables, this.constants.value);
+      result += constants + "\n\n";
+      let mainFunc = this.unwrapVariableInWGSL(obj.variables, this.main.value);
       result += "@compute @workgroup_size(" + w[0] + "," + w[1] + "," + w[2] + ")\n";
       result += "fn main(" + inputs.getFunctionParams() + ") {\n";
       result += mainFunc;
@@ -8685,6 +8810,7 @@ var __publicField = (obj, key, value) => {
           datas = void 0;
         }
       }
+      console.log("Vec2Buffer ", offset);
       super("", "float32x2", offset);
       if (typeof datas != "number") {
         this.datas = datas;

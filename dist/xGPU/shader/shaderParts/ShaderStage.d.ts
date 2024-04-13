@@ -34,6 +34,7 @@ export declare class ShaderStage {
         color: string;
     }[];
     protected unwrapVariableInMainFunction(shaderVariables: string): string;
+    protected unwrapVariableInWGSL(shaderVariables: string, wgsl: string): string;
     addOutputVariable(name: string, shaderType: {
         type: string;
     }): void;

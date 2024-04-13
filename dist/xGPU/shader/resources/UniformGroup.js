@@ -17,8 +17,10 @@ export class UniformGroup {
                                        so we must store the name we use when we build the 'struct' in order to write a 'struct'
                                        for every properties while being sure we don't have two sames structs*/
     datas;
+    dataView;
     set(datas) {
         this.datas = datas;
+        this.dataView = new DataView(datas, 0, datas.byteLength);
         this.mustBeTransfered = true;
     }
     buffer = null;
@@ -136,7 +138,6 @@ export class UniformGroup {
         }
         return null;
     }
-    get type() { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: false }; }
     getStructName(name) {
         if (!name)
             return null;
@@ -163,9 +164,50 @@ export class UniformGroup {
             this.items[i].mustBeTransfered = true;
         }
     }
+    get type() {
+        return {
+            nbComponent: this.arrayStride,
+            isUniformGroup: true,
+            isArray: false
+        };
+    }
+    setDatas(item, dataView = null, offset = 0) {
+        if (!dataView)
+            dataView = this.dataView;
+        const startId = item.startId + offset;
+        const type = item.type;
+        const primitive = type.primitive;
+        switch (primitive) {
+            case "f32":
+                for (let i = 0; i < type.nbValues; i++)
+                    dataView.setFloat32((startId + i) * 4, item[i], true);
+                break;
+            case "i32":
+                for (let i = 0; i < type.nbValues; i++)
+                    dataView.setInt32((startId + i) * 4, item[i], true);
+                break;
+            case "u32":
+                for (let i = 0; i < type.nbValues; i++)
+                    dataView.setUint32((startId + i) * 4, item[i], true);
+                break;
+        }
+    }
+    copyIntoDataView(dataView, offset) {
+        let item;
+        for (let i = 0; i < this.items.length; i++) {
+            item = this.items[i];
+            if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+                item.copyIntoDataView(dataView, offset + item.startId);
+            }
+            else {
+                this.setDatas(item, dataView, offset);
+            }
+        }
+    }
     async update(gpuResource, fromUniformBuffer = false) {
         if (fromUniformBuffer === false) {
-            XGPU.device.queue.writeBuffer(gpuResource, this.startId, this.datas.buffer, 0, this.arrayStride * Float32Array.BYTES_PER_ELEMENT);
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            XGPU.device.queue.writeBuffer(gpuResource, this.startId, this.datas, 0, this.arrayStride * Float32Array.BYTES_PER_ELEMENT);
             return;
         }
         //console.log("items.length = ", this.items);
@@ -181,8 +223,8 @@ export class UniformGroup {
                 else {
                     //console.log(item);
                     //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer.byteLength, item.buffer, item.byteOffset)
-                    this.datas.set(item, item.startId);
-                    //console.log("item.byteLength = ", item.byteLength)
+                    //this.datas.set(item, item.startId);
+                    this.setDatas(item);
                     XGPU.device.queue.writeBuffer(gpuResource, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer, item.byteOffset, item.byteLength);
                 }
                 item.mustBeTransfered = false;
@@ -384,27 +426,31 @@ export class UniformGroup {
         }
         //--------------------------
         this.arrayStride = offset;
+        this.datas = new ArrayBuffer(offset * 4);
+        this.dataView = new DataView(this.datas, 0, this.datas.byteLength);
+        this.items = result;
+        this.copyIntoDataView(this.dataView, 0);
+        /*
         this.datas = new Float32Array(offset);
-        //console.log("arrayStride = ", this.arrayStride, result.length)
-        let o;
+        console.log("arrayStride = ", this.arrayStride, result.length)
+
+        let o: any;
         for (let i = 0; i < result.length; i++) {
             o = result[i];
             if (o instanceof UniformGroup || o instanceof UniformGroupArray) {
                 if (o instanceof UniformGroup) {
                     this.datas.set(o.datas, o.startId);
-                }
-                else {
+                } else {
                     let start = o.startId;
                     for (let j = 0; j < o.length; j++) {
                         this.datas.set(o.groups[j].datas, start);
                         start += o.groups[j].arrayStride;
                     }
                 }
+            } else {
+                this.datas.set(o, o.startId)
             }
-            else {
-                this.datas.set(o, o.startId);
-            }
-        }
+        }*/
         //console.timeEnd("STACK ITEMS")
         return result;
     }

@@ -1,5 +1,5 @@
 /// <reference types="dist" />
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveUintUniform } from "../../PrimitiveType";
+import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
 export type Uniformable = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform | UniformGroup | UniformGroupArray;
@@ -17,8 +17,9 @@ export declare class UniformGroup {
         localVariables: string;
     };
     wgslStructNames: string[];
-    datas: Float32Array;
-    set(datas: Float32Array): void;
+    datas: ArrayBuffer;
+    dataView: DataView;
+    set(datas: ArrayBuffer): void;
     protected buffer: UniformBuffer;
     get uniformBuffer(): UniformBuffer;
     set uniformBuffer(buffer: UniformBuffer);
@@ -30,12 +31,14 @@ export declare class UniformGroup {
     remove(name: string): Uniformable;
     add(name: string, data: Uniformable, useLocalVariable?: boolean, stackItems?: boolean): Uniformable;
     getElementByName(name: string): Uniformable;
-    get type(): any;
     protected getStructName(name: string): string;
     protected getVarName(name: string): string;
     createVariable(uniformBufferName: string): string;
     updateStack(): void;
     forceUpdate(): void;
+    get type(): any;
+    setDatas(item: PrimitiveType, dataView?: DataView, offset?: number): void;
+    copyIntoDataView(dataView: DataView, offset: number): void;
     update(gpuResource: GPUBuffer, fromUniformBuffer?: boolean): Promise<void>;
     getStruct(name: string): {
         struct: string;

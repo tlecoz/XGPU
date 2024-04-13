@@ -249,9 +249,10 @@ export class VertexBufferIO {
 
     }
 
+    public dataStructureChanged: boolean = false;
+    public nextDatas: Float32Array | Int32Array | Uint32Array
 
-
-    public set datas(v: Float32Array) {
+    public set datas(v: Float32Array | Int32Array | Uint32Array) {
         this.buffers[0].datas = v;
         this.buffers[1].datas = v;
 

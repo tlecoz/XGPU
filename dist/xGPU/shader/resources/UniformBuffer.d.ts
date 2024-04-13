@@ -28,6 +28,7 @@ export declare class UniformBuffer implements IShaderResource {
     createDeclaration(uniformName: string, bindingId: number, groupId?: number): string;
     getUniformById(id: number): Uniformable;
     getUniformByName(name: string): Uniformable;
+    protected _bufferType: "read-only-storage" | "uniform";
     get bufferType(): "read-only-storage" | "uniform";
     createGpuResource(): any;
     getItemsAsArray(): any[];
@@ -50,7 +51,9 @@ export declare class UniformBuffer implements IShaderResource {
     get itemNames(): string[];
     get nbComponent(): number;
     get nbUniforms(): number;
+    protected _usage: number;
     protected debug: string;
     protected shaderVisibility: GPUShaderStageFlags;
+    protected pipelineType: "compute" | "render" | "compute_mixed";
     setPipelineType(pipelineType: "compute" | "render" | "compute_mixed"): void;
 }

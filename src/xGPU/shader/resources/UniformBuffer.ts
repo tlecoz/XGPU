@@ -238,11 +238,11 @@ export class UniformBuffer implements IShaderResource {
         if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536 && this.pipelineType == "render") return "uniform";
         return "read-only-storage";
         */
-
+        /*
         let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
 
         if (this.bufferType === "read-only-storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-
+        */
 
         this.pipelineType = pipelineType;
 
