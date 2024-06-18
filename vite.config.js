@@ -5,7 +5,7 @@ export default defineConfig({
 
 
     build: {
-        minify: false,
+        //minify: false,
         lib: {
             // Could also be a dictionary or array of multiple entry points
             entry: 'src/index.ts',

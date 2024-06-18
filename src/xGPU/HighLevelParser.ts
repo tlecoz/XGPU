@@ -354,7 +354,7 @@ export class HighLevelParser {
             } else {
 
 
-                console.log("O = ", o)
+                //console.log("O = ", o)
 
                 let offset = o.offset;
                 if (o instanceof VertexAttribute) {

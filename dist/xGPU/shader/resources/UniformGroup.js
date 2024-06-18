@@ -206,7 +206,7 @@ export class UniformGroup {
     }
     async update(gpuResource, fromUniformBuffer = false) {
         if (fromUniformBuffer === false) {
-            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             XGPU.device.queue.writeBuffer(gpuResource, this.startId, this.datas, 0, this.arrayStride * Float32Array.BYTES_PER_ELEMENT);
             return;
         }

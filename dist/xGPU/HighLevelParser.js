@@ -303,7 +303,7 @@ export class HighLevelParser {
                 bindgroup.buffer = new VertexBuffer(attributes);
             }
             else {
-                console.log("O = ", o);
+                //console.log("O = ", o)
                 let offset = o.offset;
                 if (o instanceof VertexAttribute) {
                     offset = o.dataOffset;

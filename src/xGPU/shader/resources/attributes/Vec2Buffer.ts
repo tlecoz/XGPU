@@ -12,7 +12,7 @@ export class Vec2Buffer extends VertexAttribute {
             }
         }
 
-        console.log("Vec2Buffer ", offset)
+        //console.log("Vec2Buffer ", offset)
 
         super("", "float32x2", offset)
         //console.log("Vec2Buffer.dataOffset = ", this.dataOffset)
