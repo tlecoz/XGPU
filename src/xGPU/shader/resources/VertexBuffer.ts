@@ -47,7 +47,7 @@ export class VertexBuffer implements IShaderResource {
         datas?: Float32Array | Int32Array | Uint32Array | Uint16Array
     }) {
 
-        //console.log("VERTEX BUFFER ", attributes)
+        console.log("VERTEX BUFFER 2", attributes)
 
         if (!descriptor) descriptor = {};
         else descriptor = { ...descriptor };
@@ -76,6 +76,45 @@ export class VertexBuffer implements IShaderResource {
         if (descriptor.datas) this.datas = descriptor.datas;
 
     }
+
+    /*
+    public pushDatas(datas: Float32Array | Int32Array | Uint32Array | Uint16Array) {
+        this.mustBeTransfered = true;
+
+        if (!extraBufferSize) extraBufferSize = 1000;
+
+        //if (this.datas) console.log(this.datas.length + " VS " + (offset + len))
+
+        if (!this._datas || this._datas.length < offset + len) {
+
+
+           
+
+
+            if (!this._datas) {
+                this._datas = datas;
+                this.createGpuResource();
+            } else if ((offset + len) - this._datas.length >= extraBufferSize) {
+                this._datas = datas;
+                this.createGpuResource();
+            } else {
+
+                //console.log("B")
+
+                if (indices instanceof Uint16Array) this._datas = new Uint16Array(this._datas.length + extraBufferSize);
+                else this._datas = new Uint32Array(this._datas.length + extraBufferSize);
+                this._datas.set(indices);
+                this.createGpuResource();
+            }
+        } else {
+            //console.log("A ", indices.slice(offset, offset + len))
+            if (offset && len) this._datas.set(indices.slice(offset, offset + len), offset)
+            else this._datas.set(indices);
+        }
+
+        this.update();
+    }
+    */
 
 
     public clone(): VertexBuffer {
@@ -246,6 +285,7 @@ export class VertexBuffer implements IShaderResource {
         //console.log("VertexBuffer.createBindgroupEntry size = ", this.datas.byteLength)
         let size = 0;
         if (this.datas) size = this.datas.byteLength;
+        if(this.lowLevelBuffer) size = this._bufferSize;
         return {
             binding: bindingId,
             resource: {
@@ -403,11 +443,15 @@ export class VertexBuffer implements IShaderResource {
 
         //console.log("this.arrayStride = ", offset);
         //console.log(this.descriptor.stepMode)
-        return {
+
+        const res =  {
             stepMode: this.descriptor.stepMode,
             arrayStride: Float32Array.BYTES_PER_ELEMENT * this.arrayStride,
             attributes
         }
+
+        console.log("res = ",res)
+        return res
 
 
     }
@@ -433,7 +477,7 @@ export class VertexBuffer implements IShaderResource {
 
         //console.log(this.io, this.descriptor.stepMode)
         if (this.gpuBufferIOs) {
-
+            console.log("GPUBufferIOs = ",this.gpuBufferIOs)
             return this.stackAttributes(builtinOffset);
         }
 
@@ -468,6 +512,34 @@ export class VertexBuffer implements IShaderResource {
     }
 
 
+    protected lowLevelBuffer:boolean = false;
+    public createLowLevelBuffer(bufferSize:number,accessMode:"read"|"read_write" = "read" ,usage:number = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST){
+        this.lowLevelBuffer = true;
+        if (this.gpuResource) this.gpuResource.destroy();
+       
+        this.descriptor.usage = usage;
+        this.descriptor.accessMode = accessMode;
+        this.deviceId = XGPU.deviceId;
+        this._bufferSize = bufferSize;
+        this.gpuResource = XGPU.device.createBuffer({
+            size: bufferSize,
+            usage: this.descriptor.usage,
+            mappedAtCreation: false,
+        })
+        this.destroyed = false;
+        this.mustBeTransfered = true;
+    }
+
+    public updateLowLevelBuffer(buffer:ArrayBuffer,bufferOffset:number,dataOffset?:number,size?:number){
+        if(size == undefined) size = buffer.byteLength;
+        if(dataOffset == undefined) dataOffset = 0;
+
+        if(!this.gpuResource) throw new Error("you must create a GPUBuffer using VertexBuffer.createGPUResource(bufferSize)");
+        if(bufferOffset + size > this._bufferSize) throw new Error("incorrect gpu buffer length, max length = "+this._bufferSize+" vs "+(bufferOffset + size));
+        if(dataOffset + size > buffer.byteLength) throw new Error("incorrect datas length")
+
+        XGPU.device.queue.writeBuffer(this.gpuResource, bufferOffset, buffer,dataOffset,size)
+     }
 
 
 
@@ -475,15 +547,17 @@ export class VertexBuffer implements IShaderResource {
     protected deviceId: number;
     public get bufferSize(): number { return this._bufferSize; }
     public createGpuResource() {
+        if(this.lowLevelBuffer) return;
         if (this.attributeChanged) this.updateAttributes();
         if (!this.datas || this.gpuBufferIOs) return;
         if (this.gpuResource) this.gpuResource.destroy();
 
+        const bufferSize = this.datas.byteLength;
         //console.warn("VB.createGPUResource ", this.io, this.pipelineType, XGPU.debugUsage(this.descriptor.usage))
         this.deviceId = XGPU.deviceId;
-        this._bufferSize = this.datas.byteLength;
+        this._bufferSize = bufferSize;
         this.gpuResource = XGPU.device.createBuffer({
-            size: this.datas.byteLength,
+            size: bufferSize,
             usage: this.descriptor.usage,
             mappedAtCreation: false,
         })
@@ -552,8 +626,10 @@ export class VertexBuffer implements IShaderResource {
 
     }
 
+    
 
     public updateBuffer(): void {
+        if(this.lowLevelBuffer) return;
         if (!this.datas) return;
         if (!this.gpuResource) this.createGpuResource();
         if (this.datas.byteLength != this._bufferSize) this.createGpuResource();

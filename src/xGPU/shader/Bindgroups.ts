@@ -74,7 +74,7 @@ export class Bindgroups {
 
 
         for (let i = 0; i < this.groups.length; i++) {
-            //console.log(i, " group = ", this.groups[i])
+            console.log(i, " group = ", this.groups[i])
             if (!autoLayout) layouts[i] = this.groups[i].layout;
             bindgroups[i] = this.groups[i].group;
         }
@@ -87,6 +87,8 @@ export class Bindgroups {
 
 
         const { vertexLayouts, buffers, nbVertex } = this.createVertexBufferLayout();
+
+        console.log(this.pipeline.type,vertexLayouts)
 
         description.vertex = {
             buffers: vertexLayouts

@@ -324,11 +324,13 @@ export class ComputePipeline extends Pipeline {
 
 
         this.update();
-
+        
 
         const commandEncoder = XGPU.device.createCommandEncoder();
         const computePass = commandEncoder.beginComputePass();
         computePass.setPipeline(this.buildGpuPipeline());
+
+        console.log(this.dispatchWorkgroup[0]*64)
         this.bindGroups.update();
         this.bindGroups.apply(computePass)
         computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);

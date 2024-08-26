@@ -171,9 +171,6 @@ export class VertexBufferIO {
 
         let datas;
 
-
-        //console.log("createVertexInstances type = ", type)
-
         if (type === "float32" || type === "float32x2" || type === "float32x3" || type === "float32x4") datas = new Float32Array(arrayStride * nbInstance);
         else if (type == "sint32" || type == "sint32x2" || type == "sint32x3" || type == "sint32x4") datas = new Int32Array(arrayStride * nbInstance);
         else if (type == "uint32" || type == "uint32x2" || type == "uint32x3" || type == "uint32x4") datas = new Uint32Array(arrayStride * nbInstance);
