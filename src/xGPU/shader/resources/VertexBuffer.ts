@@ -541,43 +541,34 @@ export class VertexBuffer implements IShaderResource {
 
         if(!this.lowLevelBuffer) return false;
 
+        const oldBuffer = this.gpuResource;
 
-       
-
-            const oldBuffer = this.gpuResource;
-
-            this._bufferSize = byteLength;
-            this.gpuResource = XGPU.device.createBuffer({
-                size: byteLength,
-                usage: this.descriptor.usage,
-                mappedAtCreation: false,
-            })
+        this._bufferSize = byteLength;
+        this.gpuResource = XGPU.device.createBuffer({
+            size: byteLength,
+            usage: this.descriptor.usage,
+            mappedAtCreation: false,
+        })
 
 
-            if(copyPreviousDataWithin){
-                
-
-              
-
-                    const command = XGPU.device.createCommandEncoder();
-                    command.copyBufferToBuffer(oldBuffer,0,this.gpuResource,0,oldBuffer.size);
-                    const end = command.finish();
-                
-                    XGPU.device.queue.submit([end]);
-                    XGPU.device.queue.onSubmittedWorkDone().then(()=>{
-                        oldBuffer.destroy();
-                    })
+        if(copyPreviousDataWithin){
             
-            }else{
-                //console.log("OLD BUFFER SIZE = ",oldBuffer.size)
-                //oldBuffer.destroy();
-            }
-            
-          
-            
+            const command = XGPU.device.createCommandEncoder();
+            command.copyBufferToBuffer(oldBuffer,0,this.gpuResource,0,oldBuffer.size);
+            const end = command.finish();
         
-       
-
+            XGPU.device.queue.submit([end]);
+            XGPU.device.queue.onSubmittedWorkDone().then(()=>{
+                //console.log("DESTROY BUFFER")
+                oldBuffer.destroy();
+            })
+        
+        }else{
+            
+            oldBuffer.destroy();
+            
+        }
+            
     }
 
     public updateLowLevelBuffer(buffer:ArrayBuffer,bufferOffset:number,dataOffset?:number,size?:number){
