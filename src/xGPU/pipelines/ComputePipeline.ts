@@ -361,6 +361,15 @@ export class ComputePipeline extends Pipeline {
             this.resourceIOs[i].getOutputData();
         }
 
+
+        (this.bindGroups.resources.all as any[]).forEach((o)=>{
+            if(o instanceof VertexBuffer){
+                if(o.resourceIO == null){
+                    o.getOutputData();
+                }
+            }
+        })
+
         /*
         for(let i=0;i<this.vertexBuffers.length;i++){
             this.vertexBuffers[i].getOutputData();

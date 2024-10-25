@@ -542,7 +542,7 @@ export class VertexBuffer implements IShaderResource {
         if(!this.lowLevelBuffer) return false;
 
 
-        console.log("resizeLowLevel")
+       
 
             const oldBuffer = this.gpuResource;
 
@@ -557,7 +557,7 @@ export class VertexBuffer implements IShaderResource {
             if(copyPreviousDataWithin){
                 
 
-                //this.destroyAction = ()=>{
+              
 
                     const command = XGPU.device.createCommandEncoder();
                     command.copyBufferToBuffer(oldBuffer,0,this.gpuResource,0,oldBuffer.size);
@@ -567,16 +567,6 @@ export class VertexBuffer implements IShaderResource {
                     XGPU.device.queue.onSubmittedWorkDone().then(()=>{
                         oldBuffer.destroy();
                     })
-
-
-                    
-                //}
-
-                
-
-               
-               
-                
             
             }else{
                 //console.log("OLD BUFFER SIZE = ",oldBuffer.size)
@@ -626,9 +616,13 @@ export class VertexBuffer implements IShaderResource {
 
         const buffer:GPUBuffer = this.gpuResource;
 
-        if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
+        //console.log("getOutputData ",buffer.size+" vs "+this.bufferSize);
+
+        if (!this.stagingBuffer || buffer.size != this.stagingBuffer.size) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
         const copyEncoder = XGPU.device.createCommandEncoder();
         const stage = this.stagingBuffer;
+
+      
 
         copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
 
