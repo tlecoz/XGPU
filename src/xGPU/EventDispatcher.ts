@@ -8,7 +8,7 @@ export class EventDispatcher {
 
     }
 
-    public addEventListener(eventName: string, callback: (dispatcher: EventDispatcher, data?: any) => void, removeListenerAfterDispatch: boolean = false) {
+    public addEventListener(eventName: string, callback: ( data?: any) => void, removeListenerAfterDispatch: boolean = false) {
         if (!this.eventListeners[eventName]) this.eventListeners[eventName] = [];
         if (removeListenerAfterDispatch) (callback as any).removeAfter = true;
         this.eventListeners[eventName].push(callback);
@@ -31,7 +31,7 @@ export class EventDispatcher {
 
             const t = [...this.eventListeners[eventName]];
             t.forEach(callback => {
-                callback(this, eventData);
+                callback( eventData);
                 if ((callback as any).removeAfter) this.removeEventListener(eventName, callback);
             });
         }

@@ -12,7 +12,7 @@ export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
     accessMode?: "read" | "read_write",
     usage?: GPUBufferUsageFlags,
-    datas?: Float32Array | Int32Array | Uint32Array | Uint16Array
+    datas?: Float32Array | Int32Array | Uint32Array | Uint16Array,
 }
 
 
@@ -47,7 +47,7 @@ export class VertexBuffer implements IShaderResource {
         datas?: Float32Array | Int32Array | Uint32Array | Uint16Array
     }) {
 
-        console.log("VERTEX BUFFER 2", attributes)
+        //console.warn("VERTEX BUFFER 2", attributes)
 
         if (!descriptor) descriptor = {};
         else descriptor = { ...descriptor };
@@ -302,7 +302,7 @@ export class VertexBuffer implements IShaderResource {
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
         if (this.pipelineType) return;
 
-        this.pipelineType = pipelineType;
+        this.pipelineType = pipelineType ;
         //use to handle particular cases in descriptor relative to the nature of pipeline
 
         if (pipelineType === "render") {
@@ -311,7 +311,7 @@ export class VertexBuffer implements IShaderResource {
 
 
         } else if (pipelineType === "compute_mixed") {
-
+           
             if (this.io === 1 || this.io === 0) { //VertexBufferIO output , usable in a renderPipeline
                 if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 if (!this.descriptor.accessMode) this.descriptor.accessMode = "read";
@@ -322,10 +322,10 @@ export class VertexBuffer implements IShaderResource {
 
         } else if (pipelineType === "compute") {
             if (this.io === 1 || this.io == 0) { //VertexBufferIO output || VertexBuffer in computeShader
-                if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+                if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 if (!this.descriptor.accessMode) this.descriptor.accessMode = "read";
             } else if (this.io === 2) { //VertexBufferIO input
-                if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
+                if (!this.descriptor.usage) this.descriptor.usage =  GPUBufferUsage.VERTEX |GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC;
                 if (!this.descriptor.accessMode) this.descriptor.accessMode = "read_write";
             }
         }
@@ -450,7 +450,7 @@ export class VertexBuffer implements IShaderResource {
             attributes
         }
 
-        console.log("res = ",res)
+        //console.log("res = ",res)
         return res
 
 
@@ -477,7 +477,7 @@ export class VertexBuffer implements IShaderResource {
 
         //console.log(this.io, this.descriptor.stepMode)
         if (this.gpuBufferIOs) {
-            console.log("GPUBufferIOs = ",this.gpuBufferIOs)
+            //console.log("GPUBufferIOs = ",this.gpuBufferIOs)
             return this.stackAttributes(builtinOffset);
         }
 
@@ -512,34 +512,154 @@ export class VertexBuffer implements IShaderResource {
     }
 
 
-    protected lowLevelBuffer:boolean = false;
+    public lowLevelBuffer:boolean = false;
     public createLowLevelBuffer(bufferSize:number,accessMode:"read"|"read_write" = "read" ,usage:number = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST){
         this.lowLevelBuffer = true;
+
         if (this.gpuResource) this.gpuResource.destroy();
        
         this.descriptor.usage = usage;
         this.descriptor.accessMode = accessMode;
         this.deviceId = XGPU.deviceId;
+
         this._bufferSize = bufferSize;
         this.gpuResource = XGPU.device.createBuffer({
             size: bufferSize,
             usage: this.descriptor.usage,
             mappedAtCreation: false,
         })
+
+       
+       
+
         this.destroyed = false;
         this.mustBeTransfered = true;
     }
 
+   
+    public resizeLowLevelBuffer(byteLength:number,copyPreviousDataWithin:boolean=false){
+
+        if(!this.lowLevelBuffer) return false;
+
+
+        console.log("resizeLowLevel")
+
+            const oldBuffer = this.gpuResource;
+
+            this._bufferSize = byteLength;
+            this.gpuResource = XGPU.device.createBuffer({
+                size: byteLength,
+                usage: this.descriptor.usage,
+                mappedAtCreation: false,
+            })
+
+
+            if(copyPreviousDataWithin){
+                
+
+                //this.destroyAction = ()=>{
+
+                    const command = XGPU.device.createCommandEncoder();
+                    command.copyBufferToBuffer(oldBuffer,0,this.gpuResource,0,oldBuffer.size);
+                    const end = command.finish();
+                
+                    XGPU.device.queue.submit([end]);
+                    XGPU.device.queue.onSubmittedWorkDone().then(()=>{
+                        oldBuffer.destroy();
+                    })
+
+
+                    
+                //}
+
+                
+
+               
+               
+                
+            
+            }else{
+                //console.log("OLD BUFFER SIZE = ",oldBuffer.size)
+                //oldBuffer.destroy();
+            }
+            
+          
+            
+        
+       
+
+    }
+
     public updateLowLevelBuffer(buffer:ArrayBuffer,bufferOffset:number,dataOffset?:number,size?:number){
-        if(size == undefined) size = buffer.byteLength;
-        if(dataOffset == undefined) dataOffset = 0;
+        //console.log({dataOffset,size,buffer})
 
-        if(!this.gpuResource) throw new Error("you must create a GPUBuffer using VertexBuffer.createGPUResource(bufferSize)");
-        if(bufferOffset + size > this._bufferSize) throw new Error("incorrect gpu buffer length, max length = "+this._bufferSize+" vs "+(bufferOffset + size));
-        if(dataOffset + size > buffer.byteLength) throw new Error("incorrect datas length")
+       
+            if(size == undefined) size = buffer.byteLength;
+            if(dataOffset == undefined) dataOffset = 0;
 
-        XGPU.device.queue.writeBuffer(this.gpuResource, bufferOffset, buffer,dataOffset,size)
+            if(!this.gpuResource) throw new Error("you must create a GPUBuffer using VertexBuffer.createGPUResource(bufferSize)");
+            //if(bufferOffset + size > this._bufferSize) throw new Error("incorrect gpu buffer length, max length = "+this._bufferSize+" vs "+(bufferOffset + size));
+            
+            
+            if(dataOffset + size > buffer.byteLength) throw new Error("incorrect datas length")
+
+            XGPU.device.queue.writeBuffer(this.gpuResource, bufferOffset, buffer,dataOffset,size)
+      
+
+
      }
+
+
+     protected stagingBuffer:GPUBuffer;
+     protected canCallMapAsync:boolean = true;
+     public onCanCallMapAsync:(()=>void)|null = null;
+     public onOutputData:((buf:ArrayBuffer)=>void)|null = null;
+     public async getOutputData(){
+        if(!this.onOutputData) return;
+        
+
+        
+
+        if (!this.canCallMapAsync) return;
+
+        this.canCallMapAsync = false;
+
+        const buffer:GPUBuffer = this.gpuResource;
+
+        if (!this.stagingBuffer) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
+        const copyEncoder = XGPU.device.createCommandEncoder();
+        const stage = this.stagingBuffer;
+
+        copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
+
+        XGPU.device.queue.submit([copyEncoder.finish()]);
+
+
+        await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
+       
+
+        const copyArray = stage.getMappedRange(0, stage.size);
+        const data = copyArray.slice(0);
+        stage.unmap();
+        this.canCallMapAsync = true;
+        if(this.onCanCallMapAsync) this.onCanCallMapAsync();
+
+        this.onOutputData(data);
+
+        
+     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -585,8 +705,8 @@ export class VertexBuffer implements IShaderResource {
                 const vbio = this.resourceIO;
                 const vbs = vbio.buffers;
 
-
-                //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  ", this.pipelineType)
+               
+               
                 this.setPipelineType(this.pipelineType)
                 const currentDatas = vbio.currentDatas ? vbio.currentDatas : vbs[0]._datas;
 
@@ -696,6 +816,7 @@ export class VertexBuffer implements IShaderResource {
 
 
     public update(): boolean {
+        if(this.lowLevelBuffer) return true;
         if (this.vertexArrays.length === 0) return false;
         if (this.attributeChanged) this.updateAttributes();
 
@@ -706,8 +827,5 @@ export class VertexBuffer implements IShaderResource {
 
         return true;
     }
-
-
-
 
 }

@@ -250,8 +250,7 @@ export class ComputePipeline extends Pipeline {
     }
 
 
-
-
+    
     public buildGpuPipeline() {
         //console.log("buildGpuPipeline ", this.gpuComputePipeline)
         if (this.gpuComputePipeline) return this.gpuComputePipeline;
@@ -281,6 +280,16 @@ export class ComputePipeline extends Pipeline {
             }
         }
 
+        
+        let resources:{name:string,resource:any}[][] = this.bindGroups.resources.types;
+        for(let type in resources){
+            (resources[type] as any[]).forEach((o)=>{
+                o.resource.gpuResource.label = o.name;
+            });
+        }
+
+        
+        
 
 
         const inputStruct: ShaderStruct = new ShaderStruct("Input", [...inputs]);;
@@ -330,7 +339,7 @@ export class ComputePipeline extends Pipeline {
         const computePass = commandEncoder.beginComputePass();
         computePass.setPipeline(this.buildGpuPipeline());
 
-        console.log(this.dispatchWorkgroup[0]*64)
+        //console.log(this.dispatchWorkgroup[0]*64)
         this.bindGroups.update();
         this.bindGroups.apply(computePass)
         computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);
@@ -339,13 +348,25 @@ export class ComputePipeline extends Pipeline {
 
         XGPU.device.queue.submit([commandEncoder.finish()]);
 
+        
+
+
+
         if (this.firstFrame) {
             await XGPU.device.queue.onSubmittedWorkDone()
         }
 
+        
         for (let i = 0; i < this.resourceIOs.length; i++) {
             this.resourceIOs[i].getOutputData();
         }
+
+        /*
+        for(let i=0;i<this.vertexBuffers.length;i++){
+            this.vertexBuffers[i].getOutputData();
+        }
+        */
+
 
 
         this.firstFrame = false;

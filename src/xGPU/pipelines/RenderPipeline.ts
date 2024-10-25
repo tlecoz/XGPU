@@ -685,7 +685,12 @@ export class RenderPipeline extends Pipeline {
         this.rebuildingAfterDeviceLost = false;
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
 
-
+        let resources:{name:string,resource:any}[][] = this.bindGroups.resources.types;
+        for(let type in resources){
+            (resources[type] as any[]).forEach((o)=>{
+                o.resource.gpuResource.label = o.name;
+            });
+        }
 
         if (this.resources.__DEBUG__) {
 
