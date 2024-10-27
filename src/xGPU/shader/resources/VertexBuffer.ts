@@ -242,10 +242,12 @@ export class VertexBuffer implements IShaderResource {
         let structName = vertexBufferName.substring(0, 1).toUpperCase() + vertexBufferName.slice(1);
         const varName = vertexBufferName.substring(0, 1).toLowerCase() + vertexBufferName.slice(1);
 
+        //console.log("XGPU||| structName = ",structName);
+
         let result = "";
         let type = "storage, read";
         let structType = "array<" + structName + ">"
-        if (this.io === 1 || this.io === 0) {
+        if (this.descriptor.accessMode == "read"){ //this.io === 1 || this.io === 0) {
 
             result += "struct " + structName + "{\n";
             let a: VertexAttribute;
@@ -257,7 +259,23 @@ export class VertexBuffer implements IShaderResource {
             structType = "array<" + structName + ">"
         } else {
             type = "storage, read_write"
-            structName = structName.slice(0, structName.length - 4);
+            if(this.io == 2){
+                //remove the '_out' 
+                structName = structName.slice(0, structName.length - 4);
+            }else{
+
+                result += "struct " + structName + "{\n";
+                let a: VertexAttribute;
+                for (let i = 0; i < this.vertexArrays.length; i++) {
+                    a = this.vertexArrays[i];
+                    result += "   " + a.name + ":" + a.varType + ",\n";
+                }
+                result += "}\n\n";
+                structType = "array<" + structName + ">"
+
+
+            }
+           
             structType = "array<" + structName + ">"
         }
 
@@ -267,9 +285,10 @@ export class VertexBuffer implements IShaderResource {
 
 
     }
+    public debug:boolean = false;
 
     public createBindGroupLayoutEntry(bindingId: number): any {
-
+        
         return {
             binding: bindingId,
             visibility: GPUShaderStage.COMPUTE,
@@ -300,8 +319,8 @@ export class VertexBuffer implements IShaderResource {
     protected pipelineType: "compute" | "render" | "compute_mixed";
 
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
-        if (this.pipelineType) return;
-
+        if (this.pipelineType || this.lowLevelBuffer) return;
+        
         this.pipelineType = pipelineType ;
         //use to handle particular cases in descriptor relative to the nature of pipeline
 

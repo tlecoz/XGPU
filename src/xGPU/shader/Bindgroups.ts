@@ -88,7 +88,7 @@ export class Bindgroups {
 
         const { vertexLayouts, buffers, nbVertex } = this.createVertexBufferLayout();
 
-        console.log(this.pipeline.type,vertexLayouts)
+        //console.log(this.pipeline.type,vertexLayouts)
 
         description.vertex = {
             buffers: vertexLayouts
