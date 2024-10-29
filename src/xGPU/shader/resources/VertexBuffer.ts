@@ -44,7 +44,8 @@ export class VertexBuffer implements IShaderResource {
         stepMode?: "vertex" | "instance",
         accessMode?: "read" | "read_write",
         usage?: GPUBufferUsageFlags,
-        datas?: Float32Array | Int32Array | Uint32Array | Uint16Array
+        datas?: Float32Array | Int32Array | Uint32Array | Uint16Array,
+        gpuUpdateMode?:"auto"|"manual"
     }) {
 
         //console.warn("VERTEX BUFFER 2", attributes)
@@ -53,16 +54,19 @@ export class VertexBuffer implements IShaderResource {
         else descriptor = { ...descriptor };
 
         if (!descriptor.stepMode) descriptor.stepMode = "vertex";
+       
         this.descriptor = descriptor;
 
         const items: any = attributes;
         let buffer, offset, datas;
         let attribute: VertexAttribute;
+        let nbComponent:number = 0;
         for (let name in items) {
             buffer = items[name];
             offset = buffer.offset;
             datas = buffer.datas;
-            //console.log("=> ", name, buffer)
+            nbComponent += buffer.nbComponent;
+            //console.log("=> ", name, offset,buffer.nbComponent)
 
             if (!this.attributes[name]) {
                 attribute = this.createArray(name, buffer.type, offset);
@@ -74,6 +78,20 @@ export class VertexBuffer implements IShaderResource {
 
         }
         if (descriptor.datas) this.datas = descriptor.datas;
+
+
+        if(descriptor.gpuUpdateMode == "manual"){
+            console.log("VertexBuffer gpuUpdateMode = ",nbComponent)
+
+            const accessMode = descriptor.accessMode ? descriptor.accessMode : "read";
+
+            if(!descriptor.usage){
+                throw new Error("VertexBuffer constructor : you must set the property 'usage' in the descriptor if 'gpuUpdateMode' is set to 'manual' ")
+            }
+
+            const usage = descriptor.usage;
+            this.createLowLevelBuffer(nbComponent * 4,accessMode,usage);
+        }
 
     }
 
@@ -319,7 +337,7 @@ export class VertexBuffer implements IShaderResource {
     protected pipelineType: "compute" | "render" | "compute_mixed";
 
     public setPipelineType(pipelineType: "compute" | "render" | "compute_mixed") {
-        if (this.pipelineType || this.lowLevelBuffer) return;
+        if (this.pipelineType || pipelineType == "compute" && this.lowLevelBuffer == true) return;
         
         this.pipelineType = pipelineType ;
         //use to handle particular cases in descriptor relative to the nature of pipeline
@@ -327,7 +345,6 @@ export class VertexBuffer implements IShaderResource {
         if (pipelineType === "render") {
             if (!this.descriptor.accessMode) this.descriptor.accessMode = "read";
             if (!this.descriptor.usage) this.descriptor.usage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
-
 
         } else if (pipelineType === "compute_mixed") {
            
