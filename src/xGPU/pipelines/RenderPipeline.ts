@@ -240,13 +240,13 @@ export class RenderPipeline extends Pipeline {
             outputs?: any,
             inputs?: any,
             constants?: string,
-        } | string,
+        } | string|VertexShader,
         fragmentShader?: {
             main: string,
             outputs?: any,
             inputs?: any,
             constants?: string
-        } | string
+        } | string|FragmentShader
         , [key: string]: unknown
     }): any {
 
@@ -373,10 +373,17 @@ export class RenderPipeline extends Pipeline {
         if (typeof descriptor.vertexShader === "string") {
             this.vertexShader.main.text = descriptor.vertexShader;
         } else {
+
+            if(descriptor.vertexShader instanceof VertexShader){
+                this.vertexShader = descriptor.vertexShader;
+            }else{
+                if (descriptor.vertexShader.constants) this.vertexShader.constants.text = descriptor.vertexShader.constants;
+                this.vertexShader.main.text = descriptor.vertexShader.main;
+            }   
+
             this.vertexShader.inputs = createArrayOfObjects(descriptor.vertexShader.inputs);
             this.vertexShader.outputs = createArrayOfObjects(descriptor.vertexShader.outputs);
-            if (descriptor.vertexShader.constants) this.vertexShader.constants.text = descriptor.vertexShader.constants;
-            this.vertexShader.main.text = descriptor.vertexShader.main;
+           
         }
 
 
@@ -387,10 +394,17 @@ export class RenderPipeline extends Pipeline {
             if (typeof descriptor.fragmentShader === "string") {
                 this.fragmentShader.main.text = descriptor.fragmentShader;
             } else {
+
+                if(descriptor.fragmentShader instanceof FragmentShader){
+                    this.fragmentShader = descriptor.fragmentShader;
+                }else{
+                    if (descriptor.fragmentShader.constants) this.fragmentShader.constants.text = descriptor.fragmentShader.constants;
+                    this.fragmentShader.main.text = descriptor.fragmentShader.main;
+                }
+
                 this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);;
                 this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);;
-                if (descriptor.fragmentShader.constants) this.fragmentShader.constants.text = descriptor.fragmentShader.constants;
-                this.fragmentShader.main.text = descriptor.fragmentShader.main;
+                
             }
 
         }

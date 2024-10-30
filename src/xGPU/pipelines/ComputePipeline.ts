@@ -50,7 +50,7 @@ export class ComputePipeline extends Pipeline {
             main: string
             inputs?: any,
             constants?: string,
-        } | string,
+        } | string | ComputeShader,
         [key: string]: unknown
     }) {
 
@@ -103,10 +103,17 @@ export class ComputePipeline extends Pipeline {
         if (typeof descriptor.computeShader === "string") {
             this.computeShader.main.text = descriptor.computeShader;
         } else {
+
+            if(descriptor.computeShader instanceof ComputeShader){
+                this.computeShader = descriptor.computeShader;
+            }else{
+                if (descriptor.computeShader.constants) this.computeShader.constants.text = descriptor.computeShader.constants;
+                this.computeShader.main.text = descriptor.computeShader.main;
+            }
+            
             this.computeShader.inputs = createArrayOfObjects(descriptor.computeShader.inputs);
             this.computeShader.outputs = createArrayOfObjects(descriptor.computeShader.outputs);
-            if (descriptor.computeShader.constants) this.computeShader.constants.text = descriptor.computeShader.constants;
-            this.computeShader.main.text = descriptor.computeShader.main;
+           
         }
 
 

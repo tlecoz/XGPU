@@ -20,7 +20,7 @@ export class ShaderNode {
 
     public get text(): string { return this._text }
     public set text(s: string) {
-
+        console.warn("shaderNode.set text")
 
         //--------- remove useless tabulations while keeping tabs structure -------
 
