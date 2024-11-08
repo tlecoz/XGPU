@@ -185,9 +185,34 @@ export class ShaderStage {
 
 
 
+        const res:string[] = code.split("\n");
+            let count:number = 0;
 
+            let tabs:string[] = [];
+            for(let i=0;i<16;i++){
+                if(i==0) tabs[i] = "";
+                else tabs[i] = tabs[i-1]+"\t";
+            }
+            
+            const res2:string[]= [];
+            var s:string;
+            var empty = true;
+            for(let i=0;i<res.length;i++){
+                s = res[i].trim();
+                if(s.includes("}")) count--;
 
+                if(s != "" || !empty){
+                    empty = s == "";
+                    res2.push(tabs[count] + s);
+                }
+                //s = tabs[count] + s;
 
+                if(res[i].includes("{")) count++; 
+            }
+
+           return res2.join("\n");
+
+        /*
         // Retire les sauts de ligne inutiles et divise le code en lignes
         const lines = code.replace(/\n+/g, '\n').split('\n');
 
@@ -219,6 +244,7 @@ export class ShaderStage {
         //console.log("---------------------")
 
         return formattedCode;
+        */
     }
 
 

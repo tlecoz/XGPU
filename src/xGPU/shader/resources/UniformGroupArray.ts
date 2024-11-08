@@ -25,6 +25,24 @@ export class UniformGroupArray {
 
     constructor(groups: UniformGroup[], createLocalVariable: boolean = false) {
         this.groups = groups;
+
+        //----- AJOUT LE 07/11/2024 --------
+        let offset = 0;
+        groups.forEach((g)=>{
+            g.startId = offset;
+            let n = g.type.nbComponent;
+            g.startId = offset;
+
+            if(g.arrayStride % 4 != 0){
+                g.arrayStride += (4 - g.arrayStride%4);
+            }
+
+            offset += g.arrayStride;
+
+            
+        })
+        //----------------------------------
+
         this.createVariableInsideMain = createLocalVariable;
     }
 
@@ -43,14 +61,17 @@ export class UniformGroupArray {
     public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true } }
 
     public copyIntoDataView(dataView: DataView, offset: number) {
-
+       
         let group: UniformGroup;
         for (let i = 0; i < this.groups.length; i++) {
             group = this.groups[i];
+
+            //console.log("groupArray ",i,offset)
             group.copyIntoDataView(dataView, offset);
             offset += group.arrayStride;
         }
 
+        //console.log("====> ",Array.from(new Float32Array(dataView.buffer)))
     }
 
 
@@ -87,7 +108,18 @@ export class UniformGroupArray {
     public getElementById(id: number): UniformGroup { return this.groups[id] };
 
     public get length(): number { return this.groups.length };
-    public get arrayStride(): number { return this.groups[0].arrayStride * this.groups.length }
+    public get arrayStride(): number { 
+
+        let stride = this.groups[0].arrayStride * this.groups.length ;
+        /*
+        if(stride % 4 != 0){
+            stride += 4 - stride % 4;
+        }
+        */
+        //console.log("STRIDE = ",stride);
+
+        return stride;
+    }
     public get isArray(): boolean { return true; }
     public get isUniformGroup(): boolean { return true; }
 }

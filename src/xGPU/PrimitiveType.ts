@@ -694,21 +694,27 @@ export class Vec4Array extends PrimitiveFloatUniform {
         super("array<vec4<f32>," + vec4Array.length + ">", buf)
         this.className = type;
         this.vec4Array = vec4Array;
+       
+        
     }
 
     public update(): void {
-
+        
         let mustBeTransfered = false;
         let m: Vec4;
         for (let i = 0; i < this.vec4Array.length; i++) {
             m = this.vec4Array[i];
             m.update();
             if (m.mustBeTransfered) {
+               
                 mustBeTransfered = true;
                 this.set(m, i * 4);
                 m.mustBeTransfered = false;
+               
             }
         }
+
+        
         this.mustBeTransfered = mustBeTransfered;
     }
 }

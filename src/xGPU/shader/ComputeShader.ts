@@ -48,7 +48,9 @@ export class ComputeShader extends ShaderStage {
 
         if (XGPU.showComputeShader) {
             console.log("------------- COMPUTE SHADER --------------")
-            console.log(result)
+
+            console.log(this.formatWGSLCode(result));
+            //console.log(formated)
             console.log("-------------------------------------------")
         }
         this._shaderInfos = { code: result, output: null };

@@ -14,6 +14,8 @@ import { UniformGroup, Uniformable } from "./UniformGroup";
 export type UniformBufferDescriptor = {
     useLocalVariable?: boolean;
     visibility?: GPUShaderStageFlags;
+    accessMode?:"read"|"read_write";
+    
 }
 
 export class UniformBuffer implements IShaderResource {
@@ -36,16 +38,19 @@ export class UniformBuffer implements IShaderResource {
 
 
     constructor(items: any, descriptor?: {
-        useLocalVariable?: boolean;
-        visibility?: GPUShaderStageFlags;
+        useLocalVariable?: boolean,
+        visibility?: GPUShaderStageFlags,
+        accessMode?:"read"|"read_write",
+       
     }) {
 
-        //console.warn("new UniformBuffer ")
+       
         this.descriptor = descriptor ? { ...descriptor } : {};
         this.group = new UniformGroup(items, this.descriptor.useLocalVariable);
         this.group.uniformBuffer = this;
 
-
+        if(descriptor.accessMode) this._accessMode = descriptor.accessMode;
+        
     }
 
     public cloned: boolean = false;
@@ -91,7 +96,7 @@ export class UniformBuffer implements IShaderResource {
 
         //if (!this._data) this._data = new Float32Array(new ArrayBuffer(this.byteSize))
         if (!this.gpuResource) this.createGpuResource();
-
+        
         this.group.update(this.gpuResource, true);
         this.mustBeTransfered = false;
     }
@@ -114,7 +119,13 @@ export class UniformBuffer implements IShaderResource {
         const varName = uniformName.substring(0, 1).toLowerCase() + uniformName.slice(1);
 
         if (this.bufferType === "uniform") return "@binding(" + bindingId + ") @group(" + groupId + ") var<uniform> " + varName + ":" + structName + ";\n";
-        else return "@binding(" + bindingId + ") @group(" + groupId + ") var<storage, read> " + varName + ":" + structName + ";\n";
+        else {
+            //before 08/11/2024-------
+            //return "@binding(" + bindingId + ") @group(" + groupId + ") var<storage, read> " + varName + ":" + structName + ";\n";
+
+            //update 08/11/2024:
+            return "@binding(" + bindingId + ") @group(" + groupId + ") var<storage, "+this._accessMode+"> " + varName + ":" + structName + ";\n";
+        }
     }
 
     public getUniformById(id: number) { return this.group.items[id]; }
@@ -122,9 +133,11 @@ export class UniformBuffer implements IShaderResource {
 
     //------------------------------
 
+    protected _accessMode:"read" | "read_write";
+    public get accessMode():"read" | "read_write"{return this._accessMode;}
 
-    protected _bufferType: "read-only-storage" | "uniform";
-    public get bufferType(): "read-only-storage" | "uniform" {
+    protected _bufferType: "read-only-storage" | "storage" | "uniform";
+    public get bufferType(): "read-only-storage" | "uniform" | "storage" {
         return this._bufferType;
     }
 
@@ -139,7 +152,7 @@ export class UniformBuffer implements IShaderResource {
             const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
             let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
 
-            if (this.bufferType === "read-only-storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+            if (this.bufferType === "read-only-storage" || this.bufferType === "storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
 
             //console.log("uniformBuffer createGpuResource size = ", size, this.group.arrayStride);
             this.gpuResource = XGPU.device.createBuffer({
@@ -252,11 +265,26 @@ export class UniformBuffer implements IShaderResource {
         //console.warn("setPipelineType ", pipelineType)
         //use to handle particular cases in descriptor relative to the nature of pipeline
         if (pipelineType === "compute" || pipelineType === "compute_mixed") {
-            this._bufferType = "read-only-storage";
+            if(!this._bufferType) this._bufferType = "storage";
+            if(!this._accessMode) this._accessMode = "read_write";
+
+            if(this._accessMode){
+                if(this._accessMode == "read"){
+                    this._bufferType = "read-only-storage";
+                }else{
+                    this._bufferType = "storage";
+                }
+            }else{
+                this._bufferType = "storage";
+                this._accessMode = "read_write";
+            }
+
+
             this.descriptor.visibility = GPUShaderStage.COMPUTE;
         } else {
             if (this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT < 65536) this._bufferType = "uniform";
-            else this._bufferType = "uniform";
+            else this._bufferType = "storage";
+            this._accessMode = "read";
             this.descriptor.visibility = this.shaderVisibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
         }
     }

@@ -81,8 +81,7 @@ export class VertexBuffer implements IShaderResource {
 
 
         if(descriptor.gpuUpdateMode == "manual"){
-            console.log("VertexBuffer gpuUpdateMode = ",nbComponent)
-
+           
             const accessMode = descriptor.accessMode ? descriptor.accessMode : "read";
 
             if(!descriptor.usage){

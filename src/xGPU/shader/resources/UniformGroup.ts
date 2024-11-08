@@ -233,6 +233,8 @@ export class UniformGroup {
         const type: GPUType = item.type;
         const primitive: "f32" | "i32" | "u32" | "f16" = type.primitive;
 
+        //console.log("setDatas = ",item.name,type.nbValues)
+
         switch (primitive) {
             case "f32":
                 for (let i = 0; i < type.nbValues; i++) dataView.setFloat32((startId + i) * 4, item[i], true);
@@ -267,7 +269,7 @@ export class UniformGroup {
     public async update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
 
         if (fromUniformBuffer === false) {
-            //console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            console.log("AAAAAAAAAAAAAAA ",this.startId,this.datas.byteLength/4,this.arrayStride)
             XGPU.device.queue.writeBuffer(
                 gpuResource,
                 this.startId,
@@ -284,11 +286,20 @@ export class UniformGroup {
         let item: Uniformable;
         for (let i = 0; i < this.items.length; i++) {
             item = this.items[i];
-            if (!item.type.isUniformGroup) (item as any).update();
+           
+            if (!item.type.isUniformGroup){
+               
+               (item as any).update();
+             
+            }
 
+            
             if (item.mustBeTransfered) {
-
+                //
                 if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+
+                    
+
                     item.update(gpuResource, false);
                 } else {
 
@@ -369,7 +380,7 @@ export class UniformGroup {
                         otherStructs = (item.groups[0] as UniformGroup).wgsl.struct + otherStructs;
                     }
 
-                    struct += "    " + name + ":array<" + this.getStructName(name) + "," + item.length + ">,\n"
+                    struct += "@size("+item.length * item.groups[0].arrayStride * 4 +")    " + name + ":array<" + this.getStructName(name) + "," + item.length + ">,\n"
                     localVariables += item.createVariable(this.name);
                 }
 
@@ -471,6 +482,7 @@ export class UniformGroup {
 
                 v.startId = offset;
                 offset += v.arrayStride;
+                //console.log("=======>>>> ",v.arrayStride)
                 result.push(v);
 
             } else {
@@ -499,13 +511,15 @@ export class UniformGroup {
                     result.push(v);
 
                 } else if (type.isUniformGroup) {
-
+                    
                     if (type.nbComponent >= 4) {
                         bound = 4;
                         v.startId = offset;
                         offset += Math.ceil(type.nbComponent / 4) * 4;
+                        
                         result.push(v);
                     }
+                   
 
                 } else if ((v as PrimitiveType).propertyNames) { //if it's a customClass the extends a PrimitiveType and use a struct
                     bound = 4;
@@ -573,6 +587,8 @@ export class UniformGroup {
         //--------------------------
 
         nb = floats.length;
+
+        //console.log("floats.length = ",nb)
         for (let i = 0; i < nb; i++) {
             v = floats.shift();
             v.startId = offset;
@@ -586,10 +602,19 @@ export class UniformGroup {
         if (offset % bound !== 0) {
             offset += bound - (offset % bound);
         }
-
+        
+        
+        //----AJOUT LE 07/11/2024------
+        if(offset % 4 != 0){
+            offset += 4 - offset % 4;
+        }
         //--------------------------
+        
 
+        //console.log("uniformGroup ",offset,bound);
         this.arrayStride = offset;
+
+
 
 
 

@@ -10,6 +10,12 @@ export class ShaderNode {
     private _text: string;
     private insideMainFunction: boolean;
 
+    private _nodeByName:{[key:string]:ShaderNode} = {};
+    public get nodeByName():{[key:string]:ShaderNode}{
+        return this._nodeByName;
+    }
+
+
     private subNodes: ShaderNode[];
 
     constructor(code: string = "", insideMainFunction: boolean = false) {
@@ -20,8 +26,7 @@ export class ShaderNode {
 
     public get text(): string { return this._text }
     public set text(s: string) {
-        console.warn("shaderNode.set text")
-
+        
         //--------- remove useless tabulations while keeping tabs structure -------
 
         const lines = s.split("\n");
@@ -94,6 +99,11 @@ export class ShaderNode {
         return node;
     }
 
+    public addNode(nodeName:string,code:string=""):ShaderNode{
+        const node = this.createNode(code);
+        this._nodeByName[nodeName] = node;
+        return node;
+    }
 
 
 
