@@ -68,9 +68,11 @@ export class UniformGroup {
         this.uniformBuffer = null;
     }
 
-    constructor(items: any, useLocalVariable?: boolean) {
+    protected usedAsUniformBuffer:boolean;
 
+    constructor(items: any, useLocalVariable?: boolean , usedAsUniformBuffer:boolean=false) {
 
+        this.usedAsUniformBuffer = usedAsUniformBuffer;
         this.createVariableInsideMain = !!useLocalVariable;
 
         let o: any;
@@ -609,14 +611,15 @@ export class UniformGroup {
         if(offset % 4 != 0){
             const n = 4 - offset % 4;
 
-            for(let i=0;i<n;i++){
-                const float = new Float(0);
-                float.startId = offset;
-                float.name = "padding_"+i;
-                //if(this.itemNames.includes("padding_"+i) == false) this.itemNames.push("padding_"+i);
-                result.push(float)
+            if(!this.usedAsUniformBuffer){
+                for(let i=0;i<n;i++){
+                    const float = new Float(0);
+                    float.startId = offset;
+                    float.name = "padding_"+i;
+                    result.push(float)
+                }
             }
-
+            
             offset += n;
         }
        

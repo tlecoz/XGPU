@@ -46,7 +46,7 @@ export class UniformBuffer implements IShaderResource {
 
        
         this.descriptor = descriptor ? { ...descriptor } : {};
-        this.group = new UniformGroup(items, this.descriptor.useLocalVariable);
+        this.group = new UniformGroup(items, this.descriptor.useLocalVariable,true);
         this.group.uniformBuffer = this;
 
         if(descriptor.accessMode) this._accessMode = descriptor.accessMode;
