@@ -2,7 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
-import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../../PrimitiveType";
+import { Float, PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
 import { GPUType } from "../../GPUType";
@@ -269,7 +269,7 @@ export class UniformGroup {
     public async update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
 
         if (fromUniformBuffer === false) {
-            console.log("AAAAAAAAAAAAAAA ",this.startId,this.datas.byteLength/4,this.arrayStride)
+            console.log("AAAAAAAAAAAAAAA ",this.startId,this.datas.byteLength/4,this.arrayStride , Array.from(new Float32Array(this.datas)))
             XGPU.device.queue.writeBuffer(
                 gpuResource,
                 this.startId,
@@ -396,7 +396,7 @@ export class UniformGroup {
                     if (primitiveStructs.indexOf(s) === -1 && otherStructs.indexOf(s) === -1 && struct.indexOf(s) === -1) {
                         primitiveStructs += s + "\n";
                     }
-
+                    
                     struct += "     @size(16) " + o.name + ":" + o.className + ",\n";
                     //struct += "     @size(16) " + o.name + ":" + o.constructor.name + ",\n";
 
@@ -592,22 +592,34 @@ export class UniformGroup {
         for (let i = 0; i < nb; i++) {
             v = floats.shift();
             v.startId = offset;
+            //console.log("v = ",v)
             //console.log(v.name, v.startId * 4)
             offset++;
             result.push(v);
         }
 
         //--------------------------
-
+        /*
         if (offset % bound !== 0) {
             offset += bound - (offset % bound);
         }
-        
+        */
         
         //----AJOUT LE 07/11/2024------
         if(offset % 4 != 0){
-            offset += 4 - offset % 4;
+            const n = 4 - offset % 4;
+
+            for(let i=0;i<n;i++){
+                const float = new Float(0);
+                float.startId = offset;
+                float.name = "padding_"+i;
+                //if(this.itemNames.includes("padding_"+i) == false) this.itemNames.push("padding_"+i);
+                result.push(float)
+            }
+
+            offset += n;
         }
+       
         //--------------------------
         
 

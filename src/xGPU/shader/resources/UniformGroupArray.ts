@@ -33,12 +33,15 @@ export class UniformGroupArray {
             let n = g.type.nbComponent;
             g.startId = offset;
 
+            
+            /*
             if(g.arrayStride % 4 != 0){
                 g.arrayStride += (4 - g.arrayStride%4);
             }
-
-            offset += g.arrayStride;
-
+            */
+            console.log("offset = ",offset)
+            offset += (g.arrayStride) * 4;
+            
             
         })
         //----------------------------------
