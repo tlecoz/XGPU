@@ -727,10 +727,8 @@ export class Vec4Array extends PrimitiveFloatUniform {
         for(let i=0;i<this.vec4Array.length;i++){
             this.vec4Array[i].addEventListener("ON_CHANGE",()=>{
                 this.mustBeTransfered = true;
-                console.log("OOOOOO")
                 this.set(this.vec4Array[i], i * 4);
                 this.dispatchEvent("ON_CHANGE");
-                
             })
         }
         
@@ -776,6 +774,14 @@ export class IVec4Array extends PrimitiveIntUniform {
         super(type, buf);
         this.className = type;
         this.ivec4Array = ivec4Array;
+
+        for(let i=0;i<this.ivec4Array.length;i++){
+            this.ivec4Array[i].addEventListener("ON_CHANGE",()=>{
+                this.mustBeTransfered = true;
+                this.set(this.ivec4Array[i], i * 4);
+                this.dispatchEvent("ON_CHANGE");
+            })
+        }
     }
 
     public update(): void {
@@ -810,6 +816,14 @@ export class UVec4Array extends PrimitiveUintUniform {
         super(type, buf);
         this.className = type;
         this.uvec4Array = uvec4Array;
+
+        for(let i=0;i<this.uvec4Array.length;i++){
+            this.uvec4Array[i].addEventListener("ON_CHANGE",()=>{
+                this.mustBeTransfered = true;
+                this.set(this.uvec4Array[i], i * 4);
+                this.dispatchEvent("ON_CHANGE");
+            })
+        }
     }
 
     public update(): void {
@@ -1035,6 +1049,14 @@ export class Matrix4x4Array extends PrimitiveFloatUniform {
         this.mustBeTransfered = true;
 
         this.className = "array<mat4x4<f32>," + mat4x4Array.length + ">";
+
+        for(let i=0;i<this.matrixs.length;i++){
+            this.matrixs[i].addEventListener("ON_CHANGE",()=>{
+                this.mustBeTransfered = true;
+                this.set(this.matrixs[i], i * 16);
+                this.dispatchEvent("ON_CHANGE");
+            })
+        }
     }
 
     public update(): void {
