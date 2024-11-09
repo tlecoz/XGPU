@@ -2,7 +2,7 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
-import { Float, PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../../PrimitiveType";
+import { Float, PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform, Vec4Array } from "../../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
 import { GPUType } from "../../GPUType";
@@ -22,15 +22,19 @@ export class UniformGroup extends EventDispatcher{
     public startId: number = 0;
     public createVariableInsideMain: boolean = false;
     
+    public mustBeTransfered:boolean = true;
+    protected mustDispatchChangeEvent:boolean = false;
+    /*
     protected _mustBeTransfered: boolean = true;
     public get mustBeTransfered():boolean{return this._mustBeTransfered};
     public set mustBeTransfered(b:boolean){
         if(b != this._mustBeTransfered){
+            console.warn(b)
             if(b) this.dispatchEvent(UniformGroup.ON_CHANGE);
             else this.dispatchEvent(UniformGroup.ON_CHANGED);
             this._mustBeTransfered = b;
         }
-    }
+    }*/
 
     protected _name: string;
     public wgsl: { struct: string, localVariables: string };
@@ -162,9 +166,15 @@ export class UniformGroup extends EventDispatcher{
             data.createVariableInsideMain = true;
         }
 
-        if(this.usedAsUniformBuffer == false){
+        //console.log("this.name = ",this.name)
+        if(this.usedAsUniformBuffer == false || data instanceof UniformGroup || data instanceof UniformGroupArray || data instanceof Vec4Array){
+           
             data.addEventListener("ON_CHANGE",(e)=>{
+                if(data instanceof Vec4Array) console.log("VEC4ARRAY CHANGED ",this.usedAsUniformBuffer)
+                if(data instanceof UniformGroupArray || data instanceof UniformGroup) console.log("ON_CHANGE ",data.name+" changed ",data.type)
                 this.mustBeTransfered = true;
+                //this.mustDispatchChangeEvent = true;
+                this.dispatchEvent("ON_CHANGE");
             })
         }
         
@@ -266,20 +276,27 @@ export class UniformGroup extends EventDispatcher{
                 for (let i = 0; i < type.nbValues; i++) dataView.setUint32((startId + i) * 4, item[i], true);
                 break;
         }
-
+        if(this.usedAsUniformBuffer == false && item.type.isArray == false){
+            item.mustBeTransfered = false;
+        }
+       
     }
 
     public copyIntoDataView(dataView: DataView, offset: number) {
 
         let item: Uniformable;
+        let mustTransfer = false;
         for (let i = 0; i < this.items.length; i++) {
             item = this.items[i];
-
+            //console.log("UG.copyIntoDataView item = ",item.name,item.mustBeTransfered)
             if(item.mustBeTransfered){
-
+                mustTransfer = true;
+                //console.log("MBT => ",item.name)
                 if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+                    //console.log("call  (item as UniformGroup).copyIntoDataView");
                     (item as UniformGroup).copyIntoDataView(dataView, offset + item.startId);
                 } else {
+                    //console.log("call setDatas")
                     this.setDatas(item, dataView, offset)
                 }
                 //console.log(item.name,this.usedAsUniformBuffer)
@@ -290,79 +307,96 @@ export class UniformGroup extends EventDispatcher{
                 //
             }
         }
+
+        //console.log("CIDV ",mustTransfer,this.usedAsUniformBuffer)
+        this.mustBeTransfered = mustTransfer;
+        if( mustTransfer){
+            this.dispatchEvent(UniformGroup.ON_CHANGE);
+        }
+        
+
+
+        //console.log("dataView = ",new Float32Array(dataView.buffer));
     }
 
    
+    public transfertWholeBuffer:boolean = false; 
 
+    public async update(gpuResource: GPUBuffer){//}, fromUniformBuffer: boolean = false) {
 
-    public async update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
-
-        if (fromUniformBuffer === false) {
-           
-
-            if(this.mustBeTransfered){
-                this.copyIntoDataView(this.dataView,0);
-               
-                XGPU.device.queue.writeBuffer(
-                    gpuResource,
-                    this.startId,
-                    this.datas,
-                    0,
-                    this.arrayStride * Float32Array.BYTES_PER_ELEMENT
-                )
-
-                this.mustBeTransfered = false;
-            }
-
-            
-
-            return;
-        }
-
-        //console.log("items.length = ", this.items);
-
+       
+        let mustBeTransfered = false;
+        
         let item: Uniformable;
         for (let i = 0; i < this.items.length; i++) {
             item = this.items[i];
            
-            if (!item.type.isUniformGroup){
-               
-               (item as any).update();
-             
-            }
-
-           
+            if (!item.type.isUniformGroup) (item as any).update(); 
+            else item.update(gpuResource);
             
-            if (item.mustBeTransfered) {
-                //
-                if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+
+
+            if ( item.mustBeTransfered) {
+                mustBeTransfered = true;
+                if (!(item instanceof UniformGroup || item instanceof UniformGroupArray )) {
+
+                        //console.log(item.name)
+
+                        this.setDatas(item)
+                        item.mustBeTransfered = false;
+
+                        if(this.transfertWholeBuffer == false || item.type.isArray){
+                           
+                            if(this.transfertWholeBuffer == false){
+                                XGPU.device.queue.writeBuffer(
+                                    gpuResource,
+                                    item.startId * Float32Array.BYTES_PER_ELEMENT,
+                                    item.buffer,
+                                    item.byteOffset,
+                                    item.byteLength
+                                )
+
+                            }
+
+                        }
+
 
                     
 
-                    item.update(gpuResource, false);
-                } else {
+                    
+                    
+                    //item.mustBeTransfered = false;
 
-                    //console.log(item);
-                    //console.log(item.name, item.startId * Float32Array.BYTES_PER_ELEMENT, item.buffer.byteLength, item.buffer, item.byteOffset)
-                    //this.datas.set(item, item.startId);
-                    this.setDatas(item)
-
-
-                    XGPU.device.queue.writeBuffer(
-                        gpuResource,
-                        item.startId * Float32Array.BYTES_PER_ELEMENT,
-                        item.buffer,
-                        item.byteOffset,
-                        item.byteLength
-                    )
+                }else{
+                    
+                    item.copyIntoDataView(this.dataView,item.startId)
                 }
 
-                item.mustBeTransfered = false;
-                //console.log("uniformGroup.update time = ", (new Date().getTime() - time))
+                
+
             }
+            
         }
 
+       
+        //if(this.usedAsUniformBuffer) 
 
+        if(this.usedAsUniformBuffer && this.transfertWholeBuffer){
+
+            //console.log("AAAAAAAAAAAAA ",this.mustBeTransfered)
+
+           if(mustBeTransfered){
+                console.log("AAAAAAAAAAAAAAAAAA ",this.mustBeTransfered,new Float32Array(this.dataView.buffer));
+                XGPU.device.queue.writeBuffer(
+                    gpuResource,
+                    0,
+                    this.datas,
+                    0,
+                    this.arrayStride * 4
+                )
+            }
+        }
+       
     }
 
 
@@ -666,7 +700,7 @@ export class UniformGroup extends EventDispatcher{
         
 
         //console.log("uniformGroup ",offset,bound);
-        this.arrayStride = offset;
+        this.arrayStride = offset ;
 
 
 

@@ -14,19 +14,13 @@ export class UniformGroupArray extends EventDispatcher {
     public groups: UniformGroup[];
 
     public startId: number = 0;
+    
     public createVariableInsideMain: boolean = false;
     public name: string;
 
-    protected _mustBeTransfered: boolean = true;
-    public get mustBeTransfered():boolean{return this._mustBeTransfered};
-    public set mustBeTransfered(b:boolean){
-        if(b != this._mustBeTransfered){
-            if(b) this.dispatchEvent(UniformGroup.ON_CHANGE);
-            else this.dispatchEvent(UniformGroup.ON_CHANGED);
-            this._mustBeTransfered = b;
-        }
-    }
-
+    public mustBeTransfered:boolean = true;
+    protected mustDispatchChangeEvent:boolean = false;
+   
 
     protected buffer: UniformBuffer = null;
     public get uniformBuffer(): UniformBuffer { return this.buffer };
@@ -51,8 +45,14 @@ export class UniformGroupArray extends EventDispatcher {
             g.startId = offset;
             let n = g.type.nbComponent;
             g.startId = offset;
-            offset += (g.arrayStride) * 4;
+            offset += (g.arrayStride)// * 4;
             
+            
+            g.addEventListener(UniformGroup.ON_CHANGE,()=>{
+                console.log("on array child ON_CHANGE")
+                this.mustBeTransfered = true;
+                this.dispatchEvent(UniformGroupArray.ON_CHANGE)
+            })
             
         })
         //----------------------------------
@@ -75,16 +75,20 @@ export class UniformGroupArray extends EventDispatcher {
     public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true } }
 
     public copyIntoDataView(dataView: DataView, offset: number) {
-       
+        console.log("groupArray copy into dataview")
         let group: UniformGroup;
         for (let i = 0; i < this.groups.length; i++) {
             group = this.groups[i];
-
-            //console.log("groupArray ",i,offset)
-            group.copyIntoDataView(dataView, offset);
+            if(group.mustBeTransfered){
+                group.copyIntoDataView(dataView, offset);
+                //console.log("groupArray ",i,offset,new Float32Array(dataView.buffer))
+                group.mustBeTransfered = false;
+            }
+            //
+            
             offset += group.arrayStride;
         }
-
+        this.mustBeTransfered = false;
         //console.log("====> ",Array.from(new Float32Array(dataView.buffer)))
     }
 
@@ -104,14 +108,15 @@ export class UniformGroupArray extends EventDispatcher {
         return "   var " + varName + ":array<" + this.getStructName(this.name) + "," + this.length + "> = " + this.getVarName(uniformBufferName) + "." + varName + ";\n"
     }
 
-    public update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
-        if (fromUniformBuffer) {
-            //required to build
-        }
-        console.log("uniformGroupArray.update")
+    
+
+    public update(gpuResource: GPUBuffer){
+        
+        //console.warn("uniformGroupArray.update")
         for (let i = 0; i < this.groups.length; i++) {
-            this.groups[i].update(gpuResource, false);
+            this.groups[i].update(gpuResource);
         }
+        
     }
 
     public forceUpdate(): void {

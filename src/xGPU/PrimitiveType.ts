@@ -27,25 +27,32 @@ export class PrimitiveFloatUniform extends Float32Array {
 
     public onChange: () => void;
 
+    protected mustTriggerChangeEvent:boolean = false;
+    protected mustTriggerChangedEvent:boolean = false;
 
-
+    
     protected _mustBeTransfered: boolean = true;
+    
     public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
     public set mustBeTransfered(b: boolean) {
 
-        if(this.name != "timeBytes"){
-            console.warn(this.name,this._mustBeTransfered,b);
-        }
+        //if(this.name == "timeBytes"){
+        //    console.warn(this.name,this._mustBeTransfered,b);
+        //}
         if (b != this._mustBeTransfered) {
 
-            
+            //if(b) this.mustTriggerChangeEvent = true;
+            //else this.mustTriggerChangedEvent = true; 
 
-            if (!b) this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED);
-            else this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGE);
+            if(b) this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGE);
+            else this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED);
+           
             //if (!b && this.onChange) this.onChange();
             this._mustBeTransfered = b;
         }
     }
+    
+   //public mustBeTransfered:boolean = true;
 
 
     public uniformBuffer: UniformBuffer;
@@ -124,7 +131,19 @@ export class PrimitiveFloatUniform extends Float32Array {
     }*/
 
 
-    public update() { }
+    public update() {
+        //console.log(this.name+" : update")
+        /*
+        if (this.mustTriggerChangedEvent){
+            this.mustTriggerChangedEvent = false;
+            this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED);
+        }
+        if(this.mustTriggerChangeEvent){
+            this.mustTriggerChangeEvent = false;
+            this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGE);
+        }
+         */
+     }
 
 
 
@@ -705,6 +724,15 @@ export class Vec4Array extends PrimitiveFloatUniform {
         this.className = type;
         this.vec4Array = vec4Array;
        
+        for(let i=0;i<this.vec4Array.length;i++){
+            this.vec4Array[i].addEventListener("ON_CHANGE",()=>{
+                this.mustBeTransfered = true;
+                console.log("OOOOOO")
+                this.set(this.vec4Array[i], i * 4);
+                this.dispatchEvent("ON_CHANGE");
+                
+            })
+        }
         
     }
 
@@ -714,6 +742,7 @@ export class Vec4Array extends PrimitiveFloatUniform {
         let m: Vec4;
         for (let i = 0; i < this.vec4Array.length; i++) {
             m = this.vec4Array[i];
+            if(!m.name) m.name = this.name+"#"+i;
             m.update();
             if (m.mustBeTransfered) {
                

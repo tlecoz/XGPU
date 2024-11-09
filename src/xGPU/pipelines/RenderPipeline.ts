@@ -702,7 +702,10 @@ export class RenderPipeline extends Pipeline {
         let resources:{name:string,resource:any}[][] = this.bindGroups.resources.types;
         for(let type in resources){
             (resources[type] as any[]).forEach((o)=>{
-                o.resource.gpuResource.label = o.name;
+                if(o.resource.gpuResource){
+                    o.resource.gpuResource.label = o.name;
+                }
+               
             });
         }
 
@@ -711,6 +714,7 @@ export class RenderPipeline extends Pipeline {
             this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount)
             this.vertexShaderDebuggerPipeline.onLog = (o) => {
+                console.log(o);
                 this.dispatchEvent(RenderPipeline.ON_LOG, o);
                 //this._onLog(o);
             }

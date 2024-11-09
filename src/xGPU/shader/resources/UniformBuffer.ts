@@ -97,7 +97,7 @@ export class UniformBuffer implements IShaderResource {
         //if (!this._data) this._data = new Float32Array(new ArrayBuffer(this.byteSize))
         if (!this.gpuResource) this.createGpuResource();
         
-        this.group.update(this.gpuResource, true);
+        this.group.update(this.gpuResource);
         this.mustBeTransfered = false;
     }
 
