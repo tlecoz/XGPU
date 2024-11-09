@@ -33,7 +33,9 @@ export class PrimitiveFloatUniform extends Float32Array {
     public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
     public set mustBeTransfered(b: boolean) {
 
-        
+        if(this.name != "timeBytes"){
+            console.warn(this.name,this._mustBeTransfered,b);
+        }
         if (b != this._mustBeTransfered) {
 
             

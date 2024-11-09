@@ -282,8 +282,12 @@ export class UniformGroup extends EventDispatcher{
                 } else {
                     this.setDatas(item, dataView, offset)
                 }
-            
-                item.mustBeTransfered = false;
+                //console.log(item.name,this.usedAsUniformBuffer)
+
+                if(this.usedAsUniformBuffer == false){
+                    item.mustBeTransfered = false;
+                }
+                //
             }
         }
     }
