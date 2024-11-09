@@ -15,7 +15,7 @@ export class PrimitiveFloatUniform extends Float32Array {
 
 
 
-
+    public static ON_CHANGE:string = "ON_CHANGE";
     public static ON_CHANGED: string = "ON_CHANGED";
 
 
@@ -32,8 +32,14 @@ export class PrimitiveFloatUniform extends Float32Array {
     protected _mustBeTransfered: boolean = true;
     public get mustBeTransfered(): boolean { return this._mustBeTransfered; }
     public set mustBeTransfered(b: boolean) {
+
+        
         if (b != this._mustBeTransfered) {
-            if (!b) this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED)
+
+            
+
+            if (!b) this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED);
+            else this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGE);
             //if (!b && this.onChange) this.onChange();
             this._mustBeTransfered = b;
         }
@@ -149,7 +155,7 @@ export class PrimitiveIntUniform extends Int32Array {
 
 
 
-
+    public static ON_CHANGE:string = "ON_CHANGE";
     public static ON_CHANGED: string = "ON_CHANGED";
 
     public name: string;
@@ -162,6 +168,7 @@ export class PrimitiveIntUniform extends Int32Array {
     public set mustBeTransfered(b: boolean) {
         if (b != this._mustBeTransfered) {
             if (!b) this.dispatchEvent(PrimitiveIntUniform.ON_CHANGED)
+            else this.dispatchEvent(PrimitiveIntUniform.ON_CHANGE);
             //if (!b && this.onChange) this.onChange();
             this._mustBeTransfered = b;
         }
@@ -254,7 +261,7 @@ export class PrimitiveIntUniform extends Int32Array {
 export class PrimitiveUintUniform extends Uint32Array {
 
 
-
+    public static ON_CHANGE:string = "ON_CHANGE";
     public static ON_CHANGED: string = "ON_CHANGED";
 
 
@@ -271,6 +278,7 @@ export class PrimitiveUintUniform extends Uint32Array {
         if (b != this._mustBeTransfered) {
             //if (!b && this.onChange) this.onChange();
             if (!b) this.dispatchEvent(PrimitiveUintUniform.ON_CHANGED)
+            else this.dispatchEvent(PrimitiveUintUniform.ON_CHANGE);
             this._mustBeTransfered = b;
         }
     }
@@ -714,8 +722,10 @@ export class Vec4Array extends PrimitiveFloatUniform {
             }
         }
 
+        if(this.mustBeTransfered != mustBeTransfered){
+            this.mustBeTransfered = mustBeTransfered;
+        }
         
-        this.mustBeTransfered = mustBeTransfered;
     }
 }
 

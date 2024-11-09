@@ -6,11 +6,14 @@ import { Float, PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, Primi
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
 import { GPUType } from "../../GPUType";
+import { EventDispatcher } from "../../EventDispatcher";
 
 export type Uniformable = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform | UniformGroup | UniformGroupArray;
 
-export class UniformGroup {
+export class UniformGroup extends EventDispatcher{
 
+    public static ON_CHANGE:string = "ON_CHANGE";
+    public static ON_CHANGED:string = "ON_CHANGED";
 
     public unstackedItems: any = {};
     public items: Uniformable[];
@@ -18,7 +21,16 @@ export class UniformGroup {
     public arrayStride: number = 0;
     public startId: number = 0;
     public createVariableInsideMain: boolean = false;
-    public mustBeTransfered: boolean = true;
+    
+    protected _mustBeTransfered: boolean = true;
+    public get mustBeTransfered():boolean{return this._mustBeTransfered};
+    public set mustBeTransfered(b:boolean){
+        if(b != this._mustBeTransfered){
+            if(b) this.dispatchEvent(UniformGroup.ON_CHANGE);
+            else this.dispatchEvent(UniformGroup.ON_CHANGED);
+            this._mustBeTransfered = b;
+        }
+    }
 
     protected _name: string;
     public wgsl: { struct: string, localVariables: string };
@@ -71,6 +83,7 @@ export class UniformGroup {
     protected usedAsUniformBuffer:boolean;
 
     constructor(items: any, useLocalVariable?: boolean , usedAsUniformBuffer:boolean=false) {
+        super();
 
         this.usedAsUniformBuffer = usedAsUniformBuffer;
         this.createVariableInsideMain = !!useLocalVariable;
@@ -149,7 +162,12 @@ export class UniformGroup {
             data.createVariableInsideMain = true;
         }
 
-
+        if(this.usedAsUniformBuffer == false){
+            data.addEventListener("ON_CHANGE",(e)=>{
+                this.mustBeTransfered = true;
+            })
+        }
+        
 
         const alreadyDefined: boolean = !!this.unstackedItems[name];
         this.unstackedItems[name] = data;
@@ -257,28 +275,42 @@ export class UniformGroup {
         for (let i = 0; i < this.items.length; i++) {
             item = this.items[i];
 
-            if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
-                (item as UniformGroup).copyIntoDataView(dataView, offset + item.startId);
-            } else {
-                this.setDatas(item, dataView, offset)
-            }
+            if(item.mustBeTransfered){
 
+                if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+                    (item as UniformGroup).copyIntoDataView(dataView, offset + item.startId);
+                } else {
+                    this.setDatas(item, dataView, offset)
+                }
+            
+                item.mustBeTransfered = false;
+            }
         }
     }
 
+   
 
 
     public async update(gpuResource: GPUBuffer, fromUniformBuffer: boolean = false) {
 
         if (fromUniformBuffer === false) {
-            console.log("AAAAAAAAAAAAAAA ",this.startId,this.datas.byteLength/4,this.arrayStride , Array.from(new Float32Array(this.datas)))
-            XGPU.device.queue.writeBuffer(
-                gpuResource,
-                this.startId,
-                this.datas,
-                0,
-                this.arrayStride * Float32Array.BYTES_PER_ELEMENT
-            )
+           
+
+            if(this.mustBeTransfered){
+                this.copyIntoDataView(this.dataView,0);
+               
+                XGPU.device.queue.writeBuffer(
+                    gpuResource,
+                    this.startId,
+                    this.datas,
+                    0,
+                    this.arrayStride * Float32Array.BYTES_PER_ELEMENT
+                )
+
+                this.mustBeTransfered = false;
+            }
+
+            
 
             return;
         }
@@ -295,6 +327,7 @@ export class UniformGroup {
              
             }
 
+           
             
             if (item.mustBeTransfered) {
                 //
@@ -602,6 +635,8 @@ export class UniformGroup {
 
         //--------------------------
         /*
+
+        //BEFORE 07/11/2024:
         if (offset % bound !== 0) {
             offset += bound - (offset % bound);
         }

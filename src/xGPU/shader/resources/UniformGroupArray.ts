@@ -1,17 +1,32 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { EventDispatcher } from "../../EventDispatcher";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroup } from "./UniformGroup";
 
-export class UniformGroupArray {
+export class UniformGroupArray extends EventDispatcher {
+
+    public static ON_CHANGE:string = "ON_CHANGE";
+    public static ON_CHANGED:string = "ON_CHANGED";
+
 
     public groups: UniformGroup[];
 
     public startId: number = 0;
     public createVariableInsideMain: boolean = false;
-    public mustBeTransfered: boolean = true;
     public name: string;
+
+    protected _mustBeTransfered: boolean = true;
+    public get mustBeTransfered():boolean{return this._mustBeTransfered};
+    public set mustBeTransfered(b:boolean){
+        if(b != this._mustBeTransfered){
+            if(b) this.dispatchEvent(UniformGroup.ON_CHANGE);
+            else this.dispatchEvent(UniformGroup.ON_CHANGED);
+            this._mustBeTransfered = b;
+        }
+    }
+
 
     protected buffer: UniformBuffer = null;
     public get uniformBuffer(): UniformBuffer { return this.buffer };
@@ -24,7 +39,11 @@ export class UniformGroupArray {
     }
 
     constructor(groups: UniformGroup[], createLocalVariable: boolean = false) {
+        
+        super();
+
         this.groups = groups;
+
 
         //----- AJOUT LE 07/11/2024 --------
         let offset = 0;
@@ -32,14 +51,6 @@ export class UniformGroupArray {
             g.startId = offset;
             let n = g.type.nbComponent;
             g.startId = offset;
-
-            
-            /*
-            if(g.arrayStride % 4 != 0){
-                g.arrayStride += (4 - g.arrayStride%4);
-            }
-            */
-            console.log("offset = ",offset)
             offset += (g.arrayStride) * 4;
             
             
@@ -97,6 +108,7 @@ export class UniformGroupArray {
         if (fromUniformBuffer) {
             //required to build
         }
+        console.log("uniformGroupArray.update")
         for (let i = 0; i < this.groups.length; i++) {
             this.groups[i].update(gpuResource, false);
         }
