@@ -5,9 +5,9 @@ import { EventDispatcher } from "../../EventDispatcher";
 import { ShaderNode } from "./ShaderNode";
 import { ShaderStruct } from "./ShaderStruct";
 
-export class ShaderStage extends EventDispatcher {
+export class ShaderStage  {
 
-    public static BUILD_COMPLETED:string = "BUILD_COMPLETED";
+    
 
     public inputs: { name: string, type: any, builtin?: string }[] = [];
     public outputs: { name: string, type: any, builtin?: string }[] = [];
@@ -21,7 +21,7 @@ export class ShaderStage extends EventDispatcher {
     public shaderType: "vertex" | "fragment" | "compute";
 
     constructor(shaderType: "vertex" | "fragment" | "compute") {
-        super();
+        
         this.shaderType = shaderType;
         this.constants = new ShaderNode();
         this.main = new ShaderNode("", true);
@@ -208,46 +208,13 @@ export class ShaderStage extends EventDispatcher {
                     empty = s == "";
                     res2.push(tabs[count] + s);
                 }
-                //s = tabs[count] + s;
-
+                
                 if(res[i].includes("{")) count++; 
             }
 
            return res2.join("\n");
 
-        /*
-        // Retire les sauts de ligne inutiles et divise le code en lignes
-        const lines = code.replace(/\n+/g, '\n').split('\n');
-
-        let formattedCode = '';
-        let indentLevel = 0;
-
-        for (const line of lines) {
-            const trimmedLine = line.trim();
-
-            // Diminue le niveau d'indentation si la ligne contient une accolade fermante
-            if (trimmedLine.startsWith('}')) {
-                indentLevel--;
-            }
-
-            // Ajoute des espaces pour la tabulation
-            const indentedLine = '   '.repeat(indentLevel) + trimmedLine;
-
-            // Augmente le niveau d'indentation si la ligne contient une accolade ouvrante
-            if (trimmedLine.endsWith('{')) {
-                indentLevel++;
-            }
-
-            formattedCode += indentedLine + '\n';
-        }
-
-
-        //console.log("CODE-------------")
-        //console.log(code);
-        //console.log("---------------------")
-
-        return formattedCode;
-        */
+       
     }
 
 
@@ -264,4 +231,7 @@ export class ShaderStage extends EventDispatcher {
         this._shaderInfos = { code: "", output: null }
         return this._shaderInfos;
     }
+
+
+   
 }

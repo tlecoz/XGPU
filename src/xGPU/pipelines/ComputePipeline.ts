@@ -16,6 +16,8 @@ import { HighLevelParser } from "../HighLevelParser";
 
 export class ComputePipeline extends Pipeline {
 
+    public static SHADER_CODE_BUILT:string = "SHADER_CODE_BUILT";
+
     public computeShader: ComputeShader;
     public onReceiveData: (datas: Float32Array) => void;
 
@@ -32,9 +34,11 @@ export class ComputePipeline extends Pipeline {
     public onComputeBegin: () => void;
     public onComputeEnd: () => void;
 
+    public onShaderBuild:(shaderInfos:{code:string})=>void;
+
     constructor() {
         super()
-        this.computeShader = new ComputeShader();
+        //this.computeShader = new ComputeShader();
         this.type = "compute";
     }
 
@@ -99,7 +103,7 @@ export class ComputePipeline extends Pipeline {
 
 
         this.computeShader = new ComputeShader();
-
+       
         if (typeof descriptor.computeShader === "string") {
             this.computeShader.main.text = descriptor.computeShader;
         } else {
@@ -300,10 +304,14 @@ export class ComputePipeline extends Pipeline {
 
 
         const inputStruct: ShaderStruct = new ShaderStruct("Input", [...inputs]);;
-        const { code } = this.computeShader.build(this, inputStruct)
+        const shaderInfos = this.computeShader.build(this, inputStruct)
+
+        this.dispatchEvent(ComputePipeline.SHADER_CODE_BUILT,shaderInfos)
+
+        if(this.onShaderBuild) this.onShaderBuild(shaderInfos);
 
         this.description.compute = {
-            module: XGPU.device.createShaderModule({ code: code }),
+            module: XGPU.device.createShaderModule({ code: shaderInfos.code }),
             entryPoint: "main"
         }
         this.description.layout = this.gpuPipelineLayout;
@@ -319,7 +327,7 @@ export class ComputePipeline extends Pipeline {
 
 
 
-
+    
 
 
 

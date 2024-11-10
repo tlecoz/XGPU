@@ -46,16 +46,20 @@ export class ComputeShader extends ShaderStage {
         result += mainFunc;
         result += "}\n";
 
-        if (XGPU.showComputeShader) {
-            console.log("------------- COMPUTE SHADER --------------")
-
-            console.log(this.formatWGSLCode(result));
-            //console.log(formated)
-            console.log("-------------------------------------------")
-        }
+       
+        
         this._shaderInfos = { code: result, output: null };
 
-        this.dispatchEvent(ComputeShader.BUILD_COMPLETED,this._shaderInfos);
+        if (XGPU.showComputeShader) {
+            setTimeout(()=>{
+                console.log("------------- COMPUTE SHADER --------------")
+
+                console.log(this.formatWGSLCode(this._shaderInfos.code));
+                //console.log(formated)
+                console.log("-------------------------------------------")
+            },100)
+           
+        }
 
         return this._shaderInfos;
 
@@ -63,5 +67,24 @@ export class ComputeShader extends ShaderStage {
 
 
     }
+
+
+    public static removeStructDefinitionAndReplaceStructDeclarationName(shaderCode: string, structName: string, newStructName: string): string {
+        // Expression régulière pour capturer la définition complète de la structure `structName`
+        const structRegex = new RegExp(`struct\\s+${structName}\\s*\\{[^}]*\\}`, 'g');
+        
+        // Supprimer la définition de `structName`
+        shaderCode = shaderCode.replace(structRegex, '');
+        
+        // Remplacer toutes les occurrences de `structName` par `newStructName`
+        const nameRegex = new RegExp(`\\b${structName}\\b`, 'g');
+        shaderCode = shaderCode.replace(nameRegex, newStructName);
+        
+        return shaderCode;
+      }
+      
+     
+      
+      
 
 }

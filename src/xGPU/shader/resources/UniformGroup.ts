@@ -513,8 +513,7 @@ export class UniformGroup extends EventDispatcher{
             localVariables
         };
 
-        console.warn("GET STRUCT ",this,this.wgsl)
-
+        
         return this.wgsl;
     }
 
@@ -693,6 +692,7 @@ export class UniformGroup extends EventDispatcher{
                     float.startId = offset;
                     float.name = "padding_"+i;
                     result.push(float)
+                    this.itemNames.push(float.name)
                 }
             }
             
