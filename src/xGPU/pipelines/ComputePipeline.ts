@@ -16,10 +16,18 @@ import { HighLevelParser } from "../HighLevelParser";
 
 export class ComputePipeline extends Pipeline {
 
-    public static SHADER_CODE_BUILT:string = "SHADER_CODE_BUILT";
+    public static ON_COMPUTE_SHADER_CODE_BUILT:string = "ON_COMPUTE_SHADER_CODE_BUILT";
+    public static ON_COMPUTE_BEGIN: string = "ON_COMPUTE_BEGIN";
+    public static ON_COMPUTE_END: string = "ON_COMPUTE_END";
+    public static ON_GPU_PIPELINE_BUILT: string = "ON_GPU_PIPELINE_BUILT";
+    public static ON_INIT_FROM_OBJECT:string = "ON_INIT_FROM_OBJECT";
+    public static ON_DESTROY:string = "ON_DESTROY";
+    public static ON_DEVICE_LOST:string = "ON_DEVICE_LOST";
+    public static ON_UPDATE_RESOURCES:string = "ON_UPDATE_RESOURCES";
+    public static ON_SUBMIT_QUEUE:string = "ON_SUBMIT_QUEUE";
 
     public computeShader: ComputeShader;
-    public onReceiveData: (datas: Float32Array) => void;
+    //public onReceiveData: (datas: Float32Array) => void;
 
     protected gpuComputePipeline: GPUComputePipeline;
     public workgroups: number[];
@@ -128,8 +136,10 @@ export class ComputePipeline extends Pipeline {
             }
         }
 
-        if (vertexBufferReadyToUse) this.nextFrame()
 
+        if (vertexBufferReadyToUse) this.nextFrame()
+        
+        this.dispatchEvent(ComputePipeline.ON_INIT_FROM_OBJECT,descriptor);
         return descriptor;
 
     }
@@ -149,6 +159,7 @@ export class ComputePipeline extends Pipeline {
             }
             this[z] = null;
         }
+        this.dispatchEvent(ComputePipeline.ON_DESTROY);
     }
 
 
@@ -216,6 +227,8 @@ export class ComputePipeline extends Pipeline {
 
         if (this.deviceId !== XGPU.deviceId) {
             this.deviceId = XGPU.deviceId;
+            this.dispatchEvent(ComputePipeline.ON_DEVICE_LOST);
+
             this.clearAfterDeviceLostAndRebuild();
             if (new Date().getTime() - this.lastFrameTime < 100) {
 
@@ -306,8 +319,7 @@ export class ComputePipeline extends Pipeline {
         const inputStruct: ShaderStruct = new ShaderStruct("Input", [...inputs]);;
         const shaderInfos = this.computeShader.build(this, inputStruct)
 
-        this.dispatchEvent(ComputePipeline.SHADER_CODE_BUILT,shaderInfos)
-
+        this.dispatchEvent(ComputePipeline.ON_COMPUTE_SHADER_CODE_BUILT,shaderInfos)
         if(this.onShaderBuild) this.onShaderBuild(shaderInfos);
 
         this.description.compute = {
@@ -320,6 +332,7 @@ export class ComputePipeline extends Pipeline {
         this.deviceId = XGPU.deviceId;
         this.gpuComputePipeline = XGPU.createComputePipeline(this.description);
 
+        this.dispatchEvent(ComputePipeline.ON_GPU_PIPELINE_BUILT);
 
         return this.gpuComputePipeline;
     }
@@ -341,6 +354,7 @@ export class ComputePipeline extends Pipeline {
             return;
         }
 
+        this.dispatchEvent(ComputePipeline.ON_COMPUTE_BEGIN);
         if (this.onComputeBegin) this.onComputeBegin();
 
         this.processingFirstFrame = this.firstFrame;
@@ -360,7 +374,7 @@ export class ComputePipeline extends Pipeline {
         computePass.dispatchWorkgroups(this.dispatchWorkgroup[0], this.dispatchWorkgroup[1], this.dispatchWorkgroup[2]);
         computePass.end();
 
-
+        this.dispatchEvent(ComputePipeline.ON_SUBMIT_QUEUE);
         XGPU.device.queue.submit([commandEncoder.finish()]);
 
         
@@ -395,6 +409,7 @@ export class ComputePipeline extends Pipeline {
 
         this.firstFrame = false;
         this.processingFirstFrame = false;
+        this.dispatchEvent(ComputePipeline.ON_COMPUTE_END);
         if (this.onComputeEnd) this.onComputeEnd();
 
 

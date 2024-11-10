@@ -103,6 +103,13 @@ export class RenderPipeline extends Pipeline {
     public static ON_DRAW: string = "ON_DRAW";
     public static ON_GPU_PIPELINE_BUILT: string = "ON_GPU_PIPELINE_BUILT";
     public static ON_LOG: string = "ON_LOG";
+    public static ON_VERTEX_SHADER_CODE_BUILT:string = "ON_VERTEX_SHADER_CODE_BUILT";
+    public static ON_FRAGMENT_SHADER_CODE_BUILT:string = "ON_FRAGMENT_SHADER_CODE_BUILT";
+    public static ON_INIT_FROM_OBJECT:string = "ON_INIT_FROM_OBJECT";
+    public static ON_DESTROY:string = "ON_DESTROY";
+    public static ON_DEVICE_LOST:string = "ON_DEVICE_LOST";
+    public static ON_UPDATE_RESOURCES:string = "ON_UPDATE_RESOURCES";
+  
 
     protected _renderer: IRenderer;
     public get renderer(): IRenderer { return this._renderer }
@@ -213,6 +220,7 @@ export class RenderPipeline extends Pipeline {
 
             this[z] = null;
         }
+        this.dispatchEvent(RenderPipeline.ON_DESTROY);
     }
 
     public initFromObject(descriptor: {
@@ -409,7 +417,7 @@ export class RenderPipeline extends Pipeline {
 
         }
 
-
+        this.dispatchEvent(RenderPipeline.ON_INIT_FROM_OBJECT,descriptor);
         return descriptor;
 
     }
@@ -596,7 +604,7 @@ export class RenderPipeline extends Pipeline {
     public onRebuildStartAfterDeviceLost: () => void;
     public clearAfterDeviceLostAndRebuild() {
 
-
+        this.dispatchEvent(RenderPipeline.ON_DEVICE_LOST)
         if (this.onRebuildStartAfterDeviceLost) this.onRebuildStartAfterDeviceLost();
 
         this.gpuPipeline = null;
@@ -662,10 +670,14 @@ export class RenderPipeline extends Pipeline {
 
             const vertexShader: { code: string, output: ShaderStruct } = this.vertexShader.build(this, vertexInput);
 
+            this.dispatchEvent(RenderPipeline.ON_VERTEX_SHADER_CODE_BUILT,vertexShader)
+           
+
 
             let fragmentShader: { code: string, output: ShaderStruct };
             if (this.fragmentShader) {
                 fragmentShader = this.fragmentShader.build(this, vertexShader.output.getInputFromOutput());
+                this.dispatchEvent(RenderPipeline.ON_FRAGMENT_SHADER_CODE_BUILT,fragmentShader)
             }
 
 
@@ -831,6 +843,8 @@ export class RenderPipeline extends Pipeline {
 
         if (this.renderPassTexture) this.renderPassTexture.update();
         this.bindGroups.update();
+
+        this.dispatchEvent(RenderPipeline.ON_UPDATE_RESOURCES);
         //console.log("renderPipeline.update end")
     }
 
@@ -844,7 +858,7 @@ export class RenderPipeline extends Pipeline {
         renderPass.setPipeline(this.gpuPipeline);
 
         this.bindGroups.apply(renderPass);
-
+        
     }
 
 
@@ -853,6 +867,7 @@ export class RenderPipeline extends Pipeline {
     public end(commandEncoder: GPUCommandEncoder, renderPass) {
         if (!this.resourceDefined) return;
         renderPass.end();
+        this.dispatchEvent(RenderPipeline.ON_DRAW)
 
         //console.log("end")
         //------ the arrays of textures may contains GPUTexture so I must use commandEncoder.copyTextureToTexture 
