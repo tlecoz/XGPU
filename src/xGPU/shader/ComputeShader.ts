@@ -54,6 +54,9 @@ export class ComputeShader extends ShaderStage {
             console.log("-------------------------------------------")
         }
         this._shaderInfos = { code: result, output: null };
+
+        this.dispatchEvent(ComputeShader.BUILD_COMPLETED,this._shaderInfos);
+
         return this._shaderInfos;
 
 

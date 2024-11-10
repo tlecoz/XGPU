@@ -68,6 +68,7 @@ export class FragmentShader extends ShaderStage {
 
 
         this._shaderInfos = { code: result, output: output };
+        this.dispatchEvent(FragmentShader.BUILD_COMPLETED,this._shaderInfos);
         return this._shaderInfos;
     }
 }

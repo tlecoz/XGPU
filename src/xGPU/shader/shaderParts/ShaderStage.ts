@@ -1,10 +1,13 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
+import { EventDispatcher } from "../../EventDispatcher";
 import { ShaderNode } from "./ShaderNode";
 import { ShaderStruct } from "./ShaderStruct";
 
-export class ShaderStage {
+export class ShaderStage extends EventDispatcher {
+
+    public static BUILD_COMPLETED:string = "BUILD_COMPLETED";
 
     public inputs: { name: string, type: any, builtin?: string }[] = [];
     public outputs: { name: string, type: any, builtin?: string }[] = [];
@@ -18,7 +21,7 @@ export class ShaderStage {
     public shaderType: "vertex" | "fragment" | "compute";
 
     constructor(shaderType: "vertex" | "fragment" | "compute") {
-
+        super();
         this.shaderType = shaderType;
         this.constants = new ShaderNode();
         this.main = new ShaderNode("", true);

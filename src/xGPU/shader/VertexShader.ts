@@ -79,6 +79,9 @@ export class VertexShader extends ShaderStage {
             console.log("------------------------------------------")
         }
 
-        return { code: result, output: output };
+        this._shaderInfos = { code: result, output: output };
+        this.dispatchEvent(VertexShader.BUILD_COMPLETED);
+
+        return this._shaderInfos;
     }
 }

@@ -170,8 +170,8 @@ export class UniformGroup extends EventDispatcher{
         if(this.usedAsUniformBuffer == false || data instanceof UniformGroup || data instanceof UniformGroupArray || data instanceof Vec4Array){
            
             data.addEventListener("ON_CHANGE",(e)=>{
-                if(data instanceof Vec4Array) console.log("VEC4ARRAY CHANGED ",this.usedAsUniformBuffer)
-                if(data instanceof UniformGroupArray || data instanceof UniformGroup) console.log("ON_CHANGE ",data.name+" changed ",data.type)
+                //if(data instanceof Vec4Array) console.log("VEC4ARRAY CHANGED ",this.usedAsUniformBuffer)
+                //if(data instanceof UniformGroupArray || data instanceof UniformGroup) console.log("ON_CHANGE ",data.name+" changed ",data.type)
                 this.mustBeTransfered = true;
                 //this.mustDispatchChangeEvent = true;
                 this.dispatchEvent("ON_CHANGE");
@@ -386,7 +386,7 @@ export class UniformGroup extends EventDispatcher{
             //console.log("AAAAAAAAAAAAA ",this.mustBeTransfered)
 
            if(mustBeTransfered){
-                console.log("AAAAAAAAAAAAAAAAAA ",this.mustBeTransfered,new Float32Array(this.dataView.buffer));
+                //console.log("AAAAAAAAAAAAAAAAAA ",this.mustBeTransfered,new Float32Array(this.dataView.buffer));
                 XGPU.device.queue.writeBuffer(
                     gpuResource,
                     0,
@@ -403,7 +403,7 @@ export class UniformGroup extends EventDispatcher{
 
 
 
-
+    public existingStrucName:string = undefined;
 
     public getStruct(name: string): { struct: string, localVariables: string } {
 
@@ -442,7 +442,7 @@ export class UniformGroup extends EventDispatcher{
 
                 } else {
                     name = item.name;
-
+                    
                     if (!(item.groups[0] as UniformGroup).wgsl) {
                         //console.log("#2 NAME = ", name)
                         o = (item.groups[0] as UniformGroup).getStruct(item.name);
@@ -512,6 +512,9 @@ export class UniformGroup extends EventDispatcher{
             struct,
             localVariables
         };
+
+        console.warn("GET STRUCT ",this,this.wgsl)
+
         return this.wgsl;
     }
 

@@ -49,7 +49,7 @@ export class UniformGroupArray extends EventDispatcher {
             
             
             g.addEventListener(UniformGroup.ON_CHANGE,()=>{
-                console.log("on array child ON_CHANGE")
+                //console.log("on array child ON_CHANGE")
                 this.mustBeTransfered = true;
                 this.dispatchEvent(UniformGroupArray.ON_CHANGE)
             })
@@ -75,7 +75,7 @@ export class UniformGroupArray extends EventDispatcher {
     public get type(): any { return { nbComponent: this.arrayStride, isUniformGroup: true, isArray: true } }
 
     public copyIntoDataView(dataView: DataView, offset: number) {
-        console.log("groupArray copy into dataview")
+        //console.log("groupArray copy into dataview")
         let group: UniformGroup;
         for (let i = 0; i < this.groups.length; i++) {
             group = this.groups[i];
