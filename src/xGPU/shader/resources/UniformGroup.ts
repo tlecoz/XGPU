@@ -525,6 +525,75 @@ export class UniformGroup extends EventDispatcher{
         //console.warn("stackItems")
         //console.time("STACK ITEMS")
 
+
+        //----- we sort the items by arraystride to start with bigger values / complex structure ----
+
+        let itemList = [];
+        let item:any;
+        let uniformGroupArrays = [];
+        let uniformGroups = [];
+        let vecArrays = [];
+        let matrixArrays = [];
+        let matrixs = [];
+        let primitives = [];
+
+        for(let z in items){
+            item = items[z];
+            item.name = z;
+            if(item instanceof UniformGroupArray) uniformGroupArrays.push(item);
+            else if(item instanceof UniformGroup) uniformGroups.push(item);
+            else if(item.type.isArrayOfMatrixs) matrixArrays.push(item);
+            else if(item.type.isArray) vecArrays.push(item);
+            else if(item.type.isMatrix) matrixs.push(item);
+            else primitives.push(item);
+        } 
+
+        const sortGroup = (a,b)=>{
+            if(a.arrayStride > b.arrayStride) return -1;
+            if(a.arrayStride < b.arrayStride) return 1;
+            return 0;
+        }
+
+        uniformGroupArrays = uniformGroupArrays.sort(sortGroup);
+        uniformGroups = uniformGroups.sort(sortGroup);
+
+        const sortArray = (a,b)=>{
+            const lenA = a.type.isArrayOfMatrixs ? a.type.matrixRows * 4 * a.type.arrayLength : a.type.arrayLength * 4;
+            const lenB = b.type.isArrayOfMatrixs ? b.type.matrixRows * 4 * b.type.arrayLength : b.type.arrayLength * 4;
+
+            if(lenA > lenB) return -1;
+            if(lenA < lenB) return 1;
+            return 0;
+        }
+
+        vecArrays = vecArrays.sort(sortArray);
+        matrixArrays = matrixArrays.sort(sortArray);
+
+        
+        primitives = primitives.sort((a,b)=>{
+            if(a.type.nbComponent > b.type.nbComponent) return -1;
+            if(a.type.nbComponent < b.type.nbComponent) return 1;
+            return 0;
+        })
+
+
+        itemList = uniformGroupArrays.concat(uniformGroups);
+        itemList = itemList.concat(matrixArrays);
+        itemList = itemList.concat(vecArrays);
+        itemList = itemList.concat(matrixs);
+        itemList = itemList.concat(primitives);
+
+
+
+
+
+
+
+
+
+
+
+
         const result: any[] = []
 
         let bound = 1;
@@ -539,12 +608,12 @@ export class UniformGroup extends EventDispatcher{
 
 
 
+        for(let i=0;i<itemList.length;i++){
+        //for (let z in items) {
 
-        for (let z in items) {
-
-
-            v = items[z];
-            v.name = z;
+            v = itemList[i];
+            //v = items[z];
+            //v.name = z;
             type = v.type;
 
 
@@ -674,19 +743,19 @@ export class UniformGroup extends EventDispatcher{
         }
 
         //--------------------------
-        /*
+        
 
         //BEFORE 07/11/2024:
         if (offset % bound !== 0) {
             offset += bound - (offset % bound);
         }
-        */
+        
         
         //----AJOUT LE 07/11/2024------
         if(offset % 4 != 0){
             const n = 4 - offset % 4;
 
-            if(!this.usedAsUniformBuffer){
+            //if(!this.usedAsUniformBuffer){
                 for(let i=0;i<n;i++){
                     const float = new Float(0);
                     float.startId = offset;
@@ -694,7 +763,7 @@ export class UniformGroup extends EventDispatcher{
                     result.push(float)
                     this.itemNames.push(float.name)
                 }
-            }
+            //}
             
             offset += n;
         }

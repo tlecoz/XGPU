@@ -7,6 +7,7 @@ import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
 import { VertexAttribute } from "./VertexAttribute";
 import { VertexBufferIO } from "./VertexBufferIO";
+import { EventDispatcher } from "../../EventDispatcher";
 
 export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
@@ -16,7 +17,9 @@ export type VertexBufferDescriptor = {
 }
 
 
-export class VertexBuffer implements IShaderResource {
+export class VertexBuffer extends EventDispatcher implements IShaderResource {
+
+    public static ON_OUTPUT_DATA:string = "ON_OUTPUT_DATA";
 
 
     public bufferId: number //the id used in renderPass.setVertexBuffer
@@ -48,6 +51,7 @@ export class VertexBuffer implements IShaderResource {
         gpuUpdateMode?:"auto"|"manual"
     }) {
 
+        super();
         //console.warn("VERTEX BUFFER 2", attributes)
 
         if (!descriptor) descriptor = {};
@@ -631,7 +635,7 @@ export class VertexBuffer implements IShaderResource {
      public onCanCallMapAsync:(()=>void)|null = null;
      public onOutputData:((buf:ArrayBuffer)=>void)|null = null;
      public async getOutputData(){
-        if(!this.onOutputData) return;
+        if(!this.onOutputData && !this.hasEventListener(VertexBuffer.ON_OUTPUT_DATA)) return;
         
 
         
@@ -655,6 +659,7 @@ export class VertexBuffer implements IShaderResource {
         XGPU.device.queue.submit([copyEncoder.finish()]);
 
 
+       
         await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
        
 
@@ -664,9 +669,9 @@ export class VertexBuffer implements IShaderResource {
         this.canCallMapAsync = true;
         if(this.onCanCallMapAsync) this.onCanCallMapAsync();
 
-        this.onOutputData(data);
+        if(this.hasEventListener(VertexBuffer.ON_OUTPUT_DATA)) this.dispatchEvent(VertexBuffer.ON_OUTPUT_DATA,data);
+        else this.onOutputData(data);
 
-        
      }
 
 
