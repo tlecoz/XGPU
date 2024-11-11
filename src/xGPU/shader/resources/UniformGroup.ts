@@ -527,7 +527,7 @@ export class UniformGroup extends EventDispatcher{
 
 
         //----- we sort the items by arraystride to start with bigger values / complex structure ----
-
+        /*
         let itemList = [];
         let item:any;
         let uniformGroupArrays = [];
@@ -582,7 +582,7 @@ export class UniformGroup extends EventDispatcher{
         itemList = itemList.concat(vecArrays);
         itemList = itemList.concat(matrixs);
         itemList = itemList.concat(primitives);
-
+        */
 
 
 
@@ -608,12 +608,12 @@ export class UniformGroup extends EventDispatcher{
 
 
 
-        for(let i=0;i<itemList.length;i++){
-        //for (let z in items) {
+        //for(let i=0;i<itemList.length;i++){
+        for (let z in items) {
 
-            v = itemList[i];
-            //v = items[z];
-            //v.name = z;
+            //v = itemList[i];
+            v = items[z];
+            v.name = z;
             type = v.type;
 
 
@@ -750,12 +750,12 @@ export class UniformGroup extends EventDispatcher{
             offset += bound - (offset % bound);
         }
         
-        
+        console.log("offset ",offset)
         //----AJOUT LE 07/11/2024------
         if(offset % 4 != 0){
             const n = 4 - offset % 4;
 
-            //if(!this.usedAsUniformBuffer){
+           if(!this.usedAsUniformBuffer){
                 for(let i=0;i<n;i++){
                     const float = new Float(0);
                     float.startId = offset;
@@ -763,7 +763,7 @@ export class UniformGroup extends EventDispatcher{
                     result.push(float)
                     this.itemNames.push(float.name)
                 }
-            //}
+           }
             
             offset += n;
         }
@@ -771,7 +771,7 @@ export class UniformGroup extends EventDispatcher{
         //--------------------------
         
 
-        //console.log("uniformGroup ",offset,bound);
+        //console.log("uniformGroup ",result,offset,bound);
         this.arrayStride = offset ;
 
 
@@ -779,6 +779,9 @@ export class UniformGroup extends EventDispatcher{
 
 
         this.datas = new ArrayBuffer(offset * 4);
+
+        
+
         this.dataView = new DataView(this.datas, 0, this.datas.byteLength);
         this.items = result;
         this.copyIntoDataView(this.dataView, 0);

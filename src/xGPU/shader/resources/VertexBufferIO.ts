@@ -2,23 +2,26 @@
 // This code is governed by an MIT license that can be found in the LICENSE file.
 
 import { XGPU } from "../../XGPU";
+import { StageableBuffer } from "./StageableBuffer";
 import { VertexAttribute } from "./VertexAttribute";
 import { VertexBuffer } from "./VertexBuffer";
 
 
 
-export class VertexBufferIO {
+export class VertexBufferIO extends StageableBuffer {
 
     public buffers: VertexBuffer[] = [];
     public descriptor: any;
-    public onOutputData: (data: ArrayBuffer) => void;
+    //public onOutputData: (data: ArrayBuffer) => void;
 
-    protected stagingBuffer: GPUBuffer;
-    protected canCallMapAsync: boolean = true;
+    //protected stagingBuffer: GPUBuffer;
+    //protected canCallMapAsync: boolean = true;
 
     protected deviceId: number;
 
     constructor(attributes: any, descriptor?: any) {
+
+        super();
 
         if (!descriptor) descriptor = {};
         else descriptor = { ...descriptor };

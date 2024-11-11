@@ -8,6 +8,7 @@ import { IShaderResource } from "./IShaderResource";
 import { VertexAttribute } from "./VertexAttribute";
 import { VertexBufferIO } from "./VertexBufferIO";
 import { EventDispatcher } from "../../EventDispatcher";
+import { StageableBuffer } from "./StageableBuffer";
 
 export type VertexBufferDescriptor = {
     stepMode?: "vertex" | "instance",
@@ -17,10 +18,7 @@ export type VertexBufferDescriptor = {
 }
 
 
-export class VertexBuffer extends EventDispatcher implements IShaderResource {
-
-    public static ON_OUTPUT_DATA:string = "ON_OUTPUT_DATA";
-
+export class VertexBuffer extends StageableBuffer implements IShaderResource {
 
     public bufferId: number //the id used in renderPass.setVertexBuffer
 
@@ -626,51 +624,6 @@ export class VertexBuffer extends EventDispatcher implements IShaderResource {
             XGPU.device.queue.writeBuffer(this.gpuResource, bufferOffset, buffer,dataOffset,size)
       
 
-
-     }
-
-
-     protected stagingBuffer:GPUBuffer;
-     protected canCallMapAsync:boolean = true;
-     public onCanCallMapAsync:(()=>void)|null = null;
-     public onOutputData:((buf:ArrayBuffer)=>void)|null = null;
-     public async getOutputData(){
-        if(!this.onOutputData && !this.hasEventListener(VertexBuffer.ON_OUTPUT_DATA)) return;
-        
-
-        
-
-        if (!this.canCallMapAsync) return;
-
-        this.canCallMapAsync = false;
-
-        const buffer:GPUBuffer = this.gpuResource;
-
-        //console.log("getOutputData ",buffer.size+" vs "+this.bufferSize);
-
-        if (!this.stagingBuffer || buffer.size != this.stagingBuffer.size) this.stagingBuffer = XGPU.createStagingBuffer(this.bufferSize);
-        const copyEncoder = XGPU.device.createCommandEncoder();
-        const stage = this.stagingBuffer;
-
-      
-
-        copyEncoder.copyBufferToBuffer(buffer, 0, stage, 0, stage.size);
-
-        XGPU.device.queue.submit([copyEncoder.finish()]);
-
-
-       
-        await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, stage.size)
-       
-
-        const copyArray = stage.getMappedRange(0, stage.size);
-        const data = copyArray.slice(0);
-        stage.unmap();
-        this.canCallMapAsync = true;
-        if(this.onCanCallMapAsync) this.onCanCallMapAsync();
-
-        if(this.hasEventListener(VertexBuffer.ON_OUTPUT_DATA)) this.dispatchEvent(VertexBuffer.ON_OUTPUT_DATA,data);
-        else this.onOutputData(data);
 
      }
 

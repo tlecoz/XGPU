@@ -9,6 +9,7 @@ import { XGPU } from "../../XGPU";
 import { PrimitiveType } from "../../PrimitiveType";
 import { IShaderResource } from "./IShaderResource";
 import { UniformGroup, Uniformable } from "./UniformGroup";
+import { StageableBuffer } from "./StageableBuffer";
 
 
 export type UniformBufferDescriptor = {
@@ -18,8 +19,9 @@ export type UniformBufferDescriptor = {
     
 }
 
-export class UniformBuffer implements IShaderResource {
+export class UniformBuffer extends StageableBuffer implements IShaderResource {
 
+   
 
     public gpuResource: GPUBuffer;
     public descriptor: UniformBufferDescriptor;
@@ -44,6 +46,7 @@ export class UniformBuffer implements IShaderResource {
        
     }) {
 
+        super();
        
         this.descriptor = descriptor ? { ...descriptor } : {};
         this.group = new UniformGroup(items, this.descriptor.useLocalVariable,true);
@@ -150,9 +153,9 @@ export class UniformBuffer implements IShaderResource {
             //console.time("createGpuUniformBuffer")
 
             const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
-            let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
+            let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST  ;
 
-            if (this.bufferType === "read-only-storage" || this.bufferType === "storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+            if (this.bufferType === "read-only-storage" || this.bufferType === "storage") usage = GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
 
             //console.log("uniformBuffer createGpuResource size = ", size, this.group.arrayStride);
             this.gpuResource = XGPU.device.createBuffer({
@@ -288,5 +291,8 @@ export class UniformBuffer implements IShaderResource {
             this.descriptor.visibility = this.shaderVisibility = GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX;
         }
     }
+
+
+   
 }
 

@@ -106,7 +106,6 @@ export class RenderPipeline extends Pipeline {
     public static ON_VERTEX_SHADER_CODE_BUILT:string = "ON_VERTEX_SHADER_CODE_BUILT";
     public static ON_FRAGMENT_SHADER_CODE_BUILT:string = "ON_FRAGMENT_SHADER_CODE_BUILT";
     public static ON_INIT_FROM_OBJECT:string = "ON_INIT_FROM_OBJECT";
-    public static ON_DESTROY:string = "ON_DESTROY";
     public static ON_DEVICE_LOST:string = "ON_DEVICE_LOST";
     public static ON_UPDATE_RESOURCES:string = "ON_UPDATE_RESOURCES";
   
@@ -220,7 +219,7 @@ export class RenderPipeline extends Pipeline {
 
             this[z] = null;
         }
-        this.dispatchEvent(RenderPipeline.ON_DESTROY);
+      
     }
 
     public initFromObject(descriptor: {

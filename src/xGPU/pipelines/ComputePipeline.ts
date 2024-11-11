@@ -390,13 +390,13 @@ export class ComputePipeline extends Pipeline {
             this.resourceIOs[i].getOutputData();
         }
 
-
+       
         (this.bindGroups.resources.all as any[]).forEach((o)=>{
             if(o instanceof VertexBuffer){
                 if(o.resourceIO == null){
-                    o.getOutputData();
+                    o.getOutputData(o.gpuResource);
                 }
-            }
+            }else if(o.getOutputData) o.getOutputData(o.gpuResource);
         })
 
         /*
