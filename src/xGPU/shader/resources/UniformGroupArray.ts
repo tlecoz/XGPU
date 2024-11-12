@@ -14,6 +14,7 @@ export class UniformGroupArray extends EventDispatcher {
     public groups: UniformGroup[];
 
     public startId: number = 0;
+    public globalStartId:number = 0;
     
     public createVariableInsideMain: boolean = false;
     public name: string;
@@ -58,6 +59,16 @@ export class UniformGroupArray extends EventDispatcher {
         //----------------------------------
 
         this.createVariableInsideMain = createLocalVariable;
+    }
+
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+        
+        for(let i=0;i<this.groups.length;i++){
+            this.groups[i].globalStartId = this.globalStartId + this.groups[i].startId;
+            this.groups[i].updateStartIdFromParentToChildren();
+        }
     }
 
     public clone(): UniformGroupArray {

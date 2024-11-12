@@ -20,6 +20,7 @@ export class UniformGroup extends EventDispatcher{
     public itemNames: string[] = [];
     public arrayStride: number = 0;
     public startId: number = 0;
+    public globalStartId:number = 0;
     public createVariableInsideMain: boolean = false;
     
     public mustBeTransfered:boolean = true;
@@ -263,7 +264,7 @@ export class UniformGroup extends EventDispatcher{
         const type: GPUType = item.type;
         const primitive: "f32" | "i32" | "u32" | "f16" = type.primitive;
 
-        //console.log("setDatas = ",item.name,type.nbValues)
+        //console.log("setDatas = ",item.name,startId,type.nbValues)
 
         switch (primitive) {
             case "f32":
@@ -340,17 +341,17 @@ export class UniformGroup extends EventDispatcher{
                 mustBeTransfered = true;
                 if (!(item instanceof UniformGroup || item instanceof UniformGroupArray )) {
 
-                        //console.log(item.name)
-
+                      
                         this.setDatas(item)
                         item.mustBeTransfered = false;
 
                         if(this.transfertWholeBuffer == false || item.type.isArray){
-                           
+                            
                             if(this.transfertWholeBuffer == false){
                                 XGPU.device.queue.writeBuffer(
                                     gpuResource,
-                                    item.startId * Float32Array.BYTES_PER_ELEMENT,
+                                    item.globalStartId * Float32Array.BYTES_PER_ELEMENT,
+                                    //item.startId * Float32Array.BYTES_PER_ELEMENT,
                                     item.buffer,
                                     item.byteOffset,
                                     item.byteLength
@@ -626,7 +627,7 @@ export class UniformGroup extends EventDispatcher{
 
                 v.startId = offset;
                 offset += v.arrayStride;
-                //console.log("=======>>>> ",v.arrayStride)
+                //console.log(v.name+" =======>>>> ",v.arrayStride)
                 result.push(v);
 
             } else {
@@ -750,7 +751,7 @@ export class UniformGroup extends EventDispatcher{
             offset += bound - (offset % bound);
         }
         
-        console.log("offset ",offset)
+       //console.log("offset ",offset)
         //----AJOUT LE 07/11/2024------
         if(offset % 4 != 0){
             const n = 4 - offset % 4;
@@ -814,6 +815,24 @@ export class UniformGroup extends EventDispatcher{
         return result
 
     }
+
+    
+
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+        
+        let item:Uniformable;
+        for(let i=0;i<this.items.length;i++){
+            item = this.items[i];
+            item.globalStartId = this.globalStartId + item.startId;
+            if(item instanceof UniformGroup || item instanceof UniformGroupArray || item.type.isArray){
+                item.updateStartIdFromParentToChildren();
+            }
+        }
+    }
+
+
 
     /*
     protected createTypedArrayBuffer(result: any) {

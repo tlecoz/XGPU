@@ -23,7 +23,7 @@ export class PrimitiveFloatUniform extends Float32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
-
+    public globalStartId:number = 0;
 
     public onChange: () => void;
 
@@ -168,6 +168,11 @@ export class PrimitiveFloatUniform extends Float32Array {
             });
         }
     }
+
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+    }
     //---------------------------------------------------------------------------------------------
 }
 
@@ -182,6 +187,7 @@ export class PrimitiveIntUniform extends Int32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
+    public globalStartId:number = 0;
 
     public onChange: () => void;
     protected _mustBeTransfered: boolean = true;
@@ -274,6 +280,11 @@ export class PrimitiveIntUniform extends Int32Array {
             });
         }
     }
+
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+    }
     //---------------------------------------------------------------------------------------------
 
 }
@@ -290,6 +301,7 @@ export class PrimitiveUintUniform extends Uint32Array {
     public name: string;
     public type: GPUType;
     public startId: number = 0;
+    public globalStartId:number = 0;
     public uniformBuffer: UniformBuffer;
 
     public onChange: () => void;
@@ -381,6 +393,11 @@ export class PrimitiveUintUniform extends Uint32Array {
                 callback(this, eventData);
             });
         }
+    }
+
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
     }
     //---------------------------------------------------------------------------------------------
 
@@ -745,6 +762,16 @@ export class Vec4Array extends PrimitiveFloatUniform {
         
     }
 
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+
+       
+        for(let i=0;i<this.vec4Array.length;i++){
+            this.vec4Array[i].globalStartId = this.globalStartId + this.vec4Array[i].startId;
+        }
+    }
+
     public update(): void {
         
         let mustBeTransfered = false;
@@ -767,6 +794,8 @@ export class Vec4Array extends PrimitiveFloatUniform {
         }
         
     }
+
+   
 }
 
 
@@ -802,6 +831,15 @@ export class IVec4Array extends PrimitiveIntUniform {
                 this.set(this.ivec4Array[i], i * 4);
                 this.dispatchEvent("ON_CHANGE");
             })
+        }
+    }
+
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+
+        for(let i=0;i<this.ivec4Array.length;i++){
+            this.ivec4Array[i].globalStartId = this.globalStartId + this.ivec4Array[i].startId;
         }
     }
 
@@ -854,6 +892,15 @@ export class UVec4Array extends PrimitiveUintUniform {
                 this.set(this.uvec4Array[i], i * 4);
                 this.dispatchEvent("ON_CHANGE");
             })
+        }
+    }
+
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+
+        for(let i=0;i<this.uvec4Array.length;i++){
+            this.uvec4Array[i].globalStartId = this.globalStartId + this.uvec4Array[i].startId;
         }
     }
 

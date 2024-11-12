@@ -152,6 +152,8 @@ export class UniformBuffer extends StageableBuffer implements IShaderResource {
 
             //console.time("createGpuUniformBuffer")
 
+            this.group.updateStartIdFromParentToChildren();
+
             const size = this.group.arrayStride * Float32Array.BYTES_PER_ELEMENT;
             let usage: GPUBufferUsageFlags = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST  ;
 
