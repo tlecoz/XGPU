@@ -866,8 +866,7 @@ export class RenderPipeline extends Pipeline {
     public end(commandEncoder: GPUCommandEncoder, renderPass) {
         if (!this.resourceDefined) return;
         renderPass.end();
-        this.dispatchEvent(RenderPipeline.ON_DRAW)
-
+        
         //console.log("end")
         //------ the arrays of textures may contains GPUTexture so I must use commandEncoder.copyTextureToTexture 
         // to update the content from a GPUTexture to the texture_array_2d 
