@@ -27,9 +27,7 @@ export class PrimitiveFloatUniform extends Float32Array {
 
     public onChange: () => void;
 
-    protected mustTriggerChangeEvent:boolean = false;
-    protected mustTriggerChangedEvent:boolean = false;
-
+    
     
     protected _mustBeTransfered: boolean = true;
     
@@ -121,30 +119,17 @@ export class PrimitiveFloatUniform extends Float32Array {
         return res;
     }
 
-    /*
-    public feedbackVertexId: number = 0;
-    public feedbackInstanceId: number = 0;
-    public setFeedback(vertexId: number, instanceId: number): PrimitiveFloatUniform {
-        this.feedbackVertexId = vertexId;
-        this.feedbackInstanceId = instanceId;
-        return this;
-    }*/
+   
 
 
     public update() {
-        //console.log(this.name+" : update")
-        /*
-        if (this.mustTriggerChangedEvent){
-            this.mustTriggerChangedEvent = false;
-            this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED);
-        }
-        if(this.mustTriggerChangeEvent){
-            this.mustTriggerChangeEvent = false;
-            this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGE);
-        }
-         */
+      
      }
 
+     public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+    }
 
 
     //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Float32Array)----
@@ -169,11 +154,16 @@ export class PrimitiveFloatUniform extends Float32Array {
         }
     }
 
-    public updateStartIdFromParentToChildren(){
-        //used to update the startId of elements contained in an array
-        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
-    }
     //---------------------------------------------------------------------------------------------
+
+    
+    public get definition():{
+        type:string,
+        values:Float32Array,
+        name?:string
+    }{
+        return {type:this.constructor.name,values:this,name:this.name}
+    }
 }
 
 
@@ -234,7 +224,10 @@ export class PrimitiveIntUniform extends Int32Array {
         return result;
     }
 
-
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+    }
 
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
@@ -281,12 +274,17 @@ export class PrimitiveIntUniform extends Int32Array {
         }
     }
 
-    public updateStartIdFromParentToChildren(){
-        //used to update the startId of elements contained in an array
-        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
-    }
+    
     //---------------------------------------------------------------------------------------------
 
+    
+    public get definition():{
+        type:string,
+        values:Int32Array,
+        name?:string
+    }{
+        return {type:this.constructor.name,values:this,name:this.name}
+    }
 }
 
 
@@ -347,7 +345,10 @@ export class PrimitiveUintUniform extends Uint32Array {
         return result;
     }
 
-
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+    }
 
     public createVariable(uniformBufferName: string): string {
         if (!this.createVariableInsideMain) return "";
@@ -395,12 +396,17 @@ export class PrimitiveUintUniform extends Uint32Array {
         }
     }
 
-    public updateStartIdFromParentToChildren(){
-        //used to update the startId of elements contained in an array
-        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
-    }
+   
     //---------------------------------------------------------------------------------------------
 
+    
+    public get definition():{
+        type:string,
+        values:Uint32Array,
+        name?:string
+    }{
+        return {type:this.constructor.name,values:this,name:this.name}
+    }
 }
 
 //--------------
@@ -418,6 +424,8 @@ export class Float extends PrimitiveFloatUniform {
     public get x(): number {
         return this[0];
     }
+    
+    
 }
 
 //--------------
@@ -440,6 +448,8 @@ export class Vec2 extends PrimitiveFloatUniform {
 
     public get x(): number { return this[0]; }
     public get y(): number { return this[1]; }
+
+    
 }
 
 //--------------
@@ -926,11 +936,18 @@ export class UVec4Array extends PrimitiveUintUniform {
 //==============================================================
 
 export class Matrix3x3 extends PrimitiveFloatUniform {
+    protected disableUpdate: boolean;
+    constructor(floatArray: Float32Array = null) {
+        const disableUpdate = !!floatArray;
+        if(!floatArray) floatArray = new Float32Array([
+            1,0,0,
+            0,1,0,
+            0,0,1
+        ])
 
-    constructor() {
-        super("mat3x3<f32>", new Float32Array([1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0]) as Float32Array);
+        super("mat3x3<f32>", floatArray);
+        this.className = "mat3x3<f32>"
+        this.disableUpdate = disableUpdate;
     }
 }
 /*
@@ -1117,16 +1134,27 @@ export class Matrix4x4Array extends PrimitiveFloatUniform {
 
     public matrixs: Matrix4x4[];
 
-    constructor(mat4x4Array: Matrix4x4[]) {
+    constructor(mat4x4Array_or_arrayLength: Matrix4x4[]|number) {
 
-        let buf: Float32Array = new Float32Array(mat4x4Array.length * 16);
-        for (let i = 0; i < mat4x4Array.length; i++) buf.set(mat4x4Array[i], i * 16);
-        super("array<mat4x4<f32>," + mat4x4Array.length + ">", buf)
+        let array:Matrix4x4[];
+        if(typeof mat4x4Array_or_arrayLength != "number") array = mat4x4Array_or_arrayLength;
+        else {
+           array = [];
+           for(let i =0;i<mat4x4Array_or_arrayLength;i++) array[i] = new Matrix4x4();
+        }
+ 
+ 
+        const len = array.length;
 
-        this.matrixs = mat4x4Array;
+
+        let buf: Float32Array = new Float32Array(len * 16);
+        for (let i = 0; i < len; i++) buf.set(array[i], i * 16);
+        super("array<mat4x4<f32>," + len + ">", buf)
+
+        this.matrixs = array;
         this.mustBeTransfered = true;
 
-        this.className = "array<mat4x4<f32>," + mat4x4Array.length + ">";
+        this.className = "array<mat4x4<f32>," + len + ">";
 
         for(let i=0;i<this.matrixs.length;i++){
             this.matrixs[i].addEventListener("ON_CHANGE",()=>{
@@ -1136,7 +1164,14 @@ export class Matrix4x4Array extends PrimitiveFloatUniform {
             })
         }
     }
+    public updateStartIdFromParentToChildren(){
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
 
+        for(let i=0;i<this.matrixs.length;i++){
+            this.matrixs[i].globalStartId = this.globalStartId + this.matrixs[i].startId;
+        }
+    }
     public update(): void {
 
 

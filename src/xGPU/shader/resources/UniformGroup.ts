@@ -48,11 +48,16 @@ export class UniformGroup extends EventDispatcher{
     public datas: ArrayBuffer;
     public dataView: DataView;
 
+    private debug:boolean = false;
     public set(datas: ArrayBuffer) { //to follow the structure of an ArrayBuffer like other uniforms
         this.datas = datas;
         this.dataView = new DataView(datas, 0, datas.byteLength);
+        this.updateItemFromDataView(this.dataView,0);
+       
+        console.log("SET DATA ",new Float32Array(datas))
         this.mustBeTransfered = true;
-    }
+        
+    }   
 
 
 
@@ -96,6 +101,7 @@ export class UniformGroup extends EventDispatcher{
         let o: any;
         for (let z in items) {
             o = items[z];
+           
             if (o instanceof PrimitiveFloatUniform ||
                 o instanceof PrimitiveIntUniform ||
                 o instanceof PrimitiveUintUniform ||
@@ -283,6 +289,43 @@ export class UniformGroup extends EventDispatcher{
        
     }
 
+
+    public updateItemFromDataView(dataView:DataView,offset:number){
+
+        let item: Uniformable;
+        
+        for (let i = 0; i < this.items.length; i++) {
+            item = this.items[i];
+           
+            if (item instanceof UniformGroup || item instanceof UniformGroupArray) {
+                //console.log("call  (item as UniformGroup).copyIntoDataView");
+                (item as UniformGroup).updateItemFromDataView(dataView, offset + item.startId);
+            } else {
+
+                const startId = item.startId + offset;
+                const type: GPUType = item.type;
+                const primitive: "f32" | "i32" | "u32" | "f16" = type.primitive;
+                const nb = type.nbValues;
+                if(primitive == "f32"){
+                    for(let i=0;i<nb;i++) item[i] = dataView.getFloat32((startId+i)*4,true);
+
+                }else if(primitive == "i32"){
+                    for(let i=0;i<nb;i++) item[i] = dataView.getInt32((startId+i)*4,true);
+
+                }else if(primitive == "u32"){
+                    for(let i=0;i<nb;i++) item[i] = dataView.getUint32((startId+i)*4,true);
+                }
+                item.mustBeTransfered = true;
+            }
+                //console.log(item.name,this.usedAsUniformBuffer)
+
+               
+               
+        }
+
+
+    }
+
     public copyIntoDataView(dataView: DataView, offset: number) {
 
         let item: Uniformable;
@@ -338,6 +381,7 @@ export class UniformGroup extends EventDispatcher{
 
 
             if ( item.mustBeTransfered) {
+                //console.log("item MBT = ",item.name)
                 mustBeTransfered = true;
                 if (!(item instanceof UniformGroup || item instanceof UniformGroupArray )) {
 
@@ -371,6 +415,7 @@ export class UniformGroup extends EventDispatcher{
                 }else{
                     
                     item.copyIntoDataView(this.dataView,item.startId)
+                    
                 }
 
                 
@@ -382,9 +427,9 @@ export class UniformGroup extends EventDispatcher{
        
         //if(this.usedAsUniformBuffer) 
 
-        if(this.usedAsUniformBuffer && this.transfertWholeBuffer){
+        if(/*this.usedAsUniformBuffer &&*/ this.transfertWholeBuffer){
 
-            //console.log("AAAAAAAAAAAAA ",this.mustBeTransfered)
+            console.log("AAAAAAAAAAAAA ",this.debug,new Float32Array(this.datas))
 
            if(mustBeTransfered){
                 //console.log("AAAAAAAAAAAAAAAAAA ",this.mustBeTransfered,new Float32Array(this.dataView.buffer));
@@ -832,7 +877,15 @@ export class UniformGroup extends EventDispatcher{
         }
     }
 
+    public get definition():{type:string,values:ArrayBuffer,items:any,name:string}{
 
+        const items = {};
+        for(let i=0;i<this.items.length;i++){
+            items[this.itemNames[i]] = this.items[i].definition;
+        }
+
+        return {type:"UniformGroup",values:this.datas,items,name:this.name}
+    }
 
     /*
     protected createTypedArrayBuffer(result: any) {

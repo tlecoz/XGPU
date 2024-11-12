@@ -153,4 +153,15 @@ export class UniformGroupArray extends EventDispatcher {
     }
     public get isArray(): boolean { return true; }
     public get isUniformGroup(): boolean { return true; }
+
+
+    public get definition():{type:string,groups:any[],name:string}{
+
+        const groups = [];
+        for(let i=0;i<this.groups.length;i++){
+            groups[i] = this.groups[i].definition;
+        }
+
+        return {type:"UniformGroupArray",groups,name:this.name}
+    }
 }
