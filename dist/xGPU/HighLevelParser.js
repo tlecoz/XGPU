@@ -371,12 +371,22 @@ export class HighLevelParser {
                 bindgroup = descriptor;
                 uniformBufferName = descriptor.uniformBufferName ? descriptor.uniformBufferName : "bindgroupUniforms";
             }
+            if (o.name) {
+                console.warn("parseUniform ", name);
+                let old = o;
+                let newObj = o.clone();
+                o.addEventListener("ON_CHANGE", () => {
+                    newObj.set(old);
+                });
+                o = o.clone();
+            }
             if (!bindgroup[uniformBufferName]) {
                 const uniforms = {};
                 uniforms[name] = o;
                 bindgroup[uniformBufferName] = new UniformBuffer(uniforms, { useLocalVariable: true });
             }
             else {
+                //console.warn(name);
                 bindgroup[uniformBufferName].add(name, o);
             }
             //console.log("addUniform ", name, " vertexBuffer = ", descriptor.bindgroups.default.buffer)

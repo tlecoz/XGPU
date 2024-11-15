@@ -1,11 +1,8 @@
-/// <reference types="dist" />
+import { StageableBuffer } from "./StageableBuffer";
 import { VertexBuffer } from "./VertexBuffer";
-export declare class VertexBufferIO {
+export declare class VertexBufferIO extends StageableBuffer {
     buffers: VertexBuffer[];
     descriptor: any;
-    onOutputData: (data: ArrayBuffer) => void;
-    protected stagingBuffer: GPUBuffer;
-    protected canCallMapAsync: boolean;
     protected deviceId: number;
     constructor(attributes: any, descriptor?: any);
     get input(): VertexBuffer;

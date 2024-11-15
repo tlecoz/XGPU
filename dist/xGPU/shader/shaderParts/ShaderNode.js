@@ -5,6 +5,10 @@ export class ShaderNode {
     executeSubNodeAfterCode = true;
     _text;
     insideMainFunction;
+    _nodeByName = {};
+    get nodeByName() {
+        return this._nodeByName;
+    }
     subNodes;
     constructor(code = "", insideMainFunction = false) {
         this.text = code;
@@ -69,6 +73,11 @@ export class ShaderNode {
         if (!this.subNodes)
             this.subNodes = [];
         this.subNodes.push(node);
+        return node;
+    }
+    addNode(nodeName, code = "") {
+        const node = this.createNode(code);
+        this._nodeByName[nodeName] = node;
         return node;
     }
 }

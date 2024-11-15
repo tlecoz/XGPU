@@ -48,7 +48,7 @@ export class Bindgroups {
             this.groups[0].applyDraw = true;
         }
         for (let i = 0; i < this.groups.length; i++) {
-            //console.log(i, " group = ", this.groups[i])
+            console.log(i, " group = ", this.groups[i]);
             if (!autoLayout)
                 layouts[i] = this.groups[i].layout;
             bindgroups[i] = this.groups[i].group;
@@ -56,10 +56,11 @@ export class Bindgroups {
         if (autoLayout)
             description.layout = "auto";
         else {
-            //console.log("pipelineLayout = ", layouts)
+            console.log("pipelineLayout = ", layouts);
             description.layout = XGPU.createPipelineLayout({ bindGroupLayouts: layouts });
         }
         const { vertexLayouts, buffers, nbVertex } = this.createVertexBufferLayout();
+        //console.log(this.pipeline.type,vertexLayouts)
         description.vertex = {
             buffers: vertexLayouts
         };

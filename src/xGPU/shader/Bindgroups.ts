@@ -74,14 +74,14 @@ export class Bindgroups {
 
 
         for (let i = 0; i < this.groups.length; i++) {
-            //console.log(i, " group = ", this.groups[i])
+            console.log(i, " group = ", this.groups[i])
             if (!autoLayout) layouts[i] = this.groups[i].layout;
             bindgroups[i] = this.groups[i].group;
         }
 
         if (autoLayout) description.layout = "auto";
         else {
-            //console.log("pipelineLayout = ", layouts)
+            console.log("pipelineLayout = ", layouts)
             description.layout = XGPU.createPipelineLayout({ bindGroupLayouts: layouts });
         }
 

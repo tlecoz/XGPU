@@ -427,7 +427,7 @@ export class HighLevelParser {
 
 
     protected parseUniform(descriptor: any) {
-
+        
         const addUniform = (name: string, o: any) => {
             if (!descriptor.bindgroups) descriptor.bindgroups = {};
             if (!descriptor.bindgroups.default) descriptor.bindgroups.default = {};
@@ -441,14 +441,28 @@ export class HighLevelParser {
             }
 
 
+            
+            if(o.name){
+                console.warn("parseUniform ",name)
 
+                let old = o;
+                let newObj = o.clone();
+                o.addEventListener("ON_CHANGE",()=>{
+                    newObj.set(old);
+                })
+                
+
+                o = o.clone();
+            }
 
             if (!bindgroup[uniformBufferName]) {
                 const uniforms: any = {};
                 uniforms[name] = o;
+              
                 bindgroup[uniformBufferName] = new UniformBuffer(uniforms, { useLocalVariable: true });
 
             } else {
+                //console.warn(name);
                 (bindgroup[uniformBufferName] as UniformBuffer).add(name, o);
             }
 

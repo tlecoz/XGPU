@@ -21,6 +21,11 @@ export class RenderPipeline extends Pipeline {
     static ON_DRAW = "ON_DRAW";
     static ON_GPU_PIPELINE_BUILT = "ON_GPU_PIPELINE_BUILT";
     static ON_LOG = "ON_LOG";
+    static ON_VERTEX_SHADER_CODE_BUILT = "ON_VERTEX_SHADER_CODE_BUILT";
+    static ON_FRAGMENT_SHADER_CODE_BUILT = "ON_FRAGMENT_SHADER_CODE_BUILT";
+    static ON_INIT_FROM_OBJECT = "ON_INIT_FROM_OBJECT";
+    static ON_DEVICE_LOST = "ON_DEVICE_LOST";
+    static ON_UPDATE_RESOURCES = "ON_UPDATE_RESOURCES";
     _renderer;
     get renderer() { return this._renderer; }
     set renderer(renderer) {
@@ -204,11 +209,16 @@ export class RenderPipeline extends Pipeline {
             this.vertexShader.main.text = descriptor.vertexShader;
         }
         else {
+            if (descriptor.vertexShader instanceof VertexShader) {
+                this.vertexShader = descriptor.vertexShader;
+            }
+            else {
+                if (descriptor.vertexShader.constants)
+                    this.vertexShader.constants.text = descriptor.vertexShader.constants;
+                this.vertexShader.main.text = descriptor.vertexShader.main;
+            }
             this.vertexShader.inputs = createArrayOfObjects(descriptor.vertexShader.inputs);
             this.vertexShader.outputs = createArrayOfObjects(descriptor.vertexShader.outputs);
-            if (descriptor.vertexShader.constants)
-                this.vertexShader.constants.text = descriptor.vertexShader.constants;
-            this.vertexShader.main.text = descriptor.vertexShader.main;
         }
         if (descriptor.fragmentShader) {
             this.fragmentShader = new FragmentShader();
@@ -216,15 +226,21 @@ export class RenderPipeline extends Pipeline {
                 this.fragmentShader.main.text = descriptor.fragmentShader;
             }
             else {
+                if (descriptor.fragmentShader instanceof FragmentShader) {
+                    this.fragmentShader = descriptor.fragmentShader;
+                }
+                else {
+                    if (descriptor.fragmentShader.constants)
+                        this.fragmentShader.constants.text = descriptor.fragmentShader.constants;
+                    this.fragmentShader.main.text = descriptor.fragmentShader.main;
+                }
                 this.fragmentShader.inputs = createArrayOfObjects(descriptor.fragmentShader.inputs);
                 ;
                 this.fragmentShader.outputs = createArrayOfObjects(descriptor.fragmentShader.outputs);
                 ;
-                if (descriptor.fragmentShader.constants)
-                    this.fragmentShader.constants.text = descriptor.fragmentShader.constants;
-                this.fragmentShader.main.text = descriptor.fragmentShader.main;
             }
         }
+        this.dispatchEvent(RenderPipeline.ON_INIT_FROM_OBJECT, descriptor);
         return descriptor;
     }
     _clearValue = null;
@@ -346,6 +362,7 @@ export class RenderPipeline extends Pipeline {
     rebuildingAfterDeviceLost = false;
     onRebuildStartAfterDeviceLost;
     clearAfterDeviceLostAndRebuild() {
+        this.dispatchEvent(RenderPipeline.ON_DEVICE_LOST);
         if (this.onRebuildStartAfterDeviceLost)
             this.onRebuildStartAfterDeviceLost();
         this.gpuPipeline = null;
@@ -394,9 +411,11 @@ export class RenderPipeline extends Pipeline {
             }
             //---------------------------------
             const vertexShader = this.vertexShader.build(this, vertexInput);
+            this.dispatchEvent(RenderPipeline.ON_VERTEX_SHADER_CODE_BUILT, vertexShader);
             let fragmentShader;
             if (this.fragmentShader) {
                 fragmentShader = this.fragmentShader.build(this, vertexShader.output.getInputFromOutput());
+                this.dispatchEvent(RenderPipeline.ON_FRAGMENT_SHADER_CODE_BUILT, fragmentShader);
             }
             this.description.vertex = {
                 code: vertexShader.code,
@@ -419,10 +438,19 @@ export class RenderPipeline extends Pipeline {
         }
         this.rebuildingAfterDeviceLost = false;
         this.gpuPipeline = XGPU.createRenderPipeline(this.description);
+        let resources = this.bindGroups.resources.types;
+        for (let type in resources) {
+            resources[type].forEach((o) => {
+                if (o.resource.gpuResource) {
+                    o.resource.gpuResource.label = o.name;
+                }
+            });
+        }
         if (this.resources.__DEBUG__) {
             this.vertexShaderDebuggerPipeline = new VertexShaderDebuggerPipeline();
             this.vertexShaderDebuggerPipeline.init(this, this.debugVertexCount);
             this.vertexShaderDebuggerPipeline.onLog = (o) => {
+                console.log(o);
                 this.dispatchEvent(RenderPipeline.ON_LOG, o);
                 //this._onLog(o);
             };
@@ -508,6 +536,7 @@ export class RenderPipeline extends Pipeline {
         if (this.renderPassTexture)
             this.renderPassTexture.update();
         this.bindGroups.update();
+        this.dispatchEvent(RenderPipeline.ON_UPDATE_RESOURCES);
         //console.log("renderPipeline.update end")
     }
     draw(renderPass) {

@@ -44,13 +44,12 @@ export class UniformGroupArray extends EventDispatcher {
         let offset = 0;
         groups.forEach((g)=>{
             g.startId = offset;
-            let n = g.type.nbComponent;
             g.startId = offset;
-            offset += (g.arrayStride)// * 4;
+            offset += g.arrayStride;
             
             
             g.addEventListener(UniformGroup.ON_CHANGE,()=>{
-                //console.log("on array child ON_CHANGE")
+               
                 this.mustBeTransfered = true;
                 this.dispatchEvent(UniformGroupArray.ON_CHANGE)
             })

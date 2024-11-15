@@ -7,4 +7,5 @@ export declare class ComputeShader extends ShaderStage {
         code: string;
         output: ShaderStruct;
     };
+    static removeStructDefinitionAndReplaceStructDeclarationName(shaderCode: string, structName: string, newStructName: string): string;
 }

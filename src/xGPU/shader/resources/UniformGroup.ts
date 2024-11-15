@@ -163,8 +163,9 @@ export class UniformGroup extends EventDispatcher{
 
     public add(name: string, data: Uniformable, useLocalVariable: boolean = false, stackItems: boolean = true): Uniformable {
 
-        //console.log("add ", name, data)
-
+       //console.log(data.name,data.startId)
+        //if(data.name) data = data.clone();
+       
         data.uniformBuffer = this.uniformBuffer;
         data.name = name;
         data.mustBeTransfered = true;
@@ -176,11 +177,8 @@ export class UniformGroup extends EventDispatcher{
         //console.log("this.name = ",this.name)
         if(this.usedAsUniformBuffer == false || data instanceof UniformGroup || data instanceof UniformGroupArray || data instanceof Vec4Array){
            
-            data.addEventListener("ON_CHANGE",(e)=>{
-                //if(data instanceof Vec4Array) console.log("VEC4ARRAY CHANGED ",this.usedAsUniformBuffer)
-                //if(data instanceof UniformGroupArray || data instanceof UniformGroup) console.log("ON_CHANGE ",data.name+" changed ",data.type)
+            data.addEventListener("ON_CHANGE",()=>{
                 this.mustBeTransfered = true;
-                //this.mustDispatchChangeEvent = true;
                 this.dispatchEvent("ON_CHANGE");
             })
         }

@@ -2,15 +2,20 @@
 import { PrimitiveFloatUniform, PrimitiveIntUniform, PrimitiveType, PrimitiveUintUniform } from "../../PrimitiveType";
 import { UniformBuffer } from "./UniformBuffer";
 import { UniformGroupArray } from "./UniformGroupArray";
+import { EventDispatcher } from "../../EventDispatcher";
 export type Uniformable = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform | UniformGroup | UniformGroupArray;
-export declare class UniformGroup {
+export declare class UniformGroup extends EventDispatcher {
+    static ON_CHANGE: string;
+    static ON_CHANGED: string;
     unstackedItems: any;
     items: Uniformable[];
     itemNames: string[];
     arrayStride: number;
     startId: number;
+    globalStartId: number;
     createVariableInsideMain: boolean;
     mustBeTransfered: boolean;
+    protected mustDispatchChangeEvent: boolean;
     protected _name: string;
     wgsl: {
         struct: string;
@@ -19,12 +24,14 @@ export declare class UniformGroup {
     wgslStructNames: string[];
     datas: ArrayBuffer;
     dataView: DataView;
+    private debug;
     set(datas: ArrayBuffer): void;
     protected buffer: UniformBuffer;
     get uniformBuffer(): UniformBuffer;
     set uniformBuffer(buffer: UniformBuffer);
     destroy(): void;
-    constructor(items: any, useLocalVariable?: boolean);
+    protected usedAsUniformBuffer: boolean;
+    constructor(items: any, useLocalVariable?: boolean, usedAsUniformBuffer?: boolean);
     get name(): string;
     set name(s: string);
     clone(propertyNames?: string[]): UniformGroup;
@@ -38,11 +45,21 @@ export declare class UniformGroup {
     forceUpdate(): void;
     get type(): any;
     setDatas(item: PrimitiveType, dataView?: DataView, offset?: number): void;
+    updateItemFromDataView(dataView: DataView, offset: number): void;
     copyIntoDataView(dataView: DataView, offset: number): void;
-    update(gpuResource: GPUBuffer, fromUniformBuffer?: boolean): Promise<void>;
+    transfertWholeBuffer: boolean;
+    update(gpuResource: GPUBuffer): Promise<void>;
+    existingStrucName: string;
     getStruct(name: string): {
         struct: string;
         localVariables: string;
     };
     stackItems(items: any): Uniformable[];
+    updateStartIdFromParentToChildren(): void;
+    get definition(): {
+        type: string;
+        values: ArrayBuffer;
+        items: any;
+        name: string;
+    };
 }

@@ -168,8 +168,8 @@ export class Pipeline extends EventDispatcher {
                     layout.entries[k] = resource.createBindGroupLayoutEntry(k);
                     group.entries[k] = resource.createBindGroupEntry(k)
 
-                    //console.log(k, " AAAAA layout.entries ", layout.entries[k]);
-                    //console.log(k, " AAAAA group.entries ", group.entries[k]);
+                    console.log(k, " AAAAA layout.entries ", layout.entries[k]);
+                    console.log(k, " AAAAA group.entries ", group.entries[k]);
 
 
                     k++;
@@ -177,7 +177,7 @@ export class Pipeline extends EventDispatcher {
             }
 
             if (k > 0) {
-                //console.log(i, " layout : ", layout);
+                console.log(i, " layout : ", layout,group);
 
                 group.layout = this.gpuBindGroupLayouts[n] = XGPU.createBindgroupLayout(layout)
 

@@ -1,7 +1,9 @@
 /// <reference types="dist" />
 import { Bindgroup } from "../shader/Bindgroup";
+import { FragmentShader } from "../shader/FragmentShader";
 import { VertexAttribute } from "../shader/resources/VertexAttribute";
 import { VertexBuffer } from "../shader/resources/VertexBuffer";
+import { VertexShader } from "../shader/VertexShader";
 import { Pipeline } from "./Pipeline";
 import { BlendMode } from "../blendmodes/BlendMode";
 import { DepthStencilTexture } from "./resources/textures/DepthStencilTexture";
@@ -84,6 +86,11 @@ export declare class RenderPipeline extends Pipeline {
     static ON_DRAW: string;
     static ON_GPU_PIPELINE_BUILT: string;
     static ON_LOG: string;
+    static ON_VERTEX_SHADER_CODE_BUILT: string;
+    static ON_FRAGMENT_SHADER_CODE_BUILT: string;
+    static ON_INIT_FROM_OBJECT: string;
+    static ON_DEVICE_LOST: string;
+    static ON_UPDATE_RESOURCES: string;
     protected _renderer: IRenderer;
     get renderer(): IRenderer;
     set renderer(renderer: IRenderer);
@@ -135,13 +142,13 @@ export declare class RenderPipeline extends Pipeline {
             outputs?: any;
             inputs?: any;
             constants?: string;
-        } | string;
+        } | string | VertexShader;
         fragmentShader?: {
             main: string;
             outputs?: any;
             inputs?: any;
             constants?: string;
-        } | string;
+        } | string | FragmentShader;
         [key: string]: unknown;
     }): any;
     protected _clearValue: {

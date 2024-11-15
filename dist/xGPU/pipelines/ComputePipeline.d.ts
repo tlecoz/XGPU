@@ -6,8 +6,16 @@ import { VertexBufferIO } from "../shader/resources/VertexBufferIO";
 import { Pipeline } from "./Pipeline";
 import { ImageTexture } from "../shader/resources/ImageTexture";
 export declare class ComputePipeline extends Pipeline {
+    static ON_COMPUTE_SHADER_CODE_BUILT: string;
+    static ON_COMPUTE_BEGIN: string;
+    static ON_COMPUTE_END: string;
+    static ON_GPU_PIPELINE_BUILT: string;
+    static ON_INIT_FROM_OBJECT: string;
+    static ON_DESTROY: string;
+    static ON_DEVICE_LOST: string;
+    static ON_UPDATE_RESOURCES: string;
+    static ON_SUBMIT_QUEUE: string;
     computeShader: ComputeShader;
-    onReceiveData: (datas: Float32Array) => void;
     protected gpuComputePipeline: GPUComputePipeline;
     workgroups: number[];
     protected dispatchWorkgroup: number[];
@@ -18,6 +26,9 @@ export declare class ComputePipeline extends Pipeline {
     protected textureIOs: ImageTexture[];
     onComputeBegin: () => void;
     onComputeEnd: () => void;
+    onShaderBuild: (shaderInfos: {
+        code: string;
+    }) => void;
     constructor();
     set useRenderPipeline(b: boolean);
     initFromObject(descriptor: {
@@ -27,7 +38,7 @@ export declare class ComputePipeline extends Pipeline {
             main: string;
             inputs?: any;
             constants?: string;
-        } | string;
+        } | string | ComputeShader;
         [key: string]: unknown;
     }): {
         [key: string]: unknown;
@@ -37,7 +48,7 @@ export declare class ComputePipeline extends Pipeline {
             main: string;
             inputs?: any;
             constants?: string;
-        } | string;
+        } | string | ComputeShader;
     };
     destroy(): void;
     setWorkgroups(x: number, y?: number, z?: number): void;

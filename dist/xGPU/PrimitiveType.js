@@ -4,22 +4,32 @@
 import { mat4, vec3 } from "gl-matrix";
 import { GPUType } from "./GPUType";
 export class PrimitiveFloatUniform extends Float32Array {
+    static ON_CHANGE = "ON_CHANGE";
     static ON_CHANGED = "ON_CHANGED";
     //public uniform: Uniform;
     name;
     type;
     startId = 0;
+    globalStartId = 0;
     onChange;
     _mustBeTransfered = true;
     get mustBeTransfered() { return this._mustBeTransfered; }
     set mustBeTransfered(b) {
+        //if(this.name == "timeBytes"){
+        //    console.warn(this.name,this._mustBeTransfered,b);
+        //}
         if (b != this._mustBeTransfered) {
-            if (!b)
+            //if(b) this.mustTriggerChangeEvent = true;
+            //else this.mustTriggerChangedEvent = true; 
+            if (b)
+                this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGE);
+            else
                 this.dispatchEvent(PrimitiveFloatUniform.ON_CHANGED);
             //if (!b && this.onChange) this.onChange();
             this._mustBeTransfered = b;
         }
     }
+    //public mustBeTransfered:boolean = true;
     uniformBuffer;
     propertyNames;
     createVariableInsideMain = false;
@@ -76,15 +86,12 @@ export class PrimitiveFloatUniform extends Float32Array {
         //console.log("createVariable = ", res);
         return res;
     }
-    /*
-    public feedbackVertexId: number = 0;
-    public feedbackInstanceId: number = 0;
-    public setFeedback(vertexId: number, instanceId: number): PrimitiveFloatUniform {
-        this.feedbackVertexId = vertexId;
-        this.feedbackInstanceId = instanceId;
-        return this;
-    }*/
-    update() { }
+    update() {
+    }
+    updateStartIdFromParentToChildren() {
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+    }
     //--------- EVENT DISPATCHER CLASS (that I can't extends because we already extends Float32Array)----
     eventListeners = {};
     addEventListener(eventName, callback) {
@@ -107,12 +114,18 @@ export class PrimitiveFloatUniform extends Float32Array {
             });
         }
     }
+    //---------------------------------------------------------------------------------------------
+    get definition() {
+        return { type: this.constructor.name, values: this, name: this.name };
+    }
 }
 export class PrimitiveIntUniform extends Int32Array {
+    static ON_CHANGE = "ON_CHANGE";
     static ON_CHANGED = "ON_CHANGED";
     name;
     type;
     startId = 0;
+    globalStartId = 0;
     onChange;
     _mustBeTransfered = true;
     get mustBeTransfered() { return this._mustBeTransfered; }
@@ -120,6 +133,8 @@ export class PrimitiveIntUniform extends Int32Array {
         if (b != this._mustBeTransfered) {
             if (!b)
                 this.dispatchEvent(PrimitiveIntUniform.ON_CHANGED);
+            else
+                this.dispatchEvent(PrimitiveIntUniform.ON_CHANGE);
             //if (!b && this.onChange) this.onChange();
             this._mustBeTransfered = b;
         }
@@ -151,6 +166,10 @@ export class PrimitiveIntUniform extends Int32Array {
         }
         result += "}\n";
         return result;
+    }
+    updateStartIdFromParentToChildren() {
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
     }
     createVariable(uniformBufferName) {
         if (!this.createVariableInsideMain)
@@ -197,12 +216,18 @@ export class PrimitiveIntUniform extends Int32Array {
             });
         }
     }
+    //---------------------------------------------------------------------------------------------
+    get definition() {
+        return { type: this.constructor.name, values: this, name: this.name };
+    }
 }
 export class PrimitiveUintUniform extends Uint32Array {
+    static ON_CHANGE = "ON_CHANGE";
     static ON_CHANGED = "ON_CHANGED";
     name;
     type;
     startId = 0;
+    globalStartId = 0;
     uniformBuffer;
     onChange;
     _mustBeTransfered = true;
@@ -212,6 +237,8 @@ export class PrimitiveUintUniform extends Uint32Array {
             //if (!b && this.onChange) this.onChange();
             if (!b)
                 this.dispatchEvent(PrimitiveUintUniform.ON_CHANGED);
+            else
+                this.dispatchEvent(PrimitiveUintUniform.ON_CHANGE);
             this._mustBeTransfered = b;
         }
     }
@@ -241,6 +268,10 @@ export class PrimitiveUintUniform extends Uint32Array {
         }
         result += "}\n";
         return result;
+    }
+    updateStartIdFromParentToChildren() {
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
     }
     createVariable(uniformBufferName) {
         if (!this.createVariableInsideMain)
@@ -287,6 +318,10 @@ export class PrimitiveUintUniform extends Uint32Array {
                 callback(this, eventData);
             });
         }
+    }
+    //---------------------------------------------------------------------------------------------
+    get definition() {
+        return { type: this.constructor.name, values: this, name: this.name };
     }
 }
 //--------------
@@ -518,20 +553,45 @@ export class UVec4 extends PrimitiveUintUniform {
 //==========================================================================
 export class Vec4Array extends PrimitiveFloatUniform {
     vec4Array;
-    constructor(vec4Array) {
-        let buf = new Float32Array(vec4Array.length * 4);
-        for (let i = 0; i < vec4Array.length; i++)
-            buf.set(vec4Array[i], i * 4);
-        let type = "array<vec4<f32>," + vec4Array.length + ">";
-        super("array<vec4<f32>," + vec4Array.length + ">", buf);
+    constructor(vec4Array_or_arrayLength) {
+        let array;
+        if (typeof vec4Array_or_arrayLength != "number")
+            array = vec4Array_or_arrayLength;
+        else {
+            array = [];
+            for (let i = 0; i < vec4Array_or_arrayLength; i++)
+                array[i] = new Vec4();
+        }
+        const len = array.length;
+        let buf = new Float32Array(len * 4);
+        for (let i = 0; i < len; i++)
+            buf.set(array[i], i * 4);
+        let type = "array<vec4<f32>," + array.length + ">";
+        super("array<vec4<f32>," + array.length + ">", buf);
         this.className = type;
-        this.vec4Array = vec4Array;
+        this.vec4Array = array;
+        for (let i = 0; i < this.vec4Array.length; i++) {
+            this.vec4Array[i].addEventListener("ON_CHANGE", () => {
+                this.mustBeTransfered = true;
+                this.set(this.vec4Array[i], i * 4);
+                this.dispatchEvent("ON_CHANGE");
+            });
+        }
+    }
+    updateStartIdFromParentToChildren() {
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+        for (let i = 0; i < this.vec4Array.length; i++) {
+            this.vec4Array[i].globalStartId = this.globalStartId + this.vec4Array[i].startId;
+        }
     }
     update() {
         let mustBeTransfered = false;
         let m;
         for (let i = 0; i < this.vec4Array.length; i++) {
             m = this.vec4Array[i];
+            if (!m.name)
+                m.name = this.name + "#" + i;
             m.update();
             if (m.mustBeTransfered) {
                 mustBeTransfered = true;
@@ -539,20 +599,45 @@ export class Vec4Array extends PrimitiveFloatUniform {
                 m.mustBeTransfered = false;
             }
         }
-        this.mustBeTransfered = mustBeTransfered;
+        if (this.mustBeTransfered != mustBeTransfered) {
+            this.mustBeTransfered = mustBeTransfered;
+        }
     }
 }
 //-------
 export class IVec4Array extends PrimitiveIntUniform {
     ivec4Array;
-    constructor(ivec4Array) {
-        let buf = new Int32Array(ivec4Array.length * 4);
-        for (let i = 0; i < ivec4Array.length; i++)
-            buf.set(ivec4Array[i], i * 4);
-        let type = "array<vec4<i32>," + ivec4Array.length + ">";
+    constructor(vec4Array_or_arrayLength) {
+        let array;
+        if (typeof vec4Array_or_arrayLength != "number")
+            array = vec4Array_or_arrayLength;
+        else {
+            array = [];
+            for (let i = 0; i < vec4Array_or_arrayLength; i++)
+                array[i] = new IVec4();
+        }
+        const len = array.length;
+        let buf = new Int32Array(len * 4);
+        for (let i = 0; i < len; i++)
+            buf.set(array[i], i * 4);
+        let type = "array<vec4<i32>," + array.length + ">";
         super(type, buf);
         this.className = type;
-        this.ivec4Array = ivec4Array;
+        this.ivec4Array = array;
+        for (let i = 0; i < this.ivec4Array.length; i++) {
+            this.ivec4Array[i].addEventListener("ON_CHANGE", () => {
+                this.mustBeTransfered = true;
+                this.set(this.ivec4Array[i], i * 4);
+                this.dispatchEvent("ON_CHANGE");
+            });
+        }
+    }
+    updateStartIdFromParentToChildren() {
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+        for (let i = 0; i < this.ivec4Array.length; i++) {
+            this.ivec4Array[i].globalStartId = this.globalStartId + this.ivec4Array[i].startId;
+        }
     }
     update() {
         let mustBeTransfered = false;
@@ -572,14 +657,37 @@ export class IVec4Array extends PrimitiveIntUniform {
 //-----
 export class UVec4Array extends PrimitiveUintUniform {
     uvec4Array;
-    constructor(uvec4Array) {
-        let buf = new Uint32Array(uvec4Array.length * 4);
-        for (let i = 0; i < uvec4Array.length; i++)
-            buf.set(uvec4Array[i], i * 4);
-        let type = "array<vec4<u32>," + uvec4Array.length + ">";
+    constructor(vec4Array_or_arrayLength) {
+        let array;
+        if (typeof vec4Array_or_arrayLength != "number")
+            array = vec4Array_or_arrayLength;
+        else {
+            array = [];
+            for (let i = 0; i < vec4Array_or_arrayLength; i++)
+                array[i] = new UVec4();
+        }
+        const len = array.length;
+        let buf = new Uint32Array(len * 4);
+        for (let i = 0; i < len; i++)
+            buf.set(array[i], i * 4);
+        let type = "array<vec4<u32>," + array.length + ">";
         super(type, buf);
         this.className = type;
-        this.uvec4Array = uvec4Array;
+        this.uvec4Array = array;
+        for (let i = 0; i < this.uvec4Array.length; i++) {
+            this.uvec4Array[i].addEventListener("ON_CHANGE", () => {
+                this.mustBeTransfered = true;
+                this.set(this.uvec4Array[i], i * 4);
+                this.dispatchEvent("ON_CHANGE");
+            });
+        }
+    }
+    updateStartIdFromParentToChildren() {
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+        for (let i = 0; i < this.uvec4Array.length; i++) {
+            this.uvec4Array[i].globalStartId = this.globalStartId + this.uvec4Array[i].startId;
+        }
     }
     update() {
         let mustBeTransfered = false;
@@ -598,10 +706,18 @@ export class UVec4Array extends PrimitiveUintUniform {
 }
 //==============================================================
 export class Matrix3x3 extends PrimitiveFloatUniform {
-    constructor() {
-        super("mat3x3<f32>", new Float32Array([1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0]));
+    disableUpdate;
+    constructor(floatArray = null) {
+        const disableUpdate = !!floatArray;
+        if (!floatArray)
+            floatArray = new Float32Array([
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+            ]);
+        super("mat3x3<f32>", floatArray);
+        this.className = "mat3x3<f32>";
+        this.disableUpdate = disableUpdate;
     }
 }
 /*
@@ -753,14 +869,37 @@ export class Matrix4x4 extends PrimitiveFloatUniform {
 //--------------------
 export class Matrix4x4Array extends PrimitiveFloatUniform {
     matrixs;
-    constructor(mat4x4Array) {
-        let buf = new Float32Array(mat4x4Array.length * 16);
-        for (let i = 0; i < mat4x4Array.length; i++)
-            buf.set(mat4x4Array[i], i * 16);
-        super("array<mat4x4<f32>," + mat4x4Array.length + ">", buf);
-        this.matrixs = mat4x4Array;
+    constructor(mat4x4Array_or_arrayLength) {
+        let array;
+        if (typeof mat4x4Array_or_arrayLength != "number")
+            array = mat4x4Array_or_arrayLength;
+        else {
+            array = [];
+            for (let i = 0; i < mat4x4Array_or_arrayLength; i++)
+                array[i] = new Matrix4x4();
+        }
+        const len = array.length;
+        let buf = new Float32Array(len * 16);
+        for (let i = 0; i < len; i++)
+            buf.set(array[i], i * 16);
+        super("array<mat4x4<f32>," + len + ">", buf);
+        this.matrixs = array;
         this.mustBeTransfered = true;
-        this.className = "array<mat4x4<f32>," + mat4x4Array.length + ">";
+        this.className = "array<mat4x4<f32>," + len + ">";
+        for (let i = 0; i < this.matrixs.length; i++) {
+            this.matrixs[i].addEventListener("ON_CHANGE", () => {
+                this.mustBeTransfered = true;
+                this.set(this.matrixs[i], i * 16);
+                this.dispatchEvent("ON_CHANGE");
+            });
+        }
+    }
+    updateStartIdFromParentToChildren() {
+        //used to update the startId of elements contained in an array
+        //|=> by default, the startId is related to the parent, but the parent may have a parent too so we must update every startId
+        for (let i = 0; i < this.matrixs.length; i++) {
+            this.matrixs[i].globalStartId = this.globalStartId + this.matrixs[i].startId;
+        }
     }
     update() {
         let mustBeTransfered = false;

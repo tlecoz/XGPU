@@ -67,6 +67,10 @@ export class XGPU {
     }
 
 
+
+
+
+
     public static getTransferableUniforms(uniforms:{[key:string]:Uniformable}):TransferableUniforms{
         
         let def:any;
@@ -158,6 +162,8 @@ export class XGPU {
                 array.set(o.values);
                 return array
             }
+
+            throw new Error("incorrect type")
         }
 
         const parseObject = (o:any):{[key:string]:Uniformable}=>{

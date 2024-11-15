@@ -155,28 +155,30 @@ export class ShaderStage {
         this.outputs.push({ name, type: shaderTypeOrBuiltIn.type, builtin: shaderTypeOrBuiltIn.builtin });
     }
     formatWGSLCode(code) {
-        // Retire les sauts de ligne inutiles et divise le code en lignes
-        const lines = code.replace(/\n+/g, '\n').split('\n');
-        let formattedCode = '';
-        let indentLevel = 0;
-        for (const line of lines) {
-            const trimmedLine = line.trim();
-            // Diminue le niveau d'indentation si la ligne contient une accolade fermante
-            if (trimmedLine.startsWith('}')) {
-                indentLevel--;
-            }
-            // Ajoute des espaces pour la tabulation
-            const indentedLine = '   '.repeat(indentLevel) + trimmedLine;
-            // Augmente le niveau d'indentation si la ligne contient une accolade ouvrante
-            if (trimmedLine.endsWith('{')) {
-                indentLevel++;
-            }
-            formattedCode += indentedLine + '\n';
+        const res = code.split("\n");
+        let count = 0;
+        let tabs = [];
+        for (let i = 0; i < 16; i++) {
+            if (i == 0)
+                tabs[i] = "";
+            else
+                tabs[i] = tabs[i - 1] + "\t";
         }
-        //console.log("CODE-------------")
-        //console.log(code);
-        //console.log("---------------------")
-        return formattedCode;
+        const res2 = [];
+        var s;
+        var empty = true;
+        for (let i = 0; i < res.length; i++) {
+            s = res[i].trim();
+            if (s.includes("}"))
+                count--;
+            if (s != "" || !empty) {
+                empty = s == "";
+                res2.push(tabs[count] + s);
+            }
+            if (res[i].includes("{"))
+                count++;
+        }
+        return res2.join("\n");
     }
     get shaderInfos() { return this._shaderInfos; }
     _shaderInfos;

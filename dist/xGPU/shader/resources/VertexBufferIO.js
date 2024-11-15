@@ -1,15 +1,17 @@
 // Copyright (c) 2023 Thomas Le Coz. All rights reserved.
 // This code is governed by an MIT license that can be found in the LICENSE file.
 import { XGPU } from "../../XGPU";
+import { StageableBuffer } from "./StageableBuffer";
 import { VertexBuffer } from "./VertexBuffer";
-export class VertexBufferIO {
+export class VertexBufferIO extends StageableBuffer {
     buffers = [];
     descriptor;
-    onOutputData;
-    stagingBuffer;
-    canCallMapAsync = true;
+    //public onOutputData: (data: ArrayBuffer) => void;
+    //protected stagingBuffer: GPUBuffer;
+    //protected canCallMapAsync: boolean = true;
     deviceId;
     constructor(attributes, descriptor) {
+        super();
         if (!descriptor)
             descriptor = {};
         else
@@ -103,7 +105,6 @@ export class VertexBufferIO {
             break;
         }
         let datas;
-        //console.log("createVertexInstances type = ", type)
         if (type === "float32" || type === "float32x2" || type === "float32x3" || type === "float32x4")
             datas = new Float32Array(arrayStride * nbInstance);
         else if (type == "sint32" || type == "sint32x2" || type == "sint32x3" || type == "sint32x4")

@@ -7,7 +7,6 @@ import { ShaderStruct } from "../shaderParts/ShaderStruct";
 import { IShaderResource } from "./IShaderResource";
 import { VertexAttribute } from "./VertexAttribute";
 import { VertexBufferIO } from "./VertexBufferIO";
-import { EventDispatcher } from "../../EventDispatcher";
 import { StageableBuffer } from "./StageableBuffer";
 
 export type VertexBufferDescriptor = {
@@ -574,9 +573,9 @@ export class VertexBuffer extends StageableBuffer implements IShaderResource {
     }
 
    
-    public resizeLowLevelBuffer(byteLength:number,copyPreviousDataWithin:boolean=false){
+    public resizeLowLevelBuffer(byteLength:number,copyPreviousDataWithin:boolean=false):void{
 
-        if(!this.lowLevelBuffer) return false;
+        if(!this.lowLevelBuffer) return ;
 
         const oldBuffer = this.gpuResource;
 

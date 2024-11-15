@@ -1,4 +1,15 @@
 /// <reference types="dist" />
+import { Uniformable } from "./shader/resources/UniformGroup";
+export type TransferableUniforms = {
+    items: {
+        name: string;
+        type: string;
+        values: any;
+        groups?: any;
+        items?: any;
+    };
+    transferables: ArrayBuffer[];
+};
 export declare class XGPU {
     static showVertexShader: boolean;
     static showFragmentShader: boolean;
@@ -19,6 +30,12 @@ export declare class XGPU {
     static loseDevice(): void;
     static clear(): void;
     static get loseDeviceRecently(): boolean;
+    static getTransferableUniforms(uniforms: {
+        [key: string]: Uniformable;
+    }): TransferableUniforms;
+    static parseTransferableUniform(uniforms: TransferableUniforms): {
+        [key: string]: Uniformable;
+    };
     static init(options?: {
         powerPreference?: "low-power" | "high-performance";
         forceFallbackAdaoter?: boolean;

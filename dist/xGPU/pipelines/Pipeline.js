@@ -110,13 +110,13 @@ export class Pipeline extends EventDispatcher {
                 if (!(resource instanceof VertexBuffer) || this.isComputePipeline) {
                     layout.entries[k] = resource.createBindGroupLayoutEntry(k);
                     group.entries[k] = resource.createBindGroupEntry(k);
-                    //console.log(k, " AAAAA layout.entries ", layout.entries[k]);
-                    //console.log(k, " AAAAA group.entries ", group.entries[k]);
+                    console.log(k, " AAAAA layout.entries ", layout.entries[k]);
+                    console.log(k, " AAAAA group.entries ", group.entries[k]);
                     k++;
                 }
             }
             if (k > 0) {
-                //console.log(i, " layout : ", layout);
+                console.log(i, " layout : ", layout, group);
                 group.layout = this.gpuBindGroupLayouts[n] = XGPU.createBindgroupLayout(layout);
                 this.gpuBindgroups[n] = XGPU.createBindgroup(group);
                 n++;

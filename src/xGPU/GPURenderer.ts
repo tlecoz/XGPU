@@ -211,7 +211,7 @@ export class GPURenderer extends EventDispatcher implements IRenderer {
 
 
 
-        let pipeline: RenderPipeline, renderPass;
+        let pipeline: RenderPipeline, renderPass:GPURenderPassEncoder;
         for (let i = 0; i < this.renderPipelines.length; i++) {
             pipeline = this.renderPipelines[i];
 
@@ -219,6 +219,7 @@ export class GPURenderer extends EventDispatcher implements IRenderer {
 
 
             renderPass = pipeline.beginRenderPass(this.commandEncoder, this.view, 0);
+           
             for (let j = 0; j < pipeline.pipelineCount; j++) {
                 pipeline.dispatchEvent(RenderPipeline.ON_DRAW, j);
                 pipeline.draw(renderPass);

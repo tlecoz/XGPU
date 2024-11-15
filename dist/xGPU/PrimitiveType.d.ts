@@ -2,10 +2,12 @@ import { GPUType } from "./GPUType";
 import { UniformBuffer } from "./shader/resources/UniformBuffer";
 export type PrimitiveType = PrimitiveFloatUniform | PrimitiveIntUniform | PrimitiveUintUniform;
 export declare class PrimitiveFloatUniform extends Float32Array {
+    static ON_CHANGE: string;
     static ON_CHANGED: string;
     name: string;
     type: GPUType;
     startId: number;
+    globalStartId: number;
     onChange: () => void;
     protected _mustBeTransfered: boolean;
     get mustBeTransfered(): boolean;
@@ -21,16 +23,24 @@ export declare class PrimitiveFloatUniform extends Float32Array {
     set(m: Float32Array, offset?: number): void;
     createVariable(uniformBufferName: string, name?: string): string;
     update(): void;
+    updateStartIdFromParentToChildren(): void;
     protected eventListeners: any;
     addEventListener(eventName: string, callback: (dispatcher: PrimitiveFloatUniform, data?: any) => void): void;
     removeEventListener(eventName: string, callback: (dispatcher: PrimitiveFloatUniform, data?: any) => void): void;
     dispatchEvent(eventName: string, eventData?: any): void;
+    get definition(): {
+        type: string;
+        values: Float32Array;
+        name?: string;
+    };
 }
 export declare class PrimitiveIntUniform extends Int32Array {
+    static ON_CHANGE: string;
     static ON_CHANGED: string;
     name: string;
     type: GPUType;
     startId: number;
+    globalStartId: number;
     onChange: () => void;
     protected _mustBeTransfered: boolean;
     get mustBeTransfered(): boolean;
@@ -43,18 +53,26 @@ export declare class PrimitiveIntUniform extends Int32Array {
     clone(): PrimitiveIntUniform;
     initStruct(propertyNames: string[], createVariableInsideMain?: boolean): void;
     createStruct(): string;
+    updateStartIdFromParentToChildren(): void;
     createVariable(uniformBufferName: string): string;
     update(): void;
     protected eventListeners: any;
     addEventListener(eventName: string, callback: (dispatcher: PrimitiveIntUniform, data?: any) => void): void;
     removeEventListener(eventName: string, callback: (dispatcher: PrimitiveIntUniform, data?: any) => void): void;
     dispatchEvent(eventName: string, eventData?: any): void;
+    get definition(): {
+        type: string;
+        values: Int32Array;
+        name?: string;
+    };
 }
 export declare class PrimitiveUintUniform extends Uint32Array {
+    static ON_CHANGE: string;
     static ON_CHANGED: string;
     name: string;
     type: GPUType;
     startId: number;
+    globalStartId: number;
     uniformBuffer: UniformBuffer;
     onChange: () => void;
     protected _mustBeTransfered: boolean;
@@ -67,12 +85,18 @@ export declare class PrimitiveUintUniform extends Uint32Array {
     clone(): PrimitiveUintUniform;
     initStruct(propertyNames: string[], createVariableInsideMain?: boolean): void;
     createStruct(): string;
+    updateStartIdFromParentToChildren(): void;
     createVariable(uniformBufferName: string): string;
     update(): void;
     protected eventListeners: any;
     addEventListener(eventName: string, callback: (dispatcher: PrimitiveUintUniform, data?: any) => void): void;
     removeEventListener(eventName: string, callback: (dispatcher: PrimitiveUintUniform, data?: any) => void): void;
     dispatchEvent(eventName: string, eventData?: any): void;
+    get definition(): {
+        type: string;
+        values: Uint32Array;
+        name?: string;
+    };
 }
 export declare class Float extends PrimitiveFloatUniform {
     constructor(x?: number, createLocalVariable?: boolean);
@@ -172,21 +196,25 @@ export declare class UVec4 extends PrimitiveUintUniform {
 }
 export declare class Vec4Array extends PrimitiveFloatUniform {
     vec4Array: Vec4[];
-    constructor(vec4Array: Vec4[]);
+    constructor(vec4Array_or_arrayLength: Vec4[] | number);
+    updateStartIdFromParentToChildren(): void;
     update(): void;
 }
 export declare class IVec4Array extends PrimitiveIntUniform {
     ivec4Array: IVec4[];
-    constructor(ivec4Array: IVec4[]);
+    constructor(vec4Array_or_arrayLength: IVec4[] | number);
+    updateStartIdFromParentToChildren(): void;
     update(): void;
 }
 export declare class UVec4Array extends PrimitiveUintUniform {
     uvec4Array: UVec4[];
-    constructor(uvec4Array: UVec4[]);
+    constructor(vec4Array_or_arrayLength: UVec4[] | number);
+    updateStartIdFromParentToChildren(): void;
     update(): void;
 }
 export declare class Matrix3x3 extends PrimitiveFloatUniform {
-    constructor();
+    protected disableUpdate: boolean;
+    constructor(floatArray?: Float32Array);
 }
 export declare class Matrix4x4 extends PrimitiveFloatUniform {
     protected _x: number;
@@ -225,6 +253,7 @@ export declare class Matrix4x4 extends PrimitiveFloatUniform {
 }
 export declare class Matrix4x4Array extends PrimitiveFloatUniform {
     matrixs: Matrix4x4[];
-    constructor(mat4x4Array: Matrix4x4[]);
+    constructor(mat4x4Array_or_arrayLength: Matrix4x4[] | number);
+    updateStartIdFromParentToChildren(): void;
     update(): void;
 }

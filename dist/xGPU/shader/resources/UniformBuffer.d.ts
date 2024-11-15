@@ -2,11 +2,13 @@
 import { PrimitiveType } from "../../PrimitiveType";
 import { IShaderResource } from "./IShaderResource";
 import { UniformGroup, Uniformable } from "./UniformGroup";
+import { StageableBuffer } from "./StageableBuffer";
 export type UniformBufferDescriptor = {
     useLocalVariable?: boolean;
     visibility?: GPUShaderStageFlags;
+    accessMode?: "read" | "read_write";
 };
-export declare class UniformBuffer implements IShaderResource {
+export declare class UniformBuffer extends StageableBuffer implements IShaderResource {
     gpuResource: GPUBuffer;
     descriptor: UniformBufferDescriptor;
     group: UniformGroup;
@@ -15,6 +17,7 @@ export declare class UniformBuffer implements IShaderResource {
     constructor(items: any, descriptor?: {
         useLocalVariable?: boolean;
         visibility?: GPUShaderStageFlags;
+        accessMode?: "read" | "read_write";
     });
     cloned: boolean;
     clone(propertyNames?: string[]): UniformBuffer;
@@ -28,8 +31,10 @@ export declare class UniformBuffer implements IShaderResource {
     createDeclaration(uniformName: string, bindingId: number, groupId?: number): string;
     getUniformById(id: number): Uniformable;
     getUniformByName(name: string): Uniformable;
-    protected _bufferType: "read-only-storage" | "uniform";
-    get bufferType(): "read-only-storage" | "uniform";
+    protected _accessMode: "read" | "read_write";
+    get accessMode(): "read" | "read_write";
+    protected _bufferType: "read-only-storage" | "storage" | "uniform";
+    get bufferType(): "read-only-storage" | "uniform" | "storage";
     createGpuResource(): any;
     getItemsAsArray(): any[];
     time: number;

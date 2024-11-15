@@ -25,7 +25,7 @@ export class EventDispatcher {
         if (this.eventListeners[eventName]) {
             const t = [...this.eventListeners[eventName]];
             t.forEach(callback => {
-                callback(this, eventData);
+                callback(eventData);
                 if (callback.removeAfter)
                     this.removeEventListener(eventName, callback);
             });

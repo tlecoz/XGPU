@@ -24,12 +24,25 @@ export class ComputeShader extends ShaderStage {
         //result += this.main.value;
         result += mainFunc;
         result += "}\n";
-        if (XGPU.showComputeShader) {
-            console.log("------------- COMPUTE SHADER --------------");
-            console.log(result);
-            console.log("-------------------------------------------");
-        }
         this._shaderInfos = { code: result, output: null };
+        if (XGPU.showComputeShader) {
+            setTimeout(() => {
+                console.log("------------- COMPUTE SHADER --------------");
+                console.log(this.formatWGSLCode(this._shaderInfos.code));
+                //console.log(formated)
+                console.log("-------------------------------------------");
+            }, 100);
+        }
         return this._shaderInfos;
+    }
+    static removeStructDefinitionAndReplaceStructDeclarationName(shaderCode, structName, newStructName) {
+        // Expression régulière pour capturer la définition complète de la structure `structName`
+        const structRegex = new RegExp(`struct\\s+${structName}\\s*\\{[^}]*\\}`, 'g');
+        // Supprimer la définition de `structName`
+        shaderCode = shaderCode.replace(structRegex, '');
+        // Remplacer toutes les occurrences de `structName` par `newStructName`
+        const nameRegex = new RegExp(`\\b${structName}\\b`, 'g');
+        shaderCode = shaderCode.replace(nameRegex, newStructName);
+        return shaderCode;
     }
 }
