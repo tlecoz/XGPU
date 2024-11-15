@@ -441,7 +441,7 @@ export class HighLevelParser {
             }
 
 
-            
+            /* 
             if(o.name){
                 console.warn("parseUniform ",name)
 
@@ -453,7 +453,7 @@ export class HighLevelParser {
                 
 
                 o = o.clone();
-            }
+            }*/
 
             if (!bindgroup[uniformBufferName]) {
                 const uniforms: any = {};

@@ -53,10 +53,7 @@ export class UniformGroup extends EventDispatcher{
         this.datas = datas;
         this.dataView = new DataView(datas, 0, datas.byteLength);
         this.updateItemFromDataView(this.dataView,0);
-       
-        console.log("SET DATA ",new Float32Array(datas))
         this.mustBeTransfered = true;
-        
     }   
 
 
@@ -67,7 +64,6 @@ export class UniformGroup extends EventDispatcher{
     public set uniformBuffer(buffer: UniformBuffer) {
         this.buffer = buffer;
         if (buffer) {
-            //console.log("buffer ==== ", buffer)
             buffer.mustBeTransfered = true;
         }
         for (let i = 0; i < this.items.length; i++) {
@@ -163,8 +159,7 @@ export class UniformGroup extends EventDispatcher{
 
     public add(name: string, data: Uniformable, useLocalVariable: boolean = false, stackItems: boolean = true): Uniformable {
 
-       //console.log(data.name,data.startId)
-        //if(data.name) data = data.clone();
+       
        
         data.uniformBuffer = this.uniformBuffer;
         data.name = name;
@@ -174,7 +169,6 @@ export class UniformGroup extends EventDispatcher{
             data.createVariableInsideMain = true;
         }
 
-        //console.log("this.name = ",this.name)
         if(this.usedAsUniformBuffer == false || data instanceof UniformGroup || data instanceof UniformGroupArray || data instanceof Vec4Array){
            
             data.addEventListener("ON_CHANGE",()=>{
@@ -423,11 +417,9 @@ export class UniformGroup extends EventDispatcher{
         }
 
        
-        //if(this.usedAsUniformBuffer) 
+       
 
         if(/*this.usedAsUniformBuffer &&*/ this.transfertWholeBuffer){
-
-            console.log("AAAAAAAAAAAAA ",this.debug,new Float32Array(this.datas))
 
            if(mustBeTransfered){
                 //console.log("AAAAAAAAAAAAAAAAAA ",this.mustBeTransfered,new Float32Array(this.dataView.buffer));
@@ -829,30 +821,6 @@ export class UniformGroup extends EventDispatcher{
         this.dataView = new DataView(this.datas, 0, this.datas.byteLength);
         this.items = result;
         this.copyIntoDataView(this.dataView, 0);
-
-
-
-        /*
-        this.datas = new Float32Array(offset);
-        console.log("arrayStride = ", this.arrayStride, result.length)
-
-        let o: any;
-        for (let i = 0; i < result.length; i++) {
-            o = result[i];
-            if (o instanceof UniformGroup || o instanceof UniformGroupArray) {
-                if (o instanceof UniformGroup) {
-                    this.datas.set(o.datas, o.startId);
-                } else {
-                    let start = o.startId;
-                    for (let j = 0; j < o.length; j++) {
-                        this.datas.set(o.groups[j].datas, start);
-                        start += o.groups[j].arrayStride;
-                    }
-                }
-            } else {
-                this.datas.set(o, o.startId)
-            }
-        }*/
 
         //console.timeEnd("STACK ITEMS")
         return result

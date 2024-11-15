@@ -84,7 +84,7 @@ export class XGPU {
             def = o.definition;
 
             items[z] = def;
-            console.log("type ======> ",o.type)
+            //console.log("type ======> ",o.type)
             if(def.type == "UniformGroup"){
                 if(transferables.includes(def.values) == false){
                     transferables.push(def.values);
